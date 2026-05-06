@@ -1,0 +1,124 @@
+name: experiment_designer
+description: "多维度实验设计策略 - 规划主实验、消融、鲁棒性、SOTA对比等维度"
+type: strategy
+version: "1.0"
+
+triggers:
+  - pre_generation
+  - experiment_planning
+
+dependencies:
+  - length_budget
+  - detail_gradient
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+  - name: experiment_design
+    type: dict
+    required: true
+  - name: datasets
+    type: list
+    required: false
+  - name: baselines
+    type: list
+    required: false
+
+outputs:
+  - name: experiment_plan
+    type: dict
+    description: "完整的多维度实验计划"
+
+parameters:
+  # 实验维度框架（基于R1论文分析）
+  experiment_dimensions:
+    # 维度1：主实验（必须有）
+    main_experiment:
+      priority: "P0"
+      description: "在标准设置下与SOTA方法的全面对比"
+      required_elements:
+        - "至少2个数据集的结果"
+        - "至少3个评估指标"
+        - "与5+个SOTA方法对比"
+        - "结果以表格呈现"
+        - "关键发现的文字分析"
+    
+    # 维度2：消融实验（必须有）
+    ablation_study:
+      priority: "P0"
+      description: "验证每个核心组件的贡献"
+      required_elements:
+        - "逐个移除核心组件的对比"
+        - "每个组件的独立贡献量化"
+        - "组件间组合效果分析（可选）"
+        - "紧凑表格呈现"
+    
+    # 维度3：跨域/跨场景泛化（推荐）
+    cross_domain:
+      priority: "P1"
+      description: "验证模型在不同场景下的泛化能力"
+      required_elements:
+        - "不同数据分布/场景下的表现"
+        - "跨受试者/跨环境的测试"
+        - "分析泛化瓶颈"
+    
+    # 维度4：鲁棒性测试（推荐）
+    robustness:
+      priority: "P1"
+      description: "验证模型在扰动下的稳定性"
+      noise_types:
+        - "随机遮挡 (Random Occlusion)"
+        - "随机缩放 (Random Scaling)"
+        - "高斯噪声 (Gaussian Noise)"
+        - "椒盐噪声 (Salt-and-Pepper Noise)"
+        - "泊松噪声 (Poisson Noise)"
+      required_elements:
+        - "5+种噪声类型下的性能退化"
+        - "退化曲线或表格"
+        - "与基线方法的鲁棒性对比"
+    
+    # 维度5：SOTA对比（必须有）
+    sota_comparison:
+      priority: "P0"
+      description: "与最新SOTA方法的全面对比"
+      required_elements:
+        - "按backbone类型分类对比（CNN/Transformer/Hybrid）"
+        - "同时报告识别精度和定位精度（如适用）"
+        - "突出本方法的优势场景"
+    
+    # 维度6：可视化分析（推荐）
+    visualization:
+      priority: "P2"
+      description: "定性可视化分析"
+      required_elements:
+        - "混淆矩阵热力图"
+        - "成功/失败案例展示"
+        - "特征图可视化（如适用）"
+
+  # 高工作量论文的额外维度
+  high_workload_extras:
+    # 维度7：调查与讨论（独立章节）
+    investigation_discussion:
+      priority: "P1"
+      description: "深入分析模型行为和实际应用潜力"
+      required_elements:
+        - "主观感受与客观行为的相关性分析"
+        - "单视角 vs 多视角的消融"
+        - "实际应用场景分析"
+        - "能耗/效率分析（如适用）"
+    
+    # 维度8：附录
+    appendix:
+      priority: "P2"
+      description: "补充材料"
+      required_elements:
+        - "超参数敏感性分析"
+        - "额外的可视化结果"
+        - "调查问卷详情"
+        - "推导细节"
+
+prompt_template: ""
+model_type: reasoning
+quality_check: false
+max_retries: 0

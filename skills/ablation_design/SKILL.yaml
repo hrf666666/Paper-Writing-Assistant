@@ -1,0 +1,42 @@
+name: ablation_design
+type: generator
+description: "基于代码结构分析和参考论文的智能消融实验设计"
+version: "5.0"
+author: "Paper-Writing-Assistant"
+tags: ["ablation", "experiment", "visualization"]
+
+# 输入变量
+inputs:
+  - name: project_code_path
+    description: "项目代码路径"
+    required: true
+  - name: innovation_points
+    description: "创新点列表"
+    required: true
+  - name: model_architecture
+    description: "模型架构描述"
+    required: true
+  - name: experiment_design
+    description: "实验设计"
+    required: true
+  - name: ref_ablation_patterns
+    description: "参考论文的消融实验模式"
+    required: false
+
+# 输出
+outputs:
+  - name: ablation_design
+    description: "消融实验设计方案"
+  - name: ablation_scripts
+    description: "生成的消融实验脚本路径"
+
+# 模型配置
+model_type: reasoning
+max_retries: 2
+quality_check: false
+quality_threshold: 70
+
+# 参数
+parameters:
+  strip_prefix: false
+  ensure_heading: "# Ablation Study Design"

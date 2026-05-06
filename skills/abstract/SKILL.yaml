@@ -1,0 +1,57 @@
+name: abstract
+description: "生成论文摘要和关键词 - 凝练核心问题、方法、结果和贡献"
+type: generator
+version: "2.0"
+
+triggers:
+  - phase0
+  - abstract
+
+dependencies:
+  - length_budget
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "项目创新点列表"
+  - name: experiment_design
+    type: dict
+    required: true
+    description: "实验设计数据"
+  - name: model_architecture
+    type: dict
+    required: false
+    description: "模型架构描述"
+  - name: project_info
+    type: dict
+    required: false
+    description: "项目代码分析结果"
+  - name: style_guide
+    type: dict
+    required: false
+    description: "写作风格指导"
+  - name: length_budget_chars
+    type: int
+    required: false
+    default: 1500
+    description: "摘要长度预算（字符数），IEEE Trans通常150-250词"
+  - name: keyword_count
+    type: int
+    required: false
+    default: 6
+    description: "关键词数量"
+
+outputs:
+  - name: content
+    type: str
+    description: "生成的摘要和关键词"
+
+parameters:
+  ensure_heading: "## Abstract"
+
+prompt_template: prompt.md
+model_type: generation
+quality_check: true
+quality_threshold: 60.0
+max_retries: 2

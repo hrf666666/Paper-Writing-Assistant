@@ -1,0 +1,85 @@
+name: citation_strategy
+description: "引用策略规划 - 控制引用密度、分布和真实性验证"
+type: strategy
+version: "1.0"
+
+triggers:
+  - pre_generation
+  - citation_control
+
+dependencies:
+  - length_budget
+
+inputs:
+  - name: article_type
+    type: str
+    required: true
+  - name: total_references
+    type: int
+    required: false
+    default: 40
+    description: "总引用数目标"
+  - name: ref_citation_density
+    type: dict
+    required: false
+    description: "参考论文的引用密度数据"
+
+outputs:
+  - name: citation_plan
+    type: dict
+    description: "各章节引用计划"
+
+parameters:
+  # IEEE Trans 典型引用密度（基于参考论文分析）
+  default_density:
+    ieee_trans:
+      total_refs: 40
+      introduction:
+        count: 12
+        density: "4-5 per subsection"
+        style: "broad coverage, importance signaling"
+      related_work:
+        count: 18
+        density: "5-6 per subsection"
+        style: "detailed coverage, comparison-oriented"
+      methodology:
+        count: 6
+        density: "2-3 per core technique"
+        style: "technique origin, improvement basis"
+      experiments:
+        count: 4
+        density: "1-2 per comparison"
+        style: "baseline citation, dataset citation"
+    # 高工作量论文
+    high_workload:
+      total_refs: 63
+      introduction:
+        count: 15
+        density: "5 per subsection"
+      related_work:
+        count: 25
+        density: "6-8 per subsection"
+      methodology:
+        count: 10
+        density: "3-4 per module"
+      experiments:
+        count: 13
+        density: "3-4 per comparison table"
+
+  # 引用真实性验证策略
+  verification:
+    enabled: true
+    sources:
+      - "AMiner API"
+      - "Semantic Scholar API"
+      - "Google Scholar"
+    min_verification_fields:
+      - title
+      - authors
+      - year
+      - venue
+
+prompt_template: ""
+model_type: light
+quality_check: false
+max_retries: 0

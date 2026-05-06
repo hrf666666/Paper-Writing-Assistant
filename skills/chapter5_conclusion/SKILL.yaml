@@ -1,0 +1,48 @@
+name: chapter5_conclusion
+description: "生成第五章 Conclusion - 总结贡献，讨论局限，展望未来"
+type: generator
+version: "2.0"
+
+triggers:
+  - phase5
+  - conclusion
+
+dependencies:
+  - length_budget
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "项目创新点列表"
+  - name: experiment_design
+    type: dict
+    required: true
+    description: "实验设计数据"
+  - name: previous_content
+    type: str
+    required: false
+    description: "前面章节的已生成内容摘要"
+  - name: style_guide
+    type: dict
+    required: false
+    description: "写作风格指导"
+  - name: length_budget_chars
+    type: int
+    required: false
+    default: 3000
+    description: "章节长度预算（字符数）"
+
+outputs:
+  - name: content
+    type: str
+    description: "生成的章节内容"
+
+parameters:
+  ensure_heading: "# 5. Conclusion"
+
+prompt_template: prompt.md
+model_type: generation
+quality_check: true
+quality_threshold: 60.0
+max_retries: 2
