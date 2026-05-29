@@ -1,0 +1,83 @@
+{
+  "数据集": [
+    {
+      "名称": "MERL BRDF Dataset",
+      "描述": "包含大量真实测量的双向反射分布函数(BRDF)数据，常用于渲染和合成具有复杂非朗伯体(如光泽、金属、塑料)表面的光场图像，以评估形状和反射率估计算法。",
+      "来源": "SVBRDF-Invariant Shape and Reflectance Estimation from Light-Field Cameras"
+    },
+    {
+      "名称": "Lytro Illum Real-world Captures",
+      "描述": "使用商用Lytro Illum光场相机拍摄的真实世界场景图像，包含具有挑战性的光泽(glossy)和非朗伯体表面，用于验证理论在真实设备上的有效性。",
+      "来源": "SVBRDF-Invariant Shape and Reflectance Estimation from Light-Field Cameras"
+    },
+    {
+      "名称": "Booster Dataset",
+      "描述": "包含透明和镜面(Transparent or Mirror, ToM)表面的高难度数据集，用于评估和微调深度估计网络在处理反射和折射引起的误导性视觉信息时的性能。",
+      "来源": "Learning Depth Estimation for Transparent and Mirror Surfaces"
+    },
+    {
+      "名称": "Dual-layer Synthetic LF Dataset",
+      "描述": "作者专门构建的具有双层属性(反射层和背景层)的合成光场数据集，用于解决真实反射场景下难以获取真实视差图(Ground Truth)的问题。",
+      "来源": "Decoupling and Aggregating: Dual-layer Light Field Depth Estimation with Reflective and Transparent Surfaces"
+    },
+    {
+      "名称": "Synthetic and Real-world LF Datasets",
+      "描述": "包含合成光场数据(用于训练)和真实世界光场数据(用于测试)，提供丰富的空间-角度信息，用于评估基于EPI序列分析的深度估计模型。",
+      "来源": "Exploiting Sequence Analysis for Accurate Light-Field Depth Estimation"
+    }
+  ],
+  "baseline方法": [
+    {
+      "名称": "PLC / SDC / PSSM (Traditional Lambertian LF Methods)",
+      "年份": "2010-2015",
+      "核心思路": "依赖于朗伯体(Lambertian)假设和光度一致性(Photo-consistency)线索。在处理光泽或非朗伯体表面时，由于高光和不一致性，容易产生明显的伪影和深度估计失败。",
+      "性能": "在朗伯体区域表现良好，但在非朗伯体(如高光、金属)区域性能急剧下降，产生严重伪影。"
+    },
+    {
+      "名称": "DPT (Dense Prediction Transformers)",
+      "年份": "2021",
+      "核心思路": "基于Transformer架构的单目深度估计模型，通过全局感受野和密集预测头提升深度图细节。但在未经微调时，难以处理透明和镜面(ToM)表面的深度歧义。",
+      "性能": "在常规场景表现优异，但在ToM表面初始预测误差较大，需通过伪标签微调策略才能显著提升。"
+    },
+    {
+      "名称": "CREStereo",
+      "年份": "2022",
+      "核心思路": "基于迭代搜索和自适应感受野的双目立体匹配网络。同样受限于朗伯体假设，在透明和镜面区域的匹配代价计算容易受到反射/折射干扰。",
+      "性能": "常规立体匹配精度高，但在ToM表面视差图存在严重空洞和错误，微调后性能大幅改善。"
+    },
+    {
+      "名称": "Classic EPI-based Methods (Structural Tensor / Parallelogram)",
+      "年份": "2013-2016",
+      "核心思路": "利用极平面图像(EPI)中直线斜率与深度值的几何反比关系，通过手动设计算子(如结构张量、平行四边形算子)测量斜率并结合优化技术计算深度。",
+      "性能": "计算效率较高，但在纹理缺失或复杂非朗伯体导致EPI线条断裂/交叉时，鲁棒性较差。"
+    },
+    {
+      "名称": "Multi-stream CNN Architectures",
+      "年份": "2017-2020",
+      "核心思路": "利用多流网络架构集成多方向EPI或子孔径图像(SAIs)，以充分提取光场的多视角空间-角度信息进行深度回归。",
+      "性能": "显著优于传统手工特征方法，但在处理双层场景(反射+背景)导致的代价体积双峰混叠(aliasing bimodal distribution)时，仍存在深度估计错误。"
+    }
+  ],
+  "评估指标": [
+    {
+      "名称": "MSE (Mean Squared Error) / MAE (Mean Absolute Error)",
+      "定义": "预测深度/视差图与真实值(Ground Truth)之间的均方误差或平均绝对误差，用于衡量整体深度估计的绝对偏差。",
+      "典型值范围": "MSE通常在 0.001 ~ 0.05 之间，MAE通常在 0.01 ~ 0.1 之间（具体取决于视差归一化范围和场景复杂度，非朗伯体区域误差通常显著高于朗伯体区域）。"
+    },
+    {
+      "名称": "BadPix (Bad Pixels Ratio)",
+      "定义": "预测误差超过特定阈值（如 >0.07 或 >0.03 像素）的像素占总有效像素的百分比。常用于评估深度图在边缘和高光/非朗伯体区域的局部准确性。",
+      "典型值范围": "0.5% ~ 15%。在复杂非朗伯体或透明/反射表面，未优化的Baseline方法BadPix可高达20%以上，优化后可降至5%以下。"
+    },
+    {
+      "名称": "Q25 / Q50 / Q75 (Quantiles of Error)",
+      "定义": "误差分布的分位数，表示预测误差小于特定阈值（如0.25, 0.5, 0.75像素）的像素比例，或反之。用于评估模型在不同误差容忍度下的鲁棒性。",
+      "典型值范围": "通常在 70% ~ 95% 之间。数值越高代表高精度像素占比越大。"
+    },
+    {
+      "名称": "Visual Artifacts / Qualitative Evaluation",
+      "定义": "通过视觉检查深度图在光泽、高光、透明或反射区域的伪影(Artifacts)、空洞(Holes)和边缘模糊程度。在非朗伯体光场深度估计中，定性分析是验证物理模型有效性的关键补充。",
+      "典型值范围": "无具体数值范围，通常以“无明显伪影”、“边缘锐利”、“正确分离双层”等描述性评价为主。"
+    }
+  ]
+}

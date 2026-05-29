@@ -1,0 +1,115 @@
+\section{3. Methodology}
+
+In this section, we present the overall architecture of our Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation. Different from previous works  that rely heavily on the Lambertian assumption, our model explicitly integrates physical reflection priors with deep learning representations to address the challenges posed by glossy and specular surfaces. The core principle of our framework involves extracting both data-driven geometric features and physics-based reflectance properties, followed by a dual-mask mechanism to isolate and suppress unreliable regions. By formulating depth estimation as a component-aware process, the proposed architecture effectively resolves the ambiguity in non-Lambertian regions and yields precise depth maps. As illustrated in Fig. 2, the entire pipeline consists of five primary modules: Light Field Feature Extractor (LFFE), Physical Reflection Model (PRM), Dual-Mask Generator (DMG), Masked Cost Aggregation (MCA), and Depth Regression (DR).
+
+The input to our model is a sequence of light field sub-aperture images (SAIs), denoted as $I \in \mathbb{R}^{N \times C \times H \times W}$. Here, $N$ represents the total number of angular views, $C$ indicates the number of color channels, and $H \times W$ defines the spatial resolution of each view. In our standard setting, we utilize an $81$-view light field captured on a $9 \times 9$ angular grid, meaning $N=81$ and $C=3$. Before feeding the data into the network, we apply standard preprocessing steps, including pixel intensity normalization and central view alignment, to ensure consistent numerical distributions. This multi-view input $I$ is then simultaneously directed into two parallel branches to capture complementary information: the data-driven LFFE branch and the physics-based PRM branch.
+
+The overall data flow processes the input through feature extraction, mask generation, and cost aggregation. First, the LFFE employs 3D convolutional networks to extract spatial textures and angular geometric structures from the epipolar plane image (EPI)s, outputting the light field feature map $F \in \mathbb{R}^{N \times C' \times H \times W}$, where $C'$ is the feature channel dimension. Concurrently, the PRM leverages a non-Lambertian physical illumination model to decompose pixel intensities into diffuse and specular components. Inspired by k-space frequency analysis in MRI , the PRM performs 2D discrete Fourier transform on the angular sampling matrix to analyze frequency energy distributions, thereby outputting the physical feature map $F_{phy} \in \mathbb{R}^{N \times C'' \times H \times W}$, where $C''$ denotes the physical feature channels. Subsequently, both $F$ and $F_{phy}$ are fed into the DMG. The DMG predicts two distinct masks: a spatial mask $M_{sp} \in \mathbb{R}^{N \times 1 \times H \times W}$ to identify and suppress occluded regions, and an angular mask $M_{ang} \in \mathbb{R}^{N \times 1 \times H \times W}$ to quantify pixel-level roughness and isolate non-Lambertian reflections. Following this, the MCA module constructs a 3D cost volume under hypothetical disparity $d$ and aggregates it using the dual masks. Specifically, the MCA applies element-wise weighting with $M_{sp}$ and $M_{ang}$ to filter out artifacts caused by occlusions and highlights, producing the aggregated 3D cost volume $V_{agg} \in \mathbb{R}^{D \times H \times W}$, where $D$ is the number of discretized depth levels.
+
+In the final stage, the aggregated cost volume $V_{agg}$ is passed to the DR module to infer the continuous depth values. The DR module applies a Softmax normalization along the depth dimension, followed by a Soft-argmin operation to compute the expected value. This regression strategy outputs the final sub-pixel depth map $D_{out} \in \mathbb{R}^{1 \times H \times W}$. To ensure the physical assumptions are strictly validated during optimization, the entire data flow is supervised by a physics-driven three-stage progressive training framework. This framework enforces phase gates that sequentially validate the angular spectrum classification, bidirectional wavevector parameter estimation, and component-aware fusion, thereby replacing a single end-to-end loss function with a rigorous physical consistency evaluation. Through this unified architecture, our model effectively integrates physical priors and deep features to achieve robust depth estimation in complex real-world scenes.
+
+\subsection{Light Field Feature Extractor (LFFE)}
+
+We design the Light Field Feature Extractor (LFFE) to derive discriminative spatial and angular representations from the input sub-aperture images (SAIs). In light field depth estimation, accurate feature extraction is a prerequisite for reliable matching cost computation. However, conventional 2D convolutional neural networks process each view independently , thereby neglecting the rich angular geometry inherent in light fields. Conversely, treating the angular dimension merely as a batch channel fails to capture the continuous epipolar plane image (EPI) (EPI) structures . To address these limitations, our module explicitly employs 3D convolutions to jointly model spatial textures and angular variations, providing a detailed feature space for the subsequent physical reflection and dual-mask modules.
+
+Formally, the LFFE takes the preprocessed light field SAI sequence $I \in \mathbb{R}^{N \times C \times H \times W}$ as input. To facilitate 3D convolutional operations that capture the EPI linear structures, we first reshape the angular dimension $N$ into a 2D grid $U \times V$. For the standard $9 \times 9$ angular resolution, we have $U=9$ and $V=9$. We denote the reshaped input tensor as $\mathcal{X}^{(0)} \in \mathbb{R}^{C \times U \times V \times H \times W}$. The core operation of the LFFE consists of a stack of $L$ 3D convolutional layers, each followed by a Rectified Linear Unit (ReLU) activation function to introduce non-linearity. 
+
+At the $l$-th layer ($l \in \{1, 2, \dots, L\}$), the network computes the feature tensor $\mathcal{X}^{(l)}$ from the preceding layer's output $\mathcal{X}^{(l-1)}$ through the following transformation:
+\begin{equation}
+\label{eq:eq20}
+\mathcal{X}^{(l)} = \text{ReLU}\left( \text{Conv3D}\left(\mathcal{X}^{(l-1)}; \mathbf{W}^{(l)}, \mathbf{b}^{(l)}\right) \right)
+\end{equation}
+where $\text{Conv3D}(\cdot)$ denotes the 3D convolution operation applied across the angular and spatial dimensions. The term $\mathbf{W}^{(l)} \in \mathbb{R}^{C_{out}^{(l)} \times C_{in}^{(l)} \times K_u \times K_v \times K_h \times K_w}$ represents the learnable convolutional kernels, and $\mathbf{b}^{(l)} \in \mathbb{R}^{C_{out}^{(l)}}$ denotes the bias vector. Here, $C_{in}^{(l)}$ and $C_{out}^{(l)}$ indicate the number of input and output channels at the $l$-th layer, respectively, while $K_u, K_v, K_h,$ and $K_w$ define the kernel sizes along the $U, V, H,$ and $W$ dimensions. By setting $K_u > 1$ and $K_h > 1$ (or $K_v > 1$ and $K_w > 1$), the 3D kernels explicitly span across both the angular and spatial axes, enabling the network to directly extract the slanted line patterns characteristic of EPIs.
+
+Specifically, the element-wise mathematical computation of the 3D convolution at spatial-angular coordinates $(u, v, h, w)$ and output channel $c$ is rigorously formulated as:
+\begin{equation}
+\label{eq:eq21}
+\mathcal{X}^{(l)}_{c, u, v, h, w} = \text{ReLU} \left( \sum_{c'=1}^{C_{in}^{(l)}} \sum_{k_u=1}^{K_u} \sum_{k_v=1}^{K_v} \sum_{k_h=1}^{K_h} \sum_{k_w=1}^{K_w} \mathbf{W}^{(l)}_{c, c', k_u, k_v, k_h, k_w} \cdot \mathcal{X}^{(l-1)}_{c', u+k_u, v+k_v, h+k_h, w+k_w} + \mathbf{b}^{(l)}_c \right)
+\end{equation}
+
+After passing through $L$ layers, the network produces the final 5D feature tensor $\mathcal{X}^{(L)} \in \mathbb{R}^{C' \times U \times V \times H \times W}$, which we then reshape back to the original angular sequence format. This yields the output light field feature map $F \in \mathbb{R}^{N \times C' \times H \times W}$, where $C'$ is the channel dimension of the extracted features. We express the formulation of the final output as:
+\begin{equation}
+\label{eq:eq22}
+F = \text{Reshape}\left( \mathcal{X}^{(L)} \right)
+\end{equation}
+where $\text{Reshape}(\cdot)$ restores the $U \times V$ angular grid to the flattened dimension $N$. Different from previous works that rely on separate 2D feature extractors for individual views and subsequently aggregate them via simple concatenation, our LFFE explicitly integrates the angular and spatial dimensions within the feature extraction stage. This joint modeling strategy ensures that the geometric correspondences across different views are inherently encoded into the feature representations, laying a solid foundation for subsequent cost volume construction and physical decomposition.
+
+\subsection{Physical Reflection Model (PRM)}
+
+The Physical Reflection Model (PRM) is designed to decouple the diffuse and specular reflectance components from the raw light field intensities. According to the dichromatic reflection model, the observed radiance $I(u,v,h,w)$ at angular coordinates $(u,v)$ and spatial coordinates $(h,w)$ can be decomposed into a view-independent diffuse component $I_d$ and a view-dependent specular component $I_s$:
+\begin{equation}
+\label{eq:eq23}
+I(u,v,h,w) = I_d(h,w) + I_s(u,v,h,w)
+\end{equation}
+
+Inspired by k-space frequency analysis in MRI , we observe that the diffuse component remains relatively constant across the angular domain, corresponding to the zero-frequency (DC) component in the frequency domain. Conversely, the specular component exhibits rapid intensity variations across views, manifesting as high-frequency energy. To exploit this physical property, the PRM applies a 2D Discrete Fourier Transform (DFT) on the angular sampling matrix for each spatial location:
+\begin{equation}
+\label{eq:eq24}
+\mathcal{F}(f_u, f_v, h, w) = \sum_{u=1}^{U} \sum_{v=1}^{V} I(u,v,h,w) e^{-j 2\pi \left(\frac{f_u u}{U} + \frac{f_v v}{V}\right)}
+\end{equation}
+where $f_u$ and $f_v$ denote the angular frequency indices. We then compute the frequency energy distributions by separating the spectrum into low-frequency and high-frequency bands using a learnable Gaussian low-pass filter $\mathcal{G}(f_u, f_v)$:
+\begin{equation}
+\label{eq:eq25}
+E_{low}(h,w) = \sum_{f_u} \sum_{f_v} |\mathcal{F}(f_u, f_v, h, w)|^2 \cdot \mathcal{G}(f_u, f_v)
+\end{equation}
+\begin{equation}
+\label{eq:eq26}
+E_{high}(h,w) = \sum_{f_u} \sum_{f_v} |\mathcal{F}(f_u, f_v, h, w)|^2 \cdot (1 - \mathcal{G}(f_u, f_v))
+\end{equation}
+The physical feature map $F_{phy}$ is subsequently generated by concatenating these energy maps and projecting them through a Multi-Layer Perceptron (MLP) to capture complex non-Lambertian reflectance priors:
+\begin{equation}
+\label{eq:eq27}
+F_{phy} = \text{MLP}(\text{Concat}(E_{low}, E_{high}))
+\end{equation}
+
+\subsection{Dual-Mask Generator (DMG)}
+
+The Dual-Mask Generator (DMG) leverages both the geometric features $F$ and the physical features $F_{phy}$ to predict two complementary masks. The spatial mask $M_{sp}$ aims to identify occluded regions where geometric matching is invalid, while the angular mask $M_{ang}$ quantifies the surface roughness to suppress unreliable specular highlights.
+
+To generate the spatial mask, we first compute the angular mean of the geometric features, $F_{mean} = \frac{1}{N}\sum_{i=1}^N F_i$, and concatenate it with $F_{phy}$. A stack of 2D convolutional layers followed by a Sigmoid activation function $\sigma(\cdot)$ is applied to produce $M_{sp}$:
+\begin{equation}
+\label{eq:eq28}
+M_{sp} = \sigma\left(\text{Conv2D}\left(\text{Concat}(F_{mean}, F_{phy})\right)\right)
+\end{equation}
+
+For the angular mask, we calculate the angular variance of the geometric features to measure the local photo-consistency. Regions with high variance typically correspond to specular reflections or severe occlusions. The variance map is processed by an MLP to output the angular mask:
+\begin{equation}
+\label{eq:eq29}
+M_{ang} = \sigma\left(\text{MLP}\left(\text{Var}_{ang}(F)\right)\right)
+\end{equation}
+where $\text{Var}_{ang}(F) = \frac{1}{N}\sum_{i=1}^N (F_i - F_{mean})^2$. Both masks are bounded within $[0, 1]$, acting as soft attention weights in the subsequent aggregation stage.
+
+\subsection{Masked Cost Aggregation (MCA)}
+
+The Masked Cost Aggregation (MCA) module constructs a 3D cost volume and regularizes it using the dual masks. Given a set of discretized disparity hypotheses $d \in \{1, 2, \dots, D\}$, we first warp the features of each view to the reference view using bilinear interpolation based on the epipolar geometry. The initial cost volume $V_{init} \in \mathbb{R}^{D \times H \times W}$ is computed using the normalized cross-correlation (NCC) between the reference feature $F_{ref}$ and the warped features $F_{warped}^{(d)}$:
+\begin{equation}
+\label{eq:eq30}
+V_{init}(d, h, w) = \frac{1}{N} \sum_{i=1}^{N} \text{NCC}\left(F_{ref}(h,w), F_{warped, i}^{(d)}(h,w)\right)
+\end{equation}
+
+To suppress artifacts caused by occlusions and non-Lambertian reflections, we apply the dual masks to weight the initial cost volume element-wise:
+\begin{equation}
+\label{eq:eq31}
+V_{masked}(d, h, w) = V_{init}(d, h, w) \odot M_{sp}(h,w) \odot \left( \frac{1}{N} \sum_{i=1}^{N} M_{ang}^{(i)}(h,w) \right)
+\end{equation}
+where $\odot$ denotes the Hadamard product. The masked cost volume $V_{masked}$ is then fed into a 3D Hourglass convolutional network to aggregate contextual information and enforce spatial smoothness, yielding the final aggregated cost volume $V_{agg} \in \mathbb{R}^{D \times H \times W}$.
+
+\subsection{Depth Regression and Progressive Training}
+
+The Depth Regression (DR) module converts the aggregated 3D cost volume $V_{agg}$ into a continuous sub-pixel depth map. We first apply a Softmax operation along the disparity dimension to compute the probability distribution $P(d, h, w)$ for each disparity hypothesis:
+\begin{equation}
+\label{eq:eq32}
+P(d, h, w) = \frac{\exp(-V_{agg}(d, h, w))}{\sum_{d'=1}^{D} \exp(-V_{agg}(d', h, w))}
+\end{equation}
+The final depth map $D_{out}$ is then obtained by calculating the expected value (Soft-argmin) of the disparity distribution:
+\begin{equation}
+\label{eq:eq33}
+D_{out}(h, w) = \sum_{d=1}^{D} d \cdot P(d, h, w)
+\end{equation}
+
+To optimize the network while strictly adhering to physical constraints, we employ a physics-driven three-stage progressive training framework. The overall objective function is a weighted sum of three phase-gated losses:
+\begin{equation}
+\label{eq:eq34}
+\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{spec} + \lambda_2 \mathcal{L}_{wave} + \lambda_3 \mathcal{L}_{depth}
+\end{equation}
+where $\mathcal{L}_{spec}$ enforces the angular spectrum classification accuracy in the PRM, $\mathcal{L}_{wave}$ regularizes the bidirectional wavevector parameter estimation to ensure physical consistency of the specular lobes, and $\mathcal{L}_{depth}$ is the standard smooth $L1$ loss between the predicted depth $D_{out}$ and the ground truth. The weights $\lambda_1, \lambda_2,$ and $\lambda_3$ are dynamically adjusted during the progressive training phases to sequentially validate the physical assumptions before final component-aware fusion.

@@ -1,0 +1,57 @@
+{
+  "changes": [
+    {
+      "type": "terminology",
+      "chapter": 1,
+      "count": 1815,
+      "description": "统一术语 1815 处"
+    },
+    {
+      "type": "terminology",
+      "chapter": 2,
+      "count": 1921,
+      "description": "统一术语 1921 处"
+    },
+    {
+      "type": "terminology",
+      "chapter": 3,
+      "count": 4340,
+      "description": "统一术语 4340 处"
+    },
+    {
+      "type": "terminology",
+      "chapter": 4,
+      "count": 2130,
+      "description": "统一术语 2130 处"
+    }
+  ],
+  "quality_delta": 2.0,
+  "rhythm_report": {
+    "Introduction": {
+      "words": 1862,
+      "percentage": 15.1,
+      "status": "ok"
+    },
+    "Related Work": {
+      "words": 1944,
+      "percentage": 15.7,
+      "status": "ok"
+    },
+    "Methodology": {
+      "words": 4397,
+      "percentage": 35.6,
+      "status": "ok"
+    },
+    "Experiments": {
+      "words": 3695,
+      "percentage": 29.9,
+      "status": "ok"
+    },
+    "Conclusion": {
+      "words": 449,
+      "percentage": 3.6,
+      "status": "too_short"
+    }
+  },
+  "total_changes": 4
+}

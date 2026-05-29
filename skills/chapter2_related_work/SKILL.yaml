@@ -1,0 +1,55 @@
+name: chapter2_related_work
+description: "生成第二章 Related Work - 分类综述，引用密度均匀，不足指向本项目"
+type: generator
+version: "2.1"
+
+triggers:
+  - phase2
+  - related_work
+
+dependencies:
+  - length_budget
+  - citation_strategy
+  - detail_gradient
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "项目创新点列表（用于构建对比关系和确定分类维度）"
+  - name: experiment_design
+    type: dict
+    required: true
+    description: "实验设计数据"
+  - name: style_guide
+    type: dict
+    required: false
+    description: "写作风格指导"
+  - name: chapter_org
+    type: dict
+    required: false
+    description: "章节组织参考（来自ref_pdf分析）"
+  - name: length_budget_chars
+    type: int
+    required: false
+    default: 9600
+    description: "章节长度预算（字符数）"
+  - name: structure_plan
+    type: dict
+    required: false
+    description: "由structure_planner生成的子节结构规划，如未提供则由LLM自行规划"
+
+outputs:
+  - name: content
+    type: str
+    description: "生成的章节内容"
+
+parameters:
+  papers_per_subsection: "4-6"
+  ensure_heading: "# 2. Related Work"
+
+prompt_template: prompt.md
+model_type: generation
+quality_check: true
+quality_threshold: 60.0
+max_retries: 2

@@ -1,0 +1,188 @@
+{
+  "checkpoints": {
+    "phase0": {
+      "phase_name": "phase0",
+      "phase_index": "0",
+      "timestamp": 1779869901.5886648,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 872.728520154953,
+      "quality_score": -1.0
+    },
+    "phase0_5": {
+      "phase_name": "phase0_5",
+      "phase_index": "0_5",
+      "timestamp": 1779869901.6262915,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 872.7661483287811,
+      "quality_score": -1.0
+    },
+    "phase0_6": {
+      "phase_name": "phase0_6",
+      "phase_index": "0_6",
+      "timestamp": 1779869988.065901,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 959.2057435512543,
+      "quality_score": -1.0
+    },
+    "phase0_7": {
+      "phase_name": "phase0_7",
+      "phase_index": "0_7",
+      "timestamp": 1779869988.097989,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 959.2378461360931,
+      "quality_score": -1.0
+    },
+    "phase0_8": {
+      "phase_name": "phase0_8",
+      "phase_index": "0_8",
+      "timestamp": 1779869988.1134663,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 959.2533242702484,
+      "quality_score": -1.0
+    },
+    "phase0_9": {
+      "phase_name": "phase0_9",
+      "phase_index": "0_9",
+      "timestamp": 1779870083.8078578,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 1054.947695016861,
+      "quality_score": -1.0
+    },
+    "phase1": {
+      "phase_name": "phase1",
+      "phase_index": "1",
+      "timestamp": 1779870389.6431372,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 1360.7829773426056,
+      "quality_score": 87.5
+    },
+    "phase2": {
+      "phase_name": "phase2",
+      "phase_index": "2",
+      "timestamp": 1779871176.0669487,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 2147.206802368164,
+      "quality_score": 85.625
+    },
+    "phase3": {
+      "phase_name": "phase3",
+      "phase_index": "3",
+      "timestamp": 1779873163.168106,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 4134.307962656021,
+      "quality_score": 86.475
+    },
+    "phase4": {
+      "phase_name": "phase4",
+      "phase_index": "4",
+      "timestamp": 1779873825.3027184,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 4796.4425756931305,
+      "quality_score": 84.725
+    },
+    "phase5": {
+      "phase_name": "phase5",
+      "phase_index": "5",
+      "timestamp": 1779873960.8130016,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 4931.952859401703,
+      "quality_score": 93.74999999999999
+    },
+    "phase5_1": {
+      "phase_name": "phase5_1",
+      "phase_index": "5_1",
+      "timestamp": 1779874070.1728039,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 5041.312655210495,
+      "quality_score": -1.0
+    },
+    "phase5_2": {
+      "phase_name": "phase5_2",
+      "phase_index": "5_2",
+      "timestamp": 1779874190.863138,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 5162.002994775772,
+      "quality_score": -1.0
+    },
+    "phase5_5": {
+      "phase_name": "phase5_5",
+      "phase_index": "5_5",
+      "timestamp": 1779874422.7528682,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 5393.892723083496,
+      "quality_score": -1.0
+    },
+    "phase6": {
+      "phase_name": "phase6",
+      "phase_index": "6",
+      "timestamp": 1779874580.627765,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 5551.767621278763,
+      "quality_score": -1.0
+    },
+    "phase6_5": {
+      "phase_name": "phase6_5",
+      "phase_index": "6_5",
+      "timestamp": 1779875053.8897235,
+      "status": "failed",
+      "output_files": [],
+      "error_message": "'<' not supported between instances of 'str' and 'int'",
+      "duration_seconds": 0.0,
+      "quality_score": -1.0
+    },
+    "phase7": {
+      "phase_name": "phase7",
+      "phase_index": "7",
+      "timestamp": 1779875215.0689662,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 6186.2088232040405,
+      "quality_score": -1.0
+    }
+  },
+  "state_data_keys": [
+    "project_data",
+    "ref_data",
+    "chapters",
+    "reference_pool",
+    "outline",
+    "motivation_thread",
+    "exemplar_dossier",
+    "style_profile",
+    "citation_bank",
+    "rationale_matrix",
+    "abstract",
+    "ablation_results"
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "数据集": [
+    {
+      "名称": "HCInew",
+      "规模": "20 train / 4 val",
+      "场景类型": "Lambertian",
+      "划分方式": "官方指定场景，输入裁剪为256x256，81视角(9x9)，pfm格式"
+    },
+    {
+      "名称": "HCI-Old",
+      "规模": "5 train / 0 val",
+      "场景类型": "Lambertian",
+      "划分方式": "h5格式（注：因格式兼容问题在代码加载器中被排除）"
+    },
+    {
+      "名称": "Wanner_HCI",
+      "规模": "10 train / 0 val",
+      "场景类型": "Lambertian",
+      "划分方式": "h5格式"
+    },
+    {
+      "名称": "Non-lambertian_zhenglong",
+      "规模": "4 train / 2 val",
+      "场景类型": "Non-Lambertian",
+      "划分方式": "npy格式"
+    },
+    {
+      "名称": "UrbanLF-Syn",
+      "规模": "170 train / 30 val",
+      "场景类型": "Mixed",
+      "划分方式": "npy格式"
+    }
+  ],
+  "评估指标": {
+    "主要指标": "MAE (Mean Absolute Error)",
+    "目标值": {
+      "整体 val_MAE": "< 0.20",
+      "Lambertian val_MAE": "< 0.16",
+      "Non-Lambertian val_MAE": "< 0.25",
+      "Mixed val_MAE": "< 0.22"
+    },
+    "阶段辅助指标_Phase1": {
+      "材质分类_Accuracy": "> 0.85",
+      "材质分类_AUC": "> 0.90"
+    }
+  },
+  "训练策略": {
+    "硬件环境": "单卡 RTX 3090 (24GB)",
+    "优化器": "未明确指定（默认Adam类），启用 AMP (自动混合精度)",
+    "学习率调度": "CosineAnnealingLR",
+    "batch_size": "单卡 Batch size = 1，梯度累积 (Gradient Accumulation) = 4 (有效 Batch size = 4)",
+    "epoch": "未明确指定具体数值",
+    "数据增强": "随机水平翻转（一致应用于81视角）",
+    "数据预处理": "视差归一化（逐场景2-98百分位截断至[0,1]），输入尺寸统一为 256x256",
+    "采样策略": "WeightedRandomSampler 逆频率加权（域平衡采样）"
+  },
+  "对比方法": [
+    "EPINet4Dir V3：754K参数，4方向EPI，全分辨率基线模型",
+    "纯 EPI 方法（假设全域朗伯，在非朗伯区域失效）",
+    "预训练 ResNet18 骨干网络（小数据上过拟合，无帮助）",
+    "MaterialDualCueNet 的 Defocus 分支（未能学到有效深度特征）",
+    "3-class CNN 学习型材质分类器（9x9 patch信息不足，准确率仅24.6%）"
+  ],
+  "消融设计": {
+    "计划消融模块": [
+      "介质掩码 ($M_{med}$) 与 角度方向掩码 ($M_{ang}$) 的独立与联合贡献",
+      "角度频率分析 (2D-FFT) 材质分类模块",
+      "BRDF 参数估计 (约束最小二乘)",
+      "分量感知融合策略 (漫反射EPI、镜面光度立体/邻域传播、散射模型修正的加权融合)"
+    ],
+    "已验证的失败消融 (Dead Ends)": [
+      "增加 Edge-Aware Loss：仅改善 Mixed 域，对 Non-Lambertian 无效",
+      "增加视角数 (5x5 提升至 7x7)：改善 Mixed，但 Lambertian/Non-Lambertian 无变化",
+      "引入 Defocus 分支：从未学到有效深度特征",
+      "使用 3-class CNN 进行材质分类：准确率仅 24.6%",
+      "仅使用 Lambertian 数据训练：无法泛化到 Non-Lambertian",
+      "使用随机噪声训练：零科学进展"
+    ]
+  },
+  "关键结果": {
+    "EPINet4Dir_V3_基线结果": {
+      "Overall_MAE": "0.133 (达标，目标 < 0.20)",
+      "Mixed_MAE": "0.081 (达标，目标 < 0.22)",
+      "Lambertian_MAE": "0.387 (未达标，目标 < 0.16)",
+      "Non_Lambertian_MAE": "0.411 (未达标，目标 < 0.25，预测退化为输入纹理复制)"
+    },
+    "Phase1_角度频谱材质分类验证_当前状态": {
+      "Accuracy": "0.7648 (目标 0.85，未达标)",
+      "AUC": "0.557 (目标 0.90，未达标)",
+      "结论": "处于 PARTIAL 状态，需继续优化特征工程，当前禁止进入神经网络训练阶段"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "创新点名称": "基于类MRI角度频率分析的材质反射类型解析",
+    "创新点工作内容": [
+      "将光场每个像素的9×9（81个）角度采样类比MRI中的k-space频域分析，提出角度频率分析方法。",
+      "对角度采样矩阵进行2D-DFT（二维离散傅里叶变换）转换至角度频域，分析频谱能量分布特征。",
+      "利用频域特征进行材质分类：漫反射表现为低频主导，镜面反射表现为高频展宽，散射表现为中频为主。",
+      "计算镜面度和散射度指标，实现复杂度为O(HW)的轻量级、实时像素级反射类型三分类。"
+    ],
+    "创新点价值": "突破了传统方法难以从有限角度采样中区分复杂反射类型的瓶颈，提供了一种具有明确物理意义且计算高效的材质分类手段，为后续非朗伯场景的深度估计奠定了可靠的先验基础。",
+    "支撑证据": "PROJECT_BRIEF中的'类MRI角度频率分析'与'反向波矢解析'章节；Phase 1阶段设定的角度频谱材质分类验证标准（三分类准确率>85%，AUC>0.90）；规划新增的`models/angle_fft.py`和`scripts/phase1_angle_fft.py`代码模块。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于类MRI角度频率分析的材质反射类型解析",
+      "contribution_statement": "We identify that complex material reflection types can be systematically decoupled and parsed through an MRI-like angular frequency analysis."
+    }
+  },
+  {
+    "创新点名称": "介质与角度方向双掩码物理建模 (Dual-Mask Physical Modeling)",
+    "创新点工作内容": [
+      "构建介质掩码图（Media Mask），通过量化像素级表面粗糙度参数，决定光与物质的作用类型（镜面、散射或漫反射）。",
+      "构建角度方向掩码图（Angular Mask），记录偏折矢量场以表征光波波矢在反射过程中的方向变化。",
+      "基于辐射张量场（RTF）秩的物理假设，分析朗伯与非朗伯场景下双掩码的数学特性（如朗伯场景RTF秩为1，非朗伯场景秩≥2）。",
+      "通过约束最小二乘法拟合81个角度方程，估计BRDF参数，输出介质掩码的量化权重（漫反射、镜面、散射权重）。"
+    ],
+    "创新点价值": "从物理光学层面统一了Lambertian、Non-Lambertian和Mixed三种场景的建模方式，解决了传统数据驱动模型缺乏物理可解释性的问题，使得模型能够自适应地处理混合材质和复杂光照条件。",
+    "支撑证据": "PROJECT_BRIEF中的'物理假设'与'关键洞察'章节；Phase 2阶段设定的BRDF参数估计验证标准（合成数据权重误差<10%）；规划新增的`models/dual_mask_depth.py`模型代码。",
+    "novelty_score": 0.7,
+    "novelty_verdict": "partially_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "介质与角度方向双掩码物理建模 (Dual-Mask Physical Modeling)",
+      "contribution_statement": "We propose a dual-mask physical modeling approach that explicitly captures both media properties and angular directions to represent intricate light interactions."
+    }
+  },
+  {
+    "创新点名称": "分量感知的自适应深度估计融合策略",
+    "创新点工作内容": [
+      "根据双掩码模型输出的材质权重，将深度估计任务解耦为漫反射、镜面反射和散射三个分量。",
+      "针对不同反射类型设计专属深度估计策略：漫反射区域采用EPI（极平面图像）方法，镜面区域降低EPI置信度并改用光度立体或邻域传播，散射区域采用散射模型修正。",
+      "在损失函数中引入基于介质掩码权重的像素级置信度加权机制，抑制非朗伯区域对整体梯度的干扰。",
+      "通过加权融合公式（D = wd*D_EPI + ws*D_specular + wsc*D_scatter）生成最终的统一深度图。"
+    ],
+    "创新点价值": "彻底解决了传统EPI方法因违反视角一致性假设而在非朗伯区域完全失效（预测退化为纹理复制）的致命缺陷，显著提升了混合场景和非朗伯场景下的深度估计精度和鲁棒性。",
+    "支撑证据": "PROJECT_BRIEF中的'分量感知深度估计'章节及'关键发现'（EPI在Non-Lambertian域MAE高达0.411且预测为纹理复制）；Phase 3阶段设定的性能目标（Non-Lambertian MAE < 0.25，Mixed MAE < 0.22）；规划修改的训练脚本`scripts/train_dual_mask.py`。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "分量感知的自适应深度估计融合策略",
+      "contribution_statement": "We demonstrate a component-aware adaptive fusion strategy that utilizes these parsed physical masks to achieve state-of-the-art performance in depth estimation tasks."
+    }
+  }
+]

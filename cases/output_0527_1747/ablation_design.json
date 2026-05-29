@@ -1,0 +1,37 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Ablation of MRI-like Angular Frequency Analysis (2D-DFT)",
+      "target_module": "Physical Reflection Model (PRM) - Angular Frequency Analysis",
+      "hypothesis": "2D-DFT频域分析能精准分离不同反射材质的频率特征（低频漫反射、高频镜面、中频散射），比纯空域卷积提供更可靠的物理先验和材质分类基础。",
+      "modification": "在 `PhysicalReflectionModel` 类中，移除对9×9角度采样矩阵的2D-DFT（快速傅里叶变换）操作，替换为标准的3D卷积层（`nn.Conv3d`）来提取角度特征。保持后续DMG和MCA结构及其他超参数不变。",
+      "expected_result": "Phase 1材质分类准确率显著下降（低于85%目标），AUC降低；Non-Lambertian子集MAE上升，证明类MRI频域分析对复杂材质解析的不可替代性。",
+      "comparison_with": "3D Convolution (空域角度特征提取)"
+    },
+    {
+      "experiment_name": "Ablation of Angular/Material Mask in Dual-Mask Generator",
+      "target_module": "Dual-Mask Generator (DMG) - Angular Mask Branch",
+      "hypothesis": "角度/材质掩码专门用于抑制非朗伯体（如镜面高光）引起的视角不一致噪声，仅靠空间掩码无法处理材质反射带来的伪影。",
+      "modification": "在 `DualMaskGenerator` 中移除角度掩码 $M_{ang}$ 的预测分支（移除对应的MLP和Softmax层）。在 `MaskedCostAggregation` 中，将 $M_{ang}$ 设为全1张量（即不应用角度掩码），仅使用空间掩码 $M_{sp}$ 进行代价加权。",
+      "expected_result": "Non-Lambertian和Mixed子集的MAE明显恶化，高光区域深度预测退化为纹理复制，证明角度掩码对非朗伯区域噪声过滤的关键作用。",
+      "comparison_with": "Single Spatial Mask (仅使用空间遮挡掩码)"
+    },
+    {
+      "experiment_name": "Ablation of Physical Reflection Model and Component-Aware Fusion",
+      "target_module": "Physical Reflection Model (PRM) & Component-Aware Fusion Strategy",
+      "hypothesis": "基于物理光照模型分离反射分量并进行置信度加权融合，是解决非朗伯区域EPI失效、提升整体深度估计精度的核心机制。",
+      "modification": "完全移除 `PhysicalReflectionModel` 模块及其输出的物理特征 $F_{phy}$。在 `MaskedCostAggregation` 中，直接使用LFFE的特征 $F$ 计算常规的方差代价体（Variance Cost Volume），移除分量感知的置信度加权融合逻辑，直接输入 `DepthRegression` 模块。",
+      "expected_result": "模型退化为纯数据驱动的光场深度估计网络，Non-Lambertian MAE大幅反弹至基线水平（约0.411），验证物理先验和分量感知策略对非朗伯场景的有效性。",
+      "comparison_with": "Variance Cost Volume (纯数据驱动方差代价体，无物理先验)"
+    },
+    {
+      "experiment_name": "Ablation of Explicit Physical Masking in Cost Aggregation",
+      "target_module": "Masked Cost Aggregation (MCA) - Explicit Mask Weighting",
+      "hypothesis": "显式的物理双掩码加权机制比隐式的注意力机制能更精准、高效地过滤遮挡和高光噪声，且具有更好的物理可解释性和小样本泛化能力。",
+      "modification": "在 `MaskedCostAggregation` 中，移除双掩码 $M_{sp}$ 和 $M_{ang}$ 的显式逐元素乘法加权操作。替换为在3D代价体上应用3D Non-local Attention模块（或3D Self-Attention）进行隐式的上下文特征聚合。",
+      "expected_result": "模型参数量和显存占用显著增加，训练收敛变慢；在Non-Lambertian子集上的MAE改善幅度不如显式双掩码，证明显式物理先验引导优于黑盒注意力机制。",
+      "comparison_with": "3D Non-local Attention (隐式注意力代价聚合)"
+    }
+  ],
+  "_model_analysis": {}
+}

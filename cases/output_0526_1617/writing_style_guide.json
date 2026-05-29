@@ -1,0 +1,57 @@
+{
+  "句式特征": {
+    "问题导向句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues cannot be easily applied.",
+      "Inferring the depth of transparent or mirror (ToM) surfaces represents a hard challenge for either sensors, algorithms, or deep networks."
+    ],
+    "对比句式": [
+      "While other methods generate visible artifacts, especially around the most specular parts.",
+      "In contrast, our model can work on general 1-lobe BRDFs and can also recover reflectance in addition to shape."
+    ],
+    "递进/连接句式": [
+      "After this equation is derived, we recover the shape by applying a locally polynomial shape prior (Sec. 5.1).",
+      "First, we mask ToM objects in images by in-painting them with arbitrary uniform colors. Then, we employ a monocular depth network to generate a virtual depth map."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": [
+      "问题提出式：'Light-field cameras have recently emerged as a powerful tool... However, obtaining the shape... remains challenging.'",
+      "方法声明式：'In this paper, we propose a simple pipeline...'",
+      "理论背景式：'Light fields implicitly capture the 3D geometry and reflectance properties...'"
+    ],
+    "段内论证逻辑": [
+      "先总后分结构：先总结方法贡献，再分点展开（如贡献列表1-5项）",
+      "对比论证：将现有方法与本方法进行对比分析（如'Tao et al. [27] proposed a clustering method that eliminates specular pixels...'）",
+      "因果推导：从理论假设推导到具体实现（如'Given the challenge of acquiring the ground truth disparity maps...'）"
+    ],
+    "段落结尾收束方式": [
+      "贡献总结：'Our main contributions are: 1)... 5)...'",
+      "展望过渡：'We demonstrate extensive real-world examples of shape and reflectance estimation using commercial light-field cameras (Figs. 1, 7, and 8).'",
+      "问题呼应：'This difficulty arises because ToM surfaces introduce misleading visual information about scene geometry...'（在引言结尾呼应开头问题）"
+    ]
+  },
+  "用词特征": [
+    "过渡词：however, therefore, furthermore, notably, consequently",
+    "强调词：novel, key, fundamental, significant, state-of-the-art",
+    "限定词：spatially-varying (SV), Lambertian, monocular, stereo, synthetic",
+    "学术短语：Epipolar Plane Images (EPI), photometric loss, self-supervised methods, in-painting, fine-tune"
+  ],
+  "论证模式": [
+    "问题-分析-解决方案模式：先指出现有方法局限（如'Tao et al. [27]... fails if the BRDFs do not lie on a line'），分析原因（dichromatic model失效），提出新方案（SVBRDF-invariant理论）",
+    "方法分层说明模式：按技术模块分述（如decoupling模块和aggregating模块的结构功能）",
+    "实验验证模式：先描述数据集构建（synthetic MERL dataset），再对比实验结果（Figs. 5-8）"
+  ],
+  "引用风格": {
+    "嵌入方式": [
+      "句首引用：'proposed by Chandraker [5]'",
+      "句中引用：'Tao et al. [27] proposed a clustering method...'",
+      "句末引用：'Most work assumes a known light source [10, 33].'（隐式引用）",
+      "多引用合并：'[18]–[21]'（连续引用格式）"
+    ],
+    "衔接方式": [
+      "对比衔接：'Unlike previous approaches, our method...'",
+      "因果衔接：'Due to the limitations of existing methods [9,13], we...'（隐含引用作用）",
+      "补充说明：'（Sec. 5.1）'（章节引用引导）"
+    ]
+  }
+}

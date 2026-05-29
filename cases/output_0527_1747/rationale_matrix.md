@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| Applying 2D-DFT on 9x9 angular sampling  | Traditional spatial-domain analysis fails to captu | Replaces heavy data-driven 3D CNN feature extracto | Pixel-level real-time material identific | Phase 1 validation achieving >85% three- | Methodology: MRI-like Angular Frequency Analysis | must |
+| Classifying materials based on angular f | Hard classification or pure data-driven clustering | Overcomes limitations of traditional BRDF fitting  | Non-Lambertian and Mixed datasets (e.g., | Synthesized data weight error <10% in Ph | Methodology: Physics-Driven Material Parsing | must |
+| Predicting continuous Diffuse Mask and S | Rigid Lambertian assumptions in traditional Epipol | Unlike binary masking or implicit attention mechan | High-gloss and mixed-material surfaces i | Reduction of Non-Lambertian MAE to <0.25 | Methodology: Dual-Mask Physical Decomposition | must |
+| Using the predicted Diffuse Mask to weig | Standard cost volume aggregation treats all angula | Improves upon baseline EPI and standard 3D CNN cos | Scenes with strong directional lighting  | Overall val_MAE < 0.20 and Lambertian su | Methodology: Mask-Guided Cost Volume & 3D Regularization | must |
+| Dynamically selecting depth estimation s | A single unified depth decoder cannot optimally ha | Resolves the 'texture copying' failure mode of bas | Complex mixed scenes (UrbanLF-Syn) where | Phase 3 success criteria: Overall MAE <  | Methodology: Component-Aware Adaptive Fusion | should |
+| Introducing pixel-level material weights | Standard L1/L2 depth losses penalize errors equall | Replaces uniform loss weighting or heuristic uncer | Training phase across all 209 scenes, ut | Domain-balanced sampling combined with w | Implementation Details: Loss Function and Training Strategy | should |

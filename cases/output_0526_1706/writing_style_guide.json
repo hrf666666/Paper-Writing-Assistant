@@ -1,0 +1,58 @@
+{
+  "句式特征": {
+    "转折与对比句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "However, most current depth estimation methods support only Lambertian scenes, making them unreliable for glossy surfaces.",
+      "However, real-world LF images often encounter reflective and transparent surfaces and the related regions contain depth information from the reflection and background layers..."
+    ],
+    "因果与解释句式": [
+      "This difficulty arises because ToM surfaces introduce misleading visual information about scene geometry, which makes depth estimation challenging...",
+      "Such situations break Lambertian assumptions, leading to the wrong depth estimation results of most existing depth estimation algorithms.",
+      "...since the problem is under-constrained, we assume a known distant light source."
+    ],
+    "目的与方案句式": [
+      "In this paper, we derive a spatially-varying (SV)BRDF-invariant theory for recovering 3D shape and reflectance from light-field cameras.",
+      "Purposely, this paper proposes a simple yet effective strategy for obtaining training data and, thereby, dramatically boosting the accuracy...",
+      "In this paper, we propose a novel decoupling-and-aggregating strategy and develop a dual-layer depth estimation network for LF images..."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": [
+      "背景与现状陈述：从宏观背景或技术现状切入，如'Light-fields implicitly capture the 3D geometry...'或'Light Field (LF) records both positional and directional...'",
+      "问题与挑战引入：直接点明当前面临的痛点，如'Unfortunately, light reflection and refraction over ToM surfaces violate...'或'However, real-world LF images contain much more complex environments...'"
+    ],
+    "段内论证逻辑": [
+      "现象描述 -> 问题剖析 -> 现有局限 -> 本文动机：先描述透明/反射表面的普遍性，接着剖析深度估计失败的物理或算法原因，指出现有数据集或传感器的局限，最后顺理成章引出本文策略。",
+      "理论推导 -> 具体步骤 -> 结果验证：先概述提出的理论或网络框架，然后分步骤解释模块作用（如解耦、聚合），最后说明实验验证和优势。"
+    ],
+    "段落结尾收束方式": [
+      "总结贡献与引出下文：在Introduction末尾使用编号列表明确列出核心贡献，如'Our main contributions are: 1)... 2)...'",
+      "强调优势与对比结论：在段末强调本文方法解决了前人未解决的问题，如'...which has not been achieved by previous light-field shape acquisition approaches.'",
+      "指出必要性与研究意义：在背景介绍段末强调研究的紧迫性，如'...in-depth research for the LF depth estimation task is necessary to ensure the accuracy...'"
+    ]
+  },
+  "用词特征": [
+    "过渡词：However, Moreover, Therefore, In contrast, Specifically, Unfortunately, In short, Purposely, Additionally, Nonetheless.",
+    "强调词：explicitly, dramatically, remarkably, extensively, sufficiently, significantly, seriously, primarily.",
+    "限定词：often, typically, usually, mostly, up to, in many instances, at least.",
+    "学术动词与短语：propose, derive, demonstrate, validate, formulate, address, tackle, leverage, exploit, violate, encounter, fine-tune.",
+    "专业名词短语：ground-truth annotation, state-of-the-art methods, cost volume, aliasing bimodal distribution, spatially-varying BRDFs, pseudo labels, Lambertian assumptions."
+  ],
+  "论证模式": [
+    "提出问题 → 分析原因 → 给出方案 (Problem-Cause-Solution)：首先指出透明/反射表面深度估计困难（问题），接着解释是因为违反Lambertian假设导致cost volume混叠或缺乏GT数据（原因），最后提出解耦-聚合网络或伪标签微调策略（方案）。",
+    "先总后分与贡献列举 (General-to-Specific)：在引言部分先总体概述本文提出的核心框架或理论洞察，随后使用编号列表（1, 2, 3...）详细且结构化地列举具体贡献和对应章节。",
+    "对比与批判论证 (Comparative and Critical Argumentation)：在Related Work中，先归纳现有方法（如基于Lambertian假设或二向色性模型），随后通过转折词指出其在特定材质（如金属、ToM表面）下的失效原因，从而反衬本文方法的鲁棒性和优越性。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": [
+      "句末引用（最常见）：用于支持陈述或列举相关工作，如'...remains a challenging problem for both computer vision algorithms and deep networks [64].'",
+      "句中/主语引用：将作者或具体方法作为句子主语，如'Tao et al. [27] proposed a clustering method...' 或 'The method by Johnson and Adelson [14] can estimate shape...'",
+      "括号内补充引用：用于举例说明或补充背景，如'...light-field cameras have become popular (e.g. Lytro [1] and Raytrix [22])...'"
+    ],
+    "引用与论述的衔接方式": [
+      "归纳总结式：将多篇文献归纳为一类方法并集中引用，如'Many depth estimation methods... have been proposed. However, most of them rely on the Lambertian assumption... [9, 13, 15, 25, 29, 30, 31].'",
+      "转折批判式：引用某方法后紧跟转折，指出其局限性以引出本文改进，如'A follow-up work [26] adopts the dichromatic model... However, the dichromatic model fails to hold for materials like metals [28].'",
+      "顺承借鉴式：引用前人方法后，说明本文如何受其启发或在其基础上改进，如'Recent methods [11, 32] assumed that the shape is locally polynomial... We adopt this strategy in our final optimization procedure.'"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "总体架构": "输入为9x9（共81个视角）的4D光场图像序列。首先通过EPINet4Dir模块提取4个方向的极平面图像（EPI）空间特征；同时，通过Angular FFT模块对角度维度进行快速傅里叶变换，提取频域特征以区分朗伯体与非朗伯体（高光/反射）材质。接着，Dual-Mask Generator利用频域特征生成统一的“双掩码”（朗伯体掩码与非朗伯体掩码）。最后，AngularFreqDepthNetV2模块结合EPI空间特征与双掩码，通过物理模型约束进行加权融合，输出高精度的深度图及材质分类结果。",
+  "模块详情": [
+    {
+      "模块名": "EPINet4Dir (EPI特征提取器)",
+      "输入": "(81, 3, 256, 256) 光场视角序列",
+      "核心操作": "沿水平、垂直及两个对角线方向提取极平面图像(EPI)，通过2D/3D卷积提取空间-角度几何特征，捕获光场中的视差信息。",
+      "输出": "(4, C, 256, 256) 四个方向的EPI特征图",
+      "关键公式": "F_{epi}^d = Conv2D(EPI_d(I)), d \\in \\{H, V, D1, D2\\}"
+    },
+    {
+      "模块名": "Angular FFT Module (角度频域特征提取)",
+      "输入": "(81, C, 256, 256) 视角特征序列",
+      "核心操作": "沿81个视角维度（9x9网格）应用2D快速傅里叶变换(FFT)，将角度域转换到频域，提取高频（非朗伯体/高光）和低频（朗伯体）振幅特征，用于材质解耦。",
+      "输出": "(C, 256, 256) 角度频域振幅与相位特征",
+      "关键公式": "F_{freq}(u,v) = \\mathcal{F}_{2D}(I_{angular}(x,y)), Amp = |F_{freq}|"
+    },
+    {
+      "模块名": "Dual-Mask Generator (双掩码生成器)",
+      "输入": "(C, 256, 256) 频域特征",
+      "核心操作": "通过多层感知机(MLP)和Sigmoid激活函数，将频域特征映射为像素级的材质概率，生成朗伯体掩码和非朗伯体掩码，实现物理属性的统一建模。",
+      "输出": "(2, 256, 256) 双掩码 (M_lamb, M_non_lamb)",
+      "关键公式": "M_{lamb} = \\sigma(W_2 \\cdot ReLU(W_1 \\cdot Amp)), M_{non\\_lamb} = 1 - M_{lamb}"
+    },
+    {
+      "模块名": "AngularFreqDepthNetV2 (统一深度估计与物理融合)",
+      "输入": "(4, C, 256, 256) EPI特征, (2, 256, 256) 双掩码",
+      "核心操作": "将EPI特征与双掩码进行通道级拼接，通过卷积网络进行特征融合。利用双掩码作为物理权重，对朗伯区域应用光一致性约束，对非朗伯区域应用镜面反射物理模型约束，最终回归深度值。",
+      "输出": "(1, 256, 256) 预测深度图",
+      "关键公式": "D = f_{depth}(Concat(F_{epi}, M_{lamb}, M_{non\\_lamb})) \\odot (M_{lamb} \\cdot \\mathcal{L}_{photo} + M_{non\\_lamb} \\cdot \\mathcal{L}_{specular})"
+    }
+  ],
+  "模块连接": "原始81视角光场输入同时送入EPINet4Dir和Angular FFT Module。EPINet4Dir输出4方向EPI特征；Angular FFT Module输出频域特征并送入Dual-Mask Generator生成双掩码。随后，4方向EPI特征与双掩码在通道维度拼接，共同输入到AngularFreqDepthNetV2中。AngularFreqDepthNetV2利用双掩码引导的物理损失和特征融合，最终输出单通道深度图。整个数据流实现了从空间-角度特征提取、频域材质解耦到物理约束深度回归的端到端处理。",
+  "关键超参数": {
+    "num_views": 81,
+    "input_resolution": [
+      256,
+      256
+    ],
+    "epi_directions": 4,
+    "fft_material_acc_target": 0.85,
+    "fft_material_auc_target": 0.9,
+    "max_scenes_per_batch": 2,
+    "input_channels": 3,
+    "output_channels": 1
+  }
+}

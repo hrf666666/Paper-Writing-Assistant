@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "引入结合介质掩码（Medium Mask）与角度方向掩码（Angular Direction Mask）的双掩码机制",
+      "motivation": "传统光场深度估计模型通常基于单一的Lambertian假设，在面对Non-Lambertian和Mixed场景时，高光和非朗伯体反射会导致深度估计严重失效",
+      "sota_gap": "相比单一掩码或无掩码的基线模型，显式分离并处理不同反射特性，使Non-Lambertian域MAE下降41%，Lambertian域MAE下降37%",
+      "scenario": "包含复杂反射特性的Mixed（城市混合）场景和Non-Lambertian数据集（如UrbanLF-Syn, Non-lambertian_zhenglong）",
+      "evidence": "整体MAE达到0.1795（满足<0.20目标），Mixed域MAE为0.1687（满足<0.22目标）",
+      "section": "Methodology (Dual-Mask Mechanism)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "构建参数量仅为754K的轻量级多方向极平面图像处理模型（EPINet4Dir V3），支持384×384全分辨率",
+      "motivation": "现有高精度光场深度估计模型参数量庞大且计算成本过高，无法部署在资源受限的边缘设备上，且传统EPI处理往往牺牲分辨率以换取计算效率",
+      "sota_gap": "在保持极小参数量（754K）的同时，相比基线模型整体MAE下降26%，且在单卡RTX 3090上仅需45个Epoch即可达到最佳性能",
+      "scenario": "资源受限的边缘设备部署场景，以及需要384×384全分辨率输入的高清光场数据集（如HCInew）",
+      "evidence": "模型参数量严格控制在754K，单卡RTX 3090训练仅需45 Epochs收敛，整体MAE 0.1795",
+      "section": "Methodology (Network Architecture)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "引入域平衡采样（Domain-balanced sampling）策略，在单一模型中联合训练Lambertian、Non-Lambertian和Mixed三种物理域",
+      "motivation": "多域联合训练时数据分布不均会导致模型偏向多数域（如Lambertian），从而在少数域（如Non-Lambertian）和复杂混合域上出现严重的泛化能力下降",
+      "sota_gap": "打破了传统模型只能针对单一材质假设训练的局限，避免了为不同域训练多个独立模型的繁琐，显著提升了少数域的估计精度",
+      "scenario": "包含多种物理域混合的训练集（209个训练场景，跨越HCInew, Non-lambertian_zhenglong, UrbanLF-Syn等）",
+      "evidence": "联合训练后Non-Lambertian域MAE降至目标范围内（<0.25），Mixed域MAE达到0.1687（<0.22），证明域平衡有效缓解了长尾域的性能衰退",
+      "section": "Methodology (Training Strategy)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "系统验证并证伪“类MRI角度频率分析”假设，界定9×9角度采样下频域材质分类的理论边界",
+      "motivation": "学界假设可通过光场角度维度的2D-FFT频谱特征区分材质，但该假设在主流9×9光场相机上缺乏严格物理验证，易导致后续研究在错误方向上浪费算力",
+      "sota_gap": "提供极具价值的“负面发现”，从理论上推翻现有9×9硬件下频域材质分类的可行性，指出BRDF表征需要>10个频点，而9×9采样仅提供约4个有效非DC频点",
+      "scenario": "基于主流9×9角度采样光场相机采集的数据集，以及依赖2D-FFT进行材质解耦的算法设计",
+      "evidence": "2D-FFT能量比分析显示非直流能量占比<3%；四种独立分析方法的p值均>0.05，证明9×9下不同材质域无统计学显著的光谱特征差异",
+      "section": "Discussion (Negative Findings & Theoretical Bounds)",
+      "priority": "should"
+    },
+    {
+      "design_decision": "采用从256至384的分辨率缩放（Resolution Scaling）策略进行多域联合优化",
+      "motivation": "直接在384×384高分辨率下联合训练多域数据易导致显存溢出或优化困难，而仅在低分辨率下训练会丢失复杂纹理细节，限制Mixed和Non-Lambertian域的精度上限",
+      "sota_gap": "相比固定分辨率训练，渐进式分辨率缩放使模型在保持轻量级的同时更好地捕捉高频细节，突破了EPI架构在复杂纹理场景下的性能天花板",
+      "scenario": "包含丰富高频细节和复杂纹理的Mixed（城市混合）场景（如UrbanLF-Syn），以及需要384×384全分辨率评估的测试集",
+      "evidence": "经过分辨率缩放优化后，整体MAE达到0.1795，Mixed域MAE为0.1687，满足<0.22的严格目标",
+      "section": "Methodology (Optimization Strategy)",
+      "priority": "should"
+    },
+    {
+      "design_decision": "基于频域证伪结果，推导并提出未来基于频率的光场分析所需的最低硬件采样标准（如17×17或21×21）",
+      "motivation": "既然9×9采样无法满足频域材质分类的物理需求，必须为未来的光场硬件设计和频域分析算法指明明确的理论边界和演进方向，避免盲目试错",
+      "sota_gap": "首次定量计算角度奈奎斯特频率下的有效频点数量并与BRDF表征需求对比，指出约100倍的采样密度差距，为下一代光场相机设计提供理论依据",
+      "scenario": "下一代高密度角度采样光场相机的硬件设计，以及基于高频谱能量的光场材质/深度联合估计算法研发",
+      "evidence": "数学推导证明9×9采样存在约100倍的采样密度差距，明确提出17×17或21×21的最低采样标准以满足>10个非DC频点的BRDF表征需求",
+      "section": "Discussion (Future Hardware Guidelines)",
+      "priority": "nice"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| 引入结合介质掩码（Medium Mask）与角度方向掩码（Angular Dir | 传统光场深度估计模型通常基于单一的Lambertian假设，在面对Non-Lambertian和Mi | 相比单一掩码或无掩码的基线模型，显式分离并处理不同反射特性，使Non-Lambertian域MAE下 | 包含复杂反射特性的Mixed（城市混合）场景和Non-Lambertian数据集 | 整体MAE达到0.1795（满足<0.20目标），Mixed域MAE为0.168 | Methodology (Dual-Mask Mechanism) | must |\n| 构建参数量仅为754K的轻量级多方向极平面图像处理模型（EPINet4Dir V | 现有高精度光场深度估计模型参数量庞大且计算成本过高，无法部署在资源受限的边缘设备上，且传统EPI处理 | 在保持极小参数量（754K）的同时，相比基线模型整体MAE下降26%，且在单卡RTX 3090上仅需 | 资源受限的边缘设备部署场景，以及需要384×384全分辨率输入的高清光场数据集（ | 模型参数量严格控制在754K，单卡RTX 3090训练仅需45 Epochs收敛 | Methodology (Network Architecture) | must |\n| 引入域平衡采样（Domain-balanced sampling）策略，在单一模 | 多域联合训练时数据分布不均会导致模型偏向多数域（如Lambertian），从而在少数域（如Non-L | 打破了传统模型只能针对单一材质假设训练的局限，避免了为不同域训练多个独立模型的繁琐，显著提升了少数域 | 包含多种物理域混合的训练集（209个训练场景，跨越HCInew, Non-lam | 联合训练后Non-Lambertian域MAE降至目标范围内（<0.25），Mi | Methodology (Training Strategy) | must |\n| 系统验证并证伪“类MRI角度频率分析”假设，界定9×9角度采样下频域材质分类的理 | 学界假设可通过光场角度维度的2D-FFT频谱特征区分材质，但该假设在主流9×9光场相机上缺乏严格物理 | 提供极具价值的“负面发现”，从理论上推翻现有9×9硬件下频域材质分类的可行性，指出BRDF表征需要> | 基于主流9×9角度采样光场相机采集的数据集，以及依赖2D-FFT进行材质解耦的算 | 2D-FFT能量比分析显示非直流能量占比<3%；四种独立分析方法的p值均>0.0 | Discussion (Negative Findings & Theoretical Bounds) | should |\n| 采用从256至384的分辨率缩放（Resolution Scaling）策略进行 | 直接在384×384高分辨率下联合训练多域数据易导致显存溢出或优化困难，而仅在低分辨率下训练会丢失复 | 相比固定分辨率训练，渐进式分辨率缩放使模型在保持轻量级的同时更好地捕捉高频细节，突破了EPI架构在复 | 包含丰富高频细节和复杂纹理的Mixed（城市混合）场景（如UrbanLF-Syn | 经过分辨率缩放优化后，整体MAE达到0.1795，Mixed域MAE为0.168 | Methodology (Optimization Strategy) | should |\n| 基于频域证伪结果，推导并提出未来基于频率的光场分析所需的最低硬件采样标准（如17 | 既然9×9采样无法满足频域材质分类的物理需求，必须为未来的光场硬件设计和频域分析算法指明明确的理论边 | 首次定量计算角度奈奎斯特频率下的有效频点数量并与BRDF表征需求对比，指出约100倍的采样密度差距， | 下一代高密度角度采样光场相机的硬件设计，以及基于高频谱能量的光场材质/深度联合估 | 数学推导证明9×9采样存在约100倍的采样密度差距，明确提出17×17或21×2 | Discussion (Future Hardware Guidelines) | nice |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

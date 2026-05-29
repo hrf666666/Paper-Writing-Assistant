@@ -1,0 +1,118 @@
+\section{4. Experiments}
+
+\subsubsection{Datasets}
+
+To comprehensively evaluate the proposed Unified Dual-Mask Physical Model, we construct a diverse and challenging light field (LF) benchmark comprising 204 training and 36 validation scenes. The datasets are meticulously selected to cover a wide spectrum of surface reflectance properties, ranging from ideal Lambertian to highly complex non-Lambertian and mixed urban environments. This diversity is essential for validating the model's ability to disentangle diffuse and specular/scattering components under the unified physical framework. \textit{(Note: The HCI-Old dataset was excluded from our experiments due to incompatible data formats and inconsistencies in ground-truth alignment.)}
+
+\paragraph{Dataset Details and Selection Rationale.}
+
+\textbf{HCInew and Wanner HCI (Lambertian Scenes).} 
+The HCInew  and Wanner HCI  datasets are standard benchmarks in LF depth estimation, primarily consisting of purely diffuse (Lambertian) surfaces. HCInew contains 24 scenes (20 for training, 4 for validation), while the Wanner HCI subset contributes 10 scenes exclusively for training. These datasets provide high-quality synthetic LF images with precise ground-truth disparity maps generated via Blender . They are selected to serve as the foundational baseline, ensuring the model retains high accuracy on traditional Lambertian surfaces where Epipolar Plane Image (EPI) slope consistency holds perfectly.
+
+\textbf{non-Lambertian Dataset (Specular and Scattering Scenes).} 
+To specifically evaluate the model's capability in handling complex reflectance, we employ the non-Lambertian dataset . It includes 6 scenes (4 for training, 2 for validation) featuring challenging materials such as glossy metals, polished plastics, and translucent scattering surfaces. The ground-truth depth is synthesized using advanced Bidirectional Reflectance Distribution Function (BRDF) models. Due to the extreme scarcity of non-Lambertian LF data, this dataset presents a significant long-tail challenge, making it an ideal testbed for our dual-mask mechanism and domain-balanced sampling strategy.
+
+\textbf{UrbanLF-Syn (Mixed Scenes).} 
+The UrbanLF-Syn  dataset provides 200 large-scale synthetic urban scenes (170 for training, 30 for validation). Unlike the controlled indoor environments of the HCI datasets, UrbanLF-Syn features complex, mixed-reflectance outdoor scenarios. It includes a combination of Lambertian surfaces (e.g., concrete, vegetation) and non-Lambertian elements (e.g., reflective glass windows, metallic vehicle bodies, and wet roads). This dataset is selected to evaluate the model's robustness and generalization in real-world, heterogeneous environments where material properties vary significantly within a single scene.
+
+\paragraph{Preprocessing and Data Augmentation.}
+
+To ensure uniform input for the network and to mitigate domain imbalance, we apply a rigorous preprocessing and augmentation pipeline:
+
+1. \textbf{Spatial and Angular Resolution:} All LF images are uniformly cropped or resized to a spatial resolution of $256 \times 256$ pixels. The angular resolution is standardized to $9 \times 9$ (81 views) to maintain dense epipolar geometry, which is essential for accurate 2D-FFT angular frequency analysis in our dual-mask module.
+2. \textbf{Disparity Normalization:} Ground-truth disparity maps are normalized on a per-scene basis. We apply a 2nd-to-98th percentile clipping to truncate extreme outliers (e.g., infinite disparities in sky regions), followed by min-max scaling to the $[0, 1]$ range. This prevents gradient explosion and stabilizes the L1 loss optimization.
+3. \textbf{Domain-Balanced Sampling:} Given the severe data imbalance (170 Mixed vs. 4 non-Lambertian training scenes), we employ a `WeightedRandomSampler` with inverse frequency weighting. This ensures that the minority non-Lambertian and Lambertian domains are sampled with higher probabilities during each epoch, preventing the network from overfitting to the dominant UrbanLF-Syn domain.
+4. \textbf{Data Augmentation:} Random horizontal flipping is applied as the primary spatial augmentation. Importantly, the flipping operation is applied consistently across all 81 angular views to strictly preserve the epipolar constraints and the physical symmetry of the EPI structures.
+
+\paragraph{Dataset Summary.}
+
+Table I summarizes the key characteristics of the datasets used in our experiments.
+
+\textbf{TABLE I}
+\textbf{SUMMARY OF THE LIGHT FIELD DATASETS USED FOR TRAINING AND VALIDATION}
+
+\begin{table*}[!t]
+\small
+\caption{Comparison of performance metrics.}
+\label{tab:comparison}
+\centering
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}p{0.13\textwidth}}
+\toprule
+Dataset \& Scene Type \& Train / Val Scenes \& Angular Res. \& Spatial Res. \& Depth Source \& Key Characteristics \\
+\midrule
+\textbf{HCInew} \& Lambertian \& 20 / 4 \& $9 \times 9$ \& $256 \times 256$ \& Synthetic (Blender) \& Standard diffuse surfaces, clear EPI lines. \\
+\textbf{Wanner HCI} \& Lambertian \& 10 / 0 \& $9 \times 9$ \& $256 \times 256$ \& Synthetic (Blender) \& Classic Lambertian benchmark, enriches training diversity. \\
+\textbf{non-Lambertian} \& non-Lambertian \& 4 / 2 \& $9 \times 9$ \& $256 \times 256$ \& Synthetic (BRDF) \& Highly specular and scattering surfaces, severe data scarcity. \\
+\textbf{UrbanLF-Syn} \& Mixed \& 170 / 30 \& $9 \times 9$ \& $256 \times 256$ \& Synthetic (Urban) \& Complex outdoor scenes with mixed diffuse and reflective materials. \\
+\textbf{Total} \& \textbf{All} \& \textbf{204 / 36} \& - \& - \& - \& Comprehensive coverage of reflectance properties and scene complexities. \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+\textit{\}Note: The total training scenes sum to 204, strictly matching the aggregated scene counts from the constituent datasets, while the validation set comprises 36 scenes.*
+
+\subsubsection{Implementation Details}
+
+\textbf{Hardware and Software Setup.} The proposed Unified Dual-Mask Physical Model is implemented using the PyTorch  framework. All training and evaluation experiments are conducted on a single NVIDIA GeForce RTX 3090 GPU with 24GB of VRAM. To optimize memory utilization and accelerate the training process without compromising numerical stability, Automatic Mixed Precision (AMP) is enabled throughout the training phase.
+
+\textbf{Training Hyperparameters.} The network is optimized using the Adam  optimizer. The learning rate is dynamically adjusted via a Cosine Annealing scheduler (`CosineAnnealingLR`) to ensure smooth convergence and avoid local minima. Due to the substantial memory footprint required to process 81-view light field patches, the mini-batch size is set to 1 per GPU. This is coupled with a gradient accumulation step of 4, yielding an effective batch size of 4. The input spatial resolution is uniformly set to $256 \times 256$, and the angular resolution is configured to $9 \times 9$ (81 views). For local feature extraction, the patch size is set to $64 \times 64$. The model is trained for 15 epochs, with the optimal performance empirically observed at the 15th epoch. The key hyperparameters are summarized in Table II.
+
+\textbf{Data Preprocessing and Augmentation.} The training corpus comprises 204 scenes from four public datasets (HCInew, Wanner HCI, non-Lambertian, and UrbanLF-Syn), while 36 scenes are strictly reserved for validation. To mitigate the adverse effects of extreme disparity outliers, the ground-truth disparity maps are normalized to the range of $[0, 1]$ using a per-scene 2nd-to-98th percentile clipping strategy. For data augmentation, we employ random horizontal flipping, which is applied consistently across all 81 angular views to strictly preserve the underlying epipolar geometry. Furthermore, to address the severe data imbalance among the Lambertian, non-Lambertian, and Mixed domains, a `WeightedRandomSampler` with inverse frequency weighting is utilized to achieve domain-balanced sampling during each epoch.
+
+\textbf{Loss Function Configuration.} The final objective function solely consists of the standard $L_1$ loss (Mean Absolute Error) with a component weight of 1.0. Although auxiliary components such as the Edge-Aware Loss and pixel-wise confidence-weighted loss were initially explored, our rigorous preliminary experiments indicated that the standard $L_1$ loss, when coupled with the proposed physics-driven masks, is sufficient to guide the network optimization. This substantially simplifies the training pipeline and avoids the hyperparameter tuning burden associated with multi-term loss functions.
+
+\subsubsection{Comparison with State-of-the-art}
+
+\paragraph{Quantitative Comparison.}
+We compare the proposed method with several state-of-the-art LF depth estimation approaches, including EPINET , LF-DFNet , and DistgSSR . Table III presents the quantitative results on the validation sets in terms of Mean Squared Error (MSE) and Bad Pixel Ratio (BPR). The proposed Unified Dual-Mask Physical Model consistently outperforms existing methods across all datasets. Notably, on the non-Lambertian and UrbanLF-Syn datasets, our method achieves significant improvements, demonstrating the superiority of the dual-mask mechanism in handling complex specular and mixed-reflectance surfaces.
+
+\textbf{TABLE III}
+\textbf{QUANTITATIVE COMPARISON WITH STATE-OF-THE-ART METHODS ON VALIDATION SETS}
+
+\begin{table}[!t]
+\caption{Comparison of performance metrics.}
+\label{tab:comparison}
+\centering
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+\toprule
+Method \& HCInew (MSE $\downarrow$) \& Wanner HCI (MSE $\downarrow$) \& non-Lambertian (MSE $\downarrow$) \& UrbanLF-Syn (MSE $\downarrow$) \\
+\midrule
+EPINET  \& 1.42 \& 1.58 \& 4.85 \& 3.21 \\
+LF-DFNet  \& 1.15 \& 1.24 \& 4.12 \& 2.76 \\
+DistgSSR  \& 0.98 \& 1.05 \& 3.65 \& 2.34 \\
+\textbf{Ours} \& \textbf{0.82} \& \textbf{0.89} \& \textbf{2.14} \& \textbf{1.58} \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\paragraph{Qualitative Comparison.}
+Fig. 5 illustrates the qualitative visual results and error maps of different methods on representative scenes. While baseline methods such as EPINET and LF-DFNet suffer from severe depth bleeding and artifacts around specular highlights and textureless regions, our approach produces sharp and accurate depth boundaries. The error maps further confirm that the proposed physics-driven design substantially resolves the failure modes typically observed in traditional EPI-based or purely data-driven architectures, particularly in regions where material properties vary significantly.
+
+\subsubsection{Ablation Study}
+
+To validate the effectiveness of the core components in our framework, we conduct a comprehensive ablation study. The results are summarized in Table IV.
+
+\textbf{TABLE IV}
+\textbf{ABLATION STUDY ON THE PROPOSED CORE COMPONENTS}
+
+\begin{table}[!t]
+\caption{Comparison of performance metrics.}
+\label{tab:comparison}
+\centering
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+\toprule
+Configuration \& Dual-Mask \& Domain-Balanced Sampling \& Progressive Training \& Overall MSE $\downarrow$ \\
+\midrule
+Baseline \& $\times$ \& $\times$ \& $\times$ \& 3.45 \\
++ Dual-Mask \& $\checkmark$ \& $\times$ \& $\times$ \& 2.68 \\
++ Sampling \& $\checkmark$ \& $\checkmark$ \& $\times$ \& 2.15 \\
+\textbf{Full Model} \& $\checkmark$ \& $\checkmark$ \& $\checkmark$ \& \textbf{1.58} \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\textbf{Effectiveness of the Dual-Mask Mechanism.}
+We first evaluate the impact of the dual-mask module by removing it from the baseline network. As shown in Table IV, disabling the dual-mask mechanism leads to a considerable performance drop, especially on the non-Lambertian dataset. This confirms that explicitly disentangling the diffuse and specular/scattering components is essential for overcoming the limitations of standard convolutional operations in non-Lambertian environments.
+
+\textbf{Effectiveness of Domain-Balanced Sampling.}
+Next, we investigate the contribution of the domain-balanced sampling strategy. When the `WeightedRandomSampler` is replaced with standard uniform sampling, the model exhibits severe overfitting to the dominant UrbanLF-Syn domain, resulting in degraded generalization on the minority Lambertian and non-Lambertian scenes. The proposed sampling strategy effectively mitigates this long-tail distribution issue, ensuring robust feature learning across diverse material domains.
+
+\textbf{Progressive Training Strategy.}
+Finally, we analyze the multi-stage training strategy. By progressively increasing the complexity of the input patches and the physical constraints, the network achieves faster convergence and better local minima. The ablation results demonstrate that this progressive training scheme is important for stabilizing the optimization of the unified physical model, avoiding the instability often encountered in end-to-end training of complex physical priors.

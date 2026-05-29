@@ -1,0 +1,40 @@
+{
+  "句式特征": {
+    "问题导向/挑战指出句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "Inferring the depth of transparent or mirror (ToM) surfaces represents a hard challenge for either sensors, algorithms, or deep networks.",
+      "However, real-world LF images often encounter reflective and transparent surfaces and the related regions contain depth information from the reflection and background layers, which can be modeled as dual-layer scenes."
+    ],
+    "对比/转折句式": [
+      "However, most current depth estimation methods support only Lambertian scenes, making them unreliable for glossy surfaces.",
+      "On the one hand, the definition of depth itself might appear ambiguous in such cases... On the other hand, as humans can deal with this through experience, depth sensing techniques based on deep learning... hold the potential to address this challenge.",
+      "In contrast, our model can work on general 1-lobe BRDFs, and can also recover reflectance in addition to shape, which has not been achieved by previous light-field shape acquisition approaches."
+    ],
+    "方法提出/贡献总结句式": [
+      "In this paper, we derive a spatially-varying (SV)BRDF-invariant theory for recovering 3D shape and reflectance from light-field cameras.",
+      "Purposely, this paper proposes a simple yet effective strategy for obtaining training data and, thereby, dramatically boosting the accuracy of learning-based depth estimation frameworks dealing with ToM surfaces.",
+      "In this paper, we propose a novel decoupling-and-aggregating strategy and develop a dual-layer depth estimation network for LF images with complex reflections."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "通常通过宏观背景陈述、指出当前技术的普遍应用或直接抛出研究动机来引入。常用 'In recent years...', 'In our daily lives...', 'Light Field (LF) is extensively utilized...' 等句式开篇，迅速将读者带入研究语境，确立段落基调。",
+    "段内论证逻辑": "严格遵循“漏斗型”演绎逻辑，即“背景/现状 -> 缺陷/挑战 -> 本文动机/方法”。段内高频使用因果连词（since, because）和转折连词（however, unfortunately）推进逻辑，层层递进地揭示现有方法的不足（如Lambertian假设失效），并自然过渡到本文的创新点。",
+    "段落结尾收束方式": "通常以总结本段核心观点、强调本文方法的独特优势、或通过交叉引用过渡到下一章节来收束。例如使用 'which is discussed in Sec. 4.1', 'We adopt this strategy in our final optimization procedure.' 或 'Experimental results... show the dramatic improvements...' 来收尾并承上启下。"
+  },
+  "用词特征": [
+    "过渡词：However, Therefore, Moreover, In contrast, Specifically, Unfortunately, In short, Purposely, On the one hand... On the other hand",
+    "强调词：explicitly, primarily, remarkably, dramatically, extensively, significantly, successfully, necessarily",
+    "限定词：spatially-varying, under-constrained, real-world, state-of-the-art, end-to-end, dual-layer, single-shot",
+    "学术动词与短语：derive, propose, demonstrate, validate, generalize, formulate, address, leverage, violate, encounter, fine-tune"
+  ],
+  "论证模式": [
+    "背景现状 → 指出缺陷/挑战 → 提出本文方案（Introduction和Related Work中最常见，如先指出Lambertian假设或主动传感器的局限，再提出处理非Lambertian/ToM表面的新方法）",
+    "现象描述 → 原因剖析 → 解决策略（如描述ToM表面导致深度估计失败的现象，分析是因为光反射和折射违反了传感器原理，最后提出in-painting或解耦策略）",
+    "总述核心贡献 → 分点详细列举（Introduction末尾常用，如 'Our main contributions are: 1)... 2)... 3)...'，使创新点一目了然）",
+    "理论推导/假设 → 实验验证/结果分析（Method和Experiment部分，先推导SVBRDF-invariant方程或构建cost volume，再通过合成/真实数据集验证其有效性）"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "1. 句末引用（最常见）：将引用作为事实或观点的支撑放在句末或分句末，如 '...have been proposed [9, 13, 15, 25, 29, 30, 31].'；2. 句中/主语引用：将作者或具体方法作为句子主语，如 'Tao et al. [27] proposed a clustering method...'；3. 括号内补充引用：在特定名词、设备或框架后补充，如 '...commercial light-field cameras (e.g. Lytro [1] and Raytrix [22])...'",
+    "引用与论述的衔接方式": "1. 批判性衔接：先引用他人工作，紧接着用 'However', 'Unfortunately', 'In contrast' 等转折词指出其局限性，从而引出本文动机（如 'Tao et al. [27] proposed... However, they attempt...'）；2. 顺承/基础衔接：将引用作为本文方法的基础、灵感来源或对比基准（如 '...follow the shape estimation framework using camera motion proposed by Chandraker [5, 6, 7].'）；3. 归纳性衔接：将多篇引用归纳为某一类方法或普遍现象，增强论述的权威性（如 'Many depth estimation methods... have been proposed [9, 13...].'）"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "总体架构": "输入为多视角光场子孔径图像（SAIs），首先通过光场特征提取模块提取空间和角度特征；同时，物理反射模型模块利用非朗伯体光照物理先验（分离漫反射与镜面反射）提取物理一致性特征。接着，双掩码生成模块基于提取的特征生成空间遮挡掩码和角度非朗伯掩码。随后，掩码引导的代价聚合模块在双掩码的加权下构建并聚合3D代价体，过滤掉遮挡和高光区域的噪声。最后，深度回归模块通过Soft-argmin操作输出最终的高精度深度图。",
+  "模块详情": [
+    {
+      "模块名": "光场特征提取器 (Light Field Feature Extractor, LFFE)",
+      "输入": "光场子孔径图像序列 $I \\in \\mathbb{R}^{N \\times C \\times H \\times W}$",
+      "核心操作": "使用3D卷积或4D卷积网络提取光场的空间纹理和角度几何特征，捕获极平面图像（EPI）中的线性结构。",
+      "输出": "光场特征图 $F \\in \\mathbb{R}^{N \\times C' \\times H \\times W}$",
+      "关键公式": "$F = \\text{ReLU}(\\text{Conv3D}(I))$"
+    },
+    {
+      "模块名": "物理反射模型模块 (Physical Reflection Model, PRM)",
+      "输入": "光场子孔径图像序列 $I \\in \\mathbb{R}^{N \\times C \\times H \\times W}$",
+      "核心操作": "基于非朗伯体物理光照模型（如微表面模型），将像素强度分解为漫反射和镜面反射分量，计算多视角间的物理光度一致性代价。",
+      "输出": "物理特征图 $F_{phy} \\in \\mathbb{R}^{N \\times C'' \\times H \\times W}$ 和初始视差代价 $C_{phy}$",
+      "关键公式": "$I_{u,v}(x,y) = \\rho_d(x,y) L_d + \\rho_s(x,y) L_s(u,v, \\mathbf{n})$"
+    },
+    {
+      "模块名": "双掩码生成器 (Dual-Mask Generator, DMG)",
+      "输入": "光场特征 $F$ 和 物理特征 $F_{phy}$",
+      "核心操作": "预测两个掩码：空间掩码（Spatial Mask）用于识别和抑制遮挡区域；角度/材质掩码（Angular/Material Mask）用于识别和抑制非朗伯体（高光）反射区域。",
+      "输出": "空间掩码 $M_{sp} \\in \\mathbb{R}^{N \\times 1 \\times H \\times W}$，角度掩码 $M_{ang} \\in \\mathbb{R}^{N \\times 1 \\times H \\times W}$",
+      "关键公式": "$M_{sp} = \\sigma(\\text{MLP}(F))$, $M_{ang} = \\text{Softmax}(\\text{MLP}(F_{phy} \\oplus F))$"
+    },
+    {
+      "模块名": "掩码引导代价聚合 (Masked Cost Aggregation, MCA)",
+      "输入": "光场特征 $F$，双掩码 $M_{sp}, M_{ang}$",
+      "核心操作": "在假设视差 $d$ 下，利用双掩码对多视角特征进行加权，构建3D代价体并进行3D卷积聚合，有效滤除遮挡和高光带来的伪影。",
+      "输出": "聚合后的3D代价体 $V_{agg} \\in \\mathbb{R}^{D \\times H \\times W}$",
+      "关键公式": "$V_{agg}(d) = \\sum_{u,v} (M_{sp}^{u,v} \\odot M_{ang}^{u,v}) \\cdot \\text{Cost}(F_{ref}, \\text{Warp}(F_{u,v}, d))$"
+    },
+    {
+      "模块名": "深度回归模块 (Depth Regression, DR)",
+      "输入": "聚合后的3D代价体 $V_{agg} \\in \\mathbb{R}^{D \\times H \\times W}$",
+      "核心操作": "对代价体在深度维度上应用Softmax归一化，并通过期望值计算（Soft-argmin）回归出连续的亚像素级深度值。",
+      "输出": "最终深度图 $D_{out} \\in \\mathbb{R}^{1 \\times H \\times W}$",
+      "关键公式": "$D_{out} = \\sum_{d=0}^{D-1} d \\cdot \\frac{\\exp(-V_{agg}(d))}{\\sum_{k} \\exp(-V_{agg}(k))}$"
+    }
+  ],
+  "模块连接": "输入光场图像 $I$ 分别并行输入至 LFFE 和 PRM 模块。LFFE 输出特征 $F$，PRM 输出物理特征 $F_{phy}$。$F$ 和 $F_{phy}$ 共同输入至 DMG 模块，生成双掩码 $M_{sp}$ 和 $M_{ang}$。随后，$F$、$M_{sp}$ 和 $M_{ang}$ 汇入 MCA 模块，生成聚合代价体 $V_{agg}$。最后，$V_{agg}$ 输入至 DR 模块，输出最终的深度图 $D_{out}$。整个数据流通过双掩码机制将物理先验与深度学习特征深度融合，实现端到端的优化。",
+  "关键超参数": {
+    "num_views": 81,
+    "max_disp": 4.0,
+    "num_depth_levels": 64,
+    "feature_channels": 64,
+    "mask_threshold": 0.5,
+    "physical_weight": 0.1
+  }
+}

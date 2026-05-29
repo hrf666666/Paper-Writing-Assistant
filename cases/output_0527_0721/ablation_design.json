@@ -1,0 +1,37 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Ablation of Angle FFT Material Classification",
+      "target_module": "类MRI角度频率分析机制 (Angle FFT Material Classification)",
+      "hypothesis": "基于2D-DFT的角度频谱分析能突破小感受野下空间域卷积的分类瓶颈，提供高精度的反射类型物理先验。",
+      "modification": "在 `models/angle_fft.py` 中，注释掉 2D-DFT 频谱变换和物理映射分类逻辑，替换为直接使用 3x3 卷积核的 3-class CNN 对 9x9 角度 patch 进行空间域特征提取和分类。",
+      "expected_result": "材质分类准确率从 >85% 骤降至约 24.6%（复现已有失败实验），导致 Non-Lambertian 和 Mixed 子集的 MAE 显著上升，证明频域物理先验的不可替代性。",
+      "comparison_with": "学习型材质分类器 (3-class CNN，空间域小感受野分类器)"
+    },
+    {
+      "experiment_name": "Ablation of Dual-Mask Physical Model and RTF Constraint",
+      "target_module": "双掩码物理建模与反向波矢解析 (Dual-Mask & RTF Rank Constraint)",
+      "hypothesis": "双掩码结合RTF秩约束能从物理光学层面准确量化BRDF参数，提供理论保证和泛化能力。",
+      "modification": "在 `models/dual_mask_depth.py` 中，移除介质掩码、角度方向掩码生成模块及 RTF 秩约束损失 (Rank Loss)，替换为使用普通的多层卷积网络 (CNN) 直接回归漫反射、镜面、散射权重 (w_d, w_s, w_sc)，不施加任何物理一致性约束。",
+      "expected_result": "BRDF 参数估计误差从 <10% 显著增大，模型失去物理可解释性，在极端非朗伯材质和跨域泛化测试中 MAE 明显上升，证明物理约束对参数估计的必要性。",
+      "comparison_with": "无物理约束的直接回归网络 (Direct Regression CNN for BRDF weights)"
+    },
+    {
+      "experiment_name": "Ablation of Component-Aware Adaptive Depth Estimation",
+      "target_module": "分量感知的自适应深度估计策略 (Component-Aware Adaptive Depth Branches)",
+      "hypothesis": "根据材质权重动态调度不同深度估计分支并融合，能有效解决非朗伯区域因违反视角一致性假设导致的 EPI 失效问题。",
+      "modification": "在 `models/dual_mask_depth.py` 的深度回归模块中，移除针对镜面和散射区域的专用分支 (D_specular, D_scatter) 以及分量加权融合机制 (D = w_d*D_EPI + ...)，替换为全局统一的 EPI 深度回归头（即退化为基线 EPINet4Dir 的单一回归分支）。",
+      "expected_result": "Non-Lambertian MAE 退化至基线水平 (约 0.411)，深度预测在非朗伯区域重新出现纹理复制和失效现象，证明自适应分支调度对非朗伯深度估计的核心价值。",
+      "comparison_with": "全局统一 EPI 深度回归 (Global Unified EPI Depth Regression, 即基线 EPINet4Dir 架构)"
+    },
+    {
+      "experiment_name": "Ablation of Pixel-wise Confidence Weighted Loss",
+      "target_module": "基于材质权重的像素级置信度加权损失 (Pixel-wise Confidence Weighted Loss)",
+      "hypothesis": "在损失函数中引入材质权重作为置信度，能引导模型自适应地关注非朗伯难样本区域的优化。",
+      "modification": "在 `scripts/train_dual_mask.py` 的损失函数计算部分，移除基于材质连续权重 (w_d, w_s, w_sc) 的像素级掩码加权逻辑，替换为对所有像素计算标准的、均匀权重的 L1 Loss。",
+      "expected_result": "Non-Lambertian MAE 上升，模型在训练后期对非朗伯区域的优化动力不足，整体收敛曲线在 Non-Lambertian 子集上出现 plateau，证明置信度加权对难样本挖掘的有效性。",
+      "comparison_with": "标准均匀 L1 损失 (Standard Uniform L1 Loss)"
+    }
+  ],
+  "_model_analysis": {}
+}

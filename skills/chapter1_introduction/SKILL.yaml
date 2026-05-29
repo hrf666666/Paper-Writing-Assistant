@@ -1,0 +1,62 @@
+name: chapter1_introduction
+description: "生成第一章 Introduction - 强调问题重要性和难度，指出现有方法不足，介绍贡献"
+type: generator
+version: "2.1"
+
+triggers:
+  - phase1
+  - introduction
+
+dependencies:
+  - length_budget
+  - citation_strategy
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "项目创新点列表"
+  - name: experiment_design
+    type: dict
+    required: true
+    description: "实验设计数据"
+  - name: model_architecture
+    type: dict
+    required: false
+    description: "模型架构描述"
+  - name: project_info
+    type: dict
+    required: false
+    description: "项目代码分析结果"
+  - name: style_guide
+    type: dict
+    required: false
+    description: "写作风格指导"
+  - name: chapter_org
+    type: dict
+    required: false
+    description: "章节组织参考（来自ref_pdf分析）"
+  - name: length_budget_chars
+    type: int
+    required: false
+    default: 12000
+    description: "章节长度预算（字符数）"
+  - name: structure_plan
+    type: dict
+    required: false
+    description: "由structure_planner生成的子节结构规划，如未提供则由LLM自行规划"
+
+outputs:
+  - name: content
+    type: str
+    description: "生成的章节内容"
+
+parameters:
+  ensure_heading: "# 1. Introduction"
+  citation_density: "3-5 per subsection"
+
+prompt_template: prompt.md
+model_type: generation
+quality_check: true
+quality_threshold: 60.0
+max_retries: 2

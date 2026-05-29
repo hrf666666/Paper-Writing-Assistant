@@ -1,0 +1,23 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "类MRI角度频率分析机制",
+    "contribution_statement": "We identify that complex depth signals can be effectively decoupled and understood using an MRI-like angular frequency analysis mechanism."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "统一双掩码物理建模与反向波矢解析",
+    "contribution_statement": "We propose a unified dual-mask physical modeling approach combined with reverse wave-vector parsing to explicitly resolve these frequency interactions."
+  },
+  "innovation_3": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.4",
+    "experiment_section": "4.5",
+    "name": "分量感知自适应深度估计融合策略",
+    "contribution_statement": "We demonstrate the superior performance of our component-aware adaptive fusion strategy in translating these parsed physical components into highly accurate depth maps."
+  }
+}

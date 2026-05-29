@@ -1,0 +1,67 @@
+{
+  "数据集": {
+    "名称": [
+      "HCInew",
+      "HCI-Old",
+      "Wanner_HCI",
+      "Non-lambertian_zhenglong",
+      "UrbanLF-Syn"
+    ],
+    "规模": "共245个场景（209个训练场景，36个验证场景），包含5个不同的光场数据集",
+    "场景类型": "Lambertian（纯漫反射）、Non-Lambertian（镜面/散射）、Mixed（城市混合场景）",
+    "划分方式": "按场景独立划分训练集和验证集。使用 WeightedRandomSampler 进行域平衡采样（逆频率加权）以解决数据类别不平衡问题。输入统一裁剪为 256x256 分辨率，包含 9x9=81 个视角，并进行逐场景百分位截断（2-98分位）归一化至 [0,1]。"
+  },
+  "评估指标": {
+    "指标名称": "MAE (Mean Absolute Error，平均绝对误差)",
+    "目标值": {
+      "整体数据集 (Overall)": "< 0.20",
+      "Lambertian 子集": "< 0.16",
+      "Non-Lambertian 子集": "< 0.25",
+      "Mixed 子集": "< 0.22"
+    }
+  },
+  "训练策略": {
+    "优化器": "Adam",
+    "学习率": "初始学习率 2e-4 (0.0002)，使用带线性预热的余弦退火调度器 (cosine_warmup)，warmup_steps=3",
+    "batch_size": "8 (若显存溢出则回退至4)，结合梯度累积 (gradient accumulation: 4)",
+    "epoch与步数": "训练日志记录了前3个epoch，配置中总步数 (total_steps) 设置为 72",
+    "损失函数": "L1 Loss",
+    "其他策略": "梯度裁剪 (max_norm=1.0)、自动混合精度训练 (AMP)、随机水平翻转数据增强（一致应用于81个视角）"
+  },
+  "对比方法": [
+    "EPINet4Dir V3 (754K参数，4方向 EPI 提取，全分辨率基线模型)"
+  ],
+  "消融实验设计": {
+    "已验证的失败消融 (Dead Ends)": [
+      "增加 Edge-Aware Loss：仅改善 Mixed 域，对 Non-Lambertian 无效",
+      "增加视角数 (如 5x5 增至 7x7)：改善 Mixed 域，但 Lambertian/Non-Lambertian 无变化",
+      "Defocus 分支方法 (如 MaterialDualCueNet)：defocus branch 未能学到有效深度特征",
+      "学习型材质分类器 (3-class CNN)：9x9 patch 信息不足，准确率仅 24.6%",
+      "预训练骨干网络 (如 ResNet18)：在小规模数据集上容易过拟合，无实质帮助",
+      "纯超参数调参：Lambertian MAE 在 0.32-0.38 之间 plateau，证实为架构限制而非调参问题"
+    ],
+    "计划中的核心模块验证 (Phase 1-3)": [
+      "角度频谱材质分类 (Phase 1)：消融 2D-DFT 频谱能量分布对漫反射/镜面/散射的三分类能力（目标准确率>85%）",
+      "BRDF 参数估计 (Phase 2)：验证从光场数据估计介质掩码量化权重 (w_d, w_s, w_sc) 的准确性（目标误差<10%）",
+      "分量感知深度估计 (Phase 3)：消融漫反射分量增强和像素级置信度加权对最终深度估计的影响"
+    ]
+  },
+  "关键实验结果": {
+    "基线模型 (EPINet4Dir V3) 最终结果": {
+      "Overall MAE": "0.133 (达标，目标 < 0.20)",
+      "Mixed MAE": "0.081 (达标，目标 < 0.22)",
+      "Lambertian MAE": "0.387 (未达标，目标 < 0.16)",
+      "Non-Lambertian MAE": "0.411 (未达标，目标 < 0.25)"
+    },
+    "训练日志动态结果 (前3 Epoch)": {
+      "Epoch 1": "Overall: 0.315, Lambertian: 0.357, Non-Lambertian: 0.479, Urban(Mixed): 0.303",
+      "Epoch 2": "Overall: 0.247, Lambertian: 0.361, Non-Lambertian: 0.515, Urban(Mixed): 0.218",
+      "Epoch 3": "Overall: 0.236, Lambertian: 0.365, Non-Lambertian: 0.490, Urban(Mixed): 0.206"
+    },
+    "关键发现": [
+      "EPI 方法在 Mixed 域表现优异，但在 Non-Lambertian 域完全失效（预测退化为输入纹理的复制，而非深度结构）",
+      "Non-Lambertian 失效的根因是 EPI 的视角一致性假设被镜面反射违反",
+      "Lambertian 域存在性能瓶颈，复杂纹理导致 EPI 斜率模糊，人眼单图即可判断材质，说明 81 角点信息具备区分潜力，需引入物理先验（如双掩码与角度频率分析）"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+# 5. Conclusion
+
+# 5. Conclusion
+
+In this paper, we propose a Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation to overcome the severe geometric corruption caused by complex reflectance properties. By bridging physical optics with epipolar plane image (EPI) analysis, our framework fundamentally departs from the conventional Lambertian photo-consistency assumption, enabling robust material disentanglement and accurate depth recovery in real-world mixed-material scenes. 
+
+First, we establish a dual-mask physical model via MRI-inspired angular frequency analysis, which unifies material perception across Lambertian, non-Lambertian, and mixed scenes to yield reliable physical priors and high-precision material distribution maps. Second, we devise a component-aware depth estimation strategy based on inverse wavevector analysis, fundamentally resolving the inherent failure of traditional EPI methods in specular regions and preventing prediction degradation into mere texture replication. Third, we formulate a physics-prior-driven three-stage progressive training framework that guarantees physical interpretability, circumvents overfitting during black-box optimization, and substantially enhances generalization capabilities on small-sample non-Lambertian datasets. 
+
+Although our approach achieves superior depth accuracy and robustness, it currently relies on densely sampled angular views, which restricts its direct deployment on sparse light field arrays or low-cost plenoptic cameras with limited angular resolution. Future implementation will focus on extending the inverse wavevector analysis to sparse angular sampling paradigms by integrating adaptive view-synthesis priors, thereby ensuring reliable geometric reasoning under severe angular sparsity.

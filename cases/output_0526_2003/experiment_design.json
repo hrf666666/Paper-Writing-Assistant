@@ -1,0 +1,68 @@
+{
+  "数据集": {
+    "名称": [
+      "HCInew",
+      "HCI-Old",
+      "Wanner_HCI",
+      "Non-lambertian_zhenglong",
+      "UrbanLF-Syn"
+    ],
+    "规模": "总计 209 个训练场景 + 36 个验证场景",
+    "场景类型": "Lambertian（纯漫反射）、Non-Lambertian（镜面/散射）、Mixed（城市混合场景）",
+    "划分方式": "按场景划分（Train/Val），采用统一加载器，支持4种GT格式（pfm/h5/npy/depth_png），视差归一化（2-98分位截断至[0,1]），输入尺寸256x256，81视角（9x9网格）"
+  },
+  "评估指标": {
+    "主要指标": "MAE (Mean Absolute Error)",
+    "目标值": {
+      "整体 val_MAE": "< 0.20",
+      "Lambertian val_MAE": "< 0.16",
+      "Non-Lambertian val_MAE": "< 0.25",
+      "Mixed val_MAE": "< 0.22"
+    },
+    "阶段性指标": "Phase 1 材质分类准确率 > 85% 且 AUC > 0.90；Phase 2 合成数据 BRDF 权重误差 < 10%"
+  },
+  "训练策略": {
+    "优化器": "Adam",
+    "学习率": "初始 2e-4，线性 warmup（前3 steps），随后使用 CosineAnnealingLR 衰减",
+    "batch_size": "8 (硬件约束下可 fallback 至 Batch size 1 + gradient accumulation 4)",
+    "epoch_steps": "total_steps: 72 (按 step 调度)",
+    "损失函数": "L1 Loss",
+    "其他策略": "梯度裁剪 (max_norm=1.0)，AMP 混合精度训练，域平衡采样 (WeightedRandomSampler 逆频率加权)，随机水平翻转数据增强（一致应用于81视角）"
+  },
+  "对比方法": [
+    "EPINet4Dir V3 (4方向EPI，全分辨率，754K参数，主要基线)",
+    "MaterialDualCueNet (含 defocus branch 的双线索网络)",
+    "基于预训练骨干网络的方法 (如 ResNet18)",
+    "基于学习的 3-class CNN 材质分类器"
+  ],
+  "消融设计": {
+    "消融模块与对比方式": [
+      "纯 EPI 方法 vs 双掩码+角度频率分析（验证物理先验与频域分析解决非朗伯失效的有效性）",
+      "L1 Loss vs L1 + Edge-Aware Loss（验证边缘感知损失对不同域的影响，发现仅对 Mixed 域有效）",
+      "不同视角数输入 (5x5 vs 7x7 vs 9x9)（验证角度分辨率对材质和深度的影响）",
+      "轻量级网络 vs 预训练 ResNet18 骨干（验证小数据集上的过拟合问题）",
+      "Defocus 分支 vs 无 Defocus 分支（验证散焦线索在非朗伯场景下的有效性，证明其从未学到有效特征）",
+      "学习型 CNN 材质分类 vs 角度 2D-FFT 物理分析（验证数据驱动与物理驱动在 9x9 patch 上的分类能力差异）"
+    ]
+  },
+  "关键结果": {
+    "基线模型_EPINet4Dir_V3_最终结果": {
+      "Overall MAE": "0.133 (达标)",
+      "Mixed MAE": "0.081 (达标)",
+      "Lambertian MAE": "0.387 (未达标，目标<0.16)",
+      "Non-Lambertian MAE": "0.411 (未达标，目标<0.25)"
+    },
+    "训练日志结果_前3_Epoch": {
+      "Epoch 1": "Overall: 0.315, Lamb: 0.357, Non-Lamb: 0.479, Urban: 0.303",
+      "Epoch 2": "Overall: 0.247, Lamb: 0.361, Non-Lamb: 0.515, Urban: 0.218",
+      "Epoch 3": "Overall: 0.236, Lamb: 0.365, Non-Lamb: 0.490, Urban: 0.206"
+    },
+    "关键发现": [
+      "EPI 方法在 Mixed 域表现优异，但在 Non-Lambertian 域完全失效（预测退化为输入纹理复制）",
+      "Non-Lambertian 失效根因是 EPI 的视角一致性假设被镜面反射违反",
+      "Lambertian 存在瓶颈，复杂纹理导致 EPI 斜率模糊",
+      "学习型 3-class CNN 材质分类准确率仅 24.6%，9x9 patch 信息不足以支持纯数据驱动分类",
+      "Defocus 分支无法学到有效深度特征，增加视角数对 Lambertian/Non-Lambertian 无改善"
+    ]
+  }
+}

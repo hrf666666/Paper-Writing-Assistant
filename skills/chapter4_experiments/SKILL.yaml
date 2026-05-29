@@ -1,0 +1,58 @@
+name: chapter4_experiments
+description: "生成第四章 Experiments - 多维度实验设计与结果分析"
+type: generator
+version: "2.0"
+
+triggers:
+  - phase4
+  - experiments
+
+dependencies:
+  - length_budget
+  - experiment_designer
+  - detail_gradient
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "项目创新点列表"
+  - name: experiment_design
+    type: dict
+    required: true
+    description: "实验设计数据（由experiment_designer生成或手动提供）"
+  - name: model_architecture
+    type: dict
+    required: false
+    description: "模型架构描述"
+  - name: style_guide
+    type: dict
+    required: false
+    description: "写作风格指导"
+  - name: chapter_org
+    type: dict
+    required: false
+    description: "章节组织参考"
+  - name: length_budget_chars
+    type: int
+    required: false
+    default: 16000
+    description: "章节长度预算（字符数）"
+  - name: structure_plan
+    type: dict
+    required: false
+    description: "由structure_planner生成的子节结构规划"
+
+outputs:
+  - name: content
+    type: str
+    description: "生成的章节内容"
+
+parameters:
+  ensure_heading: "# 4. Experiments"
+
+prompt_template: prompt.md
+model_type: generation
+quality_check: true
+quality_threshold: 60.0
+max_retries: 2

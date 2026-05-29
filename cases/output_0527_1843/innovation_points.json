@@ -1,0 +1,40 @@
+[
+  {
+    "创新点名称": "基于类MRI角度频率分析的双掩码物理材质解析机制",
+    "创新点工作内容": [
+      "提出双掩码物理假设：设计介质掩码量化像素级粗糙度以决定光-物质作用类型（镜面/散射/漫反射），设计角度方向掩码记录偏折矢量场表征波矢变化。",
+      "引入类MRI k-space频域分析：将光场9×9角度采样类比MRI空间编码，通过2D-DFT转换至角度频域。利用频谱能量分布特征（漫反射低频主导、镜面反射高频展宽、散射中频为主）实现像素级材质三分类。",
+      "实施三层递进反向波矢解析：通过轻量级角度频谱分类、中等复杂度的BRDF参数约束最小二乘估计，以及完整的波矢级物理解析，逐层获取材质类型分布与量化权重。"
+    ],
+    "创新点价值": "打破了传统光场深度估计依赖纯数据驱动或单一朗伯假设的黑盒模式，从物理光学层面提供了可解释的材质感知能力。通过频域特征工程有效解决了9×9稀疏角度采样下复杂混合场景的反射类型识别难题，为后续深度估计提供可靠的物理先验。",
+    "支撑证据": "PROJECT_BRIEF.md中的‘核心 Idea：双掩码 + 类MRI角度频率分析’与‘反向波矢解析’章节；Phase 1阶段设定的‘角度频谱材质分类验证’分析脚本，以及三分类准确率>85%、AUC>0.90的严格代码执行约束（PHASE_GATES）和验收标准。",
+    "novelty_score": 0.7,
+    "novelty_verdict": "partially_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于类MRI角度频率分析的双掩码物理材质解析机制",
+      "contribution_statement": "We identify that traditional depth estimation methods struggle with complex material inter-reflections, highlighting the critical need for explicit physical material decomposition."
+    }
+  },
+  {
+    "创新点名称": "多策略自适应的分量感知统一深度估计框架",
+    "创新点工作内容": [
+      "构建分量级差异化深度估计策略：针对解析出的不同反射分量采用特定算法。漫反射区域采用EPI方法；镜面区域降低EPI置信度并改用光度立体或邻域传播；散射区域采用散射模型进行修正。",
+      "设计置信度加权融合机制：利用BRDF参数估计得到的介质掩码量化权重，在损失函数中加入像素级置信度加权，并通过公式 D = w_d*D_EPI + w_s*D_specular + w_sc*D_scatter 实现深度图的自适应融合。",
+      "实施严格的三阶段递进验证与训练范式：强制按照‘Phase 1 纯数据频域分析 -> Phase 2 BRDF参数拟合 -> Phase 3 分量感知模型训练’的顺序执行，通过代码级约束禁止跳过物理验证直接进行端到端训练。"
+    ],
+    "创新点价值": "从根本上解决了传统EPI方法在非朗伯区域（因视角一致性假设被违反）完全失效且预测退化为纹理复制的问题。实现了Lambertian、Non-Lambertian和Mixed三种场景的高精度统一深度估计，显著提升了模型在复杂真实场景下的泛化能力和鲁棒性。",
+    "支撑证据": "PROJECT_BRIEF.md中的‘分量感知深度估计’章节及加权融合公式；基线模型EPINet4Dir在Non-Lambertian域MAE高达0.411（证明传统EPI失效）的对比实验证据；Phase 2和Phase 3设定的合成数据权重误差<10%及Non-Lambertian MAE<0.25的明确性能目标与约束。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "多策略自适应的分量感知统一深度估计框架",
+      "contribution_statement": "We propose a novel pipeline consisting of an MRI-like angular frequency analysis mechanism for material parsing and a multi-strategy component-aware framework for unified depth estimation."
+    }
+  }
+]

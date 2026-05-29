@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| Adopting the multi-directional EPI proce | Traditional light field depth estimation models fa | Reduces Overall MAE by 26%, Lambertian MAE by 37%, | Complex real-world environments with mix | Achieves an Overall MAE of 0.1795 and Mi | Methodology: Unified Architecture | must |
+| Designing a dual-mask modeling mechanism | Frequency-domain material classification is physic | Bypasses the hardware requirement for 17x17+ angul | Standard 9x9 angular resolution light fi | Contributes to the 41% MAE reduction in  | Methodology: Dual-Mask Mechanism | must |
+| Rigorously falsifying the 'MRI-like angu | The academic community lacks theoretical baselines | Provides a critical negative finding that prevents | Mainstream 9x9 angular resolution light  | Four independent analyses show non-DC en | Theoretical Analysis: Physical Limits | must |
+| Implementing a domain-balanced sampling  | Severe data imbalance across domains (e.g., 170 Ur | Eliminates the need for domain-specific training p | Long-tail multi-domain training scenario | Combined with resolution scaling, reduce | Training Strategy: Domain Balancing | should |
+| Scaling training resolution from 256 to  | Low resolutions discard fine spatial textures and  | Isolates the architectural limits of pure EPI meth | Lambertian scenes with highly complex te | Resolution scaling alone contributes a 2 | Experiments: Resolution & Architecture Limits | should |
+| Constraining the EPINet4Dir V3 model par | Existing unified multi-domain models suffer from p | Achieves a Pareto-optimal balance, delivering SOTA | Resource-constrained edge devices, mobil | Maintains a strict 754K parameter count  | Architecture Design: Efficiency | should |

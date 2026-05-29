@@ -1,0 +1,31 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于类MRI角度频率分析的双掩码物理材质解析机制: 打破了传统光场深度估计依赖纯数据驱动或单一朗伯假设的黑盒模式，从物理光学层面提供了可解释的材质感知能力。通过频域特征工程有效解决了9×9稀疏角度采样下复杂混合场景的反射类型识别难题，为后续深度估计提供可靠的物理先验。\n  2. 多策略自适应的分量感知统一深度估计框架: 从根本上解决了传统EPI方法在非朗伯区域（因视角一致性假设被违反）完全失效且预测退化为纹理复制的问题。实现了Lambertian、Non-Lambertian和Mixed三种场景的高精度统一深度估计，显著提升了模型在复杂真实场景下的泛化能力和鲁棒性。\n\n模型架构: 输入为9x9（共81个视角）的4D光场图像序列。首先通过EPINet4Dir模块提取4个方向的极平面图像（EPI）空间特征；同时，通过Angular FFT模块对角度维度进行快速傅里叶变换，提取频域特征以区分朗伯体与非朗伯体（高光/反射）材质。接着，Dual-Mask Generator利用频域特征生成统一的“双掩码”（朗伯体掩码与非朗伯体掩码）。最后，AngularFreqDepthNetV2模块结合EPI空间特征与双掩码，通过物理模型约束进行加权融合，输出高精度的深度图及材质分类结果。\n\n数据集: [{\"名称\": \"HCInew\", \"规模\": \"20 train / 4 val\", \"场景类型\": \"Lambertian\", \"划分方式\": \"官方指定场景，输入裁剪为256x256，81视角(9x9)，pfm格式\"}, {\"名称\": \"HCI-Old\", \"规模\": \"5 train / 0 val\", \"场景类型\": \"Lambertian\", \"划分方式\": \"h5格式（注：因格式兼容问题在代码加载器中被排除）\"}, {\"名称\": \"Wanner_HCI\", \"规模\": \"10 train / 0 val\", \"场景类型\": \"Lambertian\", \"划分方式\": \"h5格式\"",
+  "log_entries": [
+    {
+      "timestamp": 1779876066.221122,
+      "category": "log",
+      "content": "THINK: 首次执行: 分析工程代码与参考PDF",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779876066.221141,
+      "category": "log",
+      "content": "开始执行任务: analyze_project - 分析工程代码与参考PDF",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779876066.2211463,
+      "category": "log",
+      "content": "EXECUTE: 分析工程代码与参考PDF 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779876066.2211654,
+      "category": "log",
+      "content": "任务完成: analyze_project, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

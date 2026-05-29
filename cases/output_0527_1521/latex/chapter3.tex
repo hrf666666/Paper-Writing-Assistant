@@ -1,0 +1,150 @@
+\section{3. Methodology}
+
+In this section, we present the overall architecture of the proposed Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation. The proposed framework employs a physics-driven feature modulation mechanism, aiming to address the challenge of accurate depth inference under complex reflectance and occlusion conditions. Its core principle involves transforming spatial-angular signals into the frequency domain to parse material properties, then generating dual masks to explicitly filter out unreliable cues through a unified physical model, and finally regressing high-resolution depth maps. As illustrated in Fig. 1, the entire data flow progressively reduces the dimensionality of the 4D light field tensor while integrating physical priors, ultimately yielding a precise 2D depth representation. Different from previous works that rely on the global Lambertian assumption, our architecture explicitly models the distinct reflection mechanisms at the pixel level.
+
+The network takes an Input Light Field Patch as the primary input, which is extracted from the raw 4D light field data. Specifically, the input tensor is formatted as $\mathcal{I} \in \mathbb{R}^{B \times 81 \times C \times 64 \times 64}$, where $B$ denotes the batch size, $81$ represents the number of angular views arranged in a $9 \times 9$ grid, $C$ is the number of color channels, and $64 \times 64$ indicates the spatial resolution of each patch. This specific patch size and angular configuration are selected to balance the computational complexity and the receptive field required for capturing sufficient epipolar geometry. Before feeding into the main network, the raw light field patches are normalized to ensure consistent intensity distributions across different scenes. This preprocessing step stabilizes the subsequent frequency domain transformations and facilitates the convergence of the deep neural network.
+
+Following the input stage, the data flows through three core modules designed to extract, modulate, and fuse depth-sensitive features. First, the Angular FFT Material Classification Module is introduced to parse material properties by leveraging frequency domain analysis. Motivated by the fact that different reflection types exhibit distinct energy distributions in the angular spectrum, this module applies a 2D Fast Fourier Transform along the angular dimensions $(u, v)$. The transformation is formulated as:
+\begin{equation}
+\label{eq:eq18}
+F(u,v,x,y) = \sum_{m=0}^{8}\sum_{n=0}^{8} I(m,n,x,y) e^{-j 2\pi (um/9 + vn/9)}
+\end{equation}
+where $I(m,n,x,y)$ is the input spatial-angular signal, and $F(u,v,x,y)$ denotes the resulting angular frequency feature map. This operation effectively separates diffuse reflections (low-frequency), specular reflections (high-frequency), and scattering (mid-frequency), outputting a feature tensor of size $B \times 81 \times C' \times 64 \times 64$. Subsequently, these frequency features are fed into the Dual-Mask Generator to quantify pixel-level reliability. To explicitly decouple geometric occlusions from photometric non-Lambertian effects, this module utilizes two parallel 3D convolutional branches to predict the Occlusion Mask ($M_{occ}$) and the Non-Lambertian Mask ($M_{nl}$). The masks are computed as $M_{occ} = \sigma(\text{Conv3D}(F))$ and $M_{nl} = \sigma(\text{Conv3D}(F))$, where $\sigma$ represents the sigmoid activation function. Both masks share the dimension of $B \times 81 \times 1 \times 64 \times 64$, providing soft probability maps for each pixel across all views. Finally, the Unified Physical Model Feature Fusion module integrates the original light field features with the generated dual masks. Driven by the physical imaging model of light fields, this module adaptively weights the defocus and disparity cues to suppress responses from occluded and non-Lambertian regions. The fused depth-sensitive feature $F_{depth}$ is calculated as:
+\begin{equation}
+\label{eq:eq19}
+F_{depth} = \sum_{u,v} (I_{u,v} \otimes K_{defocus}) \cdot (1 - M_{occ}) \cdot (1 - M_{nl})
+\end{equation}
+where $\otimes$ denotes the convolution operation with a defocus kernel $K_{defocus}$. This physical constraint ensures that only reliable Lambertian and unoccluded features are preserved for depth regression.
+
+In the final stage, the fused depth-sensitive features are processed by the Depth Regression Head to produce the Predicted Depth Map. This head consists of multiple 2D convolutional layers interspersed with Rectified Linear Unit (ReLU) activations, which progressively map the high-dimensional features into the depth space. The regression process is formulated as $D = \text{Conv2D}(\text{ReLU}(\text{Conv2D}(F_{depth})))$, yielding a final output tensor of size $B \times 1 \times 64 \times 64$. This output represents the high-resolution depth map corresponding to the central view of the input light field patch. During inference, the predicted patches are effectively aggregated and stitched together to reconstruct the full-resolution depth map of the entire scene. By explicitly incorporating physical priors and component-aware masking throughout the architecture, the proposed model achieves robust depth estimation even in challenging non-Lambertian environments.
+
+\subsection{Angular FFT Material Classification Module}
+
+Following the extraction of the input light field patch, the Angular FFT Material Classification Module is employed to parse intrinsic material properties. Conventional light field depth estimation methods typically rely on the global Lambertian assumption, which significantly degrades performance when encountering specular highlights or complex reflectance. Non-Lambertian reflections exhibit substantial intensity variations across different views, whereas Lambertian reflections maintain photo-consistency. To address this challenge, our module explicitly models these distinct reflection mechanisms by transforming spatial-angular signals into the angular frequency domain. Different from previous works that depend on spatial-domain heuristics or implicit feature learning, our design leverages the physical characteristics of light transport to isolate high-frequency non-Lambertian components from low-frequency Lambertian backgrounds.
+
+Specifically, the input tensor $\mathcal{I} \in \mathbb{R}^{B \times 81 \times C \times 64 \times 64}$ is first reshaped into a 5D representation to explicitly formulate the angular grid. Let $I(m,n,x,y,c)$ denote the pixel intensity at angular coordinates $(m,n)$, spatial coordinates $(x,y)$, and channel index $c$, where $m,n \in \{0, 1, \dots, 8\}$. A 2D Fast Fourier Transform is then applied along the angular dimensions to project the signal into the frequency domain. The angular frequency feature $F(u,v,x,y,c)$ is calculated as:
+\begin{equation}
+\label{eq:eq20}
+F(u,v,x,y,c) = \sum_{m=0}^{8}\sum_{n=0}^{8} I(m,n,x,y,c) e^{-j 2\pi \left(\frac{um}{9} + \frac{vn}{9}\right)}
+\end{equation}
+where $u$ and $v$ represent the angular frequency indices, and $j$ denotes the imaginary unit. The low-frequency components near the origin correspond to Lambertian regions with high angular consistency. In contrast, the high-frequency components capture the substantial angular variations induced by non-Lambertian reflections. 
+
+To facilitate subsequent network processing, the complex-valued frequency features are converted into real-valued magnitude representations. The magnitude spectrum $A(u,v,x,y,c)$ is derived by:
+\begin{equation}
+\label{eq:eq21}
+A(u,v,x,y,c) = \sqrt{\text{Re}(F(u,v,x,y,c))^2 + \text{Im}(F(u,v,x,y,c))^2}
+\end{equation}
+where $\text{Re}(\cdot)$ and $\text{Im}(\cdot)$ extract the real and imaginary parts, respectively. The magnitude tensor is then reshaped back to the original angular format and processed by a convolutional layer to generate the final angular frequency feature map $\mathcal{F}_{freq} \in \mathbb{R}^{B \times 81 \times C' \times 64 \times 64}$. Additionally, to provide explicit supervision for material parsing, a material classification probability map $P_{mat}$ is predicted via a multi-layer perceptron followed by a sigmoid activation function:
+\begin{equation}
+\label{eq:eq22}
+P_{mat} = \sigma(\text{MLP}(\mathcal{F}_{freq}))
+\end{equation}
+where $P_{mat} \in \mathbb{R}^{B \times 81 \times 1 \times 64 \times 64}$ indicates the pixel-wise probability of non-Lambertian reflectance.
+
+The generated angular frequency feature map $\mathcal{F}_{freq}$ serves as the primary input for the subsequent Dual-Mask Generator. By providing explicit frequency-domain priors, this module significantly enhances the capability of the network to differentiate between reliable Lambertian cues and unreliable non-Lambertian interference. Ultimately, this physics-driven frequency analysis establishes a solid foundation for the dual-mask generation and the unified physical model feature fusion, ensuring accurate depth inference under complex material conditions.
+
+\subsection{Dual-Mask Generator}
+
+Light field depth estimation primarily relies on the photo-consistency assumption across multiple views. However, this assumption is frequently violated by occlusions and non-Lambertian reflections, which introduce severe intensity variations and lead to erroneous matching costs. Existing approaches mostly address these violations implicitly through deep feature learning or rely on spatial-domain heuristics, which struggle to accurately isolate unreliable regions in complex scenes. To address this limitation, the Dual-Mask Generator is designed to explicitly predict the occlusion probability and non-Lambertian reflection probability for each pixel across all views. By generating soft masks, this module provides pixel-level confidence weights to guide the subsequent physical model fusion.
+
+The input to this module is the angular frequency feature map $\mathcal{F} \in \mathbb{R}^{B \times 81 \times C' \times 64 \times 64}$ extracted by the preceding Angular FFT Material Classification Module. To effectively capture both spatial geometric structures and angular photometric variations, we reshape $\mathcal{F}$ into a 5D tensor $\mathbf{F} \in \mathbb{R}^{B \times C' \times 81 \times 64 \times 64}$. Here, the 81 views are treated as the depth dimension to facilitate 3D convolutions. The module comprises two parallel 3D convolutional branches dedicated to predicting the occlusion mask and the non-Lambertian mask, respectively. 
+
+Let $\mathbf{F}$ denote the input feature tensor. The occlusion mask $\mathcal{M}_{occ}$ is generated through a series of 3D convolutional layers followed by a sigmoid activation function. The mathematical formulation is expressed as:
+\begin{equation}
+\label{eq:eq23}
+\mathcal{M}_{occ} = \sigma(\mathcal{W}_{occ} \textit{ \mathbf{F} + \mathbf{b}_{occ})
+\end{equation}
+where $}$ denotes the 3D convolution operation, $\mathcal{W}_{occ}$ represents the learnable 3D convolutional kernels, and $\mathbf{b}_{occ}$ is the bias term. Furthermore, $\sigma(\cdot)$ is the sigmoid function that normalizes the output to the range $[0, 1]$. Each element in $\mathcal{M}_{occ}$ indicates the probability of the corresponding pixel being occluded in a specific view.
+
+Similarly, the non-Lambertian mask $\mathcal{M}_{nl}$ is computed by the second parallel branch to identify specular highlights and complex reflectance regions. The formulation is given by:
+\begin{equation}
+\label{eq:eq24}
+\mathcal{M}_{nl} = \sigma(\mathcal{W}_{nl} \textit{ \mathbf{F} + \mathbf{b}_{nl})
+\end{equation}
+where $\mathcal{W}_{nl}$ and $\mathbf{b}_{nl}$ are the learnable kernels and bias for the non-Lambertian branch, respectively. The resulting $\mathcal{M}_{nl}$ assigns a probability score reflecting the likelihood of non-Lambertian reflection for each pixel across the 81 views. Consequently, the outputs of the Dual-Mask Generator are the occlusion mask $\mathcal{M}_{occ} \in \mathbb{R}^{B \times 81 \times 1 \times 64 \times 64}$ and the non-Lambertian mask $\mathcal{M}_{nl} \in \mathbb{R}^{B \times 81 \times 1 \times 64 \times 64}$.
+
+Different from previous works that treat occlusion and non-Lambertian effects as implicit noise, our module explicitly decouples these two distinct physical phenomena. The angular frequency features from the preceding module provide rich material priors, enabling the 3D convolutions to accurately distinguish between geometric occlusions and photometric reflections. These generated soft masks are subsequently fed into the Unified Physical Model Feature Fusion module. In that subsequent stage, the masks serve as adaptive spatial-angular weights to suppress unreliable features and preserve robust Lambertian and unoccluded signals. This explicit physical modeling significantly enhances the accuracy of the final depth regression.
+
+\subsection{Unified Physical Model Feature Fusion}
+
+The photo-consistency assumption, which serves as the foundation of light field depth estimation, is inevitably violated by occlusions and non-Lambertian reflections. Different from previous works that implicitly learn to ignore these unreliable regions through deep feature extraction or rely on spatial-domain heuristics, our Unified Physical Model Feature Fusion explicitly incorporates the physical imaging model of light fields to filter out erroneous matching costs. The primary objective of this module is to adaptively weight the refocusing and parallax features using the dual masks generated by the preceding Dual-Mask Generator. This design suppresses feature responses in occluded and non-Lambertian regions while preserving reliable cues from unoccluded Lambertian areas.
+
+The inputs to this module comprise the original light field features $\mathcal{I} \in \mathbb{R}^{B \times 81 \times C \times 64 \times 64}$, the occlusion mask $M_{occ} \in \mathbb{R}^{B \times 81 \times 1 \times 64 \times 64}$, and the non-Lambertian mask $M_{nl} \in \mathbb{R}^{B \times 81 \times 1 \times 64 \times 64}$. Here, $\mathcal{I}$ represents the shallow features extracted from the raw light field image patches, maintaining both spatial and angular dimensions. To construct depth-sensitive representations, we first compute the defocus features across different angular views. Let $I_{u,v} \in \mathbb{R}^{C \times 64 \times 64}$ denote the feature map of the view at angular coordinates $(u,v)$. The defocus feature for a specific depth hypothesis is obtained by convolving $I_{u,v}$ with a defocus kernel.
+
+To explicitly integrate the physical constraints, we formulate the unified depth-sensitive feature fusion process. The fused depth feature $F_{depth}$ is calculated by aggregating the masked defocus features across all angular views:
+\begin{equation}
+\label{eq:eq25}
+F_{depth} = \sum_{u,v} (I_{u,v} \otimes K_{defocus}) \cdot (1 - M_{occ}^{u,v}) \cdot (1 - M_{nl}^{u,v})
+\end{equation}
+where $\otimes$ denotes the 2D convolution operation, and $K_{defocus}$ represents the learnable defocus kernel that captures the point spread function under a specific depth assumption. The terms $M_{occ}^{u,v} \in \mathbb{R}^{1 \times 64 \times 64}$ and $M_{nl}^{u,v} \in \mathbb{R}^{1 \times 64 \times 64}$ are the occlusion and non-Lambertian probability maps for the view $(u,v)$, respectively. The operations $(1 - M_{occ}^{u,v})$ and $(1 - M_{nl}^{u,v})$ act as soft confidence weights. By multiplying these complementary confidence terms, the module explicitly penalizes pixels that are highly likely to be occluded or exhibit specular reflections. Consequently, the summation over all $(u,v)$ views synthesizes a robust feature representation that is predominantly driven by photo-consistent Lambertian regions.
+
+Furthermore, to capture the parallax cues that are complementary to the defocus cues, we apply a similar masking strategy to the shifted angular features along the epipolar lines. The final fused feature map integrates both masked defocus and parallax information, yielding the output tensor $F_{depth} \in \mathbb{R}^{B \times C'' \times 64 \times 64}$. This dimensionality reduction from the 4D light field tensor to a 2D spatial feature map effectively consolidates the angular information while strictly adhering to the physical reliability constraints. 
+
+The expected effect of this design is a substantial improvement in depth estimation accuracy near object boundaries and reflective surfaces. By explicitly filtering out physically invalid correspondences before the depth regression stage, the Unified Physical Model Feature Fusion prevents the propagation of erroneous gradients. The resulting $F_{depth}$ is subsequently fed into the Depth Regression Head, providing a clean and highly discriminative feature space for accurate pixel-wise depth prediction.
+
+\subsection{Depth Regression Head}
+
+Following the Unified Physical Model Feature Fusion module, the obtained depth-sensitive features have effectively suppressed the interference from occlusions and non-Lambertian reflections. However, these features reside in a high-dimensional abstract space and must be mapped to the metric depth space. Different from previous works that rely on computationally expensive 3D convolutions or complex cost volume aggregation for depth regression, our Depth Regression Head employs a lightweight 2D convolutional architecture. This design explicitly leverages the physically filtered 2D features to regress the absolute or relative depth values of the central view, aiming to reduce computational overhead while preserving high-resolution spatial details.
+
+Specifically, the input to this module is the fused feature map $F_{depth} \in \mathbb{R}^{B \times C'' \times 64 \times 64}$, where $B$ denotes the batch size and $C''$ represents the number of feature channels. The spatial resolution is maintained at $64 \times 64$, matching the original light field image patch size. To transform these features into a depth prediction, we utilize a cascade of 2D convolutional layers interspersed with non-linear activation functions. The regression process is mathematically formulated as:
+\begin{equation}
+\label{eq:eq26}
+F_{inter} = \delta(W_1 } F_{depth} + b_1)
+\end{equation}
+\begin{equation}
+\label{eq:eq27}
+D = W_2 \textit{ F_{inter} + b_2
+\end{equation}
+where $F_{inter} \in \mathbb{R}^{B \times C_{inter} \times 64 \times 64}$ denotes the intermediate feature representation. The operator $}$ represents the 2D convolution operation. $W_1 \in \mathbb{R}^{C_{inter} \times C'' \times k \times k}$ and $b_1 \in \mathbb{R}^{C_{inter}}$ are the learnable weight tensor and bias vector of the first convolutional layer, respectively. Similarly, $W_2 \in \mathbb{R}^{1 \times C_{inter} \times k \times k}$ and $b_2 \in \mathbb{R}^{1}$ correspond to the parameters of the final output layer. The function $\delta(\cdot)$ denotes the Rectified Linear Unit (ReLU) activation, which introduces non-linearity to enhance the representational capacity of the network. The kernel size $k$ is typically set to 3 to capture local spatial context without excessive parameter inflation.
+
+The final output $D \in \mathbb{R}^{B \times 1 \times 64 \times 64}$ represents the predicted depth map for the central view, where the single channel corresponds to the scalar depth value at each pixel location. The primary innovation of this module lies in its structural simplicity, which is made possible by the explicit physical constraints applied in the preceding fusion stage. Conventional light field depth estimation methods often require deep 3D decoders to resolve ambiguities caused by non-Lambertian regions, leading to substantial parameter overhead and spatial blurring. In contrast, by explicitly filtering out erroneous matching costs via the dual masks, our Depth Regression Head accurately recovers fine-grained depth boundaries using only 2D convolutions. This architectural choice significantly decreases the overall model complexity, contributing to a compact network with merely 1,129,057 parameters.
+
+During training, the overall objective function for this stage is formulated as an L1 loss between the predicted depth map $D$ and the ground-truth annotation. This optimization strategy ensures robust convergence and yields a highly accurate depth estimation, ultimately achieving a best overall mean absolute error (MAE) of 0.1754 on the evaluation benchmark.
+
+\subsection{Training Objective}
+
+\subsubsection{Training Objective}
+
+Conventional light field depth estimation methods typically employ a global uniform loss function, implicitly assuming a purely Lambertian reflectance model. However, in non-Lambertian scenarios, specular highlights and scattering regions corrupt the linear structures of epipolar plane image (EPI)s (EPIs). This corruption causes severe deviations in depth predictions. To guide the network to adaptively focus on high-confidence components and strictly adhere to the physical reflection model, we formulate a component-aware joint training objective. The overall objective function is defined as a linear combination of four distinct terms:
+\begin{equation}
+\label{eq:eq28}
+\mathcal{L}_{total} = \lambda_{depth} \mathcal{L}_{depth} + \lambda_{mat} \mathcal{L}_{mat} + \lambda_{brdf} \mathcal{L}_{brdf} + \lambda_{reg} \mathcal{L}_{reg}
+\end{equation}
+where $\lambda$ denotes the balancing weight for each corresponding loss component.
+
+\paragraph{Confidence-Weighted Depth Estimation Loss.}
+Different from previous works that treat all pixels equally during optimization, our module explicitly incorporates the estimated material reflectance properties to modulate the depth supervision. Specular and scattering regions exhibit blurred EPI features. Applying an equal-weight depth loss to these regions inevitably leads to gradient conflicts. Therefore, we design a pixel-wise confidence-weighted L1 loss:
+\begin{equation}
+\label{eq:eq29}
+\mathcal{L}_{depth} = \frac{1}{N} \sum_{i=1}^{N} C_i \| \hat{D}_i - D_i^{gt} \|_1
+\end{equation}
+where $N$ represents the total number of pixels, while $\hat{D}_i$ and $D_i^{gt}$ denote the predicted and ground-truth depths, respectively. The term $C_i$ is the pixel-wise confidence map. We define $C_i$ as a monotonically increasing function of the diffuse weight $w_{d,i}$, formulated as $C_i = (w_{d,i})^\gamma$, where $\gamma$ is a temperature parameter controlling confidence decay. For non-Lambertian regions with small $w_{d,i}$, the network receives reduced depth penalties. This design prevents the model from overfitting to corrupted EPI structures, thereby improving overall depth accuracy.
+
+\paragraph{Material Classification and BRDF Parameter Loss.}
+To ensure the angular frequency analysis module accurately parses material types and estimates physical parameters, explicit classification and regression supervisions are required. The material classification loss utilizes the standard cross-entropy formulation:
+\begin{equation}
+\label{eq:eq30}
+\mathcal{L}_{mat} = -\frac{1}{N} \sum_{i=1}^{N} \sum_{k \in \{d, s, sc\}} y_{i,k} \log(\hat{p}_{i,k})
+\end{equation}
+where $y_{i,k}$ is the one-hot encoded ground-truth material label, and $\hat{p}_{i,k}$ represents the predicted probability for class $k$. Furthermore, the bidirectional reflectance distribution function (BRDF) parameter loss constrains the predicted reflectance weights $\hat{w}_i = [\hat{w}_{d,i}, \hat{w}_{s,i}, \hat{w}_{sc,i}]$ to approximate the target weights $w_i^{gt}$:
+\begin{equation}
+\label{eq:eq31}
+\mathcal{L}_{brdf} = \frac{1}{N} \sum_{i=1}^{N} \| \hat{w}_i - w_i^{gt} \|_1
+\end{equation}
+These objectives guarantee that the dual-mask mechanism receives physically meaningful modulation signals during the training phase.
+
+\paragraph{Physical Consistency Regularization.}
+In physical optics, the total energy of surface reflection must be conserved. Additionally, the dual masks require spatial smoothness and physical boundary constraints. We first enforce a simplex constraint to ensure the reflectance weights sum to one:
+\begin{equation}
+\label{eq:eq32}
+\mathcal{L}_{simplex} = \frac{1}{N} \sum_{i=1}^{N} \left| \sum_{k \in \{d, s, sc\}} \hat{w}_{i,k} - 1 \right|
+\end{equation}
+To maintain the continuity of the medium mask and the angular direction mask within uniform regions while preserving edges, we introduce an anisotropic smoothness regularization based on image gradients:
+\begin{equation}
+\label{eq:eq33}
+\mathcal{L}_{smooth} = \frac{1}{N} \sum_{i=1}^{N} \left( e^{-\|\nabla I_i\|} \|\nabla \hat{w}_i\|_1 + e^{-\|\nabla I_i\|} \|\nabla \hat{M}_i\|_1 \right)
+\end{equation}
+where $\nabla$ denotes the spatial gradient operator, $I_i$ is the central view image, and $\hat{M}_i$ represents the medium mask. The total regularization term is formulated as $\mathcal{L}_{reg} = \mathcal{L}_{simplex} + \mathcal{L}_{smooth}$. This regularization explicitly enforces energy conservation and spatial coherence, preventing the generation of isolated noisy masks.
+
+\paragraph{Weighting Strategy and Optimization Details.}
+Properly balancing multiple loss terms is critical for multi-task learning. We empirically set the weights to $\lambda_{depth} = 1.0$, $\lambda_{mat} = 0.5$, $\lambda_{brdf} = 0.5$, and $\lambda_{reg} = 0.1$. Depth estimation serves as the ultimate objective, thus receiving the highest weight. Material and BRDF losses act as auxiliary tasks with halved weights to prevent gradient domination. The regularization weight remains small to provide subtle refinements. The network is optimized using the CosineAnnealingLR scheduler combined with automatic mixed precision to accelerate convergence. We set the batch size to 1 with a gradient accumulation step of 4, yielding an effective batch size of 4. This configuration ensures stable convergence and an optimal trade-off among depth accuracy, material parsing, and physical plausibility.

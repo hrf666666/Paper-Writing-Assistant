@@ -1,0 +1,178 @@
+{
+  "citation_tags": [
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"light field imaging\", \"depth estimation\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"autonomous navigation\", \"robotic manipulation\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"non-Lambertian materials\", \"reflectance\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"EPI analysis\", \"focal stack\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"slope ambiguity\", \"geometric reasoning\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "baidu_scholar",
+      "keywords": "[\"end-to-end regression\", \"deep learning\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 10,
+      "keywords": "[\"overfitting\", \"limited samples\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"attention mechanisms\", \"multi-scale feature fusion\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"training instability\", \"local minima\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"epipolar plane images\", \"EPI slope\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Wanner\", \"structure tensor\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"EPI\", \"line detection\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"focal stack\", \"defocus cues\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Tao\", \"defocus\", \"correspondence\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Lin\", \"focal stack\", \"depth estimation\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"BRDF\", \"photometric stereo\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Barron\", \"Malik\", \"dichromatic model\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"dichromatic\", \"specular removal\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"deep learning light field\", \"data-driven depth\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"light field representations\", \"macro-pixel\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"EPINET\", \"Shin\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"multi-stream CNN\", \"angular fusion\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"4D tensor\", \"light field structure\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"LF-DFN\", \"4D convolution\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"DistgNet\", \"disentangled\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"long-range dependencies\", \"vision transformer\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Light Field Transformer\", \"self-attention\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"Epipolar Transformer\", \"angular attention\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "mcp",
+      "keywords": "[\"pseudo-sequence\", \"multi-view stereo\"]"
+    }
+  ],
+  "bibliography_entries": []
+}

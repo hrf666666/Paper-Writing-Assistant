@@ -1,0 +1,275 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于双掩码与多方向EPI的统一光场深度估计框架 - 打破了传统光场深度估计模型通常只能针对单一材质假设（如纯Lambertian）的局限，实现了一个模型处理复杂混合现实场景的统一框架。在保持极小参数量（754K）的同时，显著降低了整体误差，为资源受限边缘设备上的光场处理提供了高效的工程基线，证明了多方向EPI处理与域平衡训练在多域光场任务中的有效性。",
+        "Contribution: 光场频域材质分类假设的严格证伪与角度采样理论边界界定 - 提供了极具价值的“负面发现”（Negative Finding），从数学和物理层面严格证明了当前主流 9×9 光场相机在频域材质分类上的根本局限性，避免了后续研究在错误假设上的算力浪费。为光场硬件设计和频域分析算法指明了明确的理论边界，指出未来的频域光场分析必须依赖更高密度的角度采样以提供足够的非直流频谱能量。",
+        "Contribution: EPI架构在复杂纹理场景下的性能天花板诊断与突破路径 - 明确了传统 EPI 方法的理论性能极限，为社区在光场深度估计算法选型时提供了重要的参考基准，防止在 EPI 框架内进行无效的“微调”优化。系统性地规划了下一代光场深度估计的混合架构蓝图，推动了从单一 EPI 范式向多机制融合（如根据材质特性动态路由）的范式转移。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节": "研究背景与动机 (Background & Motivation)",
+          "核心任务": "介绍研究领域的宏观背景，强调研究问题在实际应用或理论中的重要性，确立研究价值并吸引读者兴趣。"
+        },
+        {
+          "子节": "问题陈述与现有局限 (Problem Statement & Limitations)",
+          "核心任务": "深入剖析当前技术、方法或理论存在的缺陷、挑战或未解决的痛点，明确本文要填补的研究空白（Research Gap）。"
+        },
+        {
+          "子节": "本文方法与核心思路 (Proposed Approach & Methodology)",
+          "核心任务": "针对上述局限，提出本文的解决方案，概述核心思想、技术路线、理论框架或系统架构。"
+        }
+      ]
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Depth from Light-Field Cameras",
+          "核心任务": "回顾光场相机深度估计的现有方法，重点分析其在处理非Lambertian（光泽/高光）表面时的局限性，并引出本文方法在通用BRDF下的优势。"
+        },
+        {
+          "子节名称": "Differential Motion Theory",
+          "核心任务": "回顾差分运动理论，详细对比本文在纯平移光场设置下与该理论在数学模型、视角变化处理上的核心差异与理论创新。"
+        },
+        {
+          "子节名称": "Shape from Shading",
+          "核心任务": "回顾阴影恢复形状（SFS）的经典方法，指出其在未知BRDF和自然光照下的局限，同时说明本文在最终优化中借鉴了其局部多项式策略以增加鲁棒性。"
+        }
+      ]
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 角度频域特征提取模块 (Angular FFT Feature Extractor)",
+          "description": "沿角度维度 (u,v) 执行 2D 快速傅里叶变换（FFT），分离低频（朗伯体漫反射）和高频（非朗伯体镜面反射）信号，提取振幅谱和相位谱作为频域特征，并通过卷积层进行降维和特征映射。"
+        },
+        {
+          "title": "3.3 双掩码生成模块 (Dual-Mask Generator)",
+          "description": "将频域特征与空域特征在通道维度拼接，通过多层卷积和MLP进行特征融合，预测每个像素属于朗伯体和非朗伯体（高光/遮挡）的概率分布，应用Softmax进行归一化，生成软掩码。"
+        },
+        {
+          "title": "3.4 物理感知深度估计模块 (Physics-Aware Depth Estimator)",
+          "description": "构建掩码引导的匹配代价。对于朗伯体区域，使用传统的光度一致性（如方差或NCC）；对于非朗伯体区域，引入基于BRDF（如Phong或Cook-Torrance）的物理渲染一致性约束，通过掩码加权融合两者构建统一的深度代价体。"
+        },
+        {
+          "title": "3.5 深度解码与优化模块 (Depth Decoder & Refinement)",
+          "description": "使用 3D 卷积网络对代价体进行空间正则化，然后通过 Softmax 概率回归计算期望深度，最后结合边缘感知平滑（Edge-aware Smoothing）进行后处理优化，消除深度不连续处的伪影。"
+        },
+        {
+          "title": "3.6 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 设计并实现了结合介质掩码（Medium Mask）与角度方向掩码（Angular Direction Mask）的双掩码建模机制，以显式处理不同反射特性的光场数据。; 构建了轻量级的多方向极平面图像处理模型 EPINet4Dir V3，参数量仅为 754K，支持在 384×384 全分辨率下进行高效特征提取。; 引入域平衡采样（Domain-balanced sampling）策略，在单一模型中联合训练 Lambertian（纯漫反射）、Non-Lambertian（镜面/散射）和 Mixed（城市混合）三种不同物理域的场景。; 通过多域联合优化与分辨率缩放（256至384），提升了模型对少数域（如 Non-Lambertian）和复杂混合域的泛化与深度估计能力。",
+        "Module motivation and design: 提出并系统验证了“类MRI角度频率分析”假设，即探索是否能通过 9×9 角度采样的 2D-FFT 频谱特征来区分漫反射、镜面反射和散射材质。; 设计并执行了四种独立的频域与空域分析方法：2D-FFT 能量比分析、逐频点熵分析、角度自相关分析以及特定域光谱特征分析。; 定量计算了角度奈奎斯特频率（Angular Nyquist frequency）下的有效频点数量，并与 BRDF（双向反射分布函数）表征所需的频点数量进行严格的数学与物理对比。; 基于证伪结果，推导并提出了未来基于频率的光场分析所需的最低硬件采样标准（如 17×17 或 21×21）。",
+        "Module motivation and design: 深入诊断了基于极平面图像（EPI）的深度估计方法在复杂 Lambertian 场景（如精细图案、重复结构）中性能停滞的根本原因。; 剖析了 EPI 方法隐含的“视角一致边缘”假设与复杂纹理产生的模糊 EPI 斜率之间的内在物理与几何矛盾。; 结合真值（GT）质量分析（如部分 HCI 场景存在退化真值）和数据多样性评估，量化了 EPI 架构的理论误差下界（MAE ≈ 0.20）。; 提出了突破该天花板的未来架构演进路线，包括引入非 EPI 方法（散焦、对应匹配）、设计混合路由架构（根据材质路由到不同分支）以及利用元学习/域适应策略。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Methodology Overview (方法概述)",
+          "核心任务": "提出方法名称（如TLA-DETR），定义整体框架类型（如two-stage cross-domain transfer learning），明确要解决的核心挑战（如红外数据稀缺下的few-shot learning），并高度概括核心原理和主要步骤。"
+        },
+        {
+          "子节名称": "Stage 1: Pre-training on Source Domain (第一阶段：源域预训练)",
+          "核心任务": "详细描述在大规模可见光数据集上预训练的特征提取和检测架构（如CNN backbone + Transformer encoder/decoder），包括网络结构细节和预训练目标。"
+        },
+        {
+          "子节名称": "Stage 2: Cross-Domain Transfer Learning (第二阶段：跨域迁移学习)",
+          "核心任务": "详细阐述独特的迁移学习策略（如冻结CNN backbone、Transformer参数共享、仅微调FFNs），解释该策略如何实现从可见光到红外域的高效域适应。"
+        }
+      ]
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: 名称, 规模, 场景类型, 划分方式"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Experimental Setup / Datasets",
+          "核心任务": "介绍实验所使用的数据集（如HCInew, Inria, Stanford, UrbanLF等）、评估指标（如MSE, BadPix）以及对比的基线方法，为后续实验奠定基础。"
+        },
+        {
+          "子节名称": "Comparison with State-of-the-Art (SOTA)",
+          "核心任务": "在标准数据集上展示定量（表格数据）和定性（视觉对比图、误差图）结果，证明所提方法在整体性能上优于现有先进方法。"
+        },
+        {
+          "子节名称": "Ablation Study",
+          "核心任务": "通过移除或替换网络中的特定模块（如双分支结构、自适应模块），验证各核心组件对最终性能的贡献和必要性。"
+        }
+      ]
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "研究总结与核心贡献",
+          "核心任务": "回顾研究背景与目标，高度概括本文提出的核心方法、模型或数据集，强调填补的研究空白或主要创新点。"
+        },
+        {
+          "子节名称": "方法优势与实验验证",
+          "核心任务": "简述方法的关键技术细节或优化组件，总结实验结果，通过与现有方法对比或多维度验证，证明方法的有效性、优越性及泛化能力。"
+        },
+        {
+          "子节名称": "局限性与未来工作",
+          "核心任务": "客观指出当前研究在数据规模、场景适用性或理论推导上的局限性，并据此提出具体的未来研究方向、扩展应用场景或系统整合计划。"
+        }
+      ]
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "Markdown（禁止混用 LaTeX 块级元素）"
+  }
+}

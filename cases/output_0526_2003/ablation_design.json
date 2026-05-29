@@ -1,0 +1,37 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "双掩码物理调制机制消融 (Ablation of Dual-Mask Physical Modulation)",
+      "target_module": "基于双掩码调制的统一光场物理建模机制 (Dual-Mask Modulation)",
+      "hypothesis": "物理驱动的双掩码（介质掩码M_med和角度方向掩码M_ang）比纯数据驱动的空间注意力机制更能准确界定非朗伯区域的光与物质相互作用，从而提供更有效的特征调制。",
+      "modification": "在 `models/dual_mask_depth.py` 中，注释掉 `DualMaskModulation` 类的实例化与前向调用。引入通用的空间注意力模块（如 `from attention_modules import SpatialAttention`），将特征调制部分替换为 `self.attention = SpatialAttention(in_channels)`，并在前向传播中应用 `F = F * self.attention(F)`。保持输入输出维度及其他网络结构不变。",
+      "expected_result": "替换为数据驱动的空间注意力后，Non-Lambertian 和 Mixed 场景的 MAE 将显著上升。因为纯数据驱动的注意力难以在9x9稀疏视角下准确理解复杂的物理反射特性（如镜面高光和散射），证明物理双掩码机制在统一建模中的不可替代性。",
+      "comparison_with": "Spatial Attention (数据驱动的空间注意力机制)"
+    },
+    {
+      "experiment_name": "类MRI角度频率材质解析消融 (Ablation of Angle-Frequency Material Analysis)",
+      "target_module": "类MRI的像素级角度频率材质解析方法 (Angle-FFT Material Analyzer)",
+      "hypothesis": "在9x9稀疏角度采样下，基于物理先验的2D-FFT角度频域分析比纯数据驱动的CNN分类器具有更高的材质分类准确率和BRDF参数估计鲁棒性。",
+      "modification": "在 `models/angle_fft.py` 中，移除 `AngleFFTAnalyzer` 内的 `torch.fft.fft2` 及频域特征映射逻辑。替换为 `LearnedCNNClassifier`（设计一个包含3层 Conv2d+ReLU+MaxPool 和 1层 Linear 的轻量级CNN），输入重塑后的 (B, 81, H, W) 角度特征，直接输出3类材质概率和BRDF权重。同步修改 `scripts/phase1_angle_fft.py` 中的调用接口以适配新输出。",
+      "expected_result": "替换为CNN分类器后，Phase 1 的材质三分类准确率将下降（难以达到 >85% 的目标），且后续深度估计在镜面和散射区域的误差增大。证明在稀疏采样下，数据驱动方法容易过拟合且缺乏物理可解释性，而2D-FFT频域分析能更精准地捕捉反射类型。",
+      "comparison_with": "Learned 3-class CNN Classifier (数据驱动的轻量级CNN材质分类器)"
+    },
+    {
+      "experiment_name": "分量感知自适应融合策略消融 (Ablation of Component-Aware Adaptive Fusion)",
+      "target_module": "分量感知的自适应深度估计与融合策略 (Component-Aware Weighted Fusion)",
+      "hypothesis": "基于材质分类权重的多分量加权融合（D = w_d*D_EPI + w_s*D_specular + w_sc*D_scatter）能有效避免非朗伯区域的“纹理复制”失效，优于传统的全局特征拼接融合。",
+      "modification": "在 `models/dual_mask_depth.py` 的深度回归阶段，移除 `ComponentAwareFusion` 模块（即移除基于 w_d, w_s, w_sc 的动态加权求和逻辑）。替换为基线 EPINet4Dir 中的标准融合方式 `StandardConcatFusion`：直接在通道维度 `torch.cat` 各个方向的特征或深度预测，后接 3x3 Conv2d 进行全局统一的深度回归，不区分材质分量。",
+      "expected_result": "替换为全局Concat融合后，Non-Lambertian MAE 将大幅上升（退回基线水平的 0.411 左右），并在高反光和透明材质区域重新出现严重的“纹理复制”伪影。证明分量感知融合策略是解决非朗伯区域深度估计失效的核心。",
+      "comparison_with": "Standard Concatenation Fusion (Baseline EPINet4Dir 的全局特征拼接融合)"
+    },
+    {
+      "experiment_name": "置信度加权损失函数消融 (Ablation of Confidence-Weighted Loss Function)",
+      "target_module": "置信度加权损失函数 (Confidence-Weighted Loss)",
+      "hypothesis": "在损失函数中引入漫反射权重 w_d 作为像素级置信度，能引导网络在训练时聚焦高置信度（朗伯）区域，抑制非朗伯区域噪声对整体梯度的干扰，从而提升整体和朗伯区域的精度。",
+      "modification": "在 `losses/depth_loss.py` 或训练循环的损失计算部分，将 `ConfidenceWeightedL1Loss` 替换为标准的 `torch.nn.L1Loss()`。具体而言，移除损失计算中乘以漫反射权重掩码 `w_d` 的操作，将 `loss = torch.mean(w_d * torch.abs(pred - gt))` 修改为无权重的 `loss = torch.mean(torch.abs(pred - gt))`。",
+      "expected_result": "替换为标准 L1 Loss 后，模型在训练时容易被非朗伯区域（如镜面高光）产生的高误差梯度主导，导致 Lambertian MAE 显著上升（无法达到 <0.16 的目标），整体 val_MAE 也会随之恶化。证明置信度加权损失对平衡不同材质区域的学习至关重要。",
+      "comparison_with": "Standard L1 Loss (无置信度加权的普通L1损失)"
+    }
+  ],
+  "_model_analysis": {}
+}

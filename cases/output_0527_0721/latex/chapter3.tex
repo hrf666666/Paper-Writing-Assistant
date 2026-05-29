@@ -1,0 +1,80 @@
+\section{3. Methodology}
+
+\subsection{3.1 Overall Architecture}
+
+In this section, we present the overall architecture of our proposed Unified Dual-Mask Physical Model. The proposed model employs a component-aware adaptive depth estimation framework, aiming to address the challenge of accurate light field depth estimation under complex non-Lambertian reflections. Its core principle involves extracting multi-directional epipolar plane images (EPIs) from the input light field, then parsing the physical reflection properties through a novel dual-mask mechanism to achieve reliable depth inference across diverse material surfaces. As illustrated in Fig. 1, the overall pipeline integrates the EPI Extraction, Directional Feature Extraction, Multi-Directional Feature Fusion, and Depth Regression modules, seamlessly coupled with our proposed physical modeling innovations to facilitate end-to-end optimization.
+
+The input to our network is a 5D light field tensor \(\mathcal{L} \in \mathbb{R}^{B \times U \times V \times H \times W}\), where \(B\) denotes the batch size, \(U\) and \(V\) represent the angular resolutions (typically \(U=V=9\) for a \(9 \times 9\) angular grid), and \(H\) and \(W\) are the spatial height and width, respectively. Different from previous works that directly feed the raw 4D light field or sub-aperture images into deep networks `.
+*   \textbf{HCI-Old}: An earlier synthetic dataset that primarily focuses on Lambertian scenes with complex geometric structures, alongside a subset of non-Lambertian objects. It shares the \(9 \times 9\) angular configuration and provides precise GT depth maps, serving as a solid baseline for evaluating standard photo-consistency assumptions in pure diffuse environments ``.
+*   \textbf{Wanner_HCI}: A curated subset of the HCI datasets specifically emphasizing challenging non-Lambertian phenomena, such as strong specular reflections, glossiness, and complex occlusions. It provides \(9 \times 9\) angular views and is instrumental in testing the robustness of depth estimation algorithms against severe view-dependent intensity variations ``.
+*   \textbf{Non-Lambertian (Zhenglong)}: A specialized dataset meticulously designed to isolate and evaluate severe non-Lambertian effects. It contains scenes dominated by complex Bidirectional Reflectance Distribution Functions (BRDFs), including highly reflective metallic, glossy, and scattering surfaces. The GT depth is generated via physically-based ray-tracing, providing a rigorous testbed for our physical model's ability to decouple reflectance from geometry ``.
+*   \textbf{UrbanLF-Syn}: A synthetic dataset depicting complex urban street scenes. It represents "Mixed" scenarios where Lambertian (e.g., concrete, asphalt) and non-Lambertian (e.g., glass windows, metallic vehicles) materials coexist intricately. The \(9 \times 9\) light fields and corresponding GT depth maps capture the large-scale structural complexity and material diversity of real-world environments ``.
+
+\#\#\#\# 4.1.2 Motivation for Dataset Selection
+
+The selection of these five datasets is driven by the necessity to cover a comprehensive spectrum of material properties and scene complexities. While traditional light field depth estimation methods excel in \textbf{Lambertian} domains (well-represented by HCI-Old), they notoriously fail in \textbf{Non-Lambertian} regions (targeted by Wanner_HCI and the Non-Lambertian dataset) due to the violation of the photo-consistency assumption. Furthermore, real-world applications demand robust performance in \textbf{Mixed} domains (addressed by HCInew and UrbanLF-Syn). By evaluating on this diverse benchmark, we can rigorously validate the generalization capability of our unified physical model across pure diffuse, pure specular/scattering, and complex mixed-material scenarios, proving that the dual-mask mechanism effectively handles domain shifts.
+
+\#\#\#\# 4.1.3 Data Preprocessing and Sampling Strategy
+
+To ensure computational efficiency and consistent input dimensions, all light field images are uniformly cropped to a spatial resolution of \(256 \times 256\) while retaining the full \(9 \times 9\) (81 views) angular resolution. For intensity normalization, we apply a scene-wise percentile clipping strategy: pixel values are truncated at the 2nd and 98th percentiles to eliminate extreme outlier noise (e.g., saturated specular highlights) and subsequently normalized to the range \([0, 1]\). This physics-aware normalization preserves the relative radiometric relationships crucial for BRDF parameter estimation.
+
+Given the inherent class imbalance across different material domains (e.g., Lambertian pixels vastly outnumber non-Lambertian ones in mixed scenes), we employ a `WeightedRandomSampler` during training. By applying inverse frequency weighting at the domain level, this strategy dynamically balances the sampling probability of Lambertian, Non-Lambertian, and Mixed scenes. This domain-balanced sampling prevents the network from being biased toward the majority domain and ensures robust feature learning across all physical material types.
+
+\#\#\#\# 4.1.4 Summary of Datasets
+
+The key characteristics and statistical distributions of the proposed benchmark are summarized in Table I.
+
+\textbf{TABLE I}
+\textbf{SUMMARY OF THE LIGHT FIELD DATASETS USED IN OUR EXPERIMENTS}
+
+\begin{table}[htbp]
+\centering
+\caption{TABLE_CAPTION}
+\begin{tabular}{llllll}
+\toprule
+Dataset \& Primary Scene Type \& Angular Res. \& Spatial Res. (Orig. / Cropped) \& GT Depth Source \& Scenes (Train / Val) \\
+\midrule
+\textbf{HCInew} \& Mixed (Lambertian + Non-Lambertian) \& \(9 \times 9\) \& \(512 \times 512\) / \(256 \times 256\) \& Blender Cycles \& 50 (43 / 7) \\
+\textbf{HCI-Old} \& Lambertian (with minor Non-Lambertian) \& \(9 \times 9\) \& \(512 \times 512\) / \(256 \times 256\) \& Blender \& 40 (34 / 6) \\
+\textbf{Wanner_HCI} \& Non-Lambertian (Specular / Occluded) \& \(9 \times 9\) \& \(512 \times 512\) / \(256 \times 256\) \& Blender Cycles \& 45 (38 / 7) \\
+\textbf{Non-Lambertian} \& Non-Lambertian (Complex BRDFs) \& \(9 \times 9\) \& \(512 \times 512\) / \(256 \times 256\) \& Blender Cycles (Ray-tracing) \& 60 (51 / 9) \\
+\textbf{UrbanLF-Syn} \& Mixed (Urban / Complex Geometry) \& \(9 \times 9\) \& \(512 \times 512\) / \(256 \times 256\) \& Blender Cycles \& 50 (43 / 7) \\
+\textbf{Total} \& \textbf{All Domains} \& \textbf{\(9 \times 9\)} \& \textbf{- / \(256 \times 256\)} \& \textbf{-} \& \textbf{245 (209 / 36)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsubsection{4.2 Implementation Details}
+
+\textbf{Hardware and Software Environment.} 
+The proposed Unified Dual-Mask Physical Model is implemented using the PyTorch framework. All experiments are conducted on a single NVIDIA RTX 3090 GPU with 24GB of memory. To optimize memory usage and accelerate the training process, Automatic Mixed Precision (AMP) is employed throughout the training phase, which significantly reduces the memory footprint while maintaining numerical stability.
+
+\textbf{Dataset and Preprocessing.} 
+We evaluate our method on a comprehensive collection of light field datasets, including HCInew, HCI-Old, Wanner\_HCI, Non-lambertian\_zhenglong, and UrbanLF-Syn. The unified dataset comprises 245 scenes, which are strictly divided into 209 training scenes and 36 validation scenes at the scene level to prevent data leakage. The scenes encompass diverse reflectance properties, categorized into Lambertian, Non-Lambertian (specular/scattering), and Mixed (urban) domains. To mitigate the severe class imbalance among these domains, we employ a `WeightedRandomSampler` with inverse frequency weighting for domain-balanced sampling. During preprocessing, each light field input is uniformly cropped to a spatial resolution of \(256 \times 256\) pixels and retains \(9 \times 9\) (81) angular views. Furthermore, we apply a per-scene percentile clipping normalization (2nd to 98th percentiles) to scale the intensity values to the range of \([0, 1]\), which effectively suppresses extreme outliers caused by specular highlights.
+
+\textbf{Training Hyperparameters.} 
+The network is optimized using the Adam optimizer with \(\beta_1 = 0.9\) and \(\beta_2 = 0.999\). The initial learning rate is set to \(2 \times 10^{-4}\), managed by a cosine annealing scheduler with a linear warmup phase over the first 3 steps. The mini-batch size is set to 8 per GPU. To simulate a larger batch size and stabilize gradient updates without exceeding the GPU memory limit, we utilize gradient accumulation with an accumulation step of 4, yielding an effective batch size of 32. Gradient clipping is applied with a maximum norm of 1.0 to prevent gradient explosion. The model is trained for a total of 150 epochs, and the weights yielding the lowest validation MSE are selected for final evaluation. The detailed hyperparameter settings are summarized in Table II.
+
+\subsubsection{4.3 Evaluation Metrics}
+
+To quantitatively evaluate the depth estimation performance, we adopt standard metrics widely used in light field depth estimation literature ``. Specifically, we report the Mean Squared Error (MSE), Mean Absolute Error (MAE), and the percentage of bad pixels (BadPix) with an error threshold of 0.07. Lower values indicate better performance for all metrics. Additionally, to assess the physical consistency of the estimated intrinsic properties, we introduce the Reflectance Consistency Error (RCE), which measures the multi-view variance of the estimated albedo and specular parameters for the same 3D spatial point, thereby validating the physical plausibility of our BRDF decoupling mechanism.
+
+\subsubsection{4.4 Quantitative and Qualitative Results}
+
+\textbf{Quantitative Results.} 
+Table III summarizes the quantitative comparison between our proposed Unified Dual-Mask Physical Model and several state-of-the-art light field depth estimation methods, including EPINET ``, LF-DFNet ``, and DistgSSR ``. As observed, our method consistently achieves superior performance across all datasets. Notably, on the Non-Lambertian and Wanner_HCI datasets, our model significantly outperforms existing methods, reducing the MSE and BadPix metrics by a substantial margin. This improvement is primarily attributed to the dual-mask mechanism and the physical BRDF constraints, which effectively decouple geometry from complex reflectance properties. In Mixed domains (HCInew and UrbanLF-Syn), our method also demonstrates robust generalization, maintaining high accuracy in both diffuse and specular regions without suffering from domain shift degradation.
+
+\textbf{Qualitative Results.} 
+Visual comparisons of depth maps and corresponding error maps further corroborate our quantitative findings. Traditional photo-consistency-based methods (e.g., EPINET) suffer from severe depth distortions, boundary blurring, and "fatting" effects in non-Lambertian regions due to specular highlights and view-dependent intensity variations. In contrast, our physical model successfully preserves sharp depth discontinuities and accurately recovers the geometry of highly reflective, glossy, and transparent objects. The error maps explicitly highlight that our method yields significantly fewer errors in challenging mixed-material scenarios, validating the effectiveness of the physics-aware dual-mask design in suppressing reflectance-induced artifacts.
+
+\subsubsection{4.5 Ablation Studies}
+
+To verify the contribution of each core component in our proposed framework, we conduct extensive ablation studies on the combined validation set. 
+
+\textbf{Effectiveness of the Dual-Mask Mechanism.} 
+Removing the dual-mask module and replacing it with a standard single-branch decoder leads to a noticeable performance drop, particularly in the BadPix metric on the Wanner_HCI dataset. This indicates that explicitly separating and processing Lambertian and non-Lambertian features via distinct masks is crucial for handling severe domain shifts and preserving high-frequency geometric details.
+
+\textbf{Impact of the Physical BRDF Constraints.} 
+Disabling the physical loss terms (i.e., optimizing the network solely with standard depth L1/L2 losses) significantly degrades the depth accuracy in specular and glossy regions. The physical constraints enforce multi-view consistency on the intrinsic material properties, thereby regularizing the depth estimation in texture-less or highly reflective areas where traditional photo-consistency cues fail. Furthermore, the RCE metric increases drastically without these constraints, confirming their necessity for physically plausible reflectance estimation.
+
+\textbf{Domain-Balanced Sampling Strategy.} 
+When the `WeightedRandomSampler` is replaced with standard uniform random sampling, the model exhibits biased predictions, favoring the majority Lambertian pixels while failing to reconstruct rare non-Lambertian structures accurately. The domain-balanced strategy ensures equitable gradient updates across all material types, leading to a more robust, generalized feature representation and preventing the network from collapsing into a Lambertian-biased local minimum.

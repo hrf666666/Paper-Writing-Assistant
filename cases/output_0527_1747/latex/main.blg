@@ -1,0 +1,138 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Warning--empty author in lightlight
+Warning--empty journal in lightlight
+Warning--empty year in lightlight
+Warning--empty author in autonomous
+Warning--empty journal in autonomous
+Warning--empty year in autonomous
+Warning--empty author in nonnon
+Warning--empty journal in nonnon
+Warning--empty year in nonnon
+Warning--empty author in epiepi
+Warning--empty journal in epiepi
+Warning--empty year in epiepi
+Warning--empty author in slopeslope
+Warning--empty journal in slopeslope
+Warning--empty year in slopeslope
+Warning--empty author in endend
+Warning--empty journal in endend
+Warning--empty year in endend
+Warning--empty author in attentionatten
+Warning--empty journal in attentionatten
+Warning--empty year in attentionatten
+Warning--empty author in trainingtrain
+Warning--empty journal in trainingtrain
+Warning--empty year in trainingtrain
+Warning--empty author in epipolarepipo
+Warning--empty journal in epipolarepipo
+Warning--empty year in epipolarepipo
+Warning--empty author in wannerwanne
+Warning--empty journal in wannerwanne
+Warning--empty year in wannerwanne
+Warning--empty author in epiepi_11
+Warning--empty journal in epiepi_11
+Warning--empty year in epiepi_11
+Warning--empty author in focalfocal
+Warning--empty journal in focalfocal
+Warning--empty year in focalfocal
+Warning--empty author in taotao
+Warning--empty journal in taotao
+Warning--empty year in taotao
+Warning--empty author in brdfbrdf
+Warning--empty journal in brdfbrdf
+Warning--empty year in brdfbrdf
+Warning--empty author in barronbarro
+Warning--empty journal in barronbarro
+Warning--empty year in barronbarro
+Warning--empty author in dichromati
+Warning--empty journal in dichromati
+Warning--empty year in dichromati
+Warning--empty author in deepdeep
+Warning--empty journal in deepdeep
+Warning--empty year in deepdeep
+Warning--empty author in lightlight_18
+Warning--empty journal in lightlight_18
+Warning--empty year in lightlight_18
+Warning--empty author in epinetepine
+Warning--empty journal in epinetepine
+Warning--empty year in epinetepine
+Warning--empty author in multimulti
+Warning--empty journal in multimulti
+Warning--empty year in multimulti
+Warning--empty author in dd
+Warning--empty journal in dd
+Warning--empty year in dd
+Warning--empty author in lflf
+Warning--empty journal in lflf
+Warning--empty year in lflf
+Warning--empty author in distgnetdistg
+Warning--empty journal in distgnetdistg
+Warning--empty year in distgnetdistg
+Warning--empty author in longlong
+Warning--empty journal in longlong
+Warning--empty year in longlong
+Warning--empty author in lightlight_25
+Warning--empty journal in lightlight_25
+Warning--empty year in lightlight_25
+Warning--empty author in epipolarepipo_26
+Warning--empty journal in epipolarepipo_26
+Warning--empty year in epipolarepipo_26
+Warning--empty author in pseudopseud
+Warning--empty journal in pseudopseud
+Warning--empty year in pseudopseud
+
+Done.
+You've used 27 entries,
+            4087 wiz_defined-function locations,
+            875 strings with 8443 characters,
+and the built_in function-call counts, 6345 in all, are:
+= -- 270
+> -- 27
+< -- 0
++ -- 27
+- -- 0
+* -- 370
+:= -- 949
+add.period$ -- 54
+call.type$ -- 27
+change.case$ -- 27
+chr.to.int$ -- 0
+cite$ -- 108
+duplicate$ -- 729
+empty$ -- 757
+format.name$ -- 0
+if$ -- 1326
+int.to.chr$ -- 0
+int.to.str$ -- 27
+missing$ -- 108
+newline$ -- 104
+num.names$ -- 0
+pop$ -- 459
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 431
+stack$ -- 0
+substring$ -- 27
+swap$ -- 216
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 27
+warning$ -- 81
+while$ -- 0
+width$ -- 29
+write$ -- 157
+(There were 81 warnings)

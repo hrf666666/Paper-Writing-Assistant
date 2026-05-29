@@ -1,0 +1,60 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 62.9,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_abstract": true,
+      "tex_no_markdown": false,
+      "tex_md_residuals": 2,
+      "tex_cite_count": 0,
+      "tex_has_citations": false,
+      "bib_exists": true,
+      "bib_entries": 1,
+      "bib_min_entries": false,
+      "pdf_exists": true,
+      "pdf_size_kb": 39.5
+    },
+    "score": 85,
+    "all_passed": true
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 8522,
+      "word_count_ok": true,
+      "citation_count": 0,
+      "citations_min": false,
+      "formula_count": 1,
+      "formulas_min": false,
+      "table_count": 2,
+      "tables_min": false,
+      "figure_refs": 1,
+      "figures_min": false,
+      "ablation_mentions": 4,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 50,
+    "sections_found": 5,
+    "total_words": 8522,
+    "total_citations": 0
+  },
+  "L3_academic_quality": {},
+  "overall": {
+    "L1_score": 85,
+    "L2_score": 50,
+    "L3_score": 0,
+    "L1_passed": true,
+    "overall_grade": "D"
+  }
+}

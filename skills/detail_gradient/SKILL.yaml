@@ -1,0 +1,105 @@
+name: detail_gradient
+description: "详略梯度控制 - 核心模块详写，辅助模块略写，确保重点突出"
+type: strategy
+version: "1.0"
+
+triggers:
+  - pre_generation
+  - detail_control
+
+dependencies:
+  - length_budget
+
+inputs:
+  - name: innovation_points
+    type: list
+    required: true
+    description: "创新点列表，用于确定详写重点"
+  - name: chapter_name
+    type: str
+    required: true
+    description: "当前章节名"
+
+outputs:
+  - name: detail_plan
+    type: dict
+    description: "详略分布计划"
+
+parameters:
+  # 详略梯度规则（基于参考论文分析）
+  rules:
+    methodology:
+      # 核心创新模块 → 详写（2-3页）
+      core_module:
+        detail_level: "high"
+        pages: "2-3"
+        content_requirements:
+          - "详细描述设计动机和直觉"
+          - "完整的数学公式推导"
+          - "与现有方法的关键区别分析"
+          - "伪代码或算法描述"
+          - "关键设计选择的ablation justification"
+      # 基础组件 → 中等详写（1-1.5页）
+      base_component:
+        detail_level: "medium"
+        pages: "1-1.5"
+        content_requirements:
+          - "简要描述核心思路"
+          - "关键公式"
+          - "与核心模块的接口说明"
+      # 通用技术 → 略写（0.3-0.5页）
+      common_technique:
+        detail_level: "low"
+        pages: "0.3-0.5"
+        content_requirements:
+          - "引用原始论文即可"
+          - "说明在本研究中的适配方式"
+          - "不需要重复描述标准方法"
+    
+    experiments:
+      # 主实验 → 详写（2-3页，多表格）
+      main_experiment:
+        detail_level: "high"
+        pages: "2-3"
+        content_requirements:
+          - "完整的实验设置描述"
+          - "多维度结果表格（不同数据集/指标）"
+          - "结果分析与讨论"
+          - "可视化对比图"
+      # 消融实验 → 中等（1-1.5页，紧凑表格）
+      ablation:
+        detail_level: "medium"
+        pages: "1-1.5"
+        content_requirements:
+          - "紧凑的消融表格"
+          - "每个组件的贡献分析"
+          - "关键发现的highlight"
+      # 鲁棒性/扩展实验 → 略写（0.5-1页）
+      robustness:
+        detail_level: "low"
+        pages: "0.5-1"
+        content_requirements:
+          - "简明的结果表格"
+          - "一两句话总结发现"
+
+    related_work:
+      # 与本研究直接相关的工作 → 详写（1-1.5段/篇）
+      direct_related:
+        detail_level: "high"
+        paragraphs_per_paper: "1-1.5"
+        content_requirements:
+          - "方法核心思路"
+          - "关键结果"
+          - "与本研究的关系"
+      # 间接相关工作 → 略写（0.3-0.5段/篇，多篇打包讨论）
+      indirectly_related:
+        detail_level: "low"
+        paragraphs_per_paper: "0.3-0.5"
+        content_requirements:
+          - "打包讨论（'Several works [1,2,3] have...'）"
+          - "只提及与本研究最相关的方面"
+
+prompt_template: ""
+model_type: light
+quality_check: false
+max_retries: 0

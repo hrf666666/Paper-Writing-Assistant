@@ -1,0 +1,68 @@
+% 请在导言区添加以下库以支持编译：
+% \usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc}
+
+\begin{tikzpicture}[
+  >=Stealth,
+  node distance=1cm,
+  module/.style={draw, rounded corners, fill=#1, minimum width=2.8cm, minimum height=1.6cm, align=center, font=\sffamily\small\bfseries, text=black},
+  tensor/.style={draw, rectangle, fill=blue!10, minimum width=1.8cm, minimum height=1cm, align=center, font=\sffamily\scriptsize, text=black},
+  io/.style={draw, rectangle, fill=gray!10, minimum width=2cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize, text=black},
+  corelabel/.style={fill=orange!20, draw=orange!80, rounded corners=2pt, inner sep=2pt, font=\sffamily\tiny\bfseries, text=red!70!black, align=center}
+]
+
+  % ================= 节点定义 =================
+  % 输入
+  \node[io] (input) at (0,0) {Light Field \\ Images \\ \tiny $[B, U, V, H, W, C]$};
+
+  % 并行分支模块
+  \node[module=orange!30] (fft) at (3.8, 3) {Angular FFT Material \\ Classification \\ \tiny (角向FFT材质分类模块)};
+  \node[module=blue!20] (defocus) at (3.8, 0) {Defocus Feature \\ Extractor \\ \tiny (纯散焦特征提取模块)};
+  \node[module=blue!20] (angular) at (3.8, -3) {Angular Frequency \\ Depth Extractor \\ \tiny (角向频率深度特征模块)};
+
+  % 中间特征张量
+  \node[tensor] (mask) at (7, 3) {Dual-Mask \\ \tiny $[B, 2, H, W]$};
+  \node[tensor] (feat_def) at (7, 0) {Defocus Feat \\ \tiny $[B, C', H, W]$};
+  \node[tensor] (feat_ang) at (7, -3) {Angular Feat \\ \tiny $[B, C'', H, W]$};
+
+  % 融合与输出
+  \node[module=orange!30, minimum height=2.8cm] (fusion) at (10.2, 0) {Dual-Mask Physical \\ Fusion \\ \tiny (双掩码物理融合模块)};
+  \node[io, fill=green!20] (output) at (13.2, 0) {Depth Map \\ \tiny $[B, 1, H, W]$};
+
+  % 损失与监督
+  \node[module=red!20] (loss) at (13.2, -3) {Domain Balanced \\ Training \& Loss \\ \tiny (领域平衡训练与诊断)};
+  \node[io] (gt) at (16.2, -3) {Ground Truth \\ \tiny $[B, 1, H, W]$};
+
+  % ================= 核心创新标注 =================
+  \node[corelabel, below=0.2cm of fft] {创新2: 频域材质分类\\物理极限界定与证伪};
+  \node[corelabel, below=0.2cm of fusion] {创新1: 双掩码与多方向EPI\\统一光场深度估计架构};
+  \node[corelabel, below=0.2cm of loss] {创新3: 多域长尾分布\\领域平衡训练与诊断};
+
+  % ================= 数据流连线 =================
+  % 输入到各分支
+  \draw[->, thick] (input.east) -- ++(1.2,0) |- (fft.west);
+  \draw[->, thick] (input.east) -- (defocus.west);
+  \draw[->, thick] (input.east) -- ++(1.2,0) |- (angular.west);
+
+  % 分支到特征张量
+  \draw[->, thick] (fft.east) -- (mask.west);
+  \draw[->, thick] (defocus.east) -- (feat_def.west);
+  \draw[->, thick] (angular.east) -- (feat_ang.west);
+
+  % 特征张量到融合模块
+  \draw[->, thick] (mask.east) -- ++(0.8,0) |- ([yshift=0.9cm]fusion.west) node[pos=0.25, above, font=\scriptsize] {$M_{dual}$};
+  \draw[->, thick] (feat_def.east) -- ++(0.8,0) -- (fusion.west) node[pos=0.5, above, font=\scriptsize] {$F_{defocus}$};
+  \draw[->, thick] (feat_ang.east) -- ++(0.8,0) |- ([yshift=-0.9cm]fusion.west) node[pos=0.25, below, font=\scriptsize] {$F_{freq}$};
+
+  % 融合到输出
+  \draw[->, thick] (fusion.east) -- (output.west) node[pos=0.5, above, font=\scriptsize] {$D_{final}$};
+
+  % 输出到损失 & GT到损失
+  \draw[->, thick] (output.south) -- (loss.north) node[pos=0.5, right, font=\scriptsize] {Pred};
+  \draw[->, thick] (gt.west) -- (loss.east) node[pos=0.5, above, font=\scriptsize] {Target};
+
+  % ================= 辅助装饰 (融合模块内部物理加权示意) =================
+  \node[draw, fill=white, rounded corners=1pt, minimum size=0.6cm, font=\tiny] (w1) at ([xshift=-0.4cm, yshift=0.5cm]fusion.center) {$M_{lamb} \odot$};
+  \node[draw, fill=white, rounded corners=1pt, minimum size=0.6cm, font=\tiny] (w2) at ([xshift=-0.4cm, yshift=-0.5cm]fusion.center) {$M_{non} \odot$};
+  \node[draw, fill=white, rounded corners=1pt, minimum size=0.6cm, font=\tiny, right=0.4cm of w1] (add) {$+$};
+
+\end{tikzpicture}

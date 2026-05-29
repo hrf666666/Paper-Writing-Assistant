@@ -1,0 +1,22 @@
+{
+  "total": 1,
+  "papers": [
+    {
+      "paperId": "https://arxiv.org/abs/2103.13043",
+      "title": "Light Field Reconstruction Using Convolutional Network on EPI and Extended Applications",
+      "year": 2019,
+      "authors": [
+        "Gaochang Wu",
+        "Yebin Liu",
+        "Lu Fang",
+        "Qionghai Dai",
+        "Tianyou Chai"
+      ],
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "abstract": "In this paper, a novel convolutional neural network (CNN)-based framework is developed for light field reconstruction from a sparse set of views. We indicate that the reconstruction can be efficiently modeled as angular restoration on an epipolar plane image (EPI). The main problem in direct reconst",
+      "citationCount": 0,
+      "group": "methods",
+      "_relevance_score": 70.0
+    }
+  ]
+}

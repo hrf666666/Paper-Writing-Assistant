@@ -1,0 +1,279 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于类MRI角度频域分析的双掩码物理建模机制 - 突破了传统光场深度估计强依赖朗伯假设的理论局限，从物理光学层面建立了一套统一处理纯漫反射、镜面/散射及城市混合场景的数学物理模型，为非朗伯区域的深度恢复提供了坚实的理论基础。",
+        "Contribution: 像素级分量感知的自适应深度估计与置信度融合策略 - 有效解决了传统EPI方法在非朗伯区域因视角一致性假设被破坏而导致的“纹理复制”失效问题，实现了单一模型对复杂混合场景的鲁棒深度估计，显著提升了非朗伯和混合场景下的深度估计精度。",
+        "Contribution: 面向有限角度采样的三层递进式反向波矢解析算法 - 在有限的角度采样分辨率下，巧妙平衡了物理模型的严谨性与计算效率，使得复杂的BRDF估计和波矢解析能够实时应用于深度估计网络，避免了纯数据驱动方法在小样本非朗伯数据上的过拟合风险。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景与动机 (Background & Motivation)",
+          "核心任务": "引入研究主题的宏观背景，阐述该领域在实际应用或理论研究中的重要性与现实需求，确立研究的大前提。"
+        },
+        {
+          "子节名称": "现有挑战与研究空白 (Challenges & Research Gap)",
+          "核心任务": "梳理现有解决方案或技术，深入剖析其在特定场景下的局限性、缺陷或未解决的问题，明确指出当前技术的瓶颈。"
+        },
+        {
+          "子节名称": "本文提出的方法 (Proposed Methodology)",
+          "核心任务": "针对上述研究空白，概述本文提出的核心算法、策略或框架，并简要说明其克服现有挑战的核心机制与理论依据。"
+        }
+      ]
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Depth from Light-Field Cameras",
+          "核心任务": "回顾光场相机深度估计的现有方法，指出其在非Lambertian（如高光/光泽）表面上的局限性，分析现有处理高光方法的缺陷，并引出本文方法在处理通用BRDF和恢复反射率上的优势。"
+        },
+        {
+          "子节名称": "Shape from Shading",
+          "核心任务": "回顾SfS（阴影恢复形状）领域的经典与最新进展，分析其在自然光照和未知BRDF条件下的约束难题，说明本文借鉴其局部多项式策略，但强调本文在非Lambertian假设下面临更复杂的挑战。"
+        },
+        {
+          "子节名称": "Differential Motion Theory",
+          "核心任务": "阐述本文的底层数学理论基础（Chandraker的微分运动理论），详细对比本文方法与该理论在相机运动类型（纯平移vs平移+旋转）、视角假设及方程推导上的核心差异与理论创新。"
+        }
+      ]
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 Angular FFT Material Module (角度FFT材质分析模块)",
+          "description": "在角度维度（9x9）上应用2D快速傅里叶变换（FFT），提取角度频率特征。低频分量对应朗伯体（漫反射）成分，高频分量对应非朗伯体（高光/反射）成分。"
+        },
+        {
+          "title": "3.3 Dual-Mask Generator (双掩码生成器)",
+          "description": "通过多层感知机（MLP）或1x1卷积对频率特征进行分类和分割，生成两个互补的掩码：漫反射置信度掩码（Lambertian Mask）和高光/遮挡掩码（Specular/Occlusion Mask）。"
+        },
+        {
+          "title": "3.4 EPINet4Dir Feature Extractor (四方向EPI特征提取器)",
+          "description": "使用共享权值的2D卷积网络（如EPINet架构）分别处理水平、垂直、主对角线、副对角线4个方向的极平面图像（EPI），提取包含视差和几何结构的特征。"
+        },
+        {
+          "title": "3.5 Physical Model Fusion Module (物理模型融合模块)",
+          "description": "基于非朗伯体反射物理模型（Lambertian + Specular），利用双掩码对4个方向的EPI特征进行自适应加权融合。降低高光区域和遮挡区域的特征权重，增强漫反射区域的几何一致性。"
+        },
+        {
+          "title": "3.6 Depth Regression Head (深度回归头)",
+          "description": "通过多层卷积和上采样操作（或代价体正则化），将高维特征映射为单通道的视差/深度值，并应用ReLU或Sigmoid限制输出范围。"
+        },
+        {
+          "title": "3.7 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出介质掩码（量化像素级粗糙度以决定光-物质作用类型）与角度方向掩码（记录偏折矢量场）的双掩码物理模型，统一表征朗伯与非朗伯反射特性。; 引入类MRI k-space频域分析思想，对光场9×9角度采样进行2D-DFT变换，利用频谱能量分布特征（低频主导漫反射、高频展宽镜面反射、中频主导散射）反向解析像素级反射类型。",
+        "Module motivation and design: 根据双掩码解析出的材质类型连续权重（漫反射、镜面、散射），为不同反射区域动态匹配专属深度估计策略（如漫反射区用EPI，镜面区降低EPI置信度改用光度立体/邻域传播，散射区用散射模型修正）。; 设计像素级置信度加权融合公式，并在损失函数中引入权重置信度加权，同时在EPI估计前利用漫反射权重对输入视角进行漫反射分量增强。",
+        "Module motivation and design: 构建三层递进解析架构：第一层通过角度频谱能量分布实现O(HW)复杂度的实时材质三分类；第二层利用约束最小二乘法求解81个角度方程估计BRDF参数权重；第三层计算偏折矢量场并验证麦克斯韦方程一致性。; 针对9×9有限角度分辨率，采用粗粒度分类与连续权重估计相结合的方式，输出连续的材质权重而非硬分类，以处理单个像素包含多种材质的混合边界问题。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "3.1 Methodology Overview (基于提供文本)",
+          "核心任务": "宏观概述整体框架（两阶段跨域迁移学习）、核心目标（解决红外数据稀缺下的检测定位）以及核心创新点（独特的参数冻结与共享策略）。"
+        },
+        {
+          "子节名称": "3.2 Network Architecture (基于文本推断)",
+          "核心任务": "详细介绍TLA-DETR的基础网络组件，包括CNN backbone、Transformer encoder/decoder以及FFNs的具体结构与参数设置。"
+        },
+        {
+          "子节名称": "3.3 Two-stage Cross-domain Transfer Learning (基于文本推断)",
+          "核心任务": "详细阐述两阶段训练流程：Stage 1在大规模可见光数据集上的预训练，以及Stage 2在红外域的迁移策略（冻结、共享、微调的具体实现）。"
+        }
+      ]
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: 名称, 规模, 场景类型, 划分方式"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Experimental Setup and Datasets (实验设置与数据集)",
+          "核心任务": "介绍所使用的公开数据集（如HCInew, Inria等）、评估指标（如MSE, Bad Pix）、基线方法（SOTA）以及实现细节，为后续实验奠定基础。"
+        },
+        {
+          "子节名称": "Overall Quantitative and Qualitative Comparison (总体定量与定性比较)",
+          "核心任务": "在标准数据集上全面评估所提方法的整体性能。通过表格展示定量指标的提升，通过深度图和误差图（Visual comparison）展示定性效果的优越性。"
+        },
+        {
+          "子节名称": "Attribute-specific and Robustness Analysis (特定属性与鲁棒性分析)",
+          "核心任务": "针对特定难点（如非朗伯体表面的透明度、反射率、噪声等）进行控制变量实验，探究算法在极端或渐变条件下的敏感度、极限和鲁棒性。"
+        }
+      ]
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "sub_section": "研究总结与核心贡献 (Research Summary & Core Contributions)",
+          "core_task": "回顾研究背景与核心目标，高度概括本文提出的方法、模型或数据集，明确论文的核心贡献与整体价值。"
+        },
+        {
+          "sub_section": "方法创新与技术细节回顾 (Methodological Innovations & Technical Highlights)",
+          "core_task": "简述方法中的关键创新点、理论推导、技术优化组件或决策机制，解释方法设计的合理性与先进性。"
+        },
+        {
+          "sub_section": "实验验证与性能优势 (Experimental Validation & Performance Advantages)",
+          "core_task": "总结实验结果，强调模型/方法的优越性、鲁棒性及泛化能力，并与现有方法进行对比以突出优势。"
+        }
+      ]
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "Markdown（禁止混用 LaTeX 块级元素）"
+  }
+}

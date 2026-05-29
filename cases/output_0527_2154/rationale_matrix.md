@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 采用域平衡采样策略在包含Lambertian、Non-Lambertian和Mi | 多域数据分布严重不均导致模型在联合训练时偏向多数域，使得少数域（如Non-Lambertian）性能 | 传统随机采样联合训练导致Non-Lambertian域MAE高达0.411；本策略使Non-Lamb | 包含280个场景的5个大规模混合数据集（涵盖Lambertian、Non-Lam | Overall MAE降至0.1795，Lambertian域MAE从0.387 | Methodology (Training Strategy) / Experiments | must |
+| 创新性地结合介质掩码（medium mask）和角度方向掩码（angular d | 低角度分辨率（如9x9）下显式材质分类不可行，传统基于材质分离的物理模型失效，需要隐式掩码来解耦复杂 | 相比直接使用单一掩码或无掩码的基线模型，双掩码机制有效引导网络关注不同介质和视角方向的几何一致性，整 | 具有复杂反射特性、多视角几何遮挡以及非朗伯体高光干扰的Mixed域和Non-La | Mixed域MAE达到0.1687（满足<0.22目标），整体MAE达到0.17 | Methodology (Network Architecture) | must |
+| 采用多方向EPI（Epipolar Plane Image）处理机制提取多视角几 | 单一正交方向（水平/垂直）EPI无法充分捕获复杂场景中的斜向边缘和遮挡区域的视差连续性，导致深度图出 | 相比仅使用正交EPI的基线模型，多方向EPI增强了非朗伯体表面的结构保持能力，使整体MAE从0.24 | 包含丰富斜向纹理、复杂遮挡和高分辨率（384px）的光场图像场景 | 在384px分辨率下Overall MAE达到0.1795，相比基线下降26%， | Methodology (Feature Extraction) / Ablation Study | must |
+| 系统验证并严格证伪“类MRI角度频率分析”假设，界定9x9角度分辨率下的频域材质 | 社区内存在通过低角度分辨率2D-FFT频谱特征区分漫反射和镜面反射材质的潜在误区，导致后续研究在无效 | Prior art假设9x9 FFT可分离材质；本研究通过4种独立方法证明非DC能量<3%且各域无频 | 9x9角度采样的标准光场数据集，以及试图利用频域特征进行BRDF表征和材质分类的 | 理论证明9x9采样仅提供约4个有效非DC频点（BRDF需>10个），与MRI的2 | Discussion / Negative Results Analysis | must |
+| 设计参数量仅为754K的EPINet4Dir V3轻量级模型作为统一基线 | 现有处理混合域光场深度估计的模型往往依赖庞大的参数量来拟合不同反射特性，导致部署困难且容易在有限多域 | 相比动辄数兆参数的复杂物理渲染网络，754K参数的模型在5个数据集上实现了SOTA级别的精度，兼顾了 | 资源受限的边缘计算设备或需要实时/近实时深度估计的混合反射光场应用场景 | 模型参数量严格控制在754K，同时在384px分辨率下Overall MAE达到 | Methodology (Model Architecture) / Experiments | should |
+| 系统评估EPI架构在复杂Lambertian场景下的性能极限，并深入剖析GT质量 | 尽管模型在Non-Lambertian和Mixed域表现优异，但在纯Lambertian域仍存在性能 | 先前研究盲目优化网络结构以提升Lambertian性能；本研究通过排除退化GT实验和分辨率缩放，界定 | HCInew等包含大量纯漫反射场景且GT存在量化退化（如仅有2-100个唯一视差 | 分析指出HCI场景中GT仅有2-100个唯一视差值，通过分辨率缩放（256至38 | Discussion / Limitations and Root Cause Analysis | should |

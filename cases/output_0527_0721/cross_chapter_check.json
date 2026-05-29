@@ -1,0 +1,14 @@
+[
+  {
+    "severity": "warning",
+    "type": "check_error",
+    "description": "检查 section_references 过程中出错: '>' not supported between instances of 'str' and 'int'",
+    "location": "checker"
+  },
+  {
+    "severity": "warning",
+    "type": "format_inconsistency",
+    "description": "全文混用 Markdown 标题和 LaTeX 块级元素（\\begin{...}），建议统一格式",
+    "location": "全文"
+  }
+]

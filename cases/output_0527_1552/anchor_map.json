@@ -1,0 +1,23 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "基于类MRI角度频域分析的光场材质感知机制",
+    "contribution_statement": "We identify that material characteristics in light fields can be explicitly decoupled and understood using an MRI-like angular frequency domain analysis."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "双掩码物理调制与BRDF参数解析模型",
+    "contribution_statement": "We propose a dual-mask physical modulation model that accurately and analytically parses BRDF parameters based on this frequency-domain observation."
+  },
+  "innovation_3": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.4",
+    "experiment_section": "4.5",
+    "name": "分量感知与置信度加权的统一深度估计策略",
+    "contribution_statement": "We demonstrate that incorporating these parsed material components via a confidence-weighted strategy significantly improves the accuracy and robustness of unified depth estimation."
+  }
+}

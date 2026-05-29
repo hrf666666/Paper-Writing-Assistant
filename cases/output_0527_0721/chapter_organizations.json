@@ -1,0 +1,264 @@
+{
+  "Introduction": {
+    "章节结构": [
+      {
+        "子节名称": "研究背景与领域确立 (Establishing a Territory)",
+        "核心任务": "介绍研究领域的宏观背景，阐述研究问题在现实世界或学术界的重要性和广泛应用，确立研究的现实价值与理论意义。"
+      },
+      {
+        "子节名称": "现有局限与研究空间 (Establishing a Niche)",
+        "核心任务": "综述现有主流方法、技术或传感器，通过分类对比和深入分析，指出其在特定场景下的局限性、未解决的挑战或理论缺陷（即Research Gap）。"
+      },
+      {
+        "子节名称": "本文方法与核心贡献 (Occupying the Niche)",
+        "核心任务": "针对上述Gap提出本文的解决方案、核心思想或算法框架，概述技术路线，并明确、结构化地列出本文的主要贡献点。"
+      }
+    ],
+    "内容逻辑": "整体采用“漏斗式”递进逻辑（从宏观到微观）。首先从宽泛的现实需求或大背景切入（如全球气候变化、日常交互物体），逐步聚焦到具体的技术痛点（如深度估计在透明表面的失效、非朗伯体表面的形状恢复困难）。各子节之间通过“强转折”和“因果推导”进行过渡：使用“However/Unfortunately/Despite”等转折词引出当前技术的瓶颈，使用“In short/Therefore/Purposely”等总结词顺理成章地引出本文的动机和提出的方法，形成“大背景 -> 具体痛点 -> 现有方法失效原因 -> 本文动机 -> 本文方案”的严密逻辑闭环。",
+    "论证手法": [
+      "数据支撑：使用权威统计数据量化问题的重要性与紧迫性（如‘building energy consumption... accounting for approximately one-third’，‘spend over 90% of their daily time indoors’）。",
+      "对比分析：将不同技术路线进行横向对比以凸显现有方法的不足（如‘intrusive vs. non-invasive approaches’，‘Lambertian vs. glossy surfaces’，‘active sensors vs. deep learning’）。",
+      "举例说明：列举具体的现实场景或硬件设备使抽象问题具象化，增强代入感（如‘glass windows of buildings’，‘Lytro and Raytrix cameras’，‘smart wristbands’）。",
+      "图表辅助论证：在Introduction中直接引用核心效果图（如‘Fig. 1 highlights some specific regions...’），直观展示现有方法的失败案例与本文方法的成功对比，提供视觉证据。",
+      "文献引证：密集引用领域内经典和最新文献来支撑背景陈述，并精准界定现有工作的边界与缺陷。"
+    ],
+    "关键句式模板": {
+      "背景引入": {
+        "模板": "In [context], [phenomenon/problem] are increasingly acute challenges. / In our daily lives, we often interact with [objects].",
+        "原文示例": "In modern society, global climate change and energy scarcity are increasingly acute challenges."
+      },
+      "强调重要性": {
+        "模板": "[Task/Problem] remains a challenging problem for [field], yet necessary for [application].",
+        "原文示例": "accurately estimating depth information on these surfaces remains a challenging problem for both computer vision algorithms and deep networks, yet necessary for proper interaction..."
+      },
+      "指出Gap (转折)": {
+        "模板": "However, most current [methods] support only [assumption], making them unreliable for [specific case]. / Unfortunately, [phenomenon] violate the working principles of [sensors].",
+        "原文示例": "However, most current depth estimation methods support only Lambertian scenes, making them unreliable for glossy surfaces."
+      },
+      "提出本文方法": {
+        "模板": "In this paper, we present a [method] that explicitly models [feature]. / Purposely, this paper proposes a [adjective] strategy for [goal].",
+        "原文示例": "In this paper, we present a depth and reflectance estimation algorithm that explicitly models spatially varying BRDFs..."
+      },
+      "列举贡献": {
+        "模板": "Our main contributions are: 1) [Contribution 1]; 2) [Contribution 2]...",
+        "原文示例": "Our main contributions are: 1) A generalization of optical flow to the non-Lambertian case... 2) A depth estimation algorithm..."
+      }
+    },
+    "内容比例": {
+      "研究背景与领域确立": "20% - 30%",
+      "现有局限与研究空间 (Research Gap)": "40% - 50%",
+      "本文方法与核心贡献": "20% - 30%"
+    }
+  },
+  "Related Work": {
+    "章节结构": [
+      {
+        "子节名称": "Depth from Light-Field Cameras",
+        "核心任务": "回顾光场相机深度估计的现有方法，指出其严重依赖Lambertian假设，在处理光泽/高光表面时存在局限性，并分析近期处理高光方法的不足（如二向色模型的失效）。"
+      },
+      {
+        "子节名称": "Shape from Shading (及光照相关方法)",
+        "核心任务": "回顾基于阴影和光照恢复形状的方法，指出其在未知BRDF、自然光照以及非Lambertian表面下的约束不足、噪声敏感问题，以及未利用相机运动的局限。"
+      },
+      {
+        "子节名称": "Differential Motion Theory",
+        "核心任务": "回顾差分运动理论，将其作为本文的理论基石，并详细对比本文方法与该经典理论在相机运动类型（纯平移vs平移+旋转）、视角变化处理及求解目标上的核心差异，凸显本文的理论创新。"
+      }
+    ],
+    "内容逻辑": "该章节采用了“漏斗式（Funnel）”的收敛逻辑。首先从最直观的应用场景（光场相机深度估计）切入，指出其在非漫反射表面的失效；接着扩展到更广泛的底层视觉问题（Shape from Shading等），分析其在未知BRDF和自然光照下的理论局限；最后收敛到本文的核心理论基础（Differential Motion Theory），通过详细的对比分析，顺理成章地引出本文的理论贡献。各子节之间通过“指出前序方法假设的破灭（如Lambertian假设、dichromatic model）”作为过渡，层层递进地论证本文方法的必要性和优越性。",
+    "论证手法": [
+      "假设破除法：通过指出已有方法依赖的强假设（如Lambertian假设、dichromatic model、已知光源）在本文目标场景（general glossy, unknown BRDF）下不成立，来论证现有方法的局限性。",
+      "逐点对比法：在介绍最相关的理论基础时，使用“First... Second...”等结构，将本文方法与经典理论进行多维度的逐点对比，清晰界定本文的创新边界。",
+      "文献归纳与反例举证：通过大量引用归纳某类方法的普遍特征，并举出具体反例（如“the dichromatic model fails to hold for materials like metals”）来证明其失效。",
+      "降维/特例分析：指出经典方法在特定条件下的简化（如“assumes a constant viewing direction”），并论证本文在更复杂条件（如“account for viewpoint variations”）下的理论推导必要性。"
+    ],
+    "关键句式模板": {
+      "引入领域并指出普遍局限": "Many [methods] for [task] have been proposed. However, most of them rely on the [assumption] and work poorly on [specific case]. (原文示例: Many depth estimation methods for light-field cameras have been proposed. However, most of them rely on the Lambertian assumption and work poorly on glossy surfaces.)",
+      "介绍近期改进及其残留缺陷": "Recently, there are some works that try to deal with [problem]. [Author] proposed a [method]... However, [limitation/failure condition]. (原文示例: Recently, there are some works that try to deal with specularity. Tao et al. proposed a clustering method... However, they attempt a binary classification of pixels into either Lambertian or specular, which cannot handle general glossy surfaces.)",
+      "强调本文方法的优越性与突破": "In contrast, our model can work on [general case], and can also recover [additional feature], which has not been achieved by previous [approaches]. (原文示例: In contrast, our model can work on general 1-lobe BRDFs, and can also recover reflectance in addition to shape, which has not been achieved by previous light-field shape acquisition approaches.)",
+      "建立理论联系并列举核心差异": "Our theoretical contributions are most closely related to the [theory] proposed by [Author]. ... Our work has [number] major differences. First, in contrast to [their method], we [our method]... (原文示例: Our theoretical contributions are most closely related to the differential theory proposed by Chandraker. ... Our work has three major differences. First, in contrast to the differential motions he uses, which contain both translations and rotations, we only have translations in light-field cameras.)"
+    },
+    "内容比例": {
+      "Depth from Light-Field Cameras": "30%",
+      "Shape from Shading (及光照相关方法)": "30%",
+      "Differential Motion Theory": "40%"
+    }
+  },
+  "Methodology": {
+    "章节结构": [
+      {
+        "子节名称": "Methodology Overview (整体框架概述)",
+        "核心任务": "介绍模型的整体架构（两阶段跨域迁移学习框架），明确要解决的核心痛点（红外数据稀缺/小样本条件），并概述核心原理。"
+      },
+      {
+        "子节名称": "Pre-training on Visible-light Datasets (可见光预训练阶段) [基于原文推断]",
+        "核心任务": "详细说明第一阶段在大规模可见光数据集上构建和预训练特征提取与检测架构的具体网络设计与训练过程。"
+      },
+      {
+        "子节名称": "Cross-domain Transfer Learning Strategy (跨域迁移学习策略) [基于原文推断]",
+        "核心任务": "深入阐述第二阶段的“独特迁移技巧”，详细解释CNN骨干冻结、Transformer参数共享以及FFN微调的具体操作与理论依据。"
+      },
+      {
+        "子节名称": "Loss Functions and Optimization (损失函数与优化) [基于原文推断]",
+        "核心任务": "定义预训练和迁移阶段的具体损失函数及整体优化目标。"
+      }
+    ],
+    "内容逻辑": "采用“总-分”结构与“时间/流程”顺序相结合的逻辑。首先通过Overview段落总述整体框架和核心目标，确立研究基调；随后按模型训练的时间流（先源域预训练，后目标域迁移）展开具体技术细节。过渡方式上，通过“Its core principle involves... then...”等逻辑连接词，将宏观目标自然平滑地过渡到微观的两阶段具体操作机制，形成从“为什么做（aiming to address）”到“怎么做（core principle involves）”的严密逻辑链条。",
+    "论证手法": [
+      "目标导向论证：通过明确痛点（infrared data scarcity / few-shot learning conditions）来论证采用跨域迁移学习框架的必要性与合理性。",
+      "机制拆解与枚举：将抽象的“unique transfer learning trick”拆解为三个具体且可复现的操作（freezing CNN backbone, parameter sharing, fine-tuning FFNs），增强方法的清晰度与可信度。",
+      "跨域映射对比：通过对比源域（large-scale visible-light datasets）和目标域（infrared domain）的数据特征，论证视觉信息跨模态/跨域迁移的可行性。"
+    ],
+    "关键句式模板": {
+      "Overall Framework": "[Model Name] employs a [Framework Type] framework, aiming to address the challenge of [Specific Task] under [Specific Condition]. (原文示例: TLA-DETR employs a two-stage cross-domain transfer learning framework, aiming to address the challenge of efficient detection and location of indoor thermal adaptation behaviors under infrared data scarcity.)",
+      "Core Principle / Pipeline": "Its core principle involves [Step 1 Action] on [Source Data], then [Step 2 Action] to the [Target Data] through [Specific Technique] to achieve [Final Goal]. (原文示例: Its core principle involves pre-training a robust feature extraction and detection architecture on large-scale visible-light datasets, then transferring visual information to the infrared domain through a unique transfer learning trick... to achieve efficient domain adaptation.)",
+      "Specific Strategy Detail": "...through a unique [Method Name] ([Operation 1] + [Operation 2] + [Operation 3]) to achieve [Objective]. (原文示例: ...through a unique transfer learning trick (freezing the CNN backbone + parameter sharing of the Transformer encoder/decoder + fine-tuning only the FFNs) to achieve efficient domain adaptation.)"
+    },
+    "内容比例": {
+      "Methodology Overview": "15%",
+      "Pre-training Stage Details": "30%",
+      "Transfer Learning & Domain Adaptation": "45%",
+      "Loss Functions & Optimization": "10%"
+    }
+  },
+  "Experiments": {
+    "章节结构": [
+      {
+        "子节名称": "Experimental Setup / Datasets and Metrics",
+        "核心任务": "介绍实验所用的数据集（如HCInew, Inria, Stanford等）、评估指标（如MSE, Bad Pix）以及基线对比方法，交代实验的基础环境。"
+      },
+      {
+        "子节名称": "Main Results (Quantitative and Qualitative Comparison)",
+        "核心任务": "在标准公开数据集上展示所提方法与SOTA方法的定量指标对比（表格）和定性可视化结果（深度图、误差图），确立方法的优越性。"
+      },
+      {
+        "子节名称": "Sensitivity and Robustness Analysis",
+        "核心任务": "通过控制变量实验，评估模型对特定物理属性（如透明度、反射率、噪声、视差范围）渐变或极端变化的敏感性和鲁棒性极限。"
+      },
+      {
+        "子节名称": "Ablation Study",
+        "核心任务": "验证网络核心架构或特定创新模块（如双分支结构、自适应模块、平面先验）的有效性及其对整体性能的独立贡献。"
+      }
+    ],
+    "内容逻辑": "整体遵循“从宏观到微观、从基础验证到深度剖析”的递进逻辑。首先在标准条件下通过主实验（Main Results）确立方法的SOTA地位；随后通过敏感性分析（Sensitivity Analysis）引入控制变量，探究模型在极端或渐变物理条件（如透明度降低、反射率增加）下的性能边界和失效极限；最后通过消融实验（Ablation Study）向内解构，验证各个创新组件的必要性。子节间常通过“In addition to...”、“Since there are...”、“We then evaluated...”等过渡句实现自然衔接，并在分析中客观陈述方法的优势（Strength）与局限性（Weakness），形成完整的论证闭环。",
+    "论证手法": [
+      "定量与定性结合：使用表格展示MSE、Bad Pix等客观指标，同时辅以深度图和误差图（Error map）进行直观的视觉对比验证。",
+      "控制变量法：在敏感性分析中，固定场景其他属性，单一梯度改变透明度（如从90%降至20%）或反射率，观察算法性能衰减曲线和失效极限。",
+      "对比论证：选取多种代表性基线方法（如Distg., OACC, ST），在相同数据集和相同挑战（如非朗伯体表面、透明/镜面）下进行横向对比。",
+      "消融验证：通过移除或替换核心模块（如两分支结构），对比性能差异以证明特定网络设计的必要性。",
+      "客观辩证分析：在展示优势的同时，主动暴露模型的弱点（如前景透明度过低时背景重建困难），增强学术严谨性和可信度。"
+    ],
+    "关键句式模板": {
+      "Experimental Setup": {
+        "模板": "We evaluate our approach through experiments conducted on [Datasets] for comprehensive comparison. Based on the metrics defined in [Ref], ...",
+        "原文示例": "We evaluate our approach through experiments conducted on HCInew, Inria, Stanford, and UrbanLF datasets for comprehensive comparison."
+      },
+      "Main Results": {
+        "模板": "The experimental results demonstrate that our method surpasses state-of-the-art [approaches/methods]. / As illustrated in Fig. [X], the proposed [Method] obtains accurate results under [Conditions].",
+        "原文示例": "the experimental results demonstrate that our method surpasses state-of-the-art appr... / the proposed ACO obtains accurate results under different transparency."
+      },
+      "Sensitivity Analysis": {
+        "模板": "In order to explore the sensitivity of the algorithms to [Factor], we conduct a control variable experiment on [Dataset] with different [Levels]. / We still use the idea of controlling variables to gradually [change] the [Property].",
+        "原文示例": "in order to explore the sensitivity of the algorithms to transparency, we conduct a control variable experiment on the data David with different transparency."
+      },
+      "Ablation Study": {
+        "模板": "We conduct a set of ablation experiments to demonstrate the importance of the [Module/Structure] design.",
+        "原文示例": "experiments as a set of ablation experiments to demonstrate the importance of the two-branch structure design."
+      },
+      "Strength & Weakness": {
+        "模板": "The strength of our method is that [Advantage]. The weakness of our method is that [Limitation].",
+        "原文示例": "The strength of our method is that it is not significantly affected by the transparency... The weakness of our method is that it is challenging to reconstruct background objects when..."
+      }
+    },
+    "内容比例": {
+      "Experimental Setup / Implementation Details": "10%",
+      "Main Results (Quantitative and Qualitative)": "40%",
+      "Sensitivity and Robustness Analysis": "30%",
+      "Ablation Study": "20%"
+    }
+  },
+  "Conclusion": {
+    "章节结构": [
+      {
+        "子节名称": "研究总结与核心贡献",
+        "核心任务": "回顾研究背景与目的，高度概括本文提出的核心方法、框架或数据集，明确研究的主要贡献和核心价值。"
+      },
+      {
+        "子节名称": "具体发现与技术细节回顾",
+        "核心任务": "重述方法的关键技术点、理论推导过程、模型优化组件或机制创新，深化对核心贡献的理解，展示技术深度。"
+      },
+      {
+        "子节名称": "实验验证与优势对比",
+        "核心任务": "总结实验结果，强调模型或方法的有效性和优越性，并通过与现有基线、传统方法或先前研究的对比突出创新价值。"
+      },
+      {
+        "子节名称": "局限性与未来工作",
+        "核心任务": "客观审视当前研究在数据、场景、理论或验证范围上的局限性，并顺理成章地提出未来的改进方向、扩展计划或更广泛的应用前景。"
+      }
+    ],
+    "内容逻辑": "整体呈现“总-分-总”与“回顾-深化-展望”的递进逻辑。首先从宏观层面重申研究目标和核心贡献（总）；接着深入到具体的技术细节、理论发现和实验验证，通过对比和数据证明方法的有效性（分）；最后跳出当前研究，客观审视局限性，并引出未来的研究方向（展望）。过渡方式上，通常使用“To address.../In this paper...”引入总结，用“Experiments validate.../A series of experiments...”过渡到验证部分，最后用“Future work includes.../The current validation is based on...”等转折或顺承词引出未来展望，逻辑链条严密且自然。",
+    "论证手法": [
+      "归纳总结：对全文的核心方法、数据集和实验结果进行高度概括，提炼核心贡献（如概括TLA-DETR框架和TABD数据集的建立）。",
+      "对比论证：将提出的方法与现有基线、传统机制或先前研究进行对比，突出本方法的独特优势（如指出传统线性融合的缺陷，强调多源信息融合的优势；或对比文献[5,6,7]突出处理SVBRDF的能力）。",
+      "数据与结果支撑：引用具体的实验结果、类别数量、数据集名称或设备型号来证明方法的有效性和泛化能力（如26-category、MERL dataset、Lytro Illum）。",
+      "理论推导重申：简要回顾理论证明或数学推导的核心结论，为方法的有效性提供坚实的理论背书（如重申直接形状恢复的不可能性及推导出的不变方程）。",
+      "客观评估（局限性分析）：通过指出样本量、场景单一等客观限制，增强研究的严谨性，并为未来工作提供合理动机（如指出limited participant group和single building context）。"
+    ],
+    "关键句式模板": {
+      "研究总结与核心贡献": [
+        {
+          "句式模板": "In this paper, we propose a novel [method] for [task] from [data/source].",
+          "原文示例": "In this paper, we propose a novel BRDF-invariant shape and reflectance estimation method for glossy surfaces from light-field cameras."
+        },
+        {
+          "句式模板": "To address the core requirements for [problem], this work constructs [dataset], proposes and validates [model] – a framework for [task].",
+          "原文示例": "To address the core requirements for intelligent detection of human thermal comfort in indoor building environments, this work constructs TABD, proposes and validates TLA-DETR – a framework for identifying and locating human thermal adaptation behaviors based on infrared data."
+        }
+      ],
+      "具体发现与技术细节回顾": [
+        {
+          "句式模板": "By utilizing [theory/technique], we show that [finding 1]. However, for [condition], we derive [finding 2].",
+          "原文示例": "By utilizing the differential motion theory, we show that direct shape recovery is not possible for general BRDFs. However, for a 1-lobe BRDF that depends only on half-angle, we derive an SVBRDF-invariant equation relating depth and normals."
+        },
+        {
+          "句式模板": "According to the characteristics of [data], multiple key optimization components are incorporated into [module] to effectively enhance [capability].",
+          "原文示例": "According to the characteristics of infrared data, multiple key optimization components are incorporated into the encoder/decoder to effectively enhance the model’s spatio-temporal feature extraction and anti-interference capabilities."
+        }
+      ],
+      "实验验证与优势对比": [
+        {
+          "句式模板": "Experiments validate our algorithm on [datasets], as well as real-world data taken with [equipment].",
+          "原文示例": "Experiments validate our algorithm on most material types in the MERL dataset, as well as real-world data taken with the Lytro Illum."
+        },
+        {
+          "句式模板": "[Feature] can also be handled by our method, while this is not possible using [references].",
+          "原文示例": "Spatially-varying BRDFs can also be handled by our method, while this is not possible using [5, 6, 7]."
+        },
+        {
+          "句式模板": "A series of experiments conducted on [dataset] validate the superiority of [model] across multiple dimensions.",
+          "原文示例": "A series of experiments conducted on TABD validate the superiority of TLA-DETR across multiple dimensions."
+        }
+      ],
+      "局限性与未来工作": [
+        {
+          "句式模板": "Finally, since we showed that [limitation/ambiguity], future work includes deriving [future task].",
+          "原文示例": "Finally, since we showed that there is actually inherent ambiguity in light-fields for unknown shape and general multi-lobe reflectance, future work includes deriving its ambiguity-space..."
+        },
+        {
+          "句式模板": "Future implementation should focus on integrating [component A] with [component B], where [expected outcome].",
+          "原文示例": "Future implementation should focus on integrating this behavioral feedback loop with standard PMV calculations, where recognized behaviors dynamically adjust model parameters to achieve higher assessment accuracy."
+        },
+        {
+          "句式模板": "The current validation is based on [limitation]. We will consider [improvement] to ensure robust performance across [scenarios].",
+          "原文示例": "The current validation is based on a limited participant group and a single building context. We will consider individual differences and environmental diversity to ensure robust performance across varied building scenarios..."
+        }
+      ]
+    },
+    "内容比例": {
+      "研究总结与核心贡献": "20%",
+      "具体发现与技术细节回顾": "30%",
+      "实验验证与优势对比": "25%",
+      "局限性与未来工作": "25%"
+    }
+  }
+}

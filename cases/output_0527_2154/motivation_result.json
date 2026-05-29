@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Real-world light field scenes inherently mix diverse reflectance properties, yet current models fail to generalize across domains and suffer from severe data imbalance during joint training, especially since explicit material classification is unfeasible at low angular resolutions. To resolve this, we introduce EPINet4Dir V3, a lightweight unified baseline that leverages a dual-mask multi-directional EPI architecture and domain-balanced sampling to robustly estimate depth across Lambertian, Non-Lambertian, and mixed domains without relying on explicit material priors.\n\nINTRO_HOOK: Open by emphasizing that real-world light field scenes are inherently complex mixtures of Lambertian, Non-Lambertian, and mixed reflectances, rendering single-domain tailored models fundamentally inadequate for practical and robust deployment.\n\nGAP_BRIDGE: Transition by exposing the critical flaw in \"classify-then-estimate\" pipelines—specifically proving that 9×9 angular resolution is theoretically insufficient for frequency-domain material classification—thereby justifying the urgent need for an implicit, unified architecture paired with a domain-balanced training strategy.\n\nMETHOD_JUSTIFY: Justify the EPINet4Dir V3 design by explaining how the dual-mask (medium and angular direction) and multi-directional EPI mechanisms implicitly capture diverse geometric and texture features across reflectance types, while the domain-balanced sampling directly neutralizes the severe data distribution imbalance across the five joint-training datasets.\n\nEXPERIMENT_VALIDATE: Validate the motivation by demonstrating that EPINet4Dir V3 achieves a superior overall MAE of 0.1795 with massive error reductions in both Lambertian (37%) and Non-Lambertian (41%) domains, while simultaneously providing rigorous quantitative evidence that falsifies the 9×9 angular frequency-domain material classification hypothesis.\n\nCONCLUSION_ECHO: Echo the motivation by concluding that integrating a dual-mask multi-directional EPI architecture with domain-balanced training successfully establishes a robust, lightweight unified baseline for mixed-reflectance scenes, while our falsification of low-resolution frequency-domain classification redirects future light field research toward more practical, unified processing paradigms.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Real-world light field scenes inherently mix diverse reflectance properties, yet current models fail",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Real-world light field scenes inherently mix diverse reflectance properties, yet",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Real-world light field scenes inherently mix diverse reflectance properties, yet",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Unified Multi-Domain Depth Estimation\n**Problem**: Current light field depth estimation models are typically tailored for single reflectance properties, lacking a unified baseline for mixed scenes, and suffer from severe data distribution imbalance during multi-domain joint training.\n**Significance**: Real-world scenes inherently contain mixed reflectance characteristics; models failing to generalize across Lambertian, Non-Lambertian, and mixed domains severely limit the practical",
+  "candidates": [
+    {
+      "direction": "Unified Multi-Domain Depth Estimation",
+      "problem": "Current light field depth estimation models are typically tailored for single reflectance properties, lacking a unified baseline for mixed scenes, and suffer from severe data distribution imbalance during multi-domain joint training.",
+      "significance": "Real-world scenes inherently contain mixed reflectance characteristics; models failing to generalize across Lambertian, Non-Lambertian, and mixed domains severely limit the practical deployment and robustness of light field technologies.",
+      "approach": "The project introduces the lightweight EPINet4Dir V3 model featuring dual-mask modeling and multi-directional EPI mechanisms, coupled with a domain-balanced sampling strategy across five diverse datasets to unify multi-domain processing.",
+      "key_claim": "By integrating a dual-mask multi-directional EPI architecture with domain-balanced training, this project establishes a robust and lightweight unified baseline for light field depth estimation across diverse reflectance domains."
+    },
+    {
+      "direction": "Frequency-Domain Material Classification Boundaries",
+      "problem": "The research community harbors a misconception that low angular resolution light fields (e.g., 9x9) can effectively classify materials (diffuse vs. specular) using frequency-domain features analogous to MRI k-space analysis.",
+      "significance": "This flawed assumption misdirects research efforts toward ineffective algorithmic designs and inadequate hardware configurations, fundamentally stalling the progress of frequency-based light field material analysis.",
+      "approach": "The project rigorously falsifies the 'MRI-like angular frequency analysis' hypothesis through four independent analytical methods and quantitatively defines the resolution boundary by comparing effective non-DC frequency points with BRDF requirements.",
+      "key_claim": "By strictly falsifying the viability of frequency-domain material classification at 9x9 angular resolution, this work establishes clear hardware and theoretical boundaries to prevent futile research efforts in low-resolution light field analysis."
+    },
+    {
+      "direction": "EPI Architecture Performance Ceilings",
+      "problem": "Epipolar Plane Image (EPI) architectures exhibit a distinct performance ceiling in complex Lambertian scenes, yet the community lacks a systematic understanding of the root causes, such as edge assumption flaws and Ground Truth (GT) degradation.",
+      "significance": "Without identifying the theoretical performance lower bounds and fundamental failure modes of EPI methods, researchers risk blindly optimizing network structures without overcoming intrinsic bottlenecks, hindering ultimate depth estimation accuracy.",
+      "approach": "The project systematically evaluates the performance limits of EPI methods on large-scale mixed datasets, deeply analyzes root causes like view-consistency edge flaws and GT degradation, and quantitatively determines the theoretical performance bounds via resolution scaling and GT exclusion experiments.",
+      "key_claim": "This project systematically probes and defines the performance ceiling of EPI architectures in complex Lambertian scenes, uncovering intrinsic bottlenecks to guide the design of next-generation light field depth estimation frameworks."
+    }
+  ]
+}

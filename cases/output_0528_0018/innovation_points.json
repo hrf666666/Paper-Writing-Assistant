@@ -1,0 +1,59 @@
+[
+  {
+    "创新点名称": "基于双掩码与多方向EPI的统一光场深度估计架构",
+    "创新点工作内容": [
+      "设计并实现了结合介质掩码（Medium Mask）与角度方向掩码（Angular Direction Mask）的双掩码建模机制。",
+      "构建了多方向EPI处理网络（EPINet4Dir V3），在单一模型内统一处理Lambertian、Non-Lambertian和Mixed（城市混合）三种复杂场景。",
+      "采用紧凑的网络设计，将模型参数量控制在754K，并在384×384全分辨率下进行端到端训练。"
+    ],
+    "创新点价值": "打破了传统光场深度估计模型难以同时兼顾漫反射与非漫反射场景的局限，提供了一个轻量且高效的统一基线模型。在整体性能上实现了MAE 0.1795，证明了多方向EPI结合双掩码在混合场景下的有效性。",
+    "支撑证据": "最终模型EPINet4Dir V3在Epoch 45达到Overall MAE 0.1795，Mixed域MAE 0.1687；模型参数量仅为754K；相比基线模型，Overall MAE下降26%，Lambertian和Non-Lambertian域分别下降37%和41%。",
+    "novelty_score": 0.7,
+    "novelty_verdict": "partially_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于双掩码与多方向EPI的统一光场深度估计架构",
+      "contribution_statement": "We identify that existing light field angular frequency domain material classifications have strict physical limits, providing a theoretical falsification of prior assumptions."
+    }
+  },
+  {
+    "创新点名称": "光场角度频域材质分类的物理极限界定与理论证伪",
+    "创新点工作内容": [
+      "提出“类MRI角度频率分析”假设，即不同材质在光场角度采样中产生不同的频谱分布，可通过角度2D-FFT进行区分。",
+      "设计并执行了四种独立的频域分析方法（2D-FFT能量比、逐频点熵、角度自相关、特定域光谱特征）对该假设进行严格验证。",
+      "从信号处理与采样定理角度，定量分析了9×9角度分辨率下的奈奎斯特频率限制及有效频点数量。"
+    ],
+    "创新点价值": "做出了重要的“负面发现”科学贡献，严格证伪了在当前主流9×9角度分辨率下进行频域材质分类的可行性。明确了光场频域分析的硬件物理底线，指出未来研究至少需要17×17角度采样，避免了学术界在低角度分辨率下盲目探索，为光场传感器设计和算法研究提供了明确的理论指导。",
+    "支撑证据": "四种分析方法一致表明9×9采样的非DC能量占比<3%，各域之间无统计学显著差异（p>0.05）；理论推导证明9×9采样仅提供约4个有效非DC频点，与MRI k空间存在约100倍的采样密度差距；报告明确将此结论列为本研究“最重要的科学贡献”。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "光场角度频域材质分类的物理极限界定与理论证伪",
+      "contribution_statement": "We propose a unified light field depth estimation architecture based on dual-mask and multi-directional EPI to overcome these theoretical bottlenecks."
+    }
+  },
+  {
+    "创新点名称": "面向多域长尾分布的领域平衡训练与架构极限诊断",
+    "创新点工作内容": [
+      "针对光场数据集中不同领域场景数量极度不均的问题，引入领域平衡采样（Domain-balanced sampling）机制以优化多领域联合训练。",
+      "实施分辨率缩放策略，将训练分辨率从256提升至384，以捕捉更丰富的空间纹理和EPI斜率特征。",
+      "对Lambertian域的性能瓶颈进行根因分析，界定了EPI架构在复杂纹理场景下的理论性能天花板。"
+    ],
+    "创新点价值": "有效缓解了多领域联合训练时少数领域被主导领域梯度淹没的问题，大幅提升了模型在数据稀缺领域的泛化能力。同时明确了EPI方法的架构极限，指出突破性能瓶颈必须依赖非EPI方法或混合架构，为后续研究指明了工程优化与架构演进的方向。",
+    "支撑证据": "领域平衡采样与分辨率提升使Lambertian域MAE从基线的0.387降至0.2443（提升37%），其中分辨率提升单独贡献了26%的改善；Non-Lambertian域MAE从0.411降至0.2442（提升41%）；根因分析确立了EPI方法在复杂Lambertian场景下MAE约等于0.20的下界估计。",
+    "novelty_score": 0.7,
+    "novelty_verdict": "partially_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "面向多域长尾分布的领域平衡训练与架构极限诊断",
+      "contribution_statement": "We demonstrate the effectiveness and architectural limits of our model through domain-balanced training on multi-domain long-tail distributions."
+    }
+  }
+]

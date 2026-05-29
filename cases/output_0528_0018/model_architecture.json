@@ -1,0 +1,50 @@
+{
+  "总体架构": "该模型（Unified Dual-Mask Physical Model）旨在解决非朗伯体光场深度估计问题。总体架构接收多视角光场图像作为输入，首先通过角向快速傅里叶变换（Angular FFT）模块进行材质分类，生成朗伯体与非朗伯体的双掩码（Dual-Mask）。随后，特征分别流入纯散焦线索分支（Defocus Branch）和角向频率线索分支（Angular Frequency Branch）提取深度特征。最后，利用双掩码物理模型对两路特征进行自适应加权融合，输出最终的深度图。",
+  "模块详情": [
+    {
+      "模块名": "角向FFT材质分类模块 (Angular FFT Material Classification)",
+      "输入": "光场角向维度图像，维度为 [B, U, V, H, W, C]",
+      "核心操作": "对角向维度进行2D FFT变换提取频域特征，通过多层感知机（MLP）进行材质分类，生成朗伯体和非朗伯体区域的概率掩码。",
+      "输出": "材质分类双掩码，维度为 [B, 2, H, W]，包含 Lambertian Mask 和 Non-Lambertian Mask",
+      "关键公式": "F(u,v) = \\sum_{x}\\sum_{y} I(x,y) e^{-j2\\pi(ux/M + vy/N)}, M_{dual} = \\text{Softmax}(\\text{MLP}(\\text{FFT}(I_{angular})))"
+    },
+    {
+      "模块名": "纯散焦特征提取模块 (Defocus Feature Extractor / DefocusOnlyNet)",
+      "输入": "中心视角图像及多视角散焦图像，维度为 [B, C, H, W]",
+      "核心操作": "不依赖极线几何（pure_defocus_no_epi），通过多尺度卷积提取散焦模糊线索，构建散焦深度特征图，专门用于处理非朗伯体区域。",
+      "输出": "散焦深度特征，维度为 [B, C', H, W]",
+      "关键公式": "F_{defocus} = \\text{Conv}(I_{ref}, \\text{DefocusStack})"
+    },
+    {
+      "模块名": "角向频率深度特征模块 (Angular Frequency Depth Extractor / AngularFreqDepthNetV2)",
+      "输入": "光场极平面图像（EPI）或角向切片，维度为 [B, U, V, H, W, C]",
+      "核心操作": "在角向和空间维度进行频率域分析，提取极线斜率的高频和低频特征，增强朗伯体区域的深度鲁棒性。",
+      "输出": "角向频率深度特征，维度为 [B, C'', H, W]",
+      "关键公式": "F_{freq} = \\text{FreqConv}(\\text{FFT2D}(EPI))"
+    },
+    {
+      "模块名": "双掩码物理融合模块 (Dual-Mask Physical Fusion)",
+      "输入": "散焦特征 F_{defocus}，角向频率特征 F_{freq}，双掩码 M_{dual}",
+      "核心操作": "根据物理成像模型，利用双掩码对两种特征进行空间自适应加权。朗伯体区域信任角向频率特征，非朗伯体区域信任散焦特征。",
+      "输出": "最终融合深度特征，经回归头输出深度图，维度为 [B, 1, H, W]",
+      "关键公式": "D_{final} = M_{lamb} \\odot \\text{MLP}(F_{freq}) + M_{non-lamb} \\odot \\text{MLP}(F_{defocus})"
+    }
+  ],
+  "模块连接": "输入光场数据首先并行进入“角向FFT材质分类模块”和两个特征提取分支（“纯散焦特征提取模块”与“角向频率深度特征模块”）。材质分类模块输出的双掩码与两个分支提取的深度特征图在通道维度拼接后，输入到“双掩码物理融合模块”。融合模块利用掩码进行逐元素加权求和，最后通过1x1卷积回归出单通道深度图。",
+  "关键超参数": {
+    "patch_size": 384,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "scheduler": "CosineAnnealingLR",
+    "total_epochs": 30,
+    "grad_clip_norm": 1.0,
+    "loss_function": "L1Loss",
+    "sampler": "WeightedRandomSampler",
+    "domain_weights": {
+      "Urban": 1.1,
+      "Lambertian": 9.75,
+      "Non-Lambertian": 39.0
+    }
+  }
+}

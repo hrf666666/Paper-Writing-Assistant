@@ -1,0 +1,26 @@
+name: academic_writing_style
+description: "IEEE Transactions 顶刊学术写作风格指导 - 柔性引导 AI 学习顶刊风格特点"
+type: style_guide
+version: "1.0"
+
+# 适用范围：所有章节生成时自动应用
+triggers:
+  - chapter1_introduction
+  - chapter2_related_work
+  - chapter3_methodology
+  - chapter4_experiments
+  - chapter5_conclusion
+  - abstract
+
+# 依赖：引用策略
+dependencies:
+  - citation_strategy
+
+outputs:
+  - name: style_constraints
+    type: dict
+    description: "写作风格约束字典，注入到各章节 prompt"
+
+prompt_template: style_guide.md
+quality_check: true
+quality_threshold: 70.0

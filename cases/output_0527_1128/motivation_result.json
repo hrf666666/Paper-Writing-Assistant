@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Traditional light field depth estimation fatally degenerates into **texture copying** in **non-Lambertian regions** due to its blind reliance on the **photo-consistency assumption**, severely hindering real-world 3D reconstruction. To break this physical bottleneck, we decouple reflection components via **MRI-like angular frequency analysis** and **dual-mask physical modeling**, applying tailored estimation strategies for diffuse, specular, and scattering regions. This **component-aware adaptive depth estimation** completely resolves non-Lambertian depth failures, enabling high-fidelity depth prediction across complex, mixed-material environments.\n\nINTRO_HOOK: Open with a striking visual contrast demonstrating how state-of-the-art light field methods perfectly reconstruct Lambertian textures but catastrophically collapse into **texture copying** on everyday specular and scattering objects. Immediately frame this not as a minor edge case, but as a fundamental physical violation of the **photo-consistency assumption** that renders current 3D vision systems unreliable in real-world, predominantly **non-Lambertian regions**.\n\nGAP_BRIDGE: Highlight that while existing methods attempt to mask out or hallucinate non-Lambertian artifacts, they lack physical interpretability and fail to model the underlying light transport and wavevector deflections. Transition to our method by arguing that true robustness requires physically decoupling reflection components via **dual-mask physical modeling** before applying specialized depth estimators, rather than forcing a single flawed **photo-consistency assumption** across all materials.\n\nMETHOD_JUSTIFY: The **MRI-like angular frequency analysis** and **dual-mask physical modeling** are explicitly designed to parse and quantify diffuse, specular, and scattering weights, replacing blind assumptions with physical BRDF constraints. Consequently, the **component-aware adaptive depth estimation** leverages these exact physical weights to route each pixel to its optimal estimator (e.g., EPI for diffuse, photometric stereo for specular), ensuring the fatal **texture copying** failure is structurally prevented.\n\nEXPERIMENT_VALIDATE: Design ablation studies that intentionally isolate **non-Lambertian regions** to prove that without our component decoupling, depth errors spike due to **texture copying**, whereas our tailored strategies maintain sub-pixel accuracy. Furthermore, include real-world mixed-material evaluations to demonstrate that our material classification and dual-mask weighting directly correlate with the elimination of fatal depth degenerations in downstream 3D reconstruction tasks.\n\nCONCLUSION_ECHO: Reiterate that the fatal flaw of the **photo-consistency assumption** in **non-Lambertian regions** is not an unsolvable anomaly, but a physical misalignment successfully corrected through our **component-aware adaptive depth estimation**. Conclude by emphasizing that by restoring physical fidelity via **dual-mask physical modeling**, this work transitions 3D reconstruction from idealized Lambertian assumptions to robust, real-world applicability.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Traditional light field depth estimation fatally degenerates into **texture copying** in **non-Lambe",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Traditional light field depth estimation fatally degenerates into **texture copy",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Traditional light field depth estimation fatally degenerates into **texture copy",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Non-Lambertian Depth Estimation Failure\n**Problem**: Traditional light field depth estimation methods, such as Epipolar Plane Image (EPI) analysis, rely heavily on the photo-consistency assumption, which fatally fails in non-Lambertian (specular and scattering) regions, causing depth predictions to degenerate into mere texture copying.\n**Significance**: Real-world environments are predominantly composed of non-Lambertian and mixed materials. The inability to accurately estimate de",
+  "candidates": [
+    {
+      "direction": "Non-Lambertian Depth Estimation Failure",
+      "problem": "Traditional light field depth estimation methods, such as Epipolar Plane Image (EPI) analysis, rely heavily on the photo-consistency assumption, which fatally fails in non-Lambertian (specular and scattering) regions, causing depth predictions to degenerate into mere texture copying.",
+      "significance": "Real-world environments are predominantly composed of non-Lambertian and mixed materials. The inability to accurately estimate depth in these regions severely compromises the reliability of 3D reconstruction and downstream vision tasks in practical applications.",
+      "approach": "The project introduces a component-aware adaptive depth estimation fusion strategy that decouples the depth estimation task based on material weights. It applies specialized strategies for diffuse (EPI), specular (photometric stereo/neighborhood propagation), and scattering regions, followed by a weighted fusion to generate a unified depth map.",
+      "key_claim": "By decoupling reflection components and applying tailored estimation strategies, this approach completely resolves the fatal depth estimation failure caused by the violation of photo-consistency in non-Lambertian regions."
+    },
+    {
+      "direction": "Lack of Physical Interpretability in Data-Driven Models",
+      "problem": "Existing deep learning-based light field models are largely black-box and data-driven, lacking explicit physical modeling of light-matter interactions, which makes it difficult to uniformly and robustly handle Lambertian, non-Lambertian, and mixed material scenes.",
+      "significance": "Without physical constraints, these models exhibit poor generalization under unseen complex lighting and mixed materials, and fail to provide physically meaningful intermediate representations, limiting their deployment in rigorous physical and geometric vision tasks.",
+      "approach": "It constructs a Dual-Mask Physical Modeling framework based on the physical assumption of the Radiance Tensor Field (RTF) rank. By generating a media mask for surface roughness and an angular mask for wavevector deflection, it estimates BRDF parameters via constrained least squares to unify the modeling of all reflection types.",
+      "key_claim": "Integrating dual-mask physical modeling transforms black-box networks into a unified, physically interpretable framework capable of adaptively processing mixed materials and complex illumination conditions."
+    },
+    {
+      "direction": "Reflection Parsing Bottleneck under Limited Angular Sampling",
+      "problem": "Light field cameras typically capture limited angular sampling (e.g., 9x9 views), creating a severe bottleneck for traditional methods attempting to distinguish complex material reflection types (diffuse, specular, scattering) from such sparse angular data.",
+      "significance": "Accurate, pixel-level material classification is a critical prerequisite for depth estimation and illumination separation in non-Lambertian scenes. Misclassification directly propagates into severe errors in subsequent geometric and physical parameter estimations.",
+      "approach": "The project proposes an MRI-inspired angular frequency analysis method that applies 2D-DFT to the 9x9 angular samples, transforming them into the angular frequency domain. It leverages spectral energy distribution characteristics (low-frequency for diffuse, high-frequency for specular, mid-frequency for scattering) to achieve lightweight, real-time material classification with O(HW) complexity.",
+      "key_claim": "By adapting MRI-inspired frequency domain analysis to sparse angular samples, this method breaks through traditional limitations to achieve highly efficient, physically grounded pixel-level classification of complex reflection types."
+    }
+  ]
+}

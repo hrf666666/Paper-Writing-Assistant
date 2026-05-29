@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "Applying 2D-DFT angular frequency analysis on the 9x9 angular sampling matrix (MRI k-space analogy) for material classification",
+      "motivation": "Traditional light field depth estimation relies on pure Lambertian assumptions and fails to distinguish specular, scattering, and diffuse reflections, causing depth estimation failure in non-Lambertian regions.",
+      "sota_gap": "Compared to heuristic highlight detection or complex CNN material segmentation, 2D-DFT parses physical wave vector changes directly in the frequency domain, reducing computational complexity to O(HW).",
+      "scenario": "Highly reflective and complex scattering material regions in the Non-lambertian_zhenglong dataset.",
+      "evidence": "Material 3-class classification (diffuse, specular, scattering) accuracy > 85% and AUC > 0.90 in Phase 1 validation.",
+      "section": "Methodology (Angular Frequency-Domain Parsing)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Dual-mask physical modeling utilizing a medium mask for pixel-level roughness and an angular direction mask for the deflection vector field",
+      "motivation": "A single mask cannot simultaneously handle spatial occlusion (geometric issue) and angular non-Lambertian reflection (physical photometric inconsistency), introducing severe noise during 3D cost aggregation.",
+      "sota_gap": "Traditional light field matching costs (e.g., EPI variance) degrade to texture copying in non-Lambertian regions; dual masks explicitly filter occlusion and highlight noise during cost volume construction.",
+      "scenario": "Urban mixed scenes containing glass curtain wall reflections and complex spatial occlusions in the UrbanLF-Syn dataset.",
+      "evidence": "Mask-guided cost aggregation reduces the val_MAE of the Non-Lambertian subset from a baseline of 0.411 to < 0.25.",
+      "section": "Methodology (Dual-Mask Physical Modeling)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Component-aware depth estimation strategy applying EPI for diffuse, photometric stereo for specular, and model correction for scattering, fused via confidence weighting",
+      "motivation": "Different reflection types have completely different physical imaging mechanisms; using a unified depth regression network causes complete failure and depth jumps in specular regions due to violated view-consistency.",
+      "sota_gap": "Compared to end-to-end black-box depth estimation networks (e.g., LFNet, EPINET) that suffer from severe blurring in specular areas, component-aware strategy ensures depth continuity at edges and reflections via physical weight fusion.",
+      "scenario": "Scenes containing mixed reflection materials like metal and plastic in HCInew and Wanner_HCI datasets.",
+      "evidence": "Overall val_MAE < 0.20, Lambertian subset val_MAE < 0.16, Non-Lambertian subset val_MAE < 0.25.",
+      "section": "Methodology (Component-Aware Depth Estimation)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Three-stage progressive validation framework with Phase Gates code-level constraints blocking subsequent training if physical hypotheses fail",
+      "motivation": "Deep learning models easily fall into local optima or overfit on small-sample non-Lambertian data; skipping physical validation for end-to-end training causes the model to lose physical interpretability.",
+      "sota_gap": "Traditional research directly optimizes a single end-to-end loss function; this framework blocks subsequent training via regex matching if physical hypotheses fail, avoiding 249 previous invalid training loops.",
+      "scenario": "Model training and hyperparameter tuning stages across all datasets, especially the small-sample Non-lambertian_zhenglong dataset.",
+      "evidence": "BRDF parameter constrained least squares estimation in Phase 2 achieves material weight error < 10%, ensuring physical consistency for Phase 3 fusion.",
+      "section": "Experimental Setup / Training Strategy",
+      "priority": "should"
+    },
+    {
+      "design_decision": "Physical Reflection Model (PRM) module based on the microfacet model to explicitly decompose pixel intensity into diffuse and specular components",
+      "motivation": "Pure data-driven feature extractors (LFFE) cannot understand the physical photometric consistency of non-Lambertian illumination, leading to artifacts during multi-view feature matching.",
+      "sota_gap": "Compared to methods using only 2D/3D CNNs to extract appearance features, PRM provides physically meaningful prior feature maps that separate view-dependent specularities from view-independent diffuse albedo.",
+      "scenario": "Highlight regions with strong view-dependence, such as glossy surfaces and metallic objects in the Non-lambertian_zhenglong dataset.",
+      "evidence": "Integrating PRM features significantly improves the signal-to-noise ratio of the 3D cost volume, supporting the overall val_MAE target of < 0.20.",
+      "section": "Methodology (Physical Reflection Model Module)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Domain-balanced inverse frequency weighted sampling via WeightedRandomSampler and 2-98 percentile truncation normalization for GT disparity",
+      "motivation": "The distribution of Lambertian and Non-Lambertian scenes is highly imbalanced, and raw disparities contain extreme outliers; direct training causes the model to bias towards the majority class and overfit to outliers.",
+      "sota_gap": "Compared to standard uniform sampling and MSE loss, inverse frequency weighted sampling and percentile truncation effectively mitigate the long-tail distribution problem, improving generalization on minority non-Lambertian scenes.",
+      "scenario": "Mixed dataset containing 209 training scenes across HCInew, Wanner_HCI, Non-lambertian_zhenglong, and UrbanLF-Syn.",
+      "evidence": "Smoother loss convergence curves during training, with Non-Lambertian subset val_MAE stably maintained at < 0.25 without severe overfitting.",
+      "section": "Experimental Setup (Datasets and Preprocessing)",
+      "priority": "should"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| Applying 2D-DFT angular frequency analys | Traditional light field depth estimation relies on | Compared to heuristic highlight detection or compl | Highly reflective and complex scattering | Material 3-class classification (diffuse | Methodology (Angular Frequency-Domain Parsing) | must |\n| Dual-mask physical modeling utilizing a  | A single mask cannot simultaneously handle spatial | Traditional light field matching costs (e.g., EPI  | Urban mixed scenes containing glass curt | Mask-guided cost aggregation reduces the | Methodology (Dual-Mask Physical Modeling) | must |\n| Component-aware depth estimation strateg | Different reflection types have completely differe | Compared to end-to-end black-box depth estimation  | Scenes containing mixed reflection mater | Overall val_MAE < 0.20, Lambertian subse | Methodology (Component-Aware Depth Estimation) | must |\n| Three-stage progressive validation frame | Deep learning models easily fall into local optima | Traditional research directly optimizes a single e | Model training and hyperparameter tuning | BRDF parameter constrained least squares | Experimental Setup / Training Strategy | should |\n| Physical Reflection Model (PRM) module b | Pure data-driven feature extractors (LFFE) cannot  | Compared to methods using only 2D/3D CNNs to extra | Highlight regions with strong view-depen | Integrating PRM features significantly i | Methodology (Physical Reflection Model Module) | must |\n| Domain-balanced inverse frequency weight | The distribution of Lambertian and Non-Lambertian  | Compared to standard uniform sampling and MSE loss | Mixed dataset containing 209 training sc | Smoother loss convergence curves during  | Experimental Setup (Datasets and Preprocessing) | should |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

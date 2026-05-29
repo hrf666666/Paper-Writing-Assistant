@@ -1,0 +1,97 @@
+\begin{tikzpicture}[
+  >=Stealth,
+  module/.style={draw, rounded corners, fill=#1, minimum width=1.8cm, minimum height=1.2cm, align=center, font=\small\sffamily, text=black, thick},
+  tensor/.style={draw, cylinder, shape border rotate=90, aspect=0.35, fill=#1, minimum width=1.5cm, minimum height=1cm, align=center, font=\scriptsize\sffamily, inner sep=1pt, thick},
+  innov/.style={draw, rounded corners, fill=orange!30, draw=orange!80, thick, dashed, minimum width=2.6cm, minimum height=1.2cm, align=center, font=\small\sffamily\bfseries, text=black},
+  loss_node/.style={draw, rounded corners, fill=red!20, draw=red!80, thick, minimum width=2.4cm, minimum height=1.2cm, align=center, font=\small\sffamily, text=black},
+  arr/.style={-{Stealth[length=2.5mm]}, thick, color=darkgray!80},
+  dash_arr/.style={-{Stealth[length=2mm]}, dashed, thick, color=orange!80},
+]
+
+% ================= Nodes =================
+
+% Input
+\node[tensor=blue!15] (input) at (0,0) {5D Light Field\\$9\!\times\!9\!\times\!H\!\times\!W$};
+
+% EPI Extraction
+\node[module=blue!20] (epi_ext) at (2.0,0) {EPI\\Extraction};
+
+% 4 EPIs
+\node[tensor=gray!15] (epi_h) at (4.0, 2.4) {EPI Hor};
+\node[tensor=gray!15] (epi_v) at (4.0, 0.8) {EPI Ver};
+\node[tensor=gray!15] (epi_d1) at (4.0, -0.8) {EPI Diag1};
+\node[tensor=gray!15] (epi_d2) at (4.0, -2.4) {EPI Diag2};
+
+% Feature Extraction
+\node[module=blue!20] (feat_h) at (6.0, 2.4) {Conv\\Block};
+\node[module=blue!20] (feat_v) at (6.0, 0.8) {Conv\\Block};
+\node[module=blue!20] (feat_d1) at (6.0, -0.8) {Conv\\Block};
+\node[module=blue!20] (feat_d2) at (6.0, -2.4) {Conv\\Block};
+
+% Fusion
+\node[module=blue!20, minimum width=2.2cm] (fusion) at (8.0, 0) {Multi-Directional\\Feature Fusion};
+
+% Regression
+\node[module=green!20] (reg) at (10.0, 0) {Depth\\Regression};
+
+% Output
+\node[tensor=green!15] (output) at (12.0, 0) {Depth Map\\$1\!\times\!H\!\times\!W$};
+
+% Core Innovations (Highlighted)
+\node[innov] (mri) at (6.0, 4.5) {MRI-like Angular\\Frequency Analysis};
+\node[innov] (dual_mask) at (8.0, -4.5) {Dual-Mask Physical Modeling\\and Inverse Wavevector Parsing};
+\node[innov] (comp) at (10.0, 4.5) {Component-Aware Adaptive\\Depth Estimation Strategy};
+
+% Loss
+\node[loss_node] (loss) at (12.0, -4.5) {L1 Loss \&\\Domain-balanced\\Sampling};
+
+% ================= Connections =================
+
+% Input to EPI
+\draw[arr] (input) -- (epi_ext);
+
+% EPI to 4 EPIs
+\draw[arr] (epi_ext) -- (epi_h);
+\draw[arr] (epi_ext) -- (epi_v);
+\draw[arr] (epi_ext) -- (epi_d1);
+\draw[arr] (epi_ext) -- (epi_d2);
+
+% 4 EPIs to Feat
+\draw[arr] (epi_h) -- (feat_h);
+\draw[arr] (epi_v) -- (feat_v);
+\draw[arr] (epi_d1) -- (feat_d1);
+\draw[arr] (epi_d2) -- (feat_d2);
+
+% Feat to Fusion
+\draw[arr] (feat_h) -- (fusion);
+\draw[arr] (feat_v) -- (fusion);
+\draw[arr] (feat_d1) -- (fusion);
+\draw[arr] (feat_d2) -- (fusion);
+
+% Fusion to Reg
+\draw[arr] (fusion) -- (reg);
+
+% Reg to Output
+\draw[arr] (reg) -- (output);
+
+% Innovation connections (Dashed)
+\coordinate (mri_out) at ($(mri.south) + (0,-0.5)$);
+\draw[dash_arr] (mri.south) -- (mri_out);
+\draw[dash_arr] (mri_out) -| (feat_h.north);
+\draw[dash_arr] (mri_out) -| (feat_v.north);
+\draw[dash_arr] (mri_out) -| (feat_d1.north);
+\draw[dash_arr] (mri_out) -| (feat_d2.north);
+
+\draw[dash_arr] (dual_mask.north) -- (fusion.south);
+\draw[dash_arr] (comp.south) -- (reg.north);
+
+% Loss connections
+\draw[arr, red!80] (output.south) -- ++(0,-1.8) -| (loss.north);
+\draw[arr, red!80, dashed] ($(loss.north) + (1.2, 1.8)$) node[above, font=\scriptsize\itshape, text=red!80]{GT Depth} -- (loss.north);
+
+% ================= Annotations =================
+\node[font=\scriptsize\itshape, text=darkgray, anchor=south] at (epi_ext.north) {Extract 4 Dir.};
+\node[font=\scriptsize\itshape, text=darkgray, anchor=south] at (fusion.north) {Concat + $1\!\times\!1$ Conv};
+\node[font=\scriptsize\itshape, text=darkgray, anchor=north] at (feat_d2.south) {Shared Weights};
+
+\end{tikzpicture}

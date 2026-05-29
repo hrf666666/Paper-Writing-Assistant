@@ -1,0 +1,38 @@
+[
+  {
+    "severity": "warning",
+    "type": "check_error",
+    "description": "检查 section_references 过程中出错: '>' not supported between instances of 'str' and 'int'",
+    "location": "checker"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 39.4，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 39.4"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 0.411，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 0.411"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 0.249，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 0.249"
+  },
+  {
+    "severity": "warning",
+    "type": "format_inconsistency",
+    "description": "全文混用 Markdown 标题和 LaTeX 块级元素（\\begin{...}），建议统一格式",
+    "location": "全文"
+  },
+  {
+    "severity": "critical",
+    "type": "unresolved_citations",
+    "description": "存在 27 个未解析的引用标记 [?]",
+    "location": "全文"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "句式特征": {
+    "转折与对比句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "However, most current depth estimation methods support only Lambertian scenes, making them unreliable for glossy surfaces.",
+      "However, real-world LF images often encounter reflective and transparent surfaces and the related regions contain depth information from the reflection and background layers..."
+    ],
+    "目的与结果句式": [
+      "To ease the optimization, we require the normal at one seed pixel to be specified.",
+      "Driven by the observation that ToM objects alone are responsible for misleading recent monocular networks, we argue that replacing them with equivalent, yet opaque objects would allow restoring an environment layout..."
+    ],
+    "强调与贡献句式": [
+      "Our key theoretical insight is a novel analysis of diffuse plus single-lobe SVBRDFs under a light-field setup.",
+      "Our model is the first to introduce dual-layer scenes into the LF depth estimation task using an end-to-end deep neural network."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "常采用“宏观背景引入”（如 'Light-field cameras have recently emerged as...' 或 'In our daily lives, we often interact with...'）或“直接指出问题/转折引入”（如 'Unfortunately, light reflection and refraction over ToM surfaces violate...'）。",
+    "段内论证逻辑": "遵循“现象描述 → 揭示矛盾/问题 → 分析现有方法局限性 → 提出本文动机/解决思路”的递进逻辑。在方法介绍段落，则采用“模块功能定义 → 具体实现机制 → 预期效果”的顺承逻辑。",
+    "段落结尾收束方式": "Introduction段落常以“总结性陈述+分点列举核心贡献”收束（如 'Our main contributions are: 1)... 2)...'）；Related Work段落常以“对比现有方法缺陷，强调本文方法的独特性或优越性”收束（如 'In contrast, our model can work on general 1-lobe BRDFs...' 或 'Therefore, in-depth research... is necessary...'）。"
+  },
+  "用词特征": [
+    "过渡词：However, Therefore, Moreover, Specifically, In contrast, In short, Nonetheless, On the one hand / On the other hand",
+    "强调词：explicitly, dramatically, remarkably, extensively, significantly, accurately, successfully",
+    "限定词：primarily, mostly, typically, often, usually, generally",
+    "学术动词与短语：emerge as, derive, propose, validate, demonstrate, address, leverage, violate, encounter, exhibit, fine-tune"
+  ],
+  "论证模式": [
+    "提出问题→分析原因→现有方案局限→给出方案 (Problem-Cause-Limitation-Solution)：引言和相关工作部分的标准范式。例如指出透明/反光表面深度估计难（问题），因为违反Lambertian假设或传感器失效（原因），现有方法依赖Lambertian或需要密集GT（局限），从而提出本文的无GT微调策略或双层解耦网络（方案）。",
+    "先总后分与贡献列举 (General-to-Specific & Contribution Listing)：摘要和引言结尾先总体概括本文提出的核心框架或理论，随后通过编号列表（1, 2, 3...）详细拆解具体的技术贡献和实验验证点。",
+    "理论推导与实验验证闭环 (Theory-then-Validation)：在方法论部分，先进行数学或物理层面的理论推导（如推导SVBRDF-invariant方程），再基于理论设计网络模块或优化先验，最后通过合成与真实数据集进行定量和定性验证。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "1. 句末引用（作为事实或观点的支撑，最常见）：'...remains a challenging problem for both computer vision algorithms and deep networks [64].' \n2. 句中/主语引用（强调特定作者或具体方法）：'Tao et al. [27] proposed a clustering method...' \n3. 括号内密集引用（用于归纳某一类相关工作）：'Many depth estimation methods for light-field cameras have been proposed [9, 13, 15, 25, 29, 30, 31].'",
+    "引用与论述的衔接方式": "1. 批评/转折衔接：引用后紧跟 'However' 指出其局限性，如 '...proposed a clustering method... However, they attempt a binary classification... which cannot handle...' \n2. 顺承/基础衔接：表明本文方法建立在引用工作之上，如 '...follow the shape estimation framework using camera motion proposed by Chandraker [5, 6, 7].' \n3. 归纳/演进衔接：用于Related Work中梳理技术脉络，如 'Early methods used CNNs... [10, 11]. More recent approaches such as AdaBins [2]... use adaptive bins...'"
+  }
+}

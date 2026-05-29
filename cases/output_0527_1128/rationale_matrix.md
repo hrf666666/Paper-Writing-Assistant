@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| Applying 2D Discrete Fourier Transform ( | Traditional methods fail to distinguish complex re | Unlike heavy CNNs extracting spatial-angular featu | Mixed material and complex illumination  | Phase 1 validation criteria: 3-class mat | Methodology - Angular Frequency Analysis | must |
+| Constructing a Dual-Mask Physical Model  | Pure data-driven models lack physical interpretabi | Overcomes black-box limitations by fitting 81 angu | Mixed scenes requiring differentiation b | Phase 2 validation criteria: BRDF parame | Methodology - Dual-Mask Physical Modeling | must |
+| Decoupling depth estimation into diffuse | Traditional EPI methods fatally degenerate into te | Completely resolves the fatal flaw of single-strat | Non-Lambertian scenes containing highly  | Key finding showing baseline EPI MAE=0.4 | Methodology - Component-Aware Depth Estimation | must |
+| Introducing a pixel-level confidence wei | Gradients from non-Lambertian regions (e.g., specu | Compared to global MSE or L1 loss, confidence weig | Training phase, particularly on complex  | Ablation study comparing convergence spe | Methodology - Loss Function / Experiments - Ablation Study | should |
+| Designing an ultra-lightweight network a | Light field data is high-dimensional (5D); traditi | Compared to million-parameter models like EPINet o | Resource-constrained deployment environm | Model parameter statistics (~108K) compa | Experiments - Efficiency and Complexity Analysis | should |
+| Extracting 4-direction Epipolar Plane Im | Single-direction EPI is susceptible to occlusion a | Compared to methods using only horizontal/vertical | Lambertian scenes with rich geometric ed | BadPix(0.07) metric comparison on HCInew | Methodology - LF Input & EPI Extraction / Experiments | nice |

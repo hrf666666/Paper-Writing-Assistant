@@ -1,0 +1,92 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+Warning--I didn't find a database entry for "lightfieldimaging3Dreconst"
+Warning--I didn't find a database entry for "depthestimationsceneunderst"
+Warning--I didn't find a database entry for "Lambertianassumptionphotoco"
+Warning--I didn't find a database entry for "nonLambertianmaterialsspecu"
+Warning--I didn't find a database entry for "EpipolarPlaneImageEPI"
+Warning--I didn't find a database entry for "EPIfocalstacks"
+Warning--I didn't find a database entry for "Lambertianassumption"
+Warning--I didn't find a database entry for "nonLambertianmaterials"
+Warning--I didn't find a database entry for "specularhighlights"
+Warning--I didn't find a database entry for "heuristicmasking"
+Warning--I didn't find a database entry for "scatteringmaterials"
+Warning--I didn't find a database entry for "earlydeeplearningEPINet"
+Warning--I didn't find a database entry for "physicalopticspriors"
+Warning--I didn't find a database entry for "attentionmechanismsreflectio"
+Warning--I didn't find a database entry for "decouplelightfield"
+Warning--I didn't find a database entry for "EPIdepthestimationlightfie"
+Warning--I didn't find a database entry for "WannerEPIstructuretensorgl"
+Warning--I didn't find a database entry for "defocusdepthestimationfocal"
+Warning--I didn't find a database entry for "Taodefocusparallaxfusionli"
+Warning--I didn't find a database entry for "specularhighlightremovalnon"
+Warning--I didn't find a database entry for "Taospecularremovallightfie"
+Warning--I didn't find a database entry for "heuristicmasklightfieldrob"
+Warning--I didn't find a database entry for "deeplearninglightfield4Dd"
+Warning--I didn't find a database entry for "EPINetEPICNNdepth"
+Warning--I didn't find a database entry for "LFNetmultiscalelightfield"
+Warning--I didn't find a database entry for "DistgNetdisentangledlightfi"
+Warning--I didn't find a database entry for "LFTransformerattentionlight"
+Warning--I didn't find a database entry for "materialawarelightfieldspe"
+Warning--I didn't find a database entry for "physicsbasedlightfieldinve"
+Warning--I didn't find a database entry for "specularseparationlightfiel"
+Warning--I didn't find a database entry for "wanner2014globally"
+Warning--I didn't find a database entry for "jeon2015accurate"
+Warning--I didn't find a database entry for "shin2018epinet"
+Warning--I didn't find a database entry for "ranftl2021vision"
+Warning--I didn't find a database entry for "li2022practical"
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 0 entries,
+            4087 wiz_defined-function locations,
+            873 strings with 8481 characters,
+and the built_in function-call counts, 104 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 19
+:= -- 27
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 1
+format.name$ -- 0
+if$ -- 3
+int.to.chr$ -- 0
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 23
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1
+stack$ -- 0
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 0
+warning$ -- 0
+while$ -- 0
+width$ -- 0
+write$ -- 22
+(There were 35 warnings)

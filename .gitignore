@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output
+output/
+workspace/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+monitor_*.sh
+
+# Codebuddy
+.codebuddy/
+
+# PDF output (large binary)
+output/**/*.pdf
+
+# Reference PDFs (large binary)
+ref_pdf/*.pdf

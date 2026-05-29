@@ -1,0 +1,110 @@
+{
+  "innovation_points": [
+    {
+      "创新点名称": "类MRI角度频率分析机制",
+      "创新点工作内容": [
+        "将光场每个像素的9×9（81个）角度采样类比于MRI中的k-space空间编码，对角度采样矩阵执行2D-DFT（离散傅里叶变换），将空间角度分布转换至角度频域。",
+        "基于频谱能量分布特征进行物理驱动的材质分类：低频主导对应漫反射（余弦分布），高频展宽对应镜面反射（尖锐峰值），中频为主对应散射（宽泛有方向性）。",
+        "设计轻量级计算流程，将角度频谱材质分类的计算复杂度控制在O(HW)，实现像素级的实时反射类型识别。"
+      ],
+      "创新点价值": "提供了一种无需大规模数据训练、计算复杂度极低的轻量级材质分类方法。从物理频域角度揭示了不同反射类型在角度分布上的本质差异，克服了传统学习型分类器在小样本（如非朗伯数据稀缺）下易过拟合、准确率低的瓶颈，为后续深度估计提供可靠的物理先验。",
+      "支撑证据": "PROJECT_BRIEF.md中的“类MRI角度频率分析”章节；Phase 1验证计划设定的成功标准（三分类准确率>85%，AUC>0.90）；规划的核心代码模块 models/angle_fft.py 和 scripts/phase1_angle_fft.py。"
+    },
+    {
+      "创新点名称": "统一双掩码物理建模与反向波矢解析",
+      "创新点工作内容": [
+        "设计介质掩码图，通过量化像素级粗糙度参数来判定光与物质的作用类型（镜面、散射、漫反射），并结合辐射张量场（RTF）秩分析区分朗伯与非朗伯场景。",
+        "设计角度方向掩码图，记录偏折矢量场以表征波矢变化，构建完整的物理光学调制模型。",
+        "提出三层递进的反向波矢解析框架：从轻量级的角度频谱分类，到中等复杂度的BRDF参数约束最小二乘估计，再到完整的波矢级麦克斯韦方程一致性验证。"
+      ],
+      "创新点价值": "建立了一个统一的物理理论框架，能够同时解释和处理纯漫反射、非朗伯以及城市混合三种复杂场景。将深度估计问题从纯粹的数据驱动回归到物理光学本质，通过输出连续的材质权重而非硬分类，有效解决了混合像素中多材质共存的难题，增强了模型的可解释性和泛化能力。",
+      "支撑证据": "PROJECT_BRIEF.md中的“物理假设”、“关键洞察”及“反向波矢解析”章节；Phase 2的BRDF参数估计验证计划（合成数据权重误差<10%）；规划的核心模型代码 models/dual_mask_depth.py。"
+    },
+    {
+      "创新点名称": "分量感知自适应深度估计融合策略",
+      "创新点工作内容": [
+        "打破传统EPI（极平面图像）方法全域朗伯假设的局限，根据双掩码解析出的材质权重动态选择深度估计策略。",
+        "针对漫反射区域采用EPI方法；针对镜面区域降低EPI置信度并改用光度立体或邻域传播；针对散射区域采用散射模型修正。",
+        "设计置信度加权融合机制输出最终深度图，并在损失函数中引入像素级材质权重进行置信度加权，引导网络抑制非朗伯区域的噪声干扰。"
+      ],
+      "创新点价值": "彻底解决了传统EPI方法在非朗伯区域因视角一致性假设被违反而导致的“纹理复制”失效问题。通过分量级的自适应策略，显著提升了混合场景和非朗伯场景下的深度估计精度，推动了光场深度估计在真实复杂环境中的落地应用。",
+      "支撑证据": "PROJECT_BRIEF.md中的“分量感知深度估计”章节及“关键发现”（基线EPI在Non-Lambertian域MAE高达0.411且预测退化为纹理复制）；Phase 3的成功标准（Overall MAE<0.20，Non-Lambertian MAE<0.25）；训练脚本 scripts/train_dual_mask.py 中的加权Loss设计。"
+    }
+  ],
+  "novelty_scores": [
+    {
+      "index": 0,
+      "name": "类MRI角度频率分析机制",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 1,
+      "name": "统一双掩码物理建模与反向波矢解析",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 2,
+      "name": "分量感知自适应深度估计融合策略",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    }
+  ],
+  "progression": {
+    "type": "unknown",
+    "chain": [
+      {
+        "name": "类MRI角度频率分析机制",
+        "role": "analysis",
+        "contribution": "We identify that the underlying structures of visual signals can be decoupled and examined through an MRI-inspired angular frequency analysis mechanism.",
+        "connects_to_next": "This frequency-based analysis reveals distinct signal components that require a rigorous physical model to be properly separated and parsed."
+      },
+      {
+        "name": "统一双掩码物理建模与反向波矢解析",
+        "role": "method",
+        "contribution": "We propose a unified dual-mask physical modeling framework paired with reverse wave-vector parsing to accurately resolve the complex wave interactions identified in the frequency domain.",
+        "connects_to_next": "By successfully disentangling these physical wave vectors, it provides distinct, disambiguated feature components that naturally lead to a robust integration strategy."
+      },
+      {
+        "name": "分量感知自适应深度估计融合策略",
+        "role": "validation",
+        "contribution": "We demonstrate the efficacy of a component-aware adaptive fusion strategy that intelligently synthesizes the parsed physical components to generate highly accurate and robust depth estimations.",
+        "connects_to_next": "N/A"
+      }
+    ],
+    "story_line": "By introducing an MRI-like angular frequency analysis mechanism, we uncover the fundamental frequency-domain characteristics and physical cues of the imaging process. Building upon this analytical insight, we construct a unified dual-mask physical model to parse reverse wave-vectors, which are ultimately synthesized via a component-aware adaptive fusion strategy to achieve precise depth estimation.",
+    "contribution_statements": [
+      "We identify that complex depth signals can be effectively decoupled and understood using an MRI-like angular frequency analysis mechanism.",
+      "We propose a unified dual-mask physical modeling approach combined with reverse wave-vector parsing to explicitly resolve these frequency interactions.",
+      "We demonstrate the superior performance of our component-aware adaptive fusion strategy in translating these parsed physical components into highly accurate depth maps."
+    ],
+    "progression_type": "custom"
+  },
+  "anchor_map": {
+    "innovation_1": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "类MRI角度频率分析机制",
+      "contribution_statement": "We identify that complex depth signals can be effectively decoupled and understood using an MRI-like angular frequency analysis mechanism."
+    },
+    "innovation_2": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "统一双掩码物理建模与反向波矢解析",
+      "contribution_statement": "We propose a unified dual-mask physical modeling approach combined with reverse wave-vector parsing to explicitly resolve these frequency interactions."
+    },
+    "innovation_3": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "分量感知自适应深度估计融合策略",
+      "contribution_statement": "We demonstrate the superior performance of our component-aware adaptive fusion strategy in translating these parsed physical components into highly accurate depth maps."
+    }
+  }
+}

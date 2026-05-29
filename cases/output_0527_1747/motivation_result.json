@@ -1,0 +1,66 @@
+{
+  "status": "confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Traditional light field depth estimation struggles with Non-Lambertian materials due to rigid Lambertian assumptions and the computational opacity of deep learning. By reframing angular sampling as an MRI-like k-space and applying 2D-DFT, we introduce a lightweight, physics-driven angular frequency analysis that accurately parses material types in O(HW) time. This approach bridges the gap between physical interpretability and real-time efficiency, enabling robust depth estimation in complex, mixed-material scenes.\n\nINTRO_HOOK: Open by contrasting the physical complexity of real-world light fields—where **Non-Lambertian reflections** violate standard depth assumptions—with the **computational opacity of deep learning** solutions. Introduce the core insight that material reflection types possess distinct, untapped **angular frequency signatures** that can be exploited for highly efficient parsing.\n\nGAP_BRIDGE: Conclude the related work by highlighting that existing parsers either collapse under **spatial-angular entanglement** in mixed scenes or demand **prohibitive computational overhead**. Pivot to the method by proposing that a fundamental **shift to the angular frequency domain** inherently disentangles material properties without requiring massive, black-box training data.\n\nMETHOD_JUSTIFY: Justify the **MRI-like k-space analogy** and subsequent 2D-DFT as a direct mathematical translation of physical reflection models into computable **spectral energy distributions** for diffuse, specular, and scattering materials. Explain that this **O(HW) physics-driven parsing** inherently satisfies the motivation for real-time, interpretable processing by bypassing heavy neural networks.\n\nEXPERIMENT_VALIDATE: Design experiments to explicitly measure **Non-Lambertian parsing accuracy** in complex regions alongside strict inference time comparisons to prove the **O(HW) efficiency** against heavy deep learning baselines. Include ablation studies on frequency-band thresholds to validate that the **spectral energy ablation** correctly maps to the underlying physical reflection types.\n\nCONCLUSION_ECHO: Reiterate that transforming angular sampling into an MRI-like frequency domain successfully **decouples material parsing** from both rigid Lambertian assumptions and expensive deep learning. Conclude by emphasizing that this **physics-grounded framework** paves the way for **real-time robust 3D reconstruction** in inherently complex, mixed-material environments.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Traditional light field depth estimation struggles with Non-Lambertian materials due to rigid Lamber",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Traditional light field depth estimation struggles with Non-Lambertian materials",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Traditional light field depth estimation struggles with Non-Lambertian materials",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "# Motivation Confirmation\n\n## Auto-selected motivation (modify if needed):\n\n**Direction**: Angular Frequency-Domain Material Parsing\n**Problem**: Traditional light field depth estimation relies on spatial textures or simple Lambertian assumptions, failing to effectively parse Non-Lambertian reflection types, while deep learning alternatives lack physical interpretability and incur high computational costs.\n**Significance**: Inaccurate identification of reflection types leads to severe depth erro",
+  "candidates": [
+    {
+      "direction": "基于物理频域的轻量级材质分类",
+      "problem": "传统学习型材质分类器依赖大规模标注数据，在非朗伯数据稀缺的小样本场景下极易过拟合，且计算复杂度高，难以满足像素级实时识别的需求。",
+      "significance": "材质分类是深度估计等下游任务的关键物理先验，分类不准确或延迟过高会直接导致复杂场景下的深度估计失效，限制光场技术的实际应用。",
+      "approach": "提出类MRI角度频率分析机制，将光场角度采样转换至角度频域，利用频谱能量分布的物理特征进行材质分类，将计算复杂度控制在O(HW)。",
+      "key_claim": "通过物理频域分析替代数据驱动的黑盒分类，实现无需大规模训练的高效、鲁棒且抗过拟合的像素级材质识别。"
+    },
+    {
+      "direction": "混合像素多材质共存的统一物理建模",
+      "problem": "现有深度估计模型通常假设场景为单一材质，无法有效表征和处理真实世界中混合像素内多材质（漫反射、镜面、散射）共存的复杂物理光学现象。",
+      "significance": "忽略混合像素的物理本质会导致模型在真实复杂场景中泛化能力差、可解释性弱，深度预测出现严重偏差。",
+      "approach": "构建统一双掩码物理建模与反向波矢解析框架，通过量化粗糙度和偏折矢量场，输出连续的材质权重而非硬分类，从物理光学本质解耦光与物质的作用类型。",
+      "key_claim": "建立统一的物理光学理论框架，通过连续材质权重和双掩码机制精准解耦混合像素，突破单一材质假设的局限。"
+    },
+    {
+      "direction": "非朗伯区域深度估计的自适应融合策略",
+      "problem": "传统极平面图像方法依赖全域朗伯假设，在非朗伯区域因视角一致性被破坏，导致严重的纹理复制和匹配失效问题。",
+      "significance": "非朗伯区域的深度缺失或错误会直接破坏整体场景的几何结构，导致基线方法预测退化，阻碍光场深度估计在真实复杂环境中的落地。",
+      "approach": "设计分量感知自适应深度估计融合策略，利用双掩码解析出的材质权重动态调整深度估计方法，并在损失函数中引入权重以抑制非朗伯噪声。",
+      "key_claim": "打破全域朗伯假设，通过分量级自适应策略和掩码引导的代价体构建，彻底解决非朗伯区域的深度估计失效问题。"
+    }
+  ]
+}

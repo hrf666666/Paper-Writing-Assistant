@@ -1,0 +1,78 @@
+{
+  "checkpoints": {
+    "phase0": {
+      "phase_name": "phase0",
+      "phase_index": 0,
+      "timestamp": 1779879369.48663,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 0.0,
+      "quality_score": -1.0
+    },
+    "phase0_5": {
+      "phase_name": "phase0_5",
+      "phase_index": "0_5",
+      "timestamp": 1779879458.584125,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 861.019957780838,
+      "quality_score": -1.0
+    },
+    "phase0_6": {
+      "phase_name": "phase0_6",
+      "phase_index": "0_6",
+      "timestamp": 1779879540.0661335,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 942.5019512176514,
+      "quality_score": -1.0
+    },
+    "phase0_7": {
+      "phase_name": "phase0_7",
+      "phase_index": "0_7",
+      "timestamp": 1779879540.0998368,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 942.5356726646423,
+      "quality_score": -1.0
+    },
+    "phase0_8": {
+      "phase_name": "phase0_8",
+      "phase_index": "0_8",
+      "timestamp": 1779879540.115057,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 942.550891160965,
+      "quality_score": -1.0
+    },
+    "phase0_9": {
+      "phase_name": "phase0_9",
+      "phase_index": "0_9",
+      "timestamp": 1779879613.1843374,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 1015.6201708316803,
+      "quality_score": -1.0
+    }
+  },
+  "state_data_keys": [
+    "project_data",
+    "ref_data",
+    "outline",
+    "reference_pool",
+    "chapters",
+    "motivation_thread",
+    "exemplar_dossier",
+    "style_profile",
+    "citation_bank",
+    "rationale_matrix",
+    "abstract",
+    "ablation_results"
+  ]
+}

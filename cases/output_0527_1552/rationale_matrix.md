@@ -1,0 +1,11 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 将9×9光场角度采样类比MRI k-space并进行2D-FFT频域分析 | 传统空间域方法难以区分复杂混合材质，且依赖空间纹理，在弱纹理或高光区域容易混淆反射类型 | 相比基于EPI斜率或CNN黑盒特征的方法，频域分析直接从物理光学频率域揭示漫反射(低频)、镜面(高频 | Non-Lambertian和Mixed场景中的弱纹理及高光溢出区域 (如Urb | 材质三分类准确率>85%，AUC>0.90，且计算复杂度严格控制在$O(HW)$ | Method: MRI-like Angular Frequency Analysis | must |
+| 设计介质掩码图(量化粗糙度)与角度方向掩码图(记录偏折矢量场)的双掩码物理调制机 | 单一掩码无法同时解耦光-物质作用类型和光线偏折几何变化，导致混合像素中多材质叠加难以量化 | 将黑盒深度学习特征转化为具有明确物理意义的参数估计，克服了传统单掩码或软注意力机制在复杂光照下物理可 | 包含多材质叠加和复杂光照的Mixed场景 (如UrbanLF-Syn中的城市建筑 | 合成数据上BRDF权重估计误差<10%，且HCI-Old数据集物理分量Groun | Method: Dual-Mask Physical Modulation | must |
+| 构建包含81个方程的约束最小二乘优化问题求解BRDF参数权重 | 需要从粗粒度的材质分类过渡到完整的物理建模，精确量化每个像素的漫反射、镜面反射和散射权重 | 相比直接通过MLP回归BRDF参数，基于81视角物理约束的最小二乘法严格保证了麦克斯韦方程的一致性， | 具有精确物理Ground Truth的合成数据集 (如HCInew和Wanner | 三层递进反向波矢解析验证了偏折矢量与麦克斯韦方程的一致性，BRDF权重拟合误差< | Method: BRDF Parameter Analytical Model | should |
+| 针对不同反射分量采用差异化深度估计分支（漫反射用EPI，镜面引入光度立体，散射用 | 传统EPI方法在非朗伯区域（如镜面反射）因视角一致性假设被违反而导致深度估计完全崩溃 | 基线EPI方法在Mixed域MAE=0.081，但在Non-Lambertian域完全失效(MAE= | Non-Lambertian主导场景及Lambertian与Non-Lamber | Non-Lambertian子集val_MAE显著下降（对比基线0.411），整 | Method: Component-Aware Depth Estimation | must |
+| 在损失函数和深度预测中引入介质掩码权重进行置信度加权融合 ($D = w_d D | 简单拼接或硬切换不同分支的深度结果会在材质交界处产生严重的深度不连续和伪影 | 相比传统的Winner-Takes-All或简单平均融合，基于物理BRDF权重的软融合保证了深度图在 | 材质交界区域（如UrbanLF-Syn中玻璃与混凝土的交界处）及Mixed场景 | 混合数据集整体val_MAE < 0.20，Lambertian子集val_MA | Method: Confidence-Weighted Fusion / Experiments: Ablation Study | must |
+| 将81视角重塑为9×9角度网格使用3D卷积，并融合4个方向（水平、垂直、两对角线 | 仅使用2D CNN会丢失角度维度的几何结构，而仅使用EPI会受限于单一方向的极线几何，无法全面捕获复 | 相比纯3D CNN（计算量大且忽略极线约束）或纯EPI网络（感受野受限），联合提取兼顾了全局角度相关 | 具有丰富纹理和复杂几何结构的Lambertian场景 (如HCInew和HCI- | Lambertian子集val_MAE < 0.16，特征提取模块的消融实验证明 | Method: LF Feature Extractor / Experiments: Ablation Study | should |
+| 采用域平衡采样（WeightedRandomSampler逆频率加权）并在5个异 | 真实世界中Non-Lambertian和Mixed场景数据稀缺，直接训练会导致模型严重偏向Lambe | 相比仅在单一数据集（如HCI）上训练或简单混合数据，逆频率加权有效缓解了长尾分布问题，提升了模型在罕 | 跨数据集泛化测试，特别是从合成域(Lambertian)到真实/复杂域(Non- | 在Non-lambertian_zhenglong和UrbanLF-Syn验证集 | Experiments: Implementation Details / Cross-Dataset Generalization | nice |

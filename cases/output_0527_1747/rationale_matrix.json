@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "Applying 2D-DFT on 9x9 angular sampling matrix to transform spatial-angular distribution into angular frequency domain.",
+      "motivation": "Traditional spatial-domain analysis fails to capture intrinsic physical differences of reflection types, and learning-based classifiers overfit on scarce non-Lambertian data.",
+      "sota_gap": "Replaces heavy data-driven 3D CNN feature extractors with an O(HW) physical frequency transform, avoiding high computational cost and black-box opacity for angular parsing.",
+      "scenario": "Pixel-level real-time material identification across all lighting conditions, especially effective for distinguishing sharp specular peaks from broad diffuse distributions.",
+      "evidence": "Phase 1 validation achieving >85% three-class accuracy and >0.90 AUC using the planned models/angle_fft.py module.",
+      "section": "Methodology: MRI-like Angular Frequency Analysis",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Classifying materials based on angular frequency energy distribution (low-freq for diffuse, high-freq for specular, mid-freq for scattering).",
+      "motivation": "Hard classification or pure data-driven clustering struggles with mixed pixels and lacks physical interpretability for complex urban or mixed scenes.",
+      "sota_gap": "Overcomes limitations of traditional BRDF fitting which requires dense angular sampling and heavy optimization, providing direct physics-driven mapping without large-scale training.",
+      "scenario": "Non-Lambertian and Mixed datasets (e.g., UrbanLF-Syn, Non-lambertian_zhenglong) where multiple reflection types coexist within a single pixel's angular profile.",
+      "evidence": "Synthesized data weight error <10% in Phase 2 BRDF parameter estimation validation.",
+      "section": "Methodology: Physics-Driven Material Parsing",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Predicting continuous Diffuse Mask and Specular Mask via a dual-mask physical decomposition module to decouple non-Lambertian reflections.",
+      "motivation": "Rigid Lambertian assumptions in traditional Epipolar Plane Image (EPI) methods cause severe 'texture copying' artifacts in highlight regions due to violated photo-consistency.",
+      "sota_gap": "Unlike binary masking or implicit attention mechanisms in prior SOTA, continuous masks explicitly model physical light transport, outputting material weights instead of hard categories to handle mixed pixels.",
+      "scenario": "High-gloss and mixed-material surfaces in HCInew and Wanner_HCI datasets where specular highlights violate standard epipolar geometry.",
+      "evidence": "Reduction of Non-Lambertian MAE to <0.25, specifically suppressing highlight-induced depth outliers.",
+      "section": "Methodology: Dual-Mask Physical Decomposition",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Using the predicted Diffuse Mask to weight and guide the construction of the epipolar cost volume before 3D regularization.",
+      "motivation": "Standard cost volume aggregation treats all angular views equally, allowing specular highlights to dominate the matching cost and corrupt depth estimation.",
+      "sota_gap": "Improves upon baseline EPI and standard 3D CNN cost volumes by explicitly down-weighting non-Lambertian angular contributions, ensuring matching relies only on Lambertian-compliant diffuse parts.",
+      "scenario": "Scenes with strong directional lighting and sharp specular reflections, particularly in the Non-lambertian_zhenglong dataset.",
+      "evidence": "Overall val_MAE < 0.20 and Lambertian subset val_MAE < 0.16, proving masking preserves standard diffuse performance while fixing specular errors.",
+      "section": "Methodology: Mask-Guided Cost Volume & 3D Regularization",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Dynamically selecting depth estimation strategies (EPI for diffuse, photometric stereo for specular, scattering correction for scattering) based on material weights.",
+      "motivation": "A single unified depth decoder cannot optimally handle the fundamentally different geometric constraints of diffuse (photo-consistency) and specular (view-dependent) reflections.",
+      "sota_gap": "Resolves the 'texture copying' failure mode of baseline EPI (which yields MAE up to 0.411 on Non-Lambertian domains) by applying specialized physical solvers per material component.",
+      "scenario": "Complex mixed scenes (UrbanLF-Syn) where diffuse, specular, and scattering regions are spatially interleaved at the pixel level.",
+      "evidence": "Phase 3 success criteria: Overall MAE < 0.20, with significant MAE drop in Non-Lambertian regions compared to single-strategy baselines.",
+      "section": "Methodology: Component-Aware Adaptive Fusion",
+      "priority": "should"
+    },
+    {
+      "design_decision": "Introducing pixel-level material weights into the loss function to guide the network to suppress noise interference from non-Lambertian regions during training.",
+      "motivation": "Standard L1/L2 depth losses penalize errors equally, causing the network to overfit to physically incorrect specular depths or struggle with scattering noise.",
+      "sota_gap": "Replaces uniform loss weighting or heuristic uncertainty estimation with physically grounded material confidence, stabilizing training on highly imbalanced Lambertian/Non-Lambertian data.",
+      "scenario": "Training phase across all 209 scenes, utilizing WeightedRandomSampler to mitigate data imbalance, particularly critical for converging on Non-lambertian_zhenglong.",
+      "evidence": "Domain-balanced sampling combined with weighted loss achieves target val_MAE < 0.25 on Non-Lambertian subset without sacrificing Lambertian accuracy (<0.16).",
+      "section": "Implementation Details: Loss Function and Training Strategy",
+      "priority": "should"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| Applying 2D-DFT on 9x9 angular sampling  | Traditional spatial-domain analysis fails to captu | Replaces heavy data-driven 3D CNN feature extracto | Pixel-level real-time material identific | Phase 1 validation achieving >85% three- | Methodology: MRI-like Angular Frequency Analysis | must |\n| Classifying materials based on angular f | Hard classification or pure data-driven clustering | Overcomes limitations of traditional BRDF fitting  | Non-Lambertian and Mixed datasets (e.g., | Synthesized data weight error <10% in Ph | Methodology: Physics-Driven Material Parsing | must |\n| Predicting continuous Diffuse Mask and S | Rigid Lambertian assumptions in traditional Epipol | Unlike binary masking or implicit attention mechan | High-gloss and mixed-material surfaces i | Reduction of Non-Lambertian MAE to <0.25 | Methodology: Dual-Mask Physical Decomposition | must |\n| Using the predicted Diffuse Mask to weig | Standard cost volume aggregation treats all angula | Improves upon baseline EPI and standard 3D CNN cos | Scenes with strong directional lighting  | Overall val_MAE < 0.20 and Lambertian su | Methodology: Mask-Guided Cost Volume & 3D Regularization | must |\n| Dynamically selecting depth estimation s | A single unified depth decoder cannot optimally ha | Resolves the 'texture copying' failure mode of bas | Complex mixed scenes (UrbanLF-Syn) where | Phase 3 success criteria: Overall MAE <  | Methodology: Component-Aware Adaptive Fusion | should |\n| Introducing pixel-level material weights | Standard L1/L2 depth losses penalize errors equall | Replaces uniform loss weighting or heuristic uncer | Training phase across all 209 scenes, ut | Domain-balanced sampling combined with w | Implementation Details: Loss Function and Training Strategy | should |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

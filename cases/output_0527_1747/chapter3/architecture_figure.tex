@@ -1,0 +1,88 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    node distance=1.5cm and 2cm,
+    module/.style={draw, rounded corners=4pt, minimum width=2.6cm, minimum height=1.4cm, align=center, font=\sffamily\small, thick, color=black!80},
+    data/.style={draw, minimum width=1.4cm, minimum height=0.7cm, align=center, font=\sffamily\scriptsize, thick, color=black!80},
+    inputout/.style={draw, minimum width=1.8cm, minimum height=1.8cm, align=center, font=\sffamily\small, thick, color=black!80},
+    mainflow/.style={->, thick, color=black!80, >=Stealth[length=3mm]},
+    skipflow/.style={->, thick, dashed, color=gray!70, >=Stealth[length=3mm]},
+    lossflow/.style={->, thick, dashed, color=orange!80!black, >=Stealth[length=3mm]},
+    dim/.style={font=\sffamily\tiny\itshape, color=black!60}
+]
+
+% ================= 节点定义 =================
+% 输入输出
+\node[inputout, fill=gray!15, draw=gray!60] (input) at (0,0) {\textbf{Input} \\ \scriptsize Light Field SAIs};
+\node[inputout, fill=green!15, draw=green!60!black] (output) at (18.5, 0) {\textbf{Output} \\ \scriptsize Depth Map};
+\node[dim, below=0.1cm of input] {81 Views ($I$)};
+\node[dim, below=0.1cm of output] {Sub-pixel ($D_{out}$)};
+
+% 核心处理模块
+\node[module, fill=blue!15, draw=blue!60] (lffe) at (3.5, 2) {\textbf{LFFE} \\ \normalfont\scriptsize Feature Extractor};
+\node[module, fill=orange!30, draw=orange!70!black] (prm) at (3.5, -2) {\textbf{PRM} \\ \normalfont\scriptsize Reflection Model};
+\node[module, fill=orange!30, draw=orange!70!black] (dmg) at (8, 0) {\textbf{DMG} \\ \normalfont\scriptsize Dual-Mask Gen};
+\node[module, fill=orange!30, draw=orange!70!black] (mca) at (12, 0) {\textbf{MCA} \\ \normalfont\scriptsize Cost Aggregation};
+\node[module, fill=orange!30, draw=orange!70!black] (dr) at (16, 0) {\textbf{DR} \\ \normalfont\scriptsize Depth Regression};
+
+% 损失/训练模块
+\node[module, fill=purple!20, draw=purple!60!black, minimum width=3.5cm] (loss) at (14, -4.5) {\textbf{Loss / Training} \\ \normalfont\scriptsize 3-Stage Progressive};
+
+% 数据/特征节点
+\node[data, fill=blue!10, draw=blue!50] (feat_f) at (5.5, 2) {$F$};
+\node[data, fill=orange!15, draw=orange!60] (feat_fphy) at (5.5, -2) {$F_{phy}$};
+\node[data, fill=orange!15, draw=orange!60] (mask_sp) at (10, 1.2) {$M_{sp}$};
+\node[data, fill=orange!15, draw=orange!60] (mask_ang) at (10, -1.2) {$M_{ang}$};
+\node[data, fill=orange!15, draw=orange!60] (v_agg) at (14, 0) {$V_{agg}$};
+
+% ================= 维度标注 =================
+\node[dim, below=0.05cm of feat_f] {$N \times C' \times H \times W$};
+\node[dim, below=0.05cm of feat_fphy] {$N \times C'' \times H \times W$};
+\node[dim, right=0.1cm of mask_sp] {$N \times 1 \times H \times W$};
+\node[dim, right=0.1cm of mask_ang] {$N \times 1 \times H \times W$};
+\node[dim, below=0.05cm of v_agg] {$D \times H \times W$};
+\node[dim, below=0.05cm of output] {$1 \times H \times W$};
+
+% ================= 数据流连线 =================
+% 输入到双分支
+\draw[mainflow] (input) -- ++(1.5,0) |- (lffe.west);
+\draw[mainflow] (input) -- ++(1.5,0) |- (prm.west);
+
+% 分支到特征
+\draw[mainflow] (lffe) -- (feat_f);
+\draw[mainflow] (prm) -- (feat_fphy);
+
+% 特征到 DMG
+\draw[mainflow] (feat_f) -- ++(1,0) |- (dmg.west);
+\draw[mainflow] (feat_fphy) -- ++(1,0) |- (dmg.west);
+
+% DMG 到双掩码
+\draw[mainflow] (dmg.east) -- ++(0.8,0) |- (mask_sp.west);
+\draw[mainflow] (dmg.east) -- ++(0.8,0) |- (mask_ang.west);
+
+% 跳跃连接 (F 到 MCA)
+\draw[skipflow] (feat_f.north) -- ++(0,1) -| (mca.north);
+
+% 掩码到 MCA
+\draw[mainflow] (mask_sp) -- ++(0.5,0) |- (mca.west);
+\draw[mainflow] (mask_ang) -- ++(0.5,0) |- (mca.west);
+
+% MCA 到 DR 到 输出
+\draw[mainflow] (mca) -- (v_agg);
+\draw[mainflow] (v_agg) -- (dr);
+\draw[mainflow] (dr) -- (output);
+
+% 监督/优化反馈连线
+\draw[lossflow] (mca.south) -- ++(0,-1.5) -| ([xshift=-0.4cm]loss.north);
+\draw[lossflow] (dr.south) -- ++(0,-2.5) -| ([xshift=0.4cm]loss.north);
+
+% ================= 核心创新模块高亮框 =================
+% 创新1：双掩码物理建模
+\node[draw, dashed, thick, orange!80!black, rounded corners=6pt, fit=(prm) (dmg) (feat_fphy) (mask_sp) (mask_ang), inner sep=10pt, label={[orange!80!black, font=\sffamily\small\bfseries]above:Dual-Mask Physical Modeling}] (box1) {};
+
+% 创新2：分量感知深度估计
+\node[draw, dashed, thick, orange!80!black, rounded corners=6pt, fit=(mca) (dr) (v_agg), inner sep=10pt, label={[orange!80!black, font=\sffamily\small\bfseries]above:Component-Aware Depth Estimation}] (box2) {};
+
+% 创新3：三阶段渐进式训练
+\node[draw, dashed, thick, purple!70!black, rounded corners=6pt, fit=(loss), inner sep=10pt, label={[purple!70!black, font=\sffamily\small\bfseries]below:3-Stage Progressive Training Framework}] (box3) {};
+
+\end{tikzpicture}

@@ -1,0 +1,187 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于类MRI角度频域分析的双掩码物理表征模型: 突破了传统光场深度估计仅依赖空间纹理或EPI极线斜率的局限，从物理光学和频域角度提供了区分朗伯与非朗伯反射的鲁棒特征表示，为复杂混合场景的统一处理奠定了坚实的理论与物理基础。\n  2. 基于反向波矢解析的轻量级BRDF参数估计方法: 在无需庞大神经网络和大量标注数据的情况下，充分利用光场固有的多角度采样优势，实现了具有明确物理意义的BRDF参数估计，有效缓解了非朗伯场景下数据稀缺导致的模型过拟合问题。\n  3. 分量感知的多策略自适应融合深度估计架构: 从根本上解决了传统EPI方法在非朗伯区域因视角一致性假设被违反而完全失效的痛点，实现了朗伯、非朗伯及城市混合场景下的高精度统一深度估计，显著提升了模型的泛化能力。\n\n模型架构: 输入为光场图像块（空间分辨率64x64，9x9视角），首先经过Angular FFT模块提取角度频率特征并进行材质分类，生成区分朗伯体与非朗伯体的Dual-Mask（双重掩码）。随后，通过EPINet4Dir模块提取4个方向的极平面图像（EPI）空间-角度特征。接着，将EPI特征与Dual-Mask结合，输入到Dual-Mask Physical Fusion模块，利用物理光照模型对非朗伯体区域的特征进行加权与修正。最后，通过深度回归模块输出最终的深度图。整个架构旨在统一处理朗伯体与非朗伯体区域的深度估计问题。\n\n数据集: {\"名称\": [\"HCInew\", \"HCI-Old\", \"Wanner_HCI\", \"Non-lambertian_zhenglong\", \"UrbanLF-Syn\"], \"规模\": \"共209个训练场景和36个验证场景（HCI-Old因h5格式问题被排除）\", \"场景类型\": \"Lambertian（纯漫反射）、Non-Lambertian（镜面/散射）、Mixed（城市混合场景）\", \"划分方式\": \"按场景划分Train/Val，采用WeightedRandomSampler进行域平衡采样（逆频率加权）\"}",
+  "log_entries": [
+    {
+      "timestamp": 1779853449.0132332,
+      "category": "log",
+      "content": "THINK: 首次执行: 分析工程代码与参考PDF",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0132375,
+      "category": "log",
+      "content": "开始执行任务: analyze_project - 分析工程代码与参考PDF",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0132413,
+      "category": "log",
+      "content": "EXECUTE: 分析工程代码与参考PDF 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0132484,
+      "category": "log",
+      "content": "任务完成: analyze_project, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0248773,
+      "category": "log",
+      "content": "THINK: 首次执行: 参考文献池构建+全局大纲规划",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0248804,
+      "category": "log",
+      "content": "开始执行任务: plan_outline - 参考文献池构建+全局大纲规划",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0406444,
+      "category": "log",
+      "content": "EXECUTE: 参考文献池构建+全局大纲规划 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.040659,
+      "category": "log",
+      "content": "任务完成: plan_outline, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.0550864,
+      "category": "log",
+      "content": "THINK: 首次执行: 动机确认与动机线程构建",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853449.055089,
+      "category": "log",
+      "content": "开始执行任务: motivation_confirm - 动机确认与动机线程构建",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.582975,
+      "category": "log",
+      "content": "EXECUTE: 动机确认与动机线程构建 完成, 耗时 93s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.5829854,
+      "category": "log",
+      "content": "任务完成: motivation_confirm, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6002653,
+      "category": "log",
+      "content": "THINK: 首次执行: 深度范例学习（6层阅读协议）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6002681,
+      "category": "log",
+      "content": "开始执行任务: exemplar_analysis - 深度范例学习（6层阅读协议）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6008477,
+      "category": "log",
+      "content": "EXECUTE: 深度范例学习（6层阅读协议） 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6008558,
+      "category": "log",
+      "content": "任务完成: exemplar_analysis, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6164017,
+      "category": "log",
+      "content": "THINK: 首次执行: 引用支撑库构建（claim级引用管理）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6164048,
+      "category": "log",
+      "content": "开始执行任务: citation_bank - 引用支撑库构建（claim级引用管理）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6164606,
+      "category": "log",
+      "content": "EXECUTE: 引用支撑库构建（claim级引用管理） 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6164682,
+      "category": "log",
+      "content": "任务完成: citation_bank, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6319199,
+      "category": "log",
+      "content": "THINK: 首次执行: 写作理由矩阵（事前规划型）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853541.6319246,
+      "category": "log",
+      "content": "开始执行任务: rationale_matrix - 写作理由矩阵（事前规划型）",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853621.3985813,
+      "category": "log",
+      "content": "EXECUTE: 写作理由矩阵（事前规划型） 完成, 耗时 80s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853621.3985977,
+      "category": "log",
+      "content": "任务完成: rationale_matrix, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853621.4104679,
+      "category": "log",
+      "content": "THINK: 首次执行: Introduction",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779853621.410471,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter1 - Introduction",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779854035.365601,
+      "category": "log",
+      "content": "EXECUTE: Introduction 完成, 耗时 414s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779854035.3664203,
+      "category": "quality",
+      "content": "Introduction 最终质量: 77.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779854035.3664289,
+      "category": "quality",
+      "content": "VERIFY phase1: 87.5/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779854035.3664453,
+      "category": "log",
+      "content": "任务完成: generate_chapter1, 质量: 76.95",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

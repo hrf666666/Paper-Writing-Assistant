@@ -1,0 +1,46 @@
+{
+  "总体架构": "该模型（基于EPINet4Dir改进的Unified Dual-Mask Physical Model）旨在解决光场深度估计中非朗伯体（Non-Lambertian，如反光、透明材质）区域的深度预测难题。输入为光场数据（通常为4个方向的EPI图像，维度B×12×H×W，由9×9子孔径图像构建）。处理过程包括：1) 通过EPI特征提取模块提取光场几何特征；2) 利用物理反射分解模块将特征解耦为漫反射（Lambertian）和镜面反射（Non-Lambertian）分量；3) 通过双掩码生成模块预测像素级的朗伯体与非朗伯体区域掩码；4) 在统一深度回归模块中，利用双掩码对物理特征进行自适应加权融合，最终回归深度。输出为高精度的深度图（Depth Map），以及辅助的朗伯体/非朗伯体掩码和物理反射分量图。",
+  "模块详情": [
+    {
+      "模块名": "EPI特征提取模块 (EPI Feature Extractor)",
+      "输入": "4个方向的EPI图像张量，维度为 (B, 12, H, W)，其中12为4个方向×3个RGB通道。",
+      "核心操作": "采用多层2D卷积（Conv2d）、批归一化（BatchNorm）和ReLU激活函数，提取光场图像中的局部纹理和全局极线几何特征。",
+      "输出": "高维光场几何特征图 F，维度为 (B, C_feat, H, W)。",
+      "关键公式": "F = \\text{Conv}_{N}(\\dots \\text{ReLU}(\\text{BatchNorm}(\\text{Conv}_1(X))))"
+    },
+    {
+      "模块名": "物理反射分解模块 (Physical Reflection Decomposition)",
+      "输入": "高维光场几何特征图 F，维度为 (B, C_feat, H, W)。",
+      "核心操作": "通过两个并行的卷积分支网络，基于物理反射模型（如Phong或Blinn-Phong模型），将混合特征解耦为漫反射（Lambertian）特征和镜面反射（Specular/Non-Lambertian）特征。",
+      "输出": "漫反射特征 F_diff (B, C_feat/2, H, W) 和 镜面反射特征 F_spec (B, C_feat/2, H, W)。",
+      "关键公式": "F_{diff} = \\text{Branch}_{diff}(F), \\quad F_{spec} = \\text{Branch}_{spec}(F)"
+    },
+    {
+      "模块名": "双掩码生成模块 (Dual-Mask Generator)",
+      "输入": "高维光场几何特征图 F，维度为 (B, C_feat, H, W)。",
+      "核心操作": "使用1×1卷积降维后接Softmax或Sigmoid激活函数，生成像素级的朗伯体掩码（Mask_L）和非朗伯体掩码（Mask_NL），用于区分不同反射属性的区域。",
+      "输出": "朗伯体掩码 M_L (B, 1, H, W) 和 非朗伯体掩码 M_NL (B, 1, H, W)，满足 M_L + M_NL = 1。",
+      "关键公式": "[M_L, M_{NL}] = \\text{Softmax}(\\text{Conv}_{1\\times1}(F))"
+    },
+    {
+      "模块名": "统一深度回归模块 (Unified Depth Regressor)",
+      "输入": "漫反射特征 F_diff、镜面反射特征 F_spec、朗伯体掩码 M_L、非朗伯体掩码 M_NL。",
+      "核心操作": "利用双掩码对对应的物理特征进行逐元素加权（或拼接后融合），消除非朗伯体区域对极线几何的干扰，最后通过全连接层或1×1卷积回归出统一的深度值。",
+      "输出": "最终深度图 D，维度为 (B, 1, H, W)。",
+      "关键公式": "D = \\text{Regressor}(M_L \\odot F_{diff} + M_{NL} \\odot F_{spec})"
+    }
+  ],
+  "模块连接": "输入光场图像首先送入“EPI特征提取模块”得到基础特征图F。F随后被并行送入“物理反射分解模块”和“双掩码生成模块”。物理反射分解模块输出解耦后的漫反射和镜面反射特征；双掩码生成模块输出对应的区域掩码。最后，“统一深度回归模块”接收上述所有特征和掩码，通过掩码引导的物理特征加权融合，输出最终深度图。数据流为单向的前馈传播，在训练阶段通过L1损失、物理一致性损失和掩码监督损失进行联合反向传播优化。",
+  "关键超参数": {
+    "model": "EPINet4Dir (Unified Dual-Mask variant)",
+    "lr": 0.0002,
+    "batch_size": 8,
+    "balanced_sampling": true,
+    "num_views": 81,
+    "loss": "L1 + Physical Consistency + Mask Loss",
+    "grad_clip": 1.0,
+    "warmup_steps": 3,
+    "total_steps": 72,
+    "scheduler": "cosine_warmup"
+  }
+}
