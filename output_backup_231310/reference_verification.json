@@ -1,0 +1,155 @@
+{
+  "citation_tags": [
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Light field\", \"Plenoptic camera\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Light field\", \"Epipolar Plane Image\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Reflectance\", \"Computer Graphics\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Benchmark\", \"Light field depth\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Decomposing light field\", \"angular signals\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Geometric angular features\", \"frequency-domain\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Traditional light field depth\", \"EPI slope\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"2D-DFT light field\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"EPINet\", \"Early DL light field\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Attention light field\", \"Dual-branch light field\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Light Field Depth Estimation via Epipolar Plane Image Analysis\", \"Epipolar Plane Image\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Light Field Photography with a Handheld Plenoptic Camera\", \"Plenoptic Camera\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"A Benchmark and Evaluation Framework for Light Field Depth Estimation\", \"Benchmark\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"U-Net\", \"Convolutional Networks\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Deep Residual Learning\", \"Image Recognition\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Attention Is All You Need\", \"Attention technique\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Feature Pyramid Networks\", \"Object Detection\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Swin Transformer\", \"Hierarchical Vision Transformer\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"An Image is Worth 16x16 Words\", \"Transformers\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Swin Transformer\", \"Hierarchical Vision Transformer\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Attention Is All You Need\", \"Attention technique\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Masked Autoencoders\", \"Scalable Vision Learners\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"U-Net\", \"Convolutional Networks\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Benchmark\", \"Evaluation Framework\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Decomposing light field\", \"angular signals\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Geometric angular features\", \"surface reflectance\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"random forest classifier\", \"geometric features\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"geometry-based material perception\", \"prior mask\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"three-layer angular\", \"signal decomposition\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Extracting geometric angular\", \"2D-DFT\"]"
+    }
+  ],
+  "bibliography_entries": []
+}

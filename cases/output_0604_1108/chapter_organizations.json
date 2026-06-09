@@ -1,0 +1,214 @@
+{
+  "Introduction": {
+    "章节结构": [
+      {
+        "子节名称": "研究背景与意义 (Background & Significance)",
+        "核心任务": "定义研究任务，通过与基础任务的对比突出其现实实用性与挑战性，并列举广泛的实际应用场景以确立研究价值。"
+      },
+      {
+        "子节名称": "现有工作及局限性 (Prior Work & Limitations)",
+        "核心任务": "对当前主流方法进行归类总结，深入剖析各类代表性架构（如GNN、Transformer）的内在缺陷或未解决的核心痛点。"
+      },
+      {
+        "子节名称": "提出方法 (Proposed Method)",
+        "核心任务": "针对上述局限性，引出本文提出的核心模型或框架，简述其关键创新机制（如引入显式关系表示、设计新型融合层等）。"
+      },
+      {
+        "子节名称": "主要贡献 (Main Contributions)",
+        "核心任务": "以列表形式精炼总结本文的理论或技术贡献，并给出在主流数据集上的核心实验指标提升，证明方法的有效性。"
+      }
+    ],
+    "内容逻辑": "整体呈现“漏斗型”递进逻辑（从宏观背景到微观方案）。首先通过“任务定义+对比+应用”确立研究价值（Why it matters）；接着通过“分类回顾+转折”揭示现有技术的瓶颈（What is missing）；随后通过“针对痛点+提出新框架”自然引出本文方法（How we solve it）；最后通过“列举创新点+实验数据”强化本文价值（What we achieved）。段落间通过对比（single vs. multi）、转折（however, while）和因果（because, thus）等逻辑词实现平滑过渡，形成严密的“提出问题-分析问题-解决问题”闭环。",
+    "论证手法": [
+      "对比论证：将多人动作预测与单人动作预测进行对比，突出多人场景的现实实用性与交互建模的高挑战性。",
+      "分类论证：将现有工作科学划分为GNN和Transformer两大阵营，分别精准剖析其固有缺陷（如GNN的过平滑问题、Transformer缺乏显式物理约束）。",
+      "引用支撑：在背景和应用部分密集引用自动驾驶、监控等领域的权威文献，在方法回顾部分引用最新顶会模型，增强论述的权威性。",
+      "数据支撑：在贡献部分使用具体的量化指标（如13.4%、17.8%的提升）和多个权威数据集（3DPW, CMU-Mocap）来客观证明方法的优越性。"
+    ],
+    "关键句式模板": {
+      "研究背景与意义": {
+        "任务定义": "[Task] aims to [objective] based on [input]. (示例: Multi-person motion prediction aims to predict the future positions of skeleton joints for multiple individuals based on their historical movements.)",
+        "对比与挑战": "Compared to traditional [baseline task], [proposed task] is more practical as [reason]. It is also more challenging because [reason]. (示例: Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group... It is also more challenging because sophisticated interactions... need to be considered.)",
+        "应用价值": "The related methods are playing significant roles in a wide range of practical applications, including [app1], [app2] and [app3]. (示例: The related methods are playing significant roles in a wide range of practical applications, including autonomous driving, surveillance systems and healthcare monitoring.)"
+      },
+      "现有工作及局限性": {
+        "方法分类": "Previous works on [task] generally adopt [number] types of architectures, including [type1] and [type2]. (示例: Previous works on multi-person motion prediction generally adopt two types of architectures, including graph neural networks (GNNs) and Transformer.)",
+        "缺陷剖析1": "The former one, such as [model], models [mechanism], however, it suffers from [limitation], thus [consequence]. (示例: The former one, such as TRiPOD, models the multi-person interaction via a graph structure, however, it suffers from the inherent oversmoothing problem in GNNs, thus can only afford shallow models...)",
+        "缺陷剖析2": "while the latter one, such as [model], treat [input] as [format], and [limitation/missing part]. (示例: while the latter one, such as MRT and SoMoFormer, treat temporal sequence or skeleton joints as a sequence input, and learn to establish the r[elations]...)"
+      },
+      "提出方法": {
+        "核心方案": "In this paper, we propose the [Model Name], which utilizes [key feature] to enhance [objective] and improve [final goal]. (示例: In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling and improve future motion prediction.)"
+      },
+      "主要贡献": {
+        "实验结果": "Experiments show that our method achieves a [X]% improvement of [metric] on [dataset]. (示例: Experiments show that our method achieves a 13.4% improvement of 900ms VIM on 3DPW-SoMoF/RC and 17.8%/12.0% improvement of 3s MPJPE on CMU-Mpcap/MuPoTS-3D dataset.)"
+      }
+    },
+    "内容比例": {
+      "研究背景与意义": "20%",
+      "现有工作及局限性": "30%",
+      "提出方法": "30%",
+      "主要贡献": "20%"
+    }
+  },
+  "Related Work": {
+    "章节结构": [
+      {
+        "子节名称": "Multi-Person Motion Prediction (任务背景与演进)",
+        "核心任务": "界定研究范围，阐述从单人运动预测到多人运动预测的演进，强调多人交互建模的实际应用价值与挑战性。"
+      },
+      {
+        "子节名称": "Graph-based Methods (基于图神经网络的方法)",
+        "核心任务": "总结利用GNN进行多人交互建模的工作，分析其图结构优势，并指出其固有的过平滑（over-smoothing）及模型深度受限等局限性。"
+      },
+      {
+        "子节名称": "Transformer-based Methods (基于Transformer的方法)",
+        "核心任务": "梳理基于Transformer的序列建模方法，肯定其全局感受野优势，同时批判其将关节视为独立序列输入而缺乏显式骨骼拓扑和物理关系约束的缺陷。"
+      },
+      {
+        "子节名称": "Relation and Interaction Modeling (关系与交互建模)",
+        "核心任务": "聚焦于关节间/人与人之间的显式关系表征（如相对距离、物理约束），引出本文提出的Joint-Relation融合机制及距离预测监督的动机。"
+      }
+    ],
+    "内容逻辑": "采用“漏斗式”递进与“破立式”结合的底层逻辑：从宏观任务背景（多人运动预测）收缩到两大主流技术路线（GNN与Transformer），接着通过批判性分析指出这两类方法在“显式关系与物理约束建模”上的共同盲区，最终自然过渡到本文的核心贡献（Joint-Relation Transformer）。子节间通过“技术演进”与“缺陷转折”进行过渡，例如从GNN的局部拓扑优势转折到其深度受限问题，再引出Transformer的全局建模优势及其结构先验缺失问题，层层剥茧推导出本文的研究Gap。",
+    "论证手法": [
+      "分类归纳：将现有文献明确划分为GNN和Transformer两大阵营，使综述条理清晰、对比鲜明。",
+      "对比分析：对比GNN（擅长结构但易过平滑）与Transformer（擅长长序列但缺显式结构）的优缺点，凸显单一方法的局限。",
+      "缺陷指出（Gap Analysis）：精准定位现有SOTA方法缺失“显式关节关系表征（如骨架结构和成对距离）”的核心痛点，为本文方法提供合法性。",
+      "具体举例与引用：通过引用具体代表性工作（如TRiPOD, MRT, SoMoFormer）作为论据支撑对各类方法局限性的评判，增强论证的客观性。"
+    ],
+    "关键句式模板": {
+      "背景引入与对比": "Compared to traditional [task A], [task B] is more practical as [reason] and more challenging because [reason]. (原文示例: Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group...)",
+      "流派划分与总起": "Previous works on [task] generally adopt [number] types of architectures, including [Method A] and [Method B]. (原文示例: Previous works on multi-person motion prediction generally adopt two types of architectures, including graph neural networks (GNNs) and Transformer.)",
+      "指出缺陷(前者/方法A)": "The former one, such as [Ref], models [feature] via [mechanism], however, it suffers from [limitation], thus [consequence]. (原文示例: The former one, such as TRiPOD, models the multi-person interaction via a graph structure, however, it suffers from the inherent oversmoothing problem...)",
+      "指出缺陷(后者/方法B)": "While the latter one, such as [Ref], treats [input] as [representation], but misses [crucial information] which is crucial for [goal]. (原文示例: ...while the latter one, such as MRT and SoMoFormer, treat temporal sequence or skeleton joints as a sequence input, but miss the explicit relation representation...)"
+    },
+    "内容比例": {
+      "Multi-Person Motion Prediction (背景与演进)": "15%",
+      "Graph-based Methods (GNN方法及局限)": "25%",
+      "Transformer-based Methods (Transformer方法及局限)": "30%",
+      "Relation and Interaction Modeling (关系建模与本文动机)": "30%"
+    }
+  },
+  "Methodology": {
+    "章节结构": [
+      {
+        "子节名称": "Problem Formulation (问题定义)",
+        "核心任务": "定义多人运动预测任务的数学符号、输入输出格式（如历史骨架序列、未来轨迹）以及关系信息（相对距离、物理约束）的数学表示。"
+      },
+      {
+        "子节名称": "Network Architecture Overview (网络架构概述)",
+        "核心任务": "介绍Joint-Relation Transformer的整体框架，说明数据流向及各主要组件的宏观作用，建立全局认知。"
+      },
+      {
+        "子节名称": "Joint-Relation Fusion Layer (核心融合层设计)",
+        "核心任务": "详细阐述关系感知注意力机制（Relation-aware Attention），解释如何显式融合关节特征与关系特征（骨架结构、成对距离）。"
+      },
+      {
+        "子节名称": "Relation Supervision and Loss Functions (关系监督与损失函数)",
+        "核心任务": "定义用于优化模型的损失函数，特别是说明如何通过预测未来距离（forecasting future distance）来监督关系信息，以及总损失的计算方式。"
+      }
+    ],
+    "内容逻辑": "整体遵循“从抽象到具体、从宏观到微观”的演绎逻辑。首先通过Problem Formulation统一数学符号和问题边界；接着通过Architecture Overview提供全局视角（通常配合架构图）；随后深入核心创新点（Fusion Layer），解释具体机制如何解决引言中提出的“缺乏显式关系表示”的痛点；最后以Loss Functions收尾，说明模型如何通过特定的优化目标来落实前述设计。各子节间通过“基于上述定义...”、“为了实现这一目标...”、“在获得特征后...”等逻辑连接词自然过渡，形成闭环。",
+    "论证手法": [
+      "数学公式推导：通过严谨的张量运算公式定义Relation-aware Attention和物理约束，确保方法的可复现性和理论严密性。",
+      "图表辅助说明：频繁引用架构图（Figure）和特征流向图，将抽象的矩阵运算和高维特征融合过程可视化。",
+      "对比分析：将提出的Relation-aware Attention与标准Transformer的Self-Attention进行对比，突出其在捕获显式骨架结构和 pairwise distance 上的优势。",
+      "先验知识引入：利用人体运动学先验（如intra-/inter-person physical constraints）作为正则化或特征输入，增强模型设计的物理合理性。"
+    ],
+    "关键句式模板": {
+      "Problem Formulation": "Let $X \\in \\mathbb{R}^{T \\times N \\times 3}$ denote the input sequence... / Formally, the multi-person motion prediction aims to learn a mapping function $f: X \\rightarrow Y$...",
+      "Network Architecture Overview": "The overall architecture of our proposed Joint-Relation Transformer is illustrated in Figure X. / It mainly consists of three key components: ...",
+      "Joint-Relation Fusion Layer": "To explicitly model the interactions, we design a novel joint-relation fusion layer. / Unlike standard attention mechanisms, our relation-aware attention incorporates...",
+      "Loss Functions": "To effectively supervise the relation information, we introduce a distance forecasting loss. / The final objective function is formulated as a weighted sum of..."
+    },
+    "内容比例": {
+      "Problem Formulation": "10%",
+      "Network Architecture Overview": "15%",
+      "Joint-Relation Fusion Layer": "45%",
+      "Relation Supervision and Loss Functions": "25%",
+      "Other (e.g., Inference/Complexity)": "5%"
+    }
+  },
+  "Experiments": {
+    "章节结构": [
+      {
+        "子节名称": "实验结果展示 (Experimental Results)",
+        "核心任务": "通过图表和图注展示合成数据与真实数据上的定性实验结果及具体应用案例（如目标移除）。"
+      },
+      {
+        "子节名称": "资源开放声明 (Resource Availability)",
+        "核心任务": "声明数据集、实验结果和补充材料的开源获取途径，增强研究的可重复性。"
+      },
+      {
+        "子节名称": "实验讨论 (Discussion)",
+        "核心任务": "多维度总结实验结论，评估方法的计算效率与准确性，分析真实数据上的鲁棒性，并深入探讨方法的局限性及潜在的解决方案。"
+      },
+      {
+        "子节名称": "全文结论 (Conclusion)",
+        "核心任务": "高度概括本文提出的核心方法、创新点，并基于实验结果对方法的有效性和优越性做出最终定论。"
+      }
+    ],
+    "内容逻辑": "整体遵循“现象展示—>深度剖析—>全局总结”的递进逻辑。首先通过直观的图表和图注展示实验现象与应用效果；接着通过Discussion部分对实验结果进行多维度剖析，从优势（效率、准确性、鲁棒性）过渡到劣势（局限性），并运用因果推理提出改进方案，形成完整的辩证逻辑闭环；最后通过Conclusion部分将实验验证的结论升华，呼应引言中的核心贡献，完成全篇的逻辑收尾。各子节之间通过“实验现象引出讨论，讨论结果支撑结论”的内在逻辑自然过渡。",
+    "论证手法": [
+      "视觉与案例支撑：通过展示合成数据与真实数据的分割结果图，以及“合成孔径目标移除”的具体应用案例，直观证明方法的实用性。",
+      "对比论证：将客观结果与ground truth及state-of-the-art方法进行对比，证明准确性；对比全光场与分割光场的重聚焦效果，证明应用价值。",
+      "辩证论证（局限性分析）：主动剖析方法的局限性（如深度估计不一致导致的问题），并针对性地提出多种workarounds（如引入角邻域、增加平滑参数等），展现研究的严谨性。",
+      "因果推理：详细推导深度估计错误如何导致自由射线增加，进而影响运行时间和分割一致性的因果链条。",
+      "文献引用支撑：引用相关成熟研究（如密集/稀疏光场的深度估计方法）来佐证所提解决方案的可行性和理论依据。"
+    ],
+    "关键句式模板": {
+      "实验结果展示": "Experiments with our [data type]. The first row shows... The second row shows an example of application for...: [application name].",
+      "资源开放声明": "We make the dataset, along with the results of our experiments and supplementary video available on our website.",
+      "讨论-总结论断": "Our experiments allow us to draw conclusions at several levels. First, we show that the proposed framework is...",
+      "讨论-性能对比": "In terms of [metric], objective comparison on ground truth data shows results competing with the state of the art.",
+      "讨论-局限性分析": "As a limitation of our approach, we can see that it requires... Indeed, a too incoherent [factor] will result in...",
+      "讨论-解决方案": "In that case, [method/concept] could be good workarounds. / One solution could be to [action], but this also triggers [side effect].",
+      "结论-方法总结": "We present a novel approach to deal with... Instead of using..., the solution exploits...",
+      "结论-实验验证": "We demonstrate the efficiency of the framework by... Comparison on [data type] show that our approach is... Experiments on [data type] show that..."
+    },
+    "内容比例": {
+      "实验结果展示 (含图注)": "25%",
+      "资源开放声明": "5%",
+      "实验讨论 (Discussion)": "45%",
+      "全文结论 (Conclusion)": "25%"
+    }
+  },
+  "Conclusion": {
+    "章节结构": [
+      {
+        "子节名称": "工作总结 (Summary of Contributions)",
+        "核心任务": "高度概括本文提出的核心方法、模型架构及解决的关键问题，重申研究动机与主要贡献。"
+      },
+      {
+        "子节名称": "结果回顾 (Summary of Results)",
+        "核心任务": "简明扼要地总结实验验证的结果，强调方法在基准数据集上的优越性、有效性或物理可行性。"
+      },
+      {
+        "子节名称": "局限性探讨 (Limitations)",
+        "核心任务": "客观分析当前方法在特定场景、计算效率、物理约束或假设条件下的不足与边界。"
+      },
+      {
+        "子节名称": "未来展望 (Future Work)",
+        "核心任务": "基于局限性或研究领域的延伸，提出具体的后续改进方向、潜在应用场景或开放性问题。"
+      }
+    ],
+    "内容逻辑": "整体遵循“回顾过去（本文工作）-> 审视现在（结果与局限）-> 展望未来（后续研究）”的递进式逻辑。从宏观的方法论总结平滑过渡到微观的实验结论，随后通过转折词（如However, Despite）引入局限性分析，最后以顺承或展望性词汇（如In the future, Building upon）引出未来工作，形成完整的学术闭环。",
+    "论证手法": [
+      "归纳概括：对冗长的方法细节和实验数据进行高度提炼，使用定性词汇（如significantly, effectively）替代具体数值。",
+      "对比论证：在局限性部分，将当前方法的输出与理想状态、物理约束或基线模型进行对比，凸显改进空间。",
+      "举例延伸：在未来工作部分，通过列举具体的下游任务（如human-robot interaction, autonomous driving）或更复杂的场景来证明研究的延展价值。"
+    ],
+    "关键句式模板": {
+      "工作总结": "In this paper, we proposed/presented [Method Name], a novel framework for [Task] that addresses [Key Problem] by [Core Mechanism].",
+      "结果回顾": "Extensive experiments on [Datasets] demonstrate that our approach achieves state-of-the-art performance / significant improvements over existing methods.",
+      "局限性探讨": "Despite the promising results, one limitation of our current approach is [Limitation], which may lead to [Consequence] in [Specific Scenario].",
+      "未来展望": "In the future, we plan to extend our method to [New Domain/Task] / incorporate [New Module] to further improve [Metric/Performance]."
+    },
+    "内容比例": {
+      "工作总结": "30%",
+      "结果回顾": "20%",
+      "局限性探讨": "20%",
+      "未来展望": "30%"
+    }
+  }
+}

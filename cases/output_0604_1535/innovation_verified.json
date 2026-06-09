@@ -1,0 +1,110 @@
+{
+  "innovation_points": [
+    {
+      "创新点名称": "基于三层角信号分解与几何特征的光场材质分类方法",
+      "创新点工作内容": [
+        "提出三层角信号分解模型，将光场角信号解耦为DC项（环境光照）、线性项（视差/深度EPI斜率）和残差项（材质/反射类型）。",
+        "摒弃了在低角分辨率（如9×9离散采样）下失效的2D-DFT频域分析，转而提取角梯度、角相关性、变异系数等几何角特征。",
+        "设计并训练基于几何特征的随机森林（RF）分类器，实现朗伯体与非朗伯体（高光、散射）表面的高精度像素级分类，为后续双掩码/双分支深度估计网络提供可靠的先验路由。"
+      ],
+      "创新点价值和意义": "从物理和几何层面解决了离散光场采样下非朗伯体材质难以分类的难题。通过验证非朗伯体表面对角锥约束（angular cone constraint）的破坏，提供了一种不依赖高频角分辨率的鲁棒材质识别机制，有效弥补了传统EPI方法在复杂反射表面上的先验缺失。",
+      "支撑证据": "module_verification_v4.md中Phase 1实验结果：RF分类器使用5个几何特征达到89.6%的准确率和0.962的AUC；角梯度（angular_gradient）特征的Cohen's d达到0.983，证明了极高的类间区分度；Wang 2017 (TPAMI) 和 Cui 2024 (TCSVT) 的文献验证了该几何分解的理论正确性。"
+    },
+    {
+      "创新点名称": "面向多域光场数据的领域平衡采样与统一深度估计训练策略",
+      "创新点工作内容": [
+        "构建统一的光场数据集加载器（unified_lf_dataset.py），支持多种GT格式并整合多域数据（如包含170个场景的UrbanLF-Syn）。",
+        "设计领域平衡采样（Domain-balanced sampling）与混合训练策略，结合WeightedRandomSampler在训练过程中动态维持跨域数据的曝光平衡。",
+        "采用4方向EPI架构（EPINet4Dir V3）作为统一基础模型，通过多域联合训练提升模型在混合场景和整体数据集上的泛化能力。"
+      ],
+      "创新点价值和意义": "有效缓解了光场深度估计中多域数据分布不均和特定领域（如非朗伯体）数据稀缺导致的过拟合问题。该策略证明了在物理假设成立的场景下，通过合理的数据采样和统一架构，EPI方法仍能挖掘出极高的深度估计精度，为多域光场模型的训练提供了范式。",
+      "支撑证据": "FINAL_REPORT.md中的Final Performance Scorecard显示：Overall MAE达到0.133（优于<0.20的目标），Mixed (Urban) MAE达到0.081（优于<0.22的目标）；'What Worked'部分明确记录了Domain-balanced sampling和WeightedRandomSampler在维持多域平衡和提升Urban/Mixed场景性能上的关键作用。"
+    },
+    {
+      "创新点名称": "光场EPI假设失效的物理边界界定与根因分析",
+      "创新点工作内容": [
+        "系统性开展132次实验，跨越16个主要研究方向（包括双分支架构、注意力机制、多损失函数组合、课程学习等），全面探索EPI方法的性能上限。",
+        "深入剖析EPI（极平面图像）方法在非朗伯体（高光、散射）和复杂纹理朗伯体场景下失效的物理与架构根源，明确镜面反射和体散射如何破坏角锥约束并导致EPI线结构断裂（形成X型图案）。",
+        "建立详尽的实验数据库（experiment_history.db）和负面结果档案，界定基于EPI斜率提取的深度估计方法的理论天花板。"
+      ],
+      "创新点价值和意义": "为光场深度估计领域提供了极具价值的“负面发现”和物理边界参考。明确指出当底层物理假设（朗伯体反射）被破坏时，单纯依靠网络架构或损失函数的调优无法突破性能瓶颈，为未来研究指明了必须放弃EPI转而探索NeRF或学习特征匹配等非EPI方法的必然方向。",
+      "支撑证据": "FINAL_REPORT.md中记录的181个死胡同和130+个连续空闲周期；Non-Lambertian MAE=0.411和Lambertian MAE=0.387的未达标结果；module_verification_v4.md中引用的Wang 2017和Cui 2024对EPI假设失效和X型图案的理论验证，以及5倍性能退化（0.081→0.411）的实证数据。"
+    }
+  ],
+  "novelty_scores": [
+    {
+      "index": 0,
+      "name": "基于三层角信号分解与几何特征的光场材质分类方法",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 1,
+      "name": "面向多域光场数据的领域平衡采样与统一深度估计训练策略",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 2,
+      "name": "光场EPI假设失效的物理边界界定与根因分析",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    }
+  ],
+  "progression": {
+    "type": "unknown",
+    "chain": [
+      {
+        "name": "光场EPI假设失效的物理边界界定与根因分析",
+        "role": "analysis",
+        "contribution": "We analytically define the physical boundaries and root causes of traditional Epipolar Plane Image (EPI) hypothesis failures in complex light fields.",
+        "connects_to_next": "By exposing the fundamental limitations of traditional EPI-based geometry extraction, this theoretical analysis directly motivates the need for a robust, domain-adaptive depth estimation strategy."
+      },
+      {
+        "name": "面向多域光场数据的领域平衡采样与统一深度估计训练策略",
+        "role": "method",
+        "contribution": "We propose a domain-balanced sampling and unified training strategy to robustly estimate depth across diverse multi-domain light field data.",
+        "connects_to_next": "This robust geometric foundation provides the accurate depth and geometry priors required to successfully disentangle complex angular signals for higher-level vision tasks."
+      },
+      {
+        "name": "基于三层角信号分解与几何特征的光场材质分类方法",
+        "role": "validation",
+        "contribution": "We develop a novel material classification method that effectively integrates a three-layer angular signal decomposition with the extracted geometric features.",
+        "connects_to_next": "N/A"
+      }
+    ],
+    "story_line": "We first establish a theoretical foundation by defining the physical boundaries and root causes of traditional light field EPI hypothesis failures. Building upon this analysis, we propose a robust multi-domain depth estimation strategy that supplies accurate geometric priors, which are subsequently integrated with a novel three-layer angular signal decomposition to achieve highly accurate material classification.",
+    "contribution_statements": [
+      "We identify that traditional EPI assumptions fail under specific physical boundaries, providing a rigorous root cause analysis for light field estimation bottlenecks.",
+      "We propose a domain-balanced sampling and unified training strategy to achieve robust cross-domain light field depth estimation.",
+      "We demonstrate a novel material classification approach that leverages three-layer angular signal decomposition alongside geometric features to achieve superior performance."
+    ],
+    "progression_type": "custom"
+  },
+  "anchor_map": {
+    "innovation_1": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于三层角信号分解与几何特征的光场材质分类方法",
+      "contribution_statement": "We identify that traditional EPI assumptions fail under specific physical boundaries, providing a rigorous root cause analysis for light field estimation bottlenecks."
+    },
+    "innovation_2": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "面向多域光场数据的领域平衡采样与统一深度估计训练策略",
+      "contribution_statement": "We propose a domain-balanced sampling and unified training strategy to achieve robust cross-domain light field depth estimation."
+    },
+    "innovation_3": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "光场EPI假设失效的物理边界界定与根因分析",
+      "contribution_statement": "We demonstrate a novel material classification approach that leverages three-layer angular signal decomposition alongside geometric features to achieve superior performance."
+    }
+  }
+}

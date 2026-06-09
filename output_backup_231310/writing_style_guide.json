@@ -1,0 +1,39 @@
+{
+  "句式特征": {
+    "提出方法句式": [
+      "This paper presents a new vision Transformer, called Swin Transformer, that capably serves as a general-purpose backbone for computer vision.",
+      "In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling and improve future motion prediction."
+    ],
+    "问题与挑战导向句式": [
+      "Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text.",
+      "Multi-person motion prediction is a challenging problem due to the dependency of motion on both individual past movements and interactions with other people."
+    ],
+    "对比与转折句式": [
+      "Transformer-based methods have shown promising results on this task, but they miss the explicit relation representation between joints, such as skeleton structure and pairwise distance, which is crucial for accurate interaction modeling.",
+      "The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection."
+    ],
+    "结果与性能展示句式": [
+      "Its performance surpasses the previous state-of-the-art by a large margin of +2.7 box AP and +2.6 mask AP on COCO, and +3.2 mIoU on ADE20K, demonstrating the potential of Transformer-based models as vision backbones.",
+      "Experiments show that our method achieves a 13.4% improvement of 900ms VIM on 3DPW-SoMoF/RC and 17.8%/12.0% improvement of 3s MPJPE on CMU-Mpcap/MuPoTS-3D dataset."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "通常采用'开门见山'的方式，直接定义研究任务并指出其核心挑战（如'Multi-person motion prediction is a challenging problem...'），或直接宣告本文提出的核心成果与模型定位（如'This paper presents...'）。",
+    "段内论证逻辑": "遵循'背景与挑战 -> 现有方法局限 -> 提出本文方法 -> 核心技术细节/机制 -> 定量实验结果 -> 意义与开源'的严密递进逻辑，环环相扣。",
+    "段落结尾收束方式": "以强调模型的广泛适用性、对未来研究的启发（如'demonstrating the potential of...'）作为理论收束，并附带代码开源链接（如'The code and models are publicly available at...'）作为实践收束，增强论文的可复现性与影响力。"
+  },
+  "用词特征": [
+    "过渡词与逻辑连接：Additionally, To address these differences, To fuse, while also, due to",
+    "强调词与程度副词：capably, crucial, novel, promising, large margin, explicit",
+    "限定词与范围界定：general-purpose, broad range, various scales, non-overlapping, intra-/inter-person",
+    "核心学术动词：presents, arises, propose, utilize, enhance, supervise, surpass, demonstrate"
+  ],
+  "论证模式": [
+    "提出问题→分析原因→给出方案→实验验证模式：首先指出任务难点（如多人运动预测的依赖性），接着分析现有Transformer方法局限的原因（如缺少显式关节关系表示），然后提出新架构（Joint-Relation Transformer）及融合层设计，最后用具体指标（如13.4% VIM提升）证明有效性。",
+    "先总后分与优势递进模式：先总体抛出模型名称及其作为'通用视觉骨干'的定位，随后分层次阐述核心创新点（如Shifted windows机制、hierarchical architecture），并逐一对应其带来的优势（计算效率降低、多尺度建模灵活性），最后以全面的下游任务指标进行总结。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "摘要部分通常不使用显式引用标记以保证行文流畅与高度概括；正文中主要采用句末数字括号引用（如'...object detection [2, 4].'）以支撑事实陈述，或采用句首/句中作者主导引用（如'Bao et al. [1] proposed...'）以展开具体方法讨论。",
+    "引用与论述的衔接方式": "引用主要用于构建研究动机（通过指出前人工作的不足来引出本文方法，如'Transformer-based methods... but they miss...'）和确立对比基线（如'surpasses the previous state-of-the-art'）。参考文献列表严格遵循IEEE/CVF标准格式，按作者、标题、会议/期刊、年份排列，确保学术溯源的严谨性。"
+  }
+}

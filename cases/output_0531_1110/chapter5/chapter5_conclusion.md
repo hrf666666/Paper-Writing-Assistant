@@ -1,0 +1,12 @@
+# 5. Conclusion
+
+# 5. Conclusion
+
+In this paper, we propose a novel Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation from plenoptic cameras. By decoupling angular signals via physical priors and introducing a geometry-aware adaptive routing mechanism, our framework effectively overcomes the inherent geometric constraint failures of traditional epipolar plane image (EPI) analysis under complex reflectance conditions. 
+
+Specifically, the core contributions of this work are summarized as follows:
+* **Physics-Prior Angular Signal Decomposition and Geometric Material Classification:** We constructed a three-layer angular signal decomposition model that decouples light field signals at both physical and geometric levels. This resolves the resolution insufficiency of traditional spectral methods under $9 \times 9$ discrete angular sampling, providing a reliable geometric foundation for precise non-Lambertian surface identification and establishing the theoretical core of the unified physical model.
+* **Geometric Root Cause Analysis of EPI Failure and Dual-Branch Adaptive Routing:** We explicitly analyzed the physical limitation boundaries of traditional EPI methods, thereby avoiding ineffective parameter tuning in loss functions and learning rates. By designing a dual-branch adaptive routing mechanism guided by geometric features, we provided clear theoretical guidance for network architecture design, proving it as an effective paradigm to mitigate depth estimation degradation on non-Lambertian surfaces.
+* **Cross-Domain Global Statistical Validation and Multi-Domain Balanced Training:** We validated that the theoretically decomposed features possess strong generalization capabilities across diverse datasets and domains. The proposed multi-domain balanced training framework significantly enhances model robustness under uneven data distributions, providing reliable data and training support for the engineering deployment of unified light field depth estimation.
+
+Finally, since we showed that the current physical decomposition inherently assumes locally smooth surfaces and may struggle with highly intricate micro-structures or severe inter-reflections, future work includes extending our dual-mask routing mechanism to incorporate neural implicit representations. This extension will enable more precise volumetric depth rendering for translucent and participating media in complex real-world light field scenarios.

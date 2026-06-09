@@ -1,0 +1,307 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 三层角信号物理分解与几何材质特征提取机制: 在低角度分辨率条件下，从物理和几何层面有效解耦了深度与材质信息，解决了传统频域方法在离散采样下无法可靠分类材质的瓶颈。该机制为非朗伯体区域的精准识别提供了鲁棒的特征基础，避免了网络盲目学习违反物理假设的噪声。\n  2. 基于双掩码路由与域平衡采样的统一深度估计架构: 通过双掩码机制缓解了单一EPI假设在全局强制应用带来的误差放大问题，提升了模型在复杂反射表面的鲁棒性；域平衡采样策略在数据长尾分布下有效挖掘了大规模数据的训练潜力，显著提升了模型在混合/城市场景下的整体深度估计精度和泛化能力。\n  3. 光场EPI假设失效的物理根因定量分析与理论验证体系: 将光场深度估计在非朗伯体域的失败原因从“网络参数或损失函数设计不当”纠正为“底层物理假设被破坏”，为后续放弃纯EPI方法提供了坚实的理论依据。该验证体系有效避免了在错误方向上的无效算力消耗，提升了自动化科研系统的试错效率和理论深度。\n\n模型架构: 该模型提出了一种统一的双掩码物理模型（Unified Dual-Mask Physical Model），用于非朗伯光场深度估计。输入为光场图像（如9×9角度采样）。首先，通过三层角信号分解模块将光场信号分解为光照（DC）、视差/深度（线性项）和材质（残差）特征。随后，数据流入双分支架构：朗伯EPI分支利用极平面图像（EPI）斜率和连续深度先验处理朗伯区域；非朗伯几何分支利用角梯度等几何特征处理非朗伯区域。同时，基于逐像素几何伪标签（如角梯度）生成双掩码。最后，通过掩码加权融合模块将双分支特征结合，输出最终的高精度深度图和域分类掩码。\n\n数据集: {\"名称\": [\"HCInew\", \"UrbanLF-Syn\", \"Non-Lambertian Dataset\"], \"规模\": \"HCInew包含多个512x512分辨率、81视角的场景（如boxes, cotton等）；UrbanLF-Syn包含170个场景；Non-Lambertian数据集仅包含4个训练场景（HCI-Old因.h5格式问题被排除）\", \"场景类型\": \"Lambertian（朗伯体）、Mixed/Urban（混合/城市）、Non-Lambertian（非朗伯体，包含高光、半透明、散射表面）\", \"划分方式\": \"按场景目录划分（如training/stratified",
+  "log_entries": [
+    {
+      "timestamp": 1780454507.2380702,
+      "category": "log",
+      "content": "EXECUTE: Related Work 完成, 耗时 1219s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780454507.2387996,
+      "category": "quality",
+      "content": "Related Work 最终质量: 81.6/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780454507.2388082,
+      "category": "quality",
+      "content": "VERIFY phase2: 87.5/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780454507.2388263,
+      "category": "log",
+      "content": "任务完成: generate_chapter2, 质量: 81.575",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780454518.144438,
+      "category": "log",
+      "content": "THINK: 首次执行: Methodology\nLLM策略建议: Anchor your methodology in the EPI-based depth estimation paradigm introduced previously, explicitly reformulating the core equations to relax the Lambertian assumption and ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780454518.1444547,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter3 - Methodology",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455439.405689,
+      "category": "log",
+      "content": "EXECUTE: Methodology 完成, 耗时 921s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455439.4074528,
+      "category": "quality",
+      "content": "Methodology 最终质量: 70.5/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455439.4077632,
+      "category": "quality",
+      "content": "VERIFY phase3: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455439.4077797,
+      "category": "log",
+      "content": "任务完成: generate_chapter3, 质量: 70.45",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455447.559543,
+      "category": "log",
+      "content": "THINK: 首次执行: Experiments\nLLM策略建议: Design the experimental framework to systematically benchmark your method against standard EPI-based approaches across progressively challenging non-Lambertian scenarios, en",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780455447.5595555,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter4 - Experiments",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456557.1026535,
+      "category": "log",
+      "content": "EXECUTE: Experiments 完成, 耗时 1110s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456557.1032062,
+      "category": "quality",
+      "content": "Experiments 最终质量: 85.2/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456557.1035695,
+      "category": "quality",
+      "content": "VERIFY phase4: 87.5/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456557.1035898,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 85.25",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456568.8654513,
+      "category": "log",
+      "content": "THINK: 首次执行: Conclusion\nLLM策略建议: Synthesize the core limitation highlighted in your introduction—the breakdown of Lambertian assumptions in real-world non-Lambertian scenes—and clearly restate how your work ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456568.8654718,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456721.8979876,
+      "category": "log",
+      "content": "EXECUTE: Conclusion 完成, 耗时 153s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456721.8981822,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 88.3/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456721.8984275,
+      "category": "quality",
+      "content": "VERIFY phase5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456721.8984454,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 88.32499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456732.9672012,
+      "category": "log",
+      "content": "THINK: 首次执行: Discussion\nLLM策略建议: Begin by concisely synthesizing your key findings to reinforce how EPI-based methods depend on the Lambertian assumption and explicitly acknowledge where this constraint limi",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456732.9672244,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456869.3456988,
+      "category": "log",
+      "content": "EXECUTE: Discussion 完成, 耗时 136s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456869.3489144,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456869.3489392,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456877.2314487,
+      "category": "log",
+      "content": "THINK: 首次执行: Limitations and Future Work\nLLM策略建议: Begin by synthesizing your core results to explicitly demonstrate how your approach resolves the traditional Lambertian assumption’s limitations when handlin",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456877.2314537,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456983.669598,
+      "category": "log",
+      "content": "EXECUTE: Limitations and Future Work 完成, 耗时 106s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456983.671833,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456983.67185,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456991.3121264,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Synthesize the core findings and theoretical frameworks established in the preceding chapters, ensuring all key arguments are accurately restated without introducing",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780456991.3121455,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1272037,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 180s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1273339,
+      "category": "quality",
+      "content": "abstract 最终质量: 93.4/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1276772,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1276956,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: 93.375",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1388447,
+      "category": "log",
+      "content": "THINK: 首次执行: 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780457171.1388483,
+      "category": "log",
+      "content": "开始执行任务: review_content - 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780458840.1435459,
+      "category": "log",
+      "content": "EXECUTE: 内容审查与参考文献审查 完成, 耗时 1669s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780458840.1435704,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780458840.155144,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780458840.1551473,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780459815.758941,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验 完成, 耗时 976s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780459815.7589755,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780459815.7759657,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780459815.7759688,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780463617.071965,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/Word输出 完成, 耗时 3801s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780463617.072295,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

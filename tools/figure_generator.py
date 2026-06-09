@@ -1,507 +1,688 @@
 # -*- coding: utf-8 -*-
 """
-Tool: 论文图表生成器 v9.0
+Tool: 论文图表生成器 v10.0
 
-用 matplotlib 生成论文所需的：
-1. 总体架构图（Architecture Diagram）
-2. 模块设计图（Module Diagram）
-3. 实验结果表格图（Comparison Table）
-4. 消融实验柱状图（Ablation Bar Chart）
-5. 性能对比图（Performance Comparison）
+架构原则（v10 vs v9.2 的根本改变）：
+- **代码 = 裁判**：只做管线编排、编译、文件IO、验证
+- **MD = 规则书**：引导 LLM 的设计/评审行为
+- **LLM = 运动员**：所有创造性工作（分析、设计、写 TikZ、修改代码）
 
-保存为 PDF 格式（LaTeX 可用 \\includegraphics 嵌入）
+路由逻辑：
+- 架构图 (teaser/module_detail) → LLM 生成 TikZ → Python 编译 pdflatex
+- 数据图 (ablation/comparison) → ExperimentExplorer → DataVisualizer → matplotlib（机械性工作，代码做）
+- 定性图 (qualitative) → ImageFinder → DataVisualizer grid
 """
 
 import os
-import re
 import json
+import re
 import logging
-from typing import Dict, List, Optional, Tuple
+import shutil
+import subprocess
+import tempfile
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# 全局 matplotlib 配置
-_MPL_CONFIGURED = False
+# 引导文件路径
+_SKILL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "skills", "figure_tikz_gen")
 
 
-def _setup_matplotlib():
-    global _MPL_CONFIGURED
-    if _MPL_CONFIGURED:
-        return
-    try:
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        plt.rcParams.update({
-            'font.family': 'serif',
-            'font.serif': ['Times New Roman', 'DejaVu Serif'],
-            'font.size': 9,
-            'axes.labelsize': 10,
-            'axes.titlesize': 11,
-            'xtick.labelsize': 8,
-            'ytick.labelsize': 8,
-            'legend.fontsize': 8,
-            'figure.dpi': 300,
-            'savefig.dpi': 300,
-            'savefig.bbox': 'tight',
-            'savefig.pad_inches': 0.05,
-        })
-        _MPL_CONFIGURED = True
-    except Exception as e:
-        logger.warning(f"[FigureGen] matplotlib 配置失败: {e}")
-
-
-def generate_architecture_diagram(output_dir: str,
-                                   innovation_points: List[Dict] = None) -> str:
+def generate_figure_from_plan(
+    fig_plan: Dict,
+    figures_dir: str,
+    venue: str = "IEEE TCSVT",
+    feedback: Optional[List[Dict]] = None,
+    project_path: Optional[str] = None,
+    text_model_alias: str = "glm_5_1",
+    previous_tikz: Optional[str] = None,
+) -> Dict:
     """
-    生成总体架构图
+    生成图表（v10 架构）。
 
-    Returns:
-        保存的 PDF 文件路径
+    Python 职责：路由 + 编译 + 文件管理
+    LLM 职责：写 TikZ 代码 / 指导数据图设计
     """
-    _setup_matplotlib()
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
-    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-
-    fig, ax = plt.subplots(1, 1, figsize=(7, 3.5))
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 5)
-    ax.axis('off')
-    ax.set_title('Overall Architecture of the Proposed Method', fontsize=11, fontweight='bold', pad=10)
-
-    # ── 定义模块 ──
-    modules = [
-        # (x, y, w, h, label, color)
-        (0.3, 1.5, 1.8, 1.2, 'Light Field\nInput\n(9×9 Angular)', '#E3F2FD'),
-        (2.5, 3.0, 1.8, 1.2, 'Angular\nFrequency\nAnalysis', '#FFF3E0'),
-        (2.5, 0.5, 1.8, 1.2, 'Dual-Mask\nModeling\n(Med+Ang)', '#E8F5E9'),
-        (4.8, 1.5, 1.8, 1.2, 'Material\nClassification\n(Diff/Spec/Sct)', '#FCE4EC'),
-        (7.1, 3.0, 2.5, 1.2, 'Component-Aware\nDepth Estimation\n(EPI/Photo/Scatter)', '#F3E5F5'),
-        (7.1, 0.5, 2.5, 1.2, 'Weighted\nFusion &\nRefinement', '#E0F7FA'),
-    ]
-
-    for x, y, w, h, label, color in modules:
-        box = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.1",
-                              facecolor=color, edgecolor='#333333', linewidth=1.0)
-        ax.add_patch(box)
-        ax.text(x + w/2, y + h/2, label, ha='center', va='center',
-                fontsize=7, fontweight='bold', color='#333333')
-
-    # ── 箭头连接 ──
-    arrows = [
-        ((2.1, 2.1), (2.5, 3.3)),   # Input → Freq Analysis
-        ((2.1, 2.1), (2.5, 1.1)),   # Input → Dual Mask
-        ((4.3, 3.6), (4.8, 2.1)),   # Freq Analysis → Material
-        ((4.3, 1.1), (4.8, 2.1)),   # Dual Mask → Material
-        ((6.6, 2.1), (7.1, 3.6)),   # Material → Depth
-        ((6.6, 2.1), (7.1, 1.1)),   # Material → Fusion
-        ((8.35, 3.0), (8.35, 1.7)), # Depth → Fusion
-    ]
-
-    for (x1, y1), (x2, y2) in arrows:
-        ax.annotate('', xy=(x2, y2), xytext=(x1, y1),
-                     arrowprops=dict(arrowstyle='->', color='#666666', lw=1.2))
-
-    # 保存
-    figures_dir = os.path.join(output_dir, "figures")
     os.makedirs(figures_dir, exist_ok=True)
-    pdf_path = os.path.join(figures_dir, "architecture.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    plt.close(fig)
 
-    logger.info(f"[FigureGen] 架构图已保存: {pdf_path}")
-    return pdf_path
+    fig_id = fig_plan.get("fig_id", "fig")
+    fig_type = fig_plan.get("fig_type", "architecture")
+    has_data = bool(fig_plan.get("data"))
+    has_images = bool(fig_plan.get("images"))
 
+    # ── 架构图 → LLM 写 TikZ，Python 只编译 ──
+    if fig_type in ("teaser", "module_detail", "architecture"):
+        return _gen_architecture_llm(
+            fig_plan, figures_dir, venue, feedback,
+            text_model_alias, previous_tikz,
+        )
 
-def generate_module_diagram(output_dir: str,
-                             module_name: str,
-                             sub_modules: List[str]) -> str:
-    """
-    生成单个模块的详细设计图
+    # ── 数据图（有数据 → matplotlib 机械性工作；无数据 → LLM TikZ 降级） ──
+    if fig_type in ("ablation", "comparison"):
+        if has_data:
+            return _gen_data_from_provided(fig_plan, figures_dir, venue)
+        if project_path:
+            result = _gen_data_from_project(fig_plan, figures_dir, venue, project_path)
+            if result.get("pdf_path"):
+                return result
+        # 无数据 → LLM 设计 TikZ 示意版（表格/柱状图的 TikZ 实现）
+        logger.info(f"[FigureGen] {fig_id} ({fig_type}) 无数据，LLM TikZ 降级")
+        return _gen_data_figure_llm(fig_plan, figures_dir, venue, text_model_alias)
 
-    Args:
-        module_name: 模块名称
-        sub_modules: 子模块列表
+    # ── 定性图（有图片 → matplotlib grid；无图片 → LLM TikZ 降级） ──
+    if fig_type == "qualitative":
+        if has_images:
+            return _gen_qualitative_from_images(fig_plan, figures_dir, venue)
+        if project_path:
+            result = _gen_qualitative_from_project(fig_plan, figures_dir, venue, project_path)
+            if result.get("pdf_path"):
+                return result
+        # 无图片 → LLM 设计 TikZ 示意版（定性对比示意图）
+        logger.info(f"[FigureGen] {fig_id} ({fig_type}) 无图片，LLM TikZ 降级")
+        return _gen_data_figure_llm(fig_plan, figures_dir, venue, text_model_alias)
 
-    Returns:
-        保存的 PDF 文件路径
-    """
-    _setup_matplotlib()
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import FancyBboxPatch
-
-    n = len(sub_modules)
-    fig_height = max(2.5, 1.0 + n * 0.8)
-    fig, ax = plt.subplots(1, 1, figsize=(5, fig_height))
-    ax.set_xlim(0, 5)
-    ax.set_ylim(0, fig_height)
-    ax.axis('off')
-
-    # 标题
-    ax.text(2.5, fig_height - 0.3, module_name, ha='center', va='center',
-            fontsize=11, fontweight='bold')
-
-    colors = ['#E3F2FD', '#FFF3E0', '#E8F5E9', '#FCE4EC', '#F3E5F5', '#E0F7FA']
-
-    for i, sub in enumerate(sub_modules):
-        y = fig_height - 1.0 - i * 0.8
-        color = colors[i % len(colors)]
-        box = FancyBboxPatch((0.5, y), 4.0, 0.6, boxstyle="round,pad=0.05",
-                              facecolor=color, edgecolor='#555', linewidth=0.8)
-        ax.add_patch(box)
-        ax.text(2.5, y + 0.3, sub, ha='center', va='center', fontsize=8)
-
-        if i > 0:
-            ax.annotate('', xy=(2.5, y + 0.6), xytext=(2.5, y + 0.8),
-                         arrowprops=dict(arrowstyle='->', color='#888', lw=1.0))
-
-    figures_dir = os.path.join(output_dir, "figures")
-    os.makedirs(figures_dir, exist_ok=True)
-    safe_name = re.sub(r'[^a-zA-Z0-9]', '_', module_name).lower()
-    pdf_path = os.path.join(figures_dir, f"module_{safe_name}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    plt.close(fig)
-
-    logger.info(f"[FigureGen] 模块图已保存: {pdf_path}")
-    return pdf_path
-
-
-def generate_comparison_table(output_dir: str,
-                               datasets: List[str],
-                               methods: List[str],
-                               metrics: List[str],
-                               data: List[List[List[float]]],
-                               best_method: str = "Ours",
-                               caption: str = "Comparison with state-of-the-art methods.") -> str:
-    """
-    生成实验对比表格图（matplotlib 渲染的三线表）
-
-    Args:
-        datasets: 数据集名称列表
-        methods: 方法名列表
-        metrics: 指标名列表 (如 ["MAE", "RMSE", "BadPix"])
-        data: [dataset][method][metric] 三维数组
-        best_method: 最佳方法名称（加粗）
-        caption: 表格标题
-
-    Returns:
-        保存的 PDF 文件路径
-    """
-    _setup_matplotlib()
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    n_datasets = len(datasets)
-    n_methods = len(methods)
-    n_metrics = len(metrics)
-
-    # 每个数据集一个子表
-    fig, axes = plt.subplots(n_datasets, 1, figsize=(7, 1.0 + n_datasets * 1.5))
-    if n_datasets == 1:
-        axes = [axes]
-
-    for d_idx, (ax, dataset) in enumerate(zip(axes, datasets)):
-        ax.axis('off')
-
-        # 构建表格数据
-        cell_text = []
-        for m_idx, method in enumerate(methods):
-            row = []
-            for metric_idx in range(n_metrics):
-                val = data[d_idx][m_idx][metric_idx]
-                if method == best_method:
-                    row.append(f"\\textbf{{{val:.3f}}}")
-                else:
-                    row.append(f"{val:.3f}")
-            cell_text.append([method] + row)
-
-        col_labels = ["Method"] + metrics
-        table = ax.table(cellText=cell_text, colLabels=col_labels,
-                         loc='center', cellLoc='center')
-        table.auto_set_font_size(False)
-        table.set_fontsize(8)
-
-        # 样式
-        for (row, col), cell in table.get_celld().items():
-            if row == 0:
-                cell.set_facecolor('#E8E8E8')
-                cell.set_text_props(fontweight='bold')
-            cell.set_edgecolor('#CCCCCC')
-            cell.set_height(0.3)
-
-        ax.set_title(f"Dataset: {dataset}", fontsize=9, fontweight='bold', pad=5)
-
-    fig.suptitle(caption, fontsize=10, y=0.98)
-
-    figures_dir = os.path.join(output_dir, "figures")
-    os.makedirs(figures_dir, exist_ok=True)
-    pdf_path = os.path.join(figures_dir, "comparison_table.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    plt.close(fig)
-
-    logger.info(f"[FigureGen] 对比表格已保存: {pdf_path}")
-    return pdf_path
-
-
-def generate_ablation_chart(output_dir: str,
-                             ablation_name: str,
-                             component_names: List[str],
-                             metric_values: List[float],
-                             metric_name: str = "MAE",
-                             baseline_value: float = None) -> str:
-    """
-    生成消融实验柱状图
-
-    Args:
-        ablation_name: 消融实验名称
-        component_names: 组件名称列表
-        metric_values: 每个配置的指标值
-        metric_name: 指标名称
-        baseline_value: 基线值（虚线标注）
-
-    Returns:
-        保存的 PDF 文件路径
-    """
-    _setup_matplotlib()
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    fig, ax = plt.subplots(1, 1, figsize=(4.5, 2.5))
-
-    x = np.arange(len(component_names))
-    bars = ax.bar(x, metric_values, color='#4A90D9', edgecolor='#333', linewidth=0.5, width=0.6)
-
-    # 高亮最佳结果
-    if metric_values:
-        best_idx = metric_values.index(min(metric_values))
-        bars[best_idx].set_color('#D94A4A')
-
-    # 基线虚线
-    if baseline_value is not None:
-        ax.axhline(y=baseline_value, color='#888', linestyle='--', linewidth=0.8, label=f'Baseline ({baseline_value:.3f})')
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(component_names, rotation=30, ha='right', fontsize=7)
-    ax.set_ylabel(metric_name, fontsize=9)
-    ax.set_title(f'Ablation: {ablation_name}', fontsize=10, fontweight='bold')
-
-    # 在柱顶标注数值
-    for bar, val in zip(bars, metric_values):
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.002,
-                f'{val:.3f}', ha='center', va='bottom', fontsize=6)
-
-    if baseline_value is not None:
-        ax.legend(fontsize=7, loc='upper right')
-
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-    figures_dir = os.path.join(output_dir, "figures")
-    os.makedirs(figures_dir, exist_ok=True)
-    safe_name = re.sub(r'[^a-zA-Z0-9]', '_', ablation_name).lower()
-    pdf_path = os.path.join(figures_dir, f"ablation_{safe_name}.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    plt.close(fig)
-
-    logger.info(f"[FigureGen] 消融图已保存: {pdf_path}")
-    return pdf_path
-
-
-def generate_performance_chart(output_dir: str,
-                                method_names: List[str],
-                                dataset_names: List[str],
-                                mae_values: List[List[float]],
-                                title: str = "Performance Comparison") -> str:
-    """
-    生成多数据集性能对比分组柱状图
-
-    Args:
-        method_names: 方法名列表
-        dataset_names: 数据集列表
-        mae_values: [method][dataset] MAE 值
-        title: 图标题
-
-    Returns:
-        保存的 PDF 文件路径
-    """
-    _setup_matplotlib()
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    n_methods = len(method_names)
-    n_datasets = len(dataset_names)
-
-    fig, ax = plt.subplots(1, 1, figsize=(6, 3))
-
-    x = np.arange(n_methods)
-    width = 0.8 / n_datasets
-    colors = plt.cm.Set2(np.linspace(0, 1, n_datasets))
-
-    for d_idx, (dataset, color) in enumerate(zip(dataset_names, colors)):
-        values = [mae_values[m][d_idx] for m in range(n_methods)]
-        offset = (d_idx - n_datasets/2 + 0.5) * width
-        bars = ax.bar(x + offset, values, width, label=dataset,
-                       color=color, edgecolor='#333', linewidth=0.3)
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(method_names, rotation=30, ha='right', fontsize=7)
-    ax.set_ylabel('MAE', fontsize=9)
-    ax.set_title(title, fontsize=10, fontweight='bold')
-    ax.legend(fontsize=7, loc='upper left', ncol=2)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-    figures_dir = os.path.join(output_dir, "figures")
-    os.makedirs(figures_dir, exist_ok=True)
-    pdf_path = os.path.join(figures_dir, "performance_comparison.pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    plt.close(fig)
-
-    logger.info(f"[FigureGen] 性能对比图已保存: {pdf_path}")
-    return pdf_path
+    # ── 未知类型 → LLM 尝试 ──
+    logger.info(f"[FigureGen] {fig_id} ({fig_type}) 未知类型，LLM TikZ 降级")
+    return _gen_data_figure_llm(fig_plan, figures_dir, venue, text_model_alias)
 
 
 # ═══════════════════════════════════════════════════════════════
-# 主入口：从项目数据自动生成所有图表
+# 架构图：LLM 写 TikZ，Python 只编译
 # ═══════════════════════════════════════════════════════════════
-def run_figure_generator(output_dir: str,
-                          project_data: Dict = None,
-                          experiment_data: Dict = None) -> Dict:
+
+def _gen_architecture_llm(
+    fig_plan: Dict,
+    figures_dir: str,
+    venue: str,
+    feedback: Optional[List[Dict]],
+    text_model_alias: str,
+    previous_tikz: Optional[str],
+) -> Dict:
+    """LLM 生成 TikZ 代码，Python 只负责编译。"""
+    fig_id = fig_plan.get("fig_id", "fig")
+
+    # 1. 加载 MD 引导文件
+    guide = _load_guide("tikz_design_guide.md")
+    examples = _load_guide("tikz_style_examples.md")
+
+    # 2. 构造 prompt
+    if previous_tikz and feedback:
+        # 迭代模式：LLM 基于反馈修改自己的 TikZ 代码
+        prompt = _build_revision_prompt(fig_plan, previous_tikz, feedback, venue, guide)
+    else:
+        # 首次生成：LLM 从零写 TikZ
+        prompt = _build_generation_prompt(fig_plan, venue, guide, examples)
+
+    system_prompt = (
+        "You are an expert TikZ developer for top-tier academic paper figures. "
+        "You write clean, compilable LaTeX+TikZ code.\n"
+        "Output ONLY the complete LaTeX document code, starting from \\documentclass. "
+        "Do NOT wrap in markdown code blocks. Do NOT add any explanation outside the code."
+    )
+
+    # 3. 调用 LLM
+    logger.info(f"[FigureGen] LLM 生成 TikZ: {fig_id}")
+    tikz_code = _call_llm(prompt, system_prompt, text_model_alias)
+
+    # 4. 清理 LLM 输出（可能包裹 markdown 代码块）
+    tikz_code = _clean_tikz_output(tikz_code)
+
+    # 5. 编译
+    result = _compile_tikz(tikz_code, fig_id, figures_dir)
+
+    # 6. 如果编译失败，让 LLM 自动修复（最多 1 次）
+    if not result.get("pdf_path") and result.get("compile_error"):
+        logger.info(f"[FigureGen] 编译失败，LLM 自动修复: {fig_id}")
+        fix_prompt = _build_fix_prompt(tikz_code, result["compile_error"])
+        fixed_code = _call_llm(fix_prompt, system_prompt, text_model_alias)
+        fixed_code = _clean_tikz_output(fixed_code)
+
+        if fixed_code and "\\documentclass" in fixed_code:
+            result = _compile_tikz(fixed_code, fig_id, figures_dir)
+            if result.get("pdf_path"):
+                tikz_code = fixed_code
+                logger.info(f"[FigureGen] 自动修复成功: {fig_id}")
+            else:
+                logger.warning(f"[FigureGen] 自动修复后仍编译失败: {fig_id}")
+        else:
+            logger.warning(f"[FigureGen] LLM 修复输出无效: {fig_id}")
+
+    # 7. 保存 TikZ 源码（供后续迭代修改）
+    if result.get("pdf_path"):
+        tikz_src_path = os.path.join(figures_dir, f"{fig_id}_source.tex")
+        with open(tikz_src_path, "w", encoding="utf-8") as f:
+            f.write(tikz_code)
+        result["tikz_source"] = tikz_src_path
+        result["tikz_code"] = tikz_code
+
+    return result
+
+
+def _build_generation_prompt(fig_plan, venue, guide, examples):
+    """首次生成的 prompt"""
+    fig_id = fig_plan.get("fig_id", "fig")
+    fig_type = fig_plan.get("fig_type", "teaser")
+    title = fig_plan.get("title", "")
+    caption = fig_plan.get("caption", "")
+    size_type = fig_plan.get("size_type", "double")
+
+    # 模块和连接信息
+    modules_str = json.dumps(fig_plan.get("modules", []), indent=2, ensure_ascii=False)
+    connections_str = json.dumps(fig_plan.get("connections", []), indent=2, ensure_ascii=False)
+    groups_str = json.dumps(fig_plan.get("groups", []), indent=2, ensure_ascii=False)
+    annotations = fig_plan.get("annotations", [])
+
+    width_hint = "16cm (double-column figure*)" if size_type in ("double", "teaser") else "8cm (single-column figure)"
+    height_hint = "4-6cm" if size_type in ("double", "teaser") else "6-8cm"
+
+    prompt = f"""## Task
+Generate a complete, compilable LaTeX+TikZ document for the following academic paper figure.
+
+## Design Guide
+{guide}
+
+## Style Examples (follow these patterns)
+{examples}
+
+## Figure Specification
+- **Figure ID**: {fig_id}
+- **Type**: {fig_type}
+- **Title**: {title}
+- **Caption**: {caption}
+- **Target Venue**: {venue}
+- **Size**: ~{width_hint} wide, ~{height_hint} tall
+
+## Modules (components to draw)
+{modules_str}
+
+## Connections (data flow)
+{connections_str}
+
+## Groups (visual grouping)
+{groups_str}
+
+## Key Annotations
+{chr(10).join('- ' + a for a in annotations) if annotations else 'None'}
+
+## Requirements
+1. Output a COMPLETE standalone LaTeX document (\\documentclass to \\end{{document}})
+2. Follow the design guide color scheme and spacing rules
+3. Innovation modules MUST be visually distinct (larger, bolder, different fill)
+4. All arrows must be clean paths (no crossing through nodes)
+5. All text must be fully visible within node boundaries
+6. Use `positioning` library for relative placement (right=of, below=of, etc.)
+7. Use `fit` library for group boxes with proper inner sep
+8. Total figure must fit the specified size range
+
+## ANTI-OVERLAP RULES (CRITICAL — violation = rejection)
+9. **Minimum node spacing**: Every node MUST have `node distance` >= 1.0cm from its neighbors
+10. **Z-order layering**: Use `\\pgfonlayer{{background}}` for all arrow/connection paths. Nodes are on the main layer, arrows behind them. Add `\\usepgflayers{{background}}` in preamble.
+11. **Label placement**: ALL annotations and edge labels MUST use `midway, above` or `midway, below` positioning — NEVER use absolute coordinates for labels
+12. **No absolute coordinates**: Use ONLY relative positioning (`right=2cm of X`, `below=1cm of Y`). NEVER use `at (x,y)` with literal numbers
+13. **Text fitting**: Set `text width=Xcm` on nodes with multi-line text to prevent overflow. Use `align=center`
+14. **Color coding**: Use soft pastels (fill=blue!10, orange!20, etc.) — NEVER saturated colors (fill=blue, fill=red)
+15. **Font hierarchy**: Module names = `\\small\\bfseries`, sub-labels = `\\scriptsize`, annotations = `\\tiny\\itshape`
+
+Generate the TikZ code now:"""
+
+    return prompt
+
+
+def _build_revision_prompt(fig_plan, previous_tikz, feedback, venue, guide):
+    """迭代修改的 prompt"""
+    fig_id = fig_plan.get("fig_id", "fig")
+    title = fig_plan.get("title", "")
+
+    # 构造反馈摘要
+    feedback_str = ""
+    for fb in feedback:
+        iteration = fb.get("iteration", "?")
+        score = fb.get("score", 0)
+        issues = fb.get("issues", [])
+        summary = fb.get("summary", "")
+        feedback_str += f"\n### Iteration {iteration} (score: {score:.1f})\n"
+        feedback_str += f"Summary: {summary}\n"
+        for issue in issues:
+            sev = issue.get("severity", "?")
+            dim = issue.get("dimension", "?")
+            desc = issue.get("description", "")
+            sugg = issue.get("suggestion", "")
+            feedback_str += f"- [{sev}] {dim}: {desc}\n  Fix: {sugg}\n"
+
+    prompt = f"""## Task
+Revise the following TikZ figure code based on reviewer feedback.
+
+## Design Guide (for reference)
+{guide}
+
+## Figure: {title} ({fig_id})
+Target venue: {venue}
+
+## Current TikZ Code
+```latex
+{previous_tikz}
+```
+
+## Reviewer Feedback
+{feedback_str}
+
+## Requirements
+1. Output the COMPLETE revised LaTeX document (\\documentclass to \\end{{document}})
+2. Address ALL reviewer issues listed above
+3. Keep the parts that were working well
+4. Maintain the design guide standards
+5. Do NOT add markdown code blocks around the output
+
+Generate the revised TikZ code now:"""
+
+    return prompt
+
+
+def _build_fix_prompt(tikz_code: str, compile_error: str) -> str:
+    """编译错误修复 prompt"""
+    # 截取错误信息（避免太长）
+    error_msg = compile_error[:800] if len(compile_error) > 800 else compile_error
+
+    return f"""## Task
+Fix the TikZ compilation error in the following LaTeX code.
+
+## Current Code
+```latex
+{tikz_code}
+```
+
+## Compilation Error
+```
+{error_msg}
+```
+
+## Common Fixes
+- Missing semicolons at end of \\draw or \\node commands
+- Missing \\usetikzlibrary for used features (calc, fit, backgrounds, etc.)
+- Incorrect calc syntax: use `($(A)!0.5!(B)$)` with correct dollar signs
+- Unmatched braces or brackets
+- Using features not loaded via \\usetikzlibrary
+
+Output ONLY the fixed complete LaTeX document. No markdown code blocks."""
+
+
+# ═══════════════════════════════════════════════════════════════
+# 编译（Python 唯一的「硬约束」执行）
+# ═══════════════════════════════════════════════════════════════
+
+def _compile_tikz(tikz_code: str, fig_id: str, figures_dir: str,
+                  max_retries: int = 1) -> Dict:
     """
-    自动生成论文所需的所有图表
-
-    Args:
-        output_dir: 输出目录
-        project_data: 项目数据（含创新点、架构等）
-        experiment_data: 实验数据（含消融结果等）
-
-    Returns:
-        生成的图表路径映射
+    编译 TikZ 代码 → PDF + PNG。
+    如果编译失败，返回空结果（不做创造性修改）。
     """
-    results = {}
+    os.makedirs(figures_dir, exist_ok=True)
+    tmp_dir = tempfile.mkdtemp(prefix="tikz_")
 
-    # 1. 总体架构图
     try:
-        innovations = []
-        if project_data:
-            innovations = project_data.get("innovation_points", [])
-        arch_path = generate_architecture_diagram(output_dir, innovations)
-        results["architecture"] = arch_path
+        tex_path = os.path.join(tmp_dir, "fig.tex")
+        with open(tex_path, "w", encoding="utf-8") as f:
+            f.write(tikz_code)
+
+        pdflatex = _find_pdflatex()
+        result = subprocess.run(
+            [pdflatex, "-interaction=nonstopmode", "-halt-on-error", "fig.tex"],
+            cwd=tmp_dir, capture_output=True, text=True, timeout=30,
+        )
+
+        compiled_pdf = os.path.join(tmp_dir, "fig.pdf")
+        if not os.path.exists(compiled_pdf) or os.path.getsize(compiled_pdf) < 1000:
+            logger.error(f"[TikZCompiler] 编译失败: {result.stdout[-500:]}")
+            return {"pdf_path": "", "png_path": "", "compile_error": result.stdout[-500:]}
+
+        pdf_path = os.path.join(figures_dir, f"{fig_id}.pdf")
+        shutil.copy2(compiled_pdf, pdf_path)
+
+        png_path = os.path.join(figures_dir, f"{fig_id}.png")
+        _pdf_to_png(compiled_pdf, png_path, tmp_dir)
+
+        size = os.path.getsize(pdf_path)
+        logger.info(f"[TikZCompiler] 编译成功: {pdf_path} ({size:,} bytes)")
+        return {"pdf_path": pdf_path, "png_path": png_path}
+
+    except subprocess.TimeoutExpired:
+        logger.error("[TikZCompiler] 编译超时")
+        return {"pdf_path": "", "png_path": "", "compile_error": "timeout"}
     except Exception as e:
-        logger.warning(f"[FigureGen] 架构图生成失败: {e}")
+        logger.error(f"[TikZCompiler] 异常: {e}")
+        return {"pdf_path": "", "png_path": "", "compile_error": str(e)}
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
-    # 2. 模块设计图
-    if project_data:
-        arch = project_data.get("model_architecture", {})
-        modules = arch.get("modules", arch.get("核心模块", []))
-        if isinstance(modules, list):
-            for i, mod in enumerate(modules[:3]):
-                try:
-                    if isinstance(mod, dict):
-                        name = mod.get("name", mod.get("模块名", f"Module_{i+1}"))
-                        subs = mod.get("sub_modules", mod.get("子模块", []))
-                        if isinstance(subs, list) and subs:
-                            path = generate_module_diagram(output_dir, name, subs)
-                            results[f"module_{i+1}"] = path
-                except Exception as e:
-                    logger.warning(f"[FigureGen] 模块图 {i+1} 生成失败: {e}")
 
-    # 3. 性能对比图
+def _pdf_to_png(pdf_path: str, png_path: str, tmp_dir: str):
+    """PDF → PNG"""
     try:
-        # 尝试从实验数据生成
-        if experiment_data:
-            datasets = experiment_data.get("datasets", ["HCI", "Stanford", "Urban"])
-            methods = experiment_data.get("methods", ["EPINet", "LFNet", "Ours"])
-            mae_data = experiment_data.get("mae_values", None)
-            if mae_data:
-                perf_path = generate_performance_chart(
-                    output_dir, methods, datasets, mae_data)
-                results["performance"] = perf_path
-    except Exception as e:
-        logger.warning(f"[FigureGen] 性能对比图生成失败: {e}")
+        subprocess.run(
+            ["pdftoppm", "-png", "-r", "200", pdf_path,
+             os.path.join(tmp_dir, "fig")],
+            capture_output=True, timeout=10,
+        )
+        tmp_png = os.path.join(tmp_dir, "fig-1.png")
+        if os.path.exists(tmp_png):
+            shutil.copy2(tmp_png, png_path)
+            return
+    except Exception:
+        pass
 
-    # 4. 消融实验图
     try:
-        ablation_path = os.path.join(output_dir, "ablation_results.json")
-        if os.path.exists(ablation_path):
-            with open(ablation_path, "r", encoding="utf-8") as f:
-                abl_data = json.load(f)
-            experiments = abl_data.get("experiments", [])
-            for i, exp in enumerate(experiments[:3]):
-                name = exp.get("name", f"Ablation_{i+1}")
-                configs = exp.get("configs", [])
-                values = exp.get("values", [])
-                baseline = exp.get("baseline_value", None)
-                if configs and values:
-                    path = generate_ablation_chart(
-                        output_dir, name, configs, values,
-                        metric_name=exp.get("metric", "MAE"),
-                        baseline_value=baseline,
-                    )
-                    results[f"ablation_{i+1}"] = path
-    except Exception as e:
-        logger.warning(f"[FigureGen] 消融图生成失败: {e}")
+        from pdf2image import convert_from_path
+        images = convert_from_path(pdf_path, dpi=200)
+        if images:
+            images[0].save(png_path)
+            return
+    except ImportError:
+        pass
 
-    logger.info(f"[FigureGen] 生成完成: {len(results)} 个图表")
-    return results
+    logger.warning(f"[TikZCompiler] PNG 生成失败，仅 PDF 可用")
 
 
-def generate_latex_figure_includes(output_dir: str) -> str:
+# ═══════════════════════════════════════════════════════════════
+# 数据图 / 定性图（机械性工作，代码做）
+# ═══════════════════════════════════════════════════════════════
+
+def _gen_data_from_provided(fig_plan, figures_dir, venue):
+    from tools.data_visualizer import generate_comparison_chart, generate_ablation_chart
+    fig_id = fig_plan.get("fig_id", "fig")
+    data = fig_plan.get("data", {})
+    if fig_plan.get("fig_type") == "ablation":
+        return generate_ablation_chart(data, figures_dir, fig_id, venue)
+    return generate_comparison_chart(data, figures_dir, fig_id, venue)
+
+
+def _gen_data_from_project(fig_plan, figures_dir, venue, project_path):
+    from tools.experiment_explorer import explore_experiments, summary_to_dict
+    from tools.data_visualizer import generate_comparison_chart, generate_ablation_chart
+
+    fig_id = fig_plan.get("fig_id", "fig")
+    fig_type = fig_plan.get("fig_type", "comparison")
+    summary = explore_experiments(project_path)
+
+    if fig_type == "ablation" and summary.ablation_data:
+        ad = summary.ablation_data
+        return generate_ablation_chart({
+            "title": fig_plan.get("title", "Ablation Study"),
+            "components": ad.components,
+            "metrics": ad.metrics,
+        }, figures_dir, fig_id, venue)
+
+    if fig_type == "comparison" and summary.comparison_data:
+        cd = summary.comparison_data
+        return generate_comparison_chart({
+            "title": fig_plan.get("title", "Performance Comparison"),
+            "methods": cd.methods,
+            "metrics": cd.metrics,
+            "values": cd.values,
+        }, figures_dir, fig_id, venue)
+
+    return _gen_placeholder(fig_plan, figures_dir)
+
+
+def _gen_qualitative_from_images(fig_plan, figures_dir, venue):
+    from tools.data_visualizer import generate_image_grid
+    return generate_image_grid(
+        fig_plan.get("images", []),
+        figures_dir,
+        fig_plan.get("fig_id", "fig"),
+        venue,
+    )
+
+
+def _gen_qualitative_from_project(fig_plan, figures_dir, venue, project_path):
+    from tools.image_finder import find_qualitative_images, get_grid_image_paths, get_grid_titles
+    from tools.data_visualizer import generate_image_grid
+
+    qual_data = find_qualitative_images(project_path)
+    image_paths = get_grid_image_paths(qual_data)
+    if not image_paths:
+        return _gen_placeholder(fig_plan, figures_dir)
+
+    titles = get_grid_titles(qual_data)
+    return generate_image_grid(image_paths, figures_dir,
+                               fig_plan.get("fig_id", "fig"), venue,
+                               n_cols=min(len(titles), 5),
+                               titles=titles[:len(image_paths)])
+
+
+# ═══════════════════════════════════════════════════════════════
+# 占位符
+# ═══════════════════════════════════════════════════════════════
+
+def _gen_placeholder(fig_plan, figures_dir):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    fig_id = fig_plan.get("fig_id", "fig")
+    title = fig_plan.get("title", fig_plan.get("fig_type", ""))
+    fig, ax = plt.subplots(figsize=(6, 2.5))
+    ax.text(0.5, 0.5, f"[{fig_id}]\n{title}\n(Placeholder — requires data or LLM generation)",
+            ha='center', va='center', fontsize=10, color='gray',
+            transform=ax.transAxes)
+    ax.axis('off')
+
+    os.makedirs(figures_dir, exist_ok=True)
+    pdf_path = os.path.join(figures_dir, f"{fig_id}.pdf")
+    png_path = os.path.join(figures_dir, f"{fig_id}.png")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight', facecolor='white')
+    fig.savefig(png_path, format='png', bbox_inches='tight', dpi=150, facecolor='white')
+    plt.close(fig)
+    return {"pdf_path": pdf_path, "png_path": png_path}
+
+
+# ═══════════════════════════════════════════════════════════════
+# 工具函数
+# ═══════════════════════════════════════════════════════════════
+
+def _load_guide(filename: str) -> str:
+    """加载 MD 引导文件"""
+    path = os.path.join(_SKILL_DIR, filename)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    return f"[Guide file not found: {path}]"
+
+
+def _call_llm(prompt: str, system_prompt: str, model_alias: str) -> str:
+    """调用 LLM（自动路由到正确的 SDK）"""
+    from api.openai_compatible import create_client_for_model
+
+    client = create_client_for_model(
+        model_alias,
+        max_tokens=8192,
+        temperature=0.3,
+    )
+    return client.query(prompt, system_prompt=system_prompt)
+
+
+def _clean_tikz_output(raw: str) -> str:
+    """清理 LLM 输出，提取纯 LaTeX 代码"""
+    # 去掉 markdown 代码块包裹
+    code = raw.strip()
+
+    # 去掉 ```latex ... ``` 包裹
+    if code.startswith("```"):
+        # 去掉开头
+        code = re.sub(r'^```(?:latex|tex)?\s*\n?', '', code)
+        # 去掉结尾
+        code = re.sub(r'\n?```\s*$', '', code)
+
+    code = code.strip()
+
+    # 确保 \documentclass 在开头
+    if "\\documentclass" not in code:
+        logger.warning("[TikZCleaner] 输出缺少 \\documentclass，尝试修补")
+        if "\\begin{tikzpicture}" in code:
+            code = (
+                r"\documentclass[border=4pt]{standalone}" "\n"
+                r"\usepackage{tikz}" "\n"
+                r"\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit, backgrounds}" "\n"
+                r"\usepackage{amsmath,amssymb}" "\n"
+                r"\begin{document}" "\n"
+                + code + "\n"
+                r"\end{document}"
+            )
+
+    return code
+
+
+# ═══════════════════════════════════════════════════════════════
+# v10.1: LLM TikZ 降级 — 数据图/定性图无数据时的 LLM 设计
+# ═══════════════════════════════════════════════════════════════
+
+def _gen_data_figure_llm(
+    fig_plan: Dict,
+    figures_dir: str,
+    venue: str,
+    text_model_alias: str,
+) -> Dict:
     """
-    生成所有图表的 LaTeX \\includegraphics 代码片段
-
-    Returns:
-        LaTeX 代码字符串
+    LLM 用 TikZ 设计数据图/定性图的示意版本。
+    当没有实际数据/图片时，让 LLM 创造性地设计一个 TikZ 示意图：
+    - 消融图 → TikZ 表格 + 柱状图
+    - 对比图 → TikZ 柱状图/雷达图
+    - 定性图 → TikZ 对比布局示意图
     """
-    figures_dir = os.path.join(output_dir, "figures")
-    if not os.path.exists(figures_dir):
-        return ""
+    fig_id = fig_plan.get("fig_id", "fig")
+    fig_type = fig_plan.get("fig_type", "ablation")
+    title = fig_plan.get("title", fig_type)
+    caption = fig_plan.get("caption", "")
 
-    latex_parts = []
-    fig_counter = 0
+    guide = _load_guide("tikz_design_guide.md")
+    examples = _load_guide("tikz_style_examples.md")
+    data_guide = _load_guide("data_figure_guide.md")
 
-    for fname in sorted(os.listdir(figures_dir)):
-        if not fname.endswith('.pdf'):
-            continue
-        fig_counter += 1
-        name = fname.replace('.pdf', '').replace('_', ' ').title()
+    type_guidance = {
+        "ablation": (
+            "Design an ablation study TABLE figure using TikZ. "
+            "Create a professional three-line table (booktabs style) showing component ablation results. "
+            "Include columns for: component name, and 2-3 metrics. "
+            "Use a row for 'Full model' and 3-4 rows for ablated variants. "
+            "Bold the best results. Use \\usepackage{booktabs} for \\toprule/\\midrule/\\bottomrule."
+        ),
+        "comparison": (
+            "Design a performance comparison BAR CHART figure using TikZ. "
+            "Create a grouped bar chart comparing 5-6 methods across 2-3 datasets. "
+            "Include a legend, axis labels, and error bars if applicable. "
+            "Highlight the 'Ours' method with a distinct color/pattern."
+        ),
+        "qualitative": (
+            "Design a qualitative comparison LAYOUT figure using TikZ. "
+            "Create a grid layout showing input -> method comparisons -> results. "
+            "Use placeholder boxes with descriptive labels (e.g., 'Input', 'Method A', 'Ours', 'Ground Truth'). "
+            "Add arrows between columns to show the comparison flow."
+        ),
+    }.get(fig_type, "Design an academic paper figure using TikZ.")
 
-        if 'architecture' in fname.lower():
-            latex_parts.append(f"""
-\\begin{{figure}}[!t]
-\\centering
-\\includegraphics[width=\\columnwidth]{{figures/{fname.replace('.pdf', '')}}}
-\\caption{{Overall architecture of the proposed dual-mask unified light field depth estimation framework. The system integrates angular frequency analysis with dual-mask modeling for component-aware depth estimation.}}
-\\label{{fig:architecture}}
-\\end{{figure}}
-""")
-        elif 'module' in fname.lower():
-            latex_parts.append(f"""
-\\begin{{figure}}[!t]
-\\centering
-\\includegraphics[width=0.9\\columnwidth]{{figures/{fname.replace('.pdf', '')}}}
-\\caption{{Detailed design of the {name} module.}}
-\\label{{fig:{fname.replace('.pdf', '')}}}
-\\end{{figure}}
-""")
-        elif 'ablation' in fname.lower():
-            latex_parts.append(f"""
-\\begin{{figure}}[!t]
-\\centering
-\\includegraphics[width=0.85\\columnwidth]{{figures/{fname.replace('.pdf', '')}}}
-\\caption{{Ablation study results: {name}.}}
-\\label{{fig:{fname.replace('.pdf', '')}}}
-\\end{{figure}}
-""")
-        elif 'comparison' in fname.lower() or 'performance' in fname.lower():
-            latex_parts.append(f"""
-\\begin{{figure}}[!t]
-\\centering
-\\includegraphics[width=\\columnwidth]{{figures/{fname.replace('.pdf', '')}}}
-\\caption{{Performance comparison across datasets.}}
-\\label{{fig:{fname.replace('.pdf', '')}}}
-\\end{{figure}}
-""")
+    prompt = f"""## Task
+Generate a complete, compilable LaTeX+TikZ document for an academic paper figure.
+This is a {fig_type} figure but NO actual data/images are available yet.
+Design a professional SCHEMATIC/TEMPLATE version that can be filled with real data later.
 
-    return '\n'.join(latex_parts)
+## Type-Specific Guidance
+{type_guidance}
+
+## Design Guide
+{guide}
+
+## Style Examples
+{examples}
+
+## Data Figure Guide
+{data_guide}
+
+## Figure Specification
+- **Figure ID**: {fig_id}
+- **Type**: {fig_type}
+- **Title**: {title}
+- **Caption**: {caption}
+- **Target Venue**: {venue}
+
+## Requirements
+1. Output a COMPLETE standalone LaTeX document (\\documentclass to \\end{{document}})
+2. The figure must look professional and publication-ready even as a template
+3. Use realistic placeholder data/values (not "xxx" or "???")
+4. Follow the design guide color scheme and typography rules
+5. Size: ~16cm wide for double-column, ~8cm for single-column
+
+Generate the TikZ code now:"""
+
+    system_prompt = (
+        "You are an expert TikZ developer for top-tier academic paper figures. "
+        "You write clean, compilable LaTeX+TikZ code.\n"
+        "Output ONLY the complete LaTeX document code, starting from \\documentclass. "
+        "Do NOT wrap in markdown code blocks. Do NOT add any explanation outside the code."
+    )
+
+    logger.info(f"[FigureGen] LLM 生成数据图 TikZ: {fig_id} ({fig_type})")
+    tikz_code = _call_llm(prompt, system_prompt, text_model_alias)
+    tikz_code = _clean_tikz_output(tikz_code)
+
+    result = _compile_tikz(tikz_code, fig_id, figures_dir)
+
+    # 编译失败则 LLM 自动修复 1 次
+    if not result.get("pdf_path") and result.get("compile_error"):
+        logger.info(f"[FigureGen] 数据图编译失败，LLM 自动修复: {fig_id}")
+        fix_prompt = _build_fix_prompt(tikz_code, result["compile_error"])
+        fixed_code = _call_llm(fix_prompt, system_prompt, text_model_alias)
+        fixed_code = _clean_tikz_output(fixed_code)
+
+        if fixed_code and "\\documentclass" in fixed_code:
+            result = _compile_tikz(fixed_code, fig_id, figures_dir)
+            if result.get("pdf_path"):
+                tikz_code = fixed_code
+                logger.info(f"[FigureGen] 数据图自动修复成功: {fig_id}")
+
+    if result.get("pdf_path"):
+        tikz_src_path = os.path.join(figures_dir, f"{fig_id}_source.tex")
+        with open(tikz_src_path, "w", encoding="utf-8") as f:
+            f.write(tikz_code)
+        result["tikz_source"] = tikz_src_path
+        result["tikz_code"] = tikz_code
+        result["generated_by"] = "llm_tikz_fallback"
+    else:
+        # LLM 也失败了，最后兜底：占位符
+        logger.warning(f"[FigureGen] LLM TikZ 降级也失败，占位符: {fig_id}")
+        result = _gen_placeholder(fig_plan, figures_dir)
+        result["generated_by"] = "placeholder_after_llm_failure"
+
+    return result
+
+
+def _find_pdflatex() -> str:
+    """自动探测 pdflatex 路径"""
+    # 1. 环境变量指定
+    env_path = os.environ.get("PDFLATEX_PATH", "")
+    if env_path and os.path.isfile(env_path):
+        return env_path
+
+    # 2. which 查找
+    try:
+        r = subprocess.run(
+            ["which", "pdflatex"], capture_output=True, text=True, timeout=5,
+        )
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+    except Exception:
+        pass
+
+    # 3. 常见路径回退
+    candidates = [
+        "/usr/local/texlive/2026/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2025/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2024/bin/x86_64-linux/pdflatex",
+        "/usr/bin/pdflatex",
+        "/usr/local/bin/pdflatex",
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+
+    # 4. 最后兜底（让 subprocess 报错）
+    return "pdflatex"

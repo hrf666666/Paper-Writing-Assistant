@@ -1,0 +1,16 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "基于三层角信号分解的几何双掩码物理模型",
+    "contribution_statement": "We identify that existing light field estimation methods struggle with feature imbalances due to the lack of a rigorous physical model for multi-domain angular signal decomposition."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "面向多域光场数据的域平衡四方向EPI统一估计框架",
+    "contribution_statement": "We propose a geometric dual-mask physical model based on three-layer angular signal decomposition to mathematically isolate and represent these complex spatial-angular interactions."
+  }
+}

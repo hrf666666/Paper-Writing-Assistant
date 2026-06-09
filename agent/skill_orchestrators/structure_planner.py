@@ -90,9 +90,15 @@ class StructurePlanner(BaseOrchestrator):
         super().__init__()
         self.api_client = api_client
 
-    def plan(self, project_data: Dict, ref_data: Dict) -> Dict:
+    def plan(self, project_data: Dict, ref_data: Dict,
+             content_strategy: Optional[Dict] = None) -> Dict:
         """
         生成全局大纲
+
+        Args:
+            project_data: 项目数据
+            ref_data: 参考数据
+            content_strategy: v10.1 ContentStrategist 的输出（每章的内容策略）
 
         Returns:
             {
@@ -102,14 +108,11 @@ class StructurePlanner(BaseOrchestrator):
                         "key_arguments": [...],
                         "content_checklist": [...],
                         "length_budget": {...},
+                        "content_strategy": {...},  # v10.1 新增
                     },
                     ...
                 },
-                "global_constraints": {
-                    "total_word_target": ...,
-                    "figure_budget": ...,
-                    "table_budget": ...,
-                }
+                "global_constraints": {...}
             }
         """
         outline = {}
@@ -118,8 +121,9 @@ class StructurePlanner(BaseOrchestrator):
                         "Experiments", "Conclusion"]
 
         for chapter_name in chapter_names:
+            chapter_strategy = (content_strategy or {}).get(chapter_name, {})
             chapter_outline = self._plan_chapter(
-                chapter_name, project_data, ref_data
+                chapter_name, project_data, ref_data, chapter_strategy
             )
             outline[chapter_name] = chapter_outline
 
@@ -133,7 +137,7 @@ class StructurePlanner(BaseOrchestrator):
             "figure_budget": 5,
             "table_budget": 4,
             "prohibited_terms": self._get_prohibited_terms(),
-            "format": "Markdown（禁止混用 LaTeX 块级元素）",
+            "format": "LaTeX（IEEE Transactions IEEEtran 格式）",
         }
 
         result = {
@@ -145,8 +149,9 @@ class StructurePlanner(BaseOrchestrator):
         return result
 
     def _plan_chapter(self, chapter_name: str,
-                      project_data: Dict, ref_data: Dict) -> Dict:
-        """为单个章节生成详细大纲"""
+                      project_data: Dict, ref_data: Dict,
+                      chapter_strategy: Optional[Dict] = None) -> Dict:
+        """为单个章节生成详细大纲（v10.1: 支持 ContentStrategy）"""
         ref_chapter_org = ref_data.get("chapter_organizations", {}).get(chapter_name, {})
         ref_structure = ref_chapter_org.get("章节结构", []) if isinstance(ref_chapter_org, dict) else []
 
@@ -155,11 +160,26 @@ class StructurePlanner(BaseOrchestrator):
         )
 
         checklist = CONTENT_CHECKLISTS.get(chapter_name, [])
+
+        # v10.1: 如果有 content_strategy，合并到 checklist
+        if chapter_strategy:
+            strategy_must = chapter_strategy.get("must_include", [])
+            strategy_focus = chapter_strategy.get("focus_areas", [])
+            if strategy_focus:
+                checklist = [f"[重点] {item}" for item in strategy_focus] + checklist
+            if strategy_must:
+                checklist.extend([f"[必须] {item}" for item in strategy_must])
+
+            # strategy 的 should_avoid 作为负向约束
+            strategy_avoid = chapter_strategy.get("should_avoid", [])
+            if strategy_avoid:
+                checklist.extend([f"[避免] {item}" for item in strategy_avoid])
+
         budget = LENGTH_BUDGETS.get(chapter_name, {"min": 500, "max": 2000, "target": 1000})
         key_arguments = self._derive_key_arguments(chapter_name, project_data)
         expected_citations = self._derive_expected_citations(chapter_name, project_data)
 
-        return {
+        result = {
             "subsections": subsections,
             "key_arguments": key_arguments,
             "content_checklist": checklist,
@@ -167,6 +187,12 @@ class StructurePlanner(BaseOrchestrator):
             "expected_citations": expected_citations,
             "ref_structure": ref_structure[:3] if ref_structure else [],
         }
+
+        # v10.1: 保存完整的内容策略到 outline
+        if chapter_strategy:
+            result["content_strategy"] = chapter_strategy
+
+        return result
 
     def _derive_subsections(self, chapter_name: str,
                             project_data: Dict, ref_structure: List) -> List[Dict]:
@@ -265,7 +291,8 @@ class StructurePlanner(BaseOrchestrator):
         try:
             from config.project_config import get_article_type_info
             return get_article_type_info().get("prohibited_terms", [])
-        except Exception:
+        except Exception as e:
+            logger.debug(f"大纲解析失败: {e}")
             return []
 
     def save(self, outline_data: Dict, output_dir: str):
@@ -323,15 +350,17 @@ class StructurePlanner(BaseOrchestrator):
 
 
 def run_structure_planner(project_data: Dict, ref_data: Dict,
-                          api_client=None) -> Dict:
+                          api_client=None,
+                          content_strategy: Optional[Dict] = None) -> Dict:
     """
-    主入口：生成全局大纲
+    主入口：生成全局大纲（v10.1: 支持 content_strategy）
     """
     from config.project_config import OUTPUT_DIR
 
     planner = StructurePlanner(api_client)
     try:
-        outline = planner.plan(project_data, ref_data)
+        outline = planner.plan(project_data, ref_data,
+                               content_strategy=content_strategy)
     except Exception as e:
         logger.error(f"[StructurePlanner] 大纲规划失败: {e}")
         outline = {"outline": {}, "global_constraints": {}}

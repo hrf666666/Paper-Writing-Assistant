@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Light field depth estimation fundamentally struggles in real-world scenarios because non-Lambertian surfaces disrupt EPI linearity, and traditional frequency-domain methods suffer from feature aliasing at low angular resolutions. By physically decoupling angular signals into illumination, disparity, and material residuals, we extract robust geometric features to accurately isolate and mask material interference. This physics-driven decoupling, paired with a dual-mask routing architecture, effectively restores depth estimation accuracy and generalizability across complex, mixed-reflection scenes.\n\nINTRO_HOOK: Open by contrasting the theoretical promise of light field imaging with its practical collapse on non-Lambertian surfaces, immediately highlighting how low angular resolutions (e.g., 9×9) cause traditional EPI-based depth estimation to fail due to violated linearity assumptions and severe frequency aliasing.\n\nGAP_BRIDGE: Conclude the related work by demonstrating that 2D-DFT frequency analyses inevitably fail under discrete low angular sampling due to feature aliasing, thereby justifying the critical pivot from frequency-domain filtering to physics-based angular signal decoupling and geometric feature extraction.\n\nMETHOD_JUSTIFY: The three-layer physical decomposition model is explicitly designed to bypass frequency aliasing by isolating material residuals, while the GeometricDualMask architecture directly fulfills the motivation by using these decoupled geometric masks to adaptively route Lambertian and non-Lambertian signals into specialized network branches.\n\nEXPERIMENT_VALIDATE: Validate the physical decoupling motivation by highlighting the Random Forest's high classification accuracy (89.6%) and the strong effect size of angular gradients (Cohen's d = 0.983), then prove the architectural motivation by demonstrating the dual-mask network's superior depth accuracy and robustness on mixed-reflection datasets.\n\nCONCLUSION_ECHO: Reiterate that shifting from fragile frequency analysis to physical signal decoupling and geometric feature extraction successfully resolves the inherent limitations of low-resolution light fields, establishing an interpretable and unified paradigm for depth estimation in real-world complex scenarios.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Light field depth estimation fundamentally struggles in real-world scenarios because non-Lambertian ",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Light field depth estimation fundamentally struggles in real-world scenarios bec",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Light field depth estimation fundamentally struggles in real-world scenarios bec",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Physical Signal Decoupling for Low-Resolution Light Fields\n**Problem**: Non-Lambertian surfaces violate the Epipolar Plane Image (EPI) linearity assumption, and traditional 2D-DFT frequency domain methods fail due to feature aliasing under real-world low angular resolutions (e.g., 9x9).\n**Significance**: This failure prevents accurate material identification, causing depth estimation methods that rely on EPI linear structures to produce severe errors on complex surfaces, fundament",
+  "candidates": [
+    {
+      "direction": "Physical Signal Decoupling for Low-Resolution Light Fields",
+      "problem": "Non-Lambertian surfaces violate the Epipolar Plane Image (EPI) linearity assumption, and traditional 2D-DFT frequency domain methods fail due to feature aliasing under real-world low angular resolutions (e.g., 9x9).",
+      "significance": "This failure prevents accurate material identification, causing depth estimation methods that rely on EPI linear structures to produce severe errors on complex surfaces, fundamentally limiting the applicability of light field technology in real-world scenarios.",
+      "approach": "Proposes a three-layer angular signal physical decomposition model to decouple signals into illumination, disparity, and material residuals, and extracts geometric angular features (e.g., angular gradients) for robust pixel-level material classification via Random Forest.",
+      "key_claim": "Decoupling signals at the physical level and leveraging geometric features overcomes the limitations of frequency analysis in low-resolution light fields, providing an interpretable and robust material mask for depth estimation."
+    },
+    {
+      "direction": "Dual-Branch Routing for Mixed Reflection Scenes",
+      "problem": "Traditional single-branch EPI networks attempt to process both the linear structures of Lambertian surfaces and the X-shaped or bimodal patterns of Non-Lambertian surfaces using the same feature extraction mechanism, leading to feature conflict and depth estimation collapse.",
+      "significance": "Real-world scenes are inherently mixed; a single model cannot simultaneously accommodate two drastically different physical imaging laws, resulting in degraded overall depth accuracy and poor generalization across diverse environments.",
+      "approach": "Designs a GeometricDualMask architecture that uses generated material masks to adaptively route light field features into dedicated Lambertian and Non-Lambertian branches, followed by a weighted fusion module for unified depth regression.",
+      "key_claim": "The mask-guided dual-branch routing mechanism breaks the representation bottleneck of single networks, enabling adaptive and high-precision depth estimation for surfaces with diverse reflection properties in mixed scenes."
+    },
+    {
+      "direction": "Mitigating Data Scarcity and Pixel-Level Label Noise",
+      "problem": "The scarcity of Non-Lambertian data in real-world datasets causes severe overfitting, and traditional scene-level binary cross-entropy (BCE) supervision introduces significant boundary noise when generating pixel-level masks.",
+      "significance": "Data imbalance and label noise drastically reduce the robustness of material classification and subsequent depth estimation, making models unstable in complex scenes with rich material variations and limiting engineering feasibility.",
+      "approach": "Introduces domain-balanced sampling and weighted random samplers to alleviate data scarcity, while employing pseudo-labels based on geometric features to generate pixel-level masks, replacing scene-level supervision to minimize noise.",
+      "key_claim": "Combining domain-balanced sampling with pixel-level pseudo-labeling effectively overcomes the long-tail distribution of Non-Lambertian data and label noise, enhancing the model's generalization and engineering feasibility on complex mixed datasets."
+    }
+  ]
+}

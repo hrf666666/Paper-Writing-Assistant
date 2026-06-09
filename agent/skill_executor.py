@@ -136,7 +136,7 @@ class SkillExecutor:
             try:
                 revised_content, report = self.quality_gate.evaluate_and_revise(
                     chapter_name=config.name,
-                    content=content,
+                    chapter_content=content,
                     style_guide=style_guide or {},
                     chapter_org=chapter_org or {},
                     previous_content=previous_content,

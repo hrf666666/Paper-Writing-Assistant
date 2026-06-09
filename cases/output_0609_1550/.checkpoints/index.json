@@ -1,0 +1,28 @@
+{
+  "checkpoints": {
+    "phase0": {
+      "phase_name": "phase0",
+      "phase_index": "0",
+      "timestamp": 1780989592.9204915,
+      "status": "completed",
+      "output_files": [],
+      "error_message": "",
+      "duration_seconds": 865.943496465683,
+      "quality_score": -1.0
+    }
+  },
+  "state_data_keys": [
+    "project_data",
+    "ref_data",
+    "chapters",
+    "reference_pool",
+    "outline",
+    "motivation_thread",
+    "exemplar_dossier",
+    "style_profile",
+    "citation_bank",
+    "rationale_matrix",
+    "abstract",
+    "ablation_results"
+  ]
+}

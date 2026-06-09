@@ -1,0 +1,160 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{light_field_imaging,depth_estimation}
+\citation{non_lambertian_surfaces,specular_reflection}
+\citation{photo_consistency,lambertian_assumption}
+\citation{epipolar_plane_image,geometric_constraints}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-A}}Background and Problem Importance}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Performance Degradation of Traditional EPI Methods Across Different Surface Materials}}{1}{table.1}\protected@file@percent }
+\newlabel{tab:mae_degradation}{{I}{1}{Performance Degradation of Traditional EPI Methods Across Different Surface Materials}{table.1}{}}
+\newlabel{eq:ch1_1}{{1}{1}{Background and Problem Importance}{equation.1}{}}
+\citation{wanner2012variational,johan2014lenslet}
+\citation{kim2013depth}
+\citation{zhang2015light}
+\citation{shin2018epinet}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Geometric patterns in Epipolar Plane Images (EPIs). (a) Lambertian surfaces exhibit clear linear structures. (b) Non-Lambertian surfaces (specular and translucent) destroy the angular cone constraints, forming $X$-shaped patterns and bimodal distributions, which fundamentally breaks the geometric assumptions of traditional EPI-based depth estimation methods.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:epi_patterns}{{1}{2}{Geometric patterns in Epipolar Plane Images (EPIs). (a) Lambertian surfaces exhibit clear linear structures. (b) Non-Lambertian surfaces (specular and translucent) destroy the angular cone constraints, forming $X$-shaped patterns and bimodal distributions, which fundamentally breaks the geometric assumptions of traditional EPI-based depth estimation methods}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-B}}Limitations of Existing Methods}{2}{subsection.1.2}\protected@file@percent }
+\citation{wang2021attention}
+\citation{huang2021defocus}
+\citation{breiman2001random}
+\citation{levoy2006light}
+\newlabel{eq:ch1_1}{{3}{3}{Limitations of Existing Methods}{equation.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Summary of Limitations in Existing Light Field Depth Estimation Methods}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:limitations_summary}{{II}{3}{Summary of Limitations in Existing Light Field Depth Estimation Methods}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Proposed Method and Contributions}{3}{section.2}\protected@file@percent }
+\citation{bolles1987epipolar,wanner2012globally}
+\citation{wanner2012globally}
+\citation{kim2013adaptive}
+\citation{tao2013depth}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Summary of Core Contributions and Corresponding Architectural Modules}}{4}{table.3}\protected@file@percent }
+\newlabel{tab:contributions_summary}{{III}{4}{Summary of Core Contributions and Corresponding Architectural Modules}{table.3}{}}
+\newlabel{eq:ch1_2}{{4}{4}{Proposed Method and Contributions}{equation.4}{}}
+\newlabel{eq:ch1_3}{{5}{4}{Proposed Method and Contributions}{equation.5}{}}
+\newlabel{eq:ch1_4}{{6}{4}{Proposed Method and Contributions}{equation.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Traditional Light Field Depth Estimation Methods}{4}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-A}1}EPI-Based Geometric Methods}{4}{subsubsection.2.1.1}\protected@file@percent }
+\newlabel{eq:ch2_1}{{7}{4}{EPI-Based Geometric Methods}{equation.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-A}2}Multi-Cue Integration Methods}{4}{subsubsection.2.1.2}\protected@file@percent }
+\newlabel{eq:ch2_2}{{8}{4}{Multi-Cue Integration Methods}{equation.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-A}3}Summary and Limitations}{4}{subsubsection.2.1.3}\protected@file@percent }
+\citation{wanner2012globally}
+\citation{tao2013depth}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Overall architecture of the proposed Unified Dual-Mask Physical Model (GeometricDualMask). The framework consists of the Three-Layer Angular Signal Decomposition module, the Lambertian EPI branch, the Non-Lambertian Geometric branch, and the Dual-Mask Generation \& Fusion module. Pixel-wise geometric pseudo-labels supervise the mask generation to ensure precise feature routing.}}{5}{figure.2}\protected@file@percent }
+\newlabel{fig:architecture}{{2}{5}{Overall architecture of the proposed Unified Dual-Mask Physical Model (GeometricDualMask). The framework consists of the Three-Layer Angular Signal Decomposition module, the Lambertian EPI branch, the Non-Lambertian Geometric branch, and the Dual-Mask Generation \& Fusion module. Pixel-wise geometric pseudo-labels supervise the mask generation to ensure precise feature routing}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Deep Learning-based Methods}{5}{subsection.2.2}\protected@file@percent }
+\citation{shin2018epinet}
+\citation{liang2020lfnet}
+\citation{wang2021agl}
+\citation{wang2018occlusion}
+\citation{chang2018pyramid}
+\citation{zhang2019ga}
+\citation{liang2022light}
+\citation{chen2023epinet}
+\citation{huang2021physics}
+\citation{zhang2022specular}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Comparison of Traditional Light Field Depth Estimation Methods}}{6}{table.4}\protected@file@percent }
+\newlabel{tab:traditional_methods}{{IV}{6}{Comparison of Traditional Light Field Depth Estimation Methods}{table.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}1}EPI-based Deep Networks}{6}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}2}Macro-Pixel and Multi-View Methods}{6}{subsubsection.2.2.2}\protected@file@percent }
+\newlabel{eq:ch2_3}{{9}{6}{Macro-Pixel and Multi-View Methods}{equation.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}3}Attention and Transformer-based Architectures}{6}{subsubsection.2.2.3}\protected@file@percent }
+\newlabel{eq:ch2_4}{{10}{6}{Attention and Transformer-based Architectures}{equation.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}4}Physics-Informed and Material-Aware Networks}{6}{subsubsection.2.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}5}Summary and Limitations}{6}{subsubsection.2.2.5}\protected@file@percent }
+\citation{shin2018epinet}
+\citation{liang2020lfnet}
+\citation{wang2018occlusion}
+\citation{chang2018pyramid}
+\citation{liang2022light}
+\citation{huang2021physics}
+\citation{zhang2022specular}
+\citation{smith2023epinet}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Comparison of Deep Learning-based Light Field Depth Estimation Methods}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:dl_methods}{{V}{7}{Comparison of Deep Learning-based Light Field Depth Estimation Methods}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Summary and Motivation}{7}{subsection.2.3}\protected@file@percent }
+\newlabel{eq:ch2_1}{{11}{7}{Summary and Motivation}{equation.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Overall Architecture}{7}{subsection.2.4}\protected@file@percent }
+\citation{wang2024dualbranch}
+\citation{smith2023lightfield}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}1}Three-Layer Angular Signal Decomposition}{8}{subsubsection.2.4.1}\protected@file@percent }
+\newlabel{eq:ch3_1}{{12}{8}{Three-Layer Angular Signal Decomposition}{equation.12}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}2}Dual-Branch Feature Extraction}{8}{subsubsection.2.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-D}3}Dual-Mask Generation and Fusion}{8}{subsubsection.2.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Key Hyperparameters of the GeometricDualMask Architecture}}{8}{table.6}\protected@file@percent }
+\newlabel{tab:hyperparams}{{VI}{8}{Key Hyperparameters of the GeometricDualMask Architecture}{table.6}{}}
+\newlabel{eq:ch3_2}{{13}{8}{Dual-Mask Generation and Fusion}{equation.13}{}}
+\newlabel{eq:ch3_3}{{14}{8}{Dual-Mask Generation and Fusion}{equation.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Core Components}{8}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}1}Three-Layer Angular Signal Decomposition}{8}{subsubsection.2.5.1}\protected@file@percent }
+\newlabel{eq:ch3_1}{{15}{8}{Three-Layer Angular Signal Decomposition}{equation.15}{}}
+\citation{wang2022prso}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Overall architecture of the proposed GeometricDualMask model. The framework decouples the light field angular signals via a physics-driven decomposition module, generating geometric pseudo-labels. A dual-branch network adaptively processes Lambertian and non-Lambertian regions, followed by a mask-guided fusion mechanism to produce the final high-precision depth map.}}{9}{figure.3}\protected@file@percent }
+\newlabel{fig:architecture}{{3}{9}{Overall architecture of the proposed GeometricDualMask model. The framework decouples the light field angular signals via a physics-driven decomposition module, generating geometric pseudo-labels. A dual-branch network adaptively processes Lambertian and non-Lambertian regions, followed by a mask-guided fusion mechanism to produce the final high-precision depth map}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}2}Lambertian EPI Branch}{9}{subsubsection.2.5.2}\protected@file@percent }
+\newlabel{eq:ch3_2}{{16}{9}{Lambertian EPI Branch}{equation.16}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}3}Non-Lambertian Geometric Branch}{9}{subsubsection.2.5.3}\protected@file@percent }
+\newlabel{eq:ch3_3}{{17}{9}{Non-Lambertian Geometric Branch}{equation.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-E}4}Dual-Mask Generation and Fusion}{9}{subsubsection.2.5.4}\protected@file@percent }
+\newlabel{eq:ch3_4}{{18}{9}{Dual-Mask Generation and Fusion}{equation.18}{}}
+\newlabel{eq:ch3_5}{{19}{9}{Dual-Mask Generation and Fusion}{equation.19}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Training Objective}{9}{subsection.2.6}\protected@file@percent }
+\citation{he2016deep}
+\citation{lin2017focal}
+\citation{loshchilov2019adamw}
+\citation{honauer2016hci}
+\citation{urbanlf2020}
+\citation{nllf2021}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Summary of Core Components in GeometricDualMask}}{10}{table.7}\protected@file@percent }
+\newlabel{tab:core_components}{{VII}{10}{Summary of Core Components in GeometricDualMask}{table.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-F}1}Loss Function}{10}{subsubsection.2.6.1}\protected@file@percent }
+\newlabel{eq:ch3_6}{{20}{10}{Loss Function}{equation.20}{}}
+\newlabel{eq:ch3_7}{{21}{10}{Loss Function}{equation.21}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-F}2}Training Strategy}{10}{subsubsection.2.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-F}3}Optimization Details}{10}{subsubsection.2.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Experimental Setup}{10}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Datasets}{10}{subsection.3.1}\protected@file@percent }
+\citation{shin2018epinet}
+\citation{wang2019lfattnet}
+\citation{wang2020distgssr}
+\citation{jin2021mac}
+\citation{li2022dualbranch}
+\citation{shin2018epinet}
+\citation{wang2019lfattnet}
+\citation{wang2020distgssr}
+\citation{jin2021mac}
+\citation{li2022dualbranch}
+\citation{shin2018epinet}
+\citation{wang2019lfattnet}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Summary of Light Field Datasets Used in Experiments}}{11}{table.8}\protected@file@percent }
+\newlabel{tab:datasets}{{VIII}{11}{Summary of Light Field Datasets Used in Experiments}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Evaluation Metrics}{11}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:mae}{{22}{11}{Evaluation Metrics}{equation.22}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Implementation Details and Training Configuration}{11}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Comparison with State-of-the-art}{11}{subsection.3.4}\protected@file@percent }
+\citation{li2022dualbranch}
+\citation{li2022dualbranch}
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Quantitative Comparison with State-of-the-Art Light Field Depth Estimation Methods on Different Domains. The Best Results are Highlighted in \textbf  {Bold}, and the Second Best are \underline  {Underlined}.}}{12}{table.9}\protected@file@percent }
+\newlabel{tab:sota_comparison}{{IX}{12}{Quantitative Comparison with State-of-the-Art Light Field Depth Estimation Methods on Different Domains. The Best Results are Highlighted in \textbf {Bold}, and the Second Best are \underline {Underlined}}{table.9}{}}
+\newlabel{eq:ch4_1}{{23}{12}{Comparison with State-of-the-art}{equation.23}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Ablation Studies}{12}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Effectiveness of Dual-Branch and Dual-Mask Architecture}{12}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Ablation Study on Architectural Components and Routing Mechanisms. The proposed Unified Dual-Mask model achieves the best performance across all domains by explicitly decoupling Lambertian and non-Lambertian regions.}}{13}{table.10}\protected@file@percent }
+\newlabel{tab:arch_ablation}{{X}{13}{Ablation Study on Architectural Components and Routing Mechanisms. The proposed Unified Dual-Mask model achieves the best performance across all domains by explicitly decoupling Lambertian and non-Lambertian regions}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Ablation Study on Angular Feature Extraction and Decomposition Strategies. Geometric features derived from the residual term provide the strongest discriminative power for mask supervision.}}{13}{table.11}\protected@file@percent }
+\newlabel{tab:feature_ablation}{{XI}{13}{Ablation Study on Angular Feature Extraction and Decomposition Strategies. Geometric features derived from the residual term provide the strongest discriminative power for mask supervision}{table.11}{}}
+\newlabel{eq:ch4_2}{{24}{13}{Effectiveness of Dual-Branch and Dual-Mask Architecture}{equation.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Impact of Physics-Based Angular Signal Decomposition}{13}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Analysis of Training Strategies and Loss Functions}{13}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{13}{section.5}\protected@file@percent }
+\citation{epinet2018baseline}
+\bibstyle{IEEEtran}
+\bibdata{references}
+\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Ablation Study on Training Strategies and Loss Functions. The proposed domain-balanced sampling combined with the standard BCE loss for mask supervision yields the most robust cross-domain generalization.}}{14}{table.12}\protected@file@percent }
+\newlabel{tab:training_ablation}{{XII}{14}{Ablation Study on Training Strategies and Loss Functions. The proposed domain-balanced sampling combined with the standard BCE loss for mask supervision yields the most robust cross-domain generalization}{table.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {XIII}{\ignorespaces Summary of Key Depth Estimation Results (MAE)}}{14}{table.13}\protected@file@percent }
+\newlabel{tab:conclusion_summary}{{XIII}{14}{Summary of Key Depth Estimation Results (MAE)}{table.13}{}}
+\gdef \@abspage@last{14}

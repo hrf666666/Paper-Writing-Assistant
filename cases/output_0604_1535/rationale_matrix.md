@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 采用三层角信号分解（DC、线性、残差）并提取几何角特征（如角梯度），摒弃低角分辨 | 在9x9等低角分辨率离散采样下，2D-DFT频域分析因频谱混叠和分辨率不足而失效，无法有效区分材质反 | 传统基于频域或高频采样的方法在低分辨率光场中性能骤降，本方法通过时域几何分解实现了不依赖高频角分辨率 | 低角分辨率（如9x9视角采样）的混合场景和包含复杂非朗伯体（高光、散射）表面的数 | Phase 1实验显示RF分类器使用5个几何特征达到89.6%准确率和0.962 | Methodology (Three-Layer Angular Signal Decomposition) | must |
+| 利用几何伪标签生成像素级朗伯/非朗伯双掩码，并路由至专门的双分支架构（朗伯EPI | 非朗伯体表面的镜面反射和体散射破坏了EPI线结构和角锥约束，单一网络无法同时拟合朗伯体的线性EPI和 | 现有单分支或场景级掩码方法容易受标签噪声影响且无法处理像素级材质混合；本设计通过像素级路由显式分离物 | 包含像素级材质混合的复杂场景（Mixed/Urban），特别是高光边缘和半透明物 | 双分支架构结合掩码加权融合，在Mixed (Urban)场景下MAE降至0.08 | Methodology (Dual-Branch Mask-Routing Architecture) | must |
+| 设计领域平衡采样（Domain-balanced sampling）结合Weig | 光场数据集中多域数据分布严重不均，且非朗伯体数据极度稀缺（如Non-Lambertian仅4个训练场 | 传统多域训练通常采用简单拼接或轮询，导致长尾域（非朗伯体）欠拟合；本策略通过动态维持跨域曝光平衡，解 | 多域联合训练环境，特别是包含大量合成朗伯体（如UrbanLF-Syn的170个场 | Final Performance Scorecard显示Overall MAE | Experimental Setup & Training Strategy | must |
+| 系统性开展132次实验并建立负面结果档案，深入剖析EPI方法在非朗伯体和复杂纹理 | 盲目堆叠网络模块无法解决EPI线性假设被物理破坏的根本问题，必须明确算法失效的边界以指导双分支架构的 | 现有文献多关注SOTA指标提升而掩盖失败案例；本研究通过界定镜面反射和体散射如何导致EPI线断裂（X | 算法评估与理论分析阶段，适用于所有基于EPI线性假设的光场深度估计基线模型（包括 | experiment_history.db中记录的132次实验结果，以及明确指出 | Discussion / Failure Analysis and Physical Boundaries | should |
+| 在非朗伯几何分支中，显式引入X形模式（X-pattern）和双峰分布（bimod | 非朗伯体（如高光和散射）在EPI中不表现为直线，而是呈现X型交叉或双峰分布，传统EPI斜率提取方法在 | 现有方法通常将非朗伯区域视为噪声或异常值进行平滑处理；本设计将其视为具有特定几何模式的信号，通过专用 | Non-Lambertian Dataset中的高光和半透明物体表面，以及Urb | 针对非朗伯体区域的消融实验表明，引入X形模式特征后，高光中心的深度估计误差显著降 | Methodology (Non-Lambertian Geometric Branch) | must |
+| 采用4方向EPI架构（EPINet4Dir V3）作为朗伯EPI分支及统一基础特 | 单方向或双方向EPI容易受遮挡和纹理缺失影响，而4方向（水平、垂直、两个对角线）能最大化利用光场角度 | 相比传统2D卷积或单方向RNN处理EPI，4方向EPI架构在保留EPI线结构的同时，显著降低了复杂纹 | 朗伯体主导的场景（Lambertian）以及Mixed场景中符合角锥约束的漫反射 | 在Lambertian场景下MAE < 0.16，且4方向特征融合有效减少了单一 | Methodology (Lambertian EPI Branch) | should |

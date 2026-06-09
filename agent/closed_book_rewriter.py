@@ -174,7 +174,7 @@ CRITICAL RULES:
 2. Follow the motivation thread and rationale matrix
 3. Maintain the style guidance
 4. Do NOT reproduce the original text structure — this is a fresh rewrite
-5. Use proper LaTeX-compatible Markdown format
+5. Use proper native LaTeX format (IEEE Transactions IEEEtran class)
 
 {blueprint}
 

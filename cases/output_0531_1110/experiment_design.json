@@ -1,0 +1,56 @@
+{
+  "数据集": {
+    "名称": [
+      "HCInew",
+      "UrbanLF-Syn",
+      "Non-Lambertian Dataset",
+      "HCI-Old (已排除)"
+    ],
+    "规模": "HCInew包含多个场景（如boxes, cotton等），81视角，512x512分辨率；UrbanLF-Syn包含170个场景；Non-Lambertian仅包含4个训练场景；HCI-Old因h5格式问题被排除。",
+    "场景类型": "Lambertian（朗伯体/漫反射）、Mixed/Urban（混合/城市）、Non-Lambertian（非朗伯体/高光/散射）",
+    "划分方式": "划分为训练集（train）和验证集（val），采用统一的数据加载器（UnifiedLFDataset）支持多种GT格式（如disparity_pfm），目标尺寸裁剪/缩放为256x256。"
+  },
+  "评估指标": {
+    "指标名称": "Mean Absolute Error (MAE，平均绝对误差)",
+    "目标值": {
+      "Overall MAE": "< 0.20",
+      "Mixed (Urban) MAE": "< 0.22",
+      "Lambertian MAE": "< 0.16",
+      "Non-Lambertian MAE": "< 0.25"
+    }
+  },
+  "训练策略": {
+    "采样与平衡": "使用 WeightedRandomSampler 进行域平衡采样（Domain-balanced sampling + Mixed training），维持跨域曝光平衡。",
+    "超参数搜索": "进行了学习率（LR）和 batch size 的扫描（sweeps）以确认指标平台期。",
+    "其他尝试策略": "尝试了数据增强（Data augmentation）、EMA训练、课程学习（Curriculum learning）、少数域过采样（Oversampling minority domains）等，但均未带来实质性提升。",
+    "具体优化器/学习率/Batch Size/Epoch": "报告中未提供最终确定的具体数值，仅说明通过sweep确定并达到了性能瓶颈（Metrics plateau confirmed）。"
+  },
+  "对比方法": [
+    "EPINet baseline variants (如 EPINet4Dir V3 4-direction EPI)",
+    "Dual-branch architectures (双分支架构)",
+    "Attention mechanisms (注意力机制)",
+    "Defocus-based auxiliary heads (基于散焦的辅助头)",
+    "Separate per-domain models (单域独立模型)",
+    "Feature matching alternatives (特征匹配替代方法，超出范围)"
+  ],
+  "消融设计": {
+    "消融模块与方向": [
+      "架构模块：Dual-branch, Attention mechanisms, Defocus-based auxiliary heads, Domain-specific mask learning",
+      "损失函数：Focal loss variants, Dice / Lovász losses, Composite multi-term losses",
+      "训练策略：EMA training, Curriculum learning, Oversampling, Data augmentation",
+      "特征工程：Angular frequency analysis (Phase 1 频域分析)"
+    ],
+    "对比方式": "在16个主要研究方向上进行了132次实验，遵循‘每次实验仅测试单一方法族（One method family per experiment）’的原则，对比其在Overall、Mixed、Lambertian和Non-Lambertian四个域上的MAE表现，以验证各模块和策略的有效性。"
+  },
+  "关键实验结果": {
+    "达成目标": {
+      "Overall MAE": "0.133 (目标 < 0.20，✅ 达成)",
+      "Mixed (Urban) MAE": "0.081 (目标 < 0.22，✅ 达成)"
+    },
+    "未达成目标": {
+      "Lambertian MAE": "0.387 (目标 < 0.16，❌ 未达成，差距2.4倍)",
+      "Non-Lambertian MAE": "0.411 (目标 < 0.25，❌ 未达成)"
+    },
+    "核心结论": "1. EPI（极平面图像）假设在非朗伯体（高光/散射）表面失效，且仅有4个训练场景导致严重的数据匮乏，无法通过模型或损失函数弥补。2. 复杂纹理导致朗伯体场景中出现EPI斜率模糊，这是EPI架构的固有局限。3. 最佳模型为 EPINet4Dir V3，结合域平衡采样在混合/城市场景表现优异。"
+  }
+}

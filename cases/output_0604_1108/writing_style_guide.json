@@ -1,0 +1,39 @@
+{
+  "句式特征": {
+    "对比与转折句式": [
+      "Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group and interacting with each other.",
+      "While encouraging results are shown in the Transformer-based methods, those previous works only implicitly learn the inter-joint relation through the attention mechanism and lack the explicit awareness of skeleton structure.",
+      "But even with this robustness, pyramids are still needed to get the most accurate results."
+    ],
+    "问题导向与动机句式": [
+      "Multi-person motion prediction is a challenging problem due to the dependency of motion on both individual past movements and interactions with other people.",
+      "Recognizing objects at vastly different scales is a fundamental challenge in computer vision.",
+      "Thus, automaton design remains restricted to only a handful of experts."
+    ],
+    "方法提出与贡献句式": [
+      "In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling and improve future motion prediction.",
+      "We propose an automatic algorithm that takes a motion sequence of a humanoid character and generates the design for a mechanical figure that approximates the input motion when driven with a single input crank.",
+      "A top-down architecture with lateral connections is developed for building high-level semantic feature maps at all scales."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "多采用“任务定义/背景陈述”或“现有工作回顾”直接切入。例如以“Multi-person motion prediction aims to...”明确任务目标，或以“Previous works on... generally adopt...”梳理技术脉络，亦或用“Recognizing objects at vastly different scales is a fundamental challenge...”点明核心痛点。",
+    "段内论证逻辑": "呈现严密的“递进与剥洋葱”逻辑。通常遵循“陈述现状/主流方法 → 剖析内在缺陷/局限性（如计算代价、语义鸿沟、隐式学习） → 引出本文动机与具体设计”的链条。在方法阐述段落，则采用“机制描述 → 理论优势 → 最终效果”的演绎逻辑。",
+    "段落结尾收束方式": "常以“总结性评价”或“实验/结果预告”收尾，以强化本段论点并为下文铺垫。例如“The quantitative results show we outperform the previous methods...”直接宣告SOTA结果，或“We show that these are important for detecting small objects.”点出关键发现以引出后续的网络设计。"
+  },
+  "用词特征": [
+    "过渡词 (Transition Words): Moreover, Additionally, However, Nevertheless, Thus, Therefore, In specific, Compared to/with, While.",
+    "强调词 (Emphasis Words): crucial, fundamental, significant, inherent, explicit, promising, state-of-the-art, vastly, heavily, largely, marginal.",
+    "限定词 (Qualifier Words): partially, mostly, generally, only, relatively, practically, inherently.",
+    "学术动词与短语 (Academic Verbs/Phrases): exploit, leverage, formulate, approximate, outperform, pave a path to, suffer from, adhere to, forego, offset."
+  ],
+  "论证模式": [
+    "“提出问题 → 分析现有方案局限 → 给出本文方案”模式：Introduction的核心逻辑。先指出任务难点（如多人交互依赖、多尺度检测的计算代价），接着剖析主流方法（如GNN的过平滑、标准Transformer缺乏显式结构感知、图像金字塔的内存瓶颈）的缺陷，最后顺理成章提出本文的针对性架构（Joint-Relation Transformer / FPN）。",
+    "“先总后分（总览框架 → 模块拆解）”模式：在Abstract和Method概述中，先宏观概括提出的系统（如“Our approach has two stages”或“a two-stream Transformer architecture”），随后逐一拆解子模块的具体功能与数学/物理约束（如motion approximation stage / layout stage）。",
+    "“机制设计 → 属性推导 → 性能增益”推导模式：在解释创新点时，先描述具体操作（如引入relation-aware attention），然后推导其满足的物理/数学属性（如translation and rotation invariant），最后落脚于对模型性能的实际提升（如enhancing prediction performance）。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "1. 句末/词末上标引用（主流）：用于支持特定事实、应用场景或数据集，不打断阅读流畅度。如“autonomous driving<sup>15, 38, 10, 51</sup>”、“3DPW-SoMoF<sup>3</sup>”。\n2. 句中/主语紧跟引用：将特定算法、模型或文献作为句子主语或核心宾语时，引用紧随其后。如“The Single Shot Detector (SSD)<sup>22</sup> is one of the first attempts...”、“object detectors like DPM<sup>7</sup> required...”。",
+    "引用与论述的衔接方式": "1. 归类与枚举式衔接：将多篇文献按应用领域或技术流派进行打包引用，以证明研究的广泛价值或技术路线的普遍性。如“including autonomous driving<sup>15, 38, 10, 51</sup>, surveillance systems<sup>13, 42, 52</sup> and healthcare monitoring<sup>43</sup>”。\n2. 对比与转折式衔接：在列举代表性工作后，立刻使用转折词（however, while, but）指出其局限性，从而为本文方法的出现构建“Gap”。如“...such as MRT<sup>46</sup> and SoMoFormer<sup>40</sup>, treat temporal sequence... Compared with GNN-based methods, Transformer has shown...”。"
+  }
+}

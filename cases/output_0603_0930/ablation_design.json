@@ -1,0 +1,83 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Geometric vs. Spectral Angular Feature Extraction",
+      "target_module": "三层角度信号分解模块 (Three-Layer Angular Signal Decomposition)",
+      "hypothesis": "在9x9等离散角分辨率下，基于几何角特征（如角梯度、角相关性）比传统的频谱特征（如2D-DFT）更具判别力，能更准确地提取残差中的材质信息并指导掩码生成，避免了频谱分析对连续角分辨率的依赖。",
+      "modification": "在三层角度信号分解模块中，移除计算 angular_gradient 和 correlation_coherence 的代码，替换为对 9x9 角度patch进行 2D-DFT 变换并提取幅度谱特征（如低频/高频能量比、主频方向、频谱熵），并将这些频谱特征输入到后续的材质分类器和掩码生成MLP中。",
+      "expected_result": "Non_Lambertian_MAE 和 Mixed_Urban_MAE 显著上升，材质分类准确率（AUC）下降，mask gap 增大（超过0.08阈值），证明几何特征在离散采样下的优越性和高判别力。",
+      "comparison_with": "基于 2D-DFT 的频谱幅度特征 (2D-DFT Magnitude Spectrum Features)"
+    },
+    {
+      "experiment_name": "Beckmann vs. GGX Normal Distribution Function",
+      "target_module": "Beckmann 法线分布函数 (Beckmann Normal Distribution Function)",
+      "hypothesis": "Beckmann 分布在当前简化 BRDF 物理模型和光场几何特征提取框架下，比现代渲染中更常用的 GGX 分布能更好地拟合非朗伯表面的反射波瓣，且在稀缺的非朗伯数据上更不易过拟合。",
+      "modification": "在物理模型构建代码中，将计算 Beckmann NDF 的公式替换为 GGX (Trowbridge-Reitz) NDF 公式。具体修改为：将分母中的指数项和归一化系数按 GGX 定义修改（分母变为 pi * (m^2 * cos^4(theta) + sin^2(theta))^2），保持粗糙度参数 m 的非线性优化拟合逻辑不变。",
+      "expected_result": "Non_Lambertian_MAE 略有上升，训练收敛速度变慢或在非线性参数优化时出现震荡，证明 Beckmann 分布与当前简化物理模型及几何先验的契合度更高。",
+      "comparison_with": "GGX (Trowbridge-Reitz) 法线分布函数"
+    },
+    {
+      "experiment_name": "Dual-Branch Routing vs. Single Unified Branch",
+      "target_module": "双掩码路由与融合模块 (Dual-Mask Routing & Fusion) 及 双分支架构",
+      "hypothesis": "双分支架构结合几何掩码路由，能自适应地将朗伯体（依赖EPI线结构）和非朗伯体（依赖X型几何模式）路由到专门的处理分支，比单一网络统一处理所有区域更能应对非朗伯表面导致的物理假设违反和EPI线结构破坏。",
+      "modification": "移除朗伯体EPI分支、非朗伯体几何分支以及双掩码路由与融合模块。将三层分解后的所有特征（DC、线性系数、残差、几何特征）在通道维度拼接后，输入到一个统一的单一 3D CNN / EPI 处理分支（如标准的 EPINet 架构），直接回归最终深度图，移除 domain_loss 辅助损失。",
+      "expected_result": "Overall_MAE 和 Mixed_Urban_MAE 显著恶化，尤其是 Non_Lambertian_MAE 大幅上升（远超0.25目标值），证明双分支和掩码路由在处理混合/非朗伯场景中的必要性。",
+      "comparison_with": "单一统一处理分支 (Single Unified EPI Branch, 类似标准 EPINet)"
+    },
+    {
+      "experiment_name": "Domain-Balanced Sampling vs. Uniform Random Sampling",
+      "target_module": "训练策略：域平衡采样 (Domain-balanced sampling) 与 WeightedRandomSampler",
+      "hypothesis": "在非朗伯数据极度稀缺（仅4个场景）且场景分布不均的情况下，域平衡采样和过采样策略能有效防止模型偏向数据量大的朗伯体域，提升跨域泛化能力和非朗伯区域的深度估计精度。",
+      "modification": "在 DataLoader 配置中，移除 WeightedRandomSampler 和基于域标签（Lambertian/Mixed/Non-Lambertian）的权重计算逻辑，移除 NL_Oversampling_Rate (10x) 设置，替换为 PyTorch 默认的均匀随机采样（Uniform Random Sampling），保持 batch_size=2 和 gradient_accumulation_steps=8 不变。",
+      "expected_result": "Lambertian_MAE 可能略有下降或持平，但 Non_Lambertian_MAE 和 Mixed_Urban_MAE 大幅上升，模型在复杂场景下失效，证明域平衡采样对长尾/稀缺域泛化的关键作用。",
+      "comparison_with": "均匀随机采样 (Uniform Random Sampling)"
+    },
+    {
+      "experiment_name": "Analytic View-Angle Mapping vs. Learnable View Embedding",
+      "target_module": "视角-角度坐标映射 (View-Angle Coordinate Mapping)",
+      "hypothesis": "在 9x9 规则离散网格下，基于距离归一化的解析几何映射足以提供准确的角度先验，且比引入高维可学习视角嵌入更不容易在非朗伯稀缺数据上过拟合，保证了物理模型的严谨性。",
+      "modification": "移除基于距离归一化的极角 θ 计算和解析映射代码，替换为可学习的视角嵌入（Learnable View Embedding）。为 9x9 的每个视角位置初始化一个可学习的特征向量（如维度为16），并将其广播拼接到输入光场特征中参与网络前向传播和反向更新。",
+      "expected_result": "在数据量大的 HCInew (Lambertian) 场景下性能相近，但在数据稀缺的 Non-Lambertian 场景下，可学习嵌入导致过拟合，使得 Non_Lambertian_MAE 上升，证明简单解析映射在少样本下的鲁棒性和物理合理性。",
+      "comparison_with": "可学习的视角嵌入 (Learnable View Embedding)"
+    }
+  ],
+  "_model_analysis": {
+    "modules": [
+      {
+        "module_name": "多视角数据加载与角域构建 (Multi-view Data Loading & Angular Domain Construction)",
+        "code_location": "tools/brdf_modeling.py -> load_scene",
+        "core_function": "读取81张多视角图像，转换为灰度图，缩放至统一空间分辨率，并重组为 9x9 的角域分布 (Angular Patch)，为后续物理建模提供输入数据。",
+        "ablation_replacement": "1) 保留RGB三通道而非转换为灰度图；2) 使用极坐标重采样替代规则的 9x9 网格采样；3) 引入轻量级CNN特征提取器替代简单的灰度化和Resize。",
+        "expected_impact": "保留RGB会增加计算量但可能提升复杂材质的区分度；极坐标采样更符合物理视角分布，可能提升边缘视角的拟合精度；引入CNN会改变纯物理建模的范式，可能提升对噪声的鲁棒性但丧失部分物理可解释性。"
+      },
+      {
+        "module_name": "Beckmann 法线分布函数 (Beckmann Normal Distribution Function)",
+        "code_location": "tools/brdf_modeling.py -> beckmann_distribution",
+        "core_function": "计算微观表面法线分布 (NDF)，通过粗糙度参数 m 控制镜面反射波瓣的形状、宽度和衰减速度。",
+        "ablation_replacement": "1) 替换为 GGX (Trowbridge-Reitz) 分布；2) 替换为 Phong 分布；3) 替换为各向异性分布 (如 Anisotropic Beckmann/GGX)。",
+        "expected_impact": "GGX 分布具有更长的尾部，能更好地拟合真实世界中的极端高光（极光滑表面），预期能降低光滑区域的拟合误差；Phong 计算更快但物理准确性稍差；各向异性分布能处理拉丝金属等材质，但会增加参数量和优化难度。"
+      },
+      {
+        "module_name": "简化 BRDF 物理模型 (Simplified BRDF Physical Model)",
+        "code_location": "tools/brdf_modeling.py -> simplified_brdf_model",
+        "core_function": "将表面反射建模为漫反射 (Lambertian) 和镜面反射 (Beckmann) 的线性组合，并为了简化计算忽略了菲涅尔 (Fresnel) 和几何衰减 (Geometry) 项。",
+        "ablation_replacement": "1) 引入完整的 Cook-Torrance 模型（加入 Fresnel 和 Geometry 项）；2) 移除镜面反射项，退化为纯 Lambertian 模型；3) 引入多次散射补偿项 (Multiple Scattering) 以保证能量守恒。",
+        "expected_impact": "完整模型能更准确地描述掠射角下的物理现象，但会显著增加非线性优化的难度和耗时；纯 Lambertian 会导致高光区域拟合严重失效；加入多次散射能改善极粗糙表面的能量泄漏问题，提升物理真实性。"
+      },
+      {
+        "module_name": "视角-角度坐标映射 (View-Angle Coordinate Mapping)",
+        "code_location": "tools/brdf_modeling.py -> fit_brdf_to_patch (角度坐标生成部分)",
+        "core_function": "将 9x9 的离散视角网格通过简单的距离归一化近似映射为连续的极角 θ，假设角度从中心向外均匀增加。",
+        "ablation_replacement": "1) 使用真实的相机内外参矩阵计算精确的三维视角方向向量；2) 引入可学习的视角嵌入 (View Embedding) 替代解析几何映射。",
+        "expected_impact": "使用真实相机参数能消除大视角下的几何近似误差，显著提升边缘视角的拟合精度；可学习嵌入可能捕获未建模的相机畸变，但需要大量数据训练且削弱了物理先验。"
+      },
+      {
+        "module_name": "非线性参数优化拟合 (Non-linear Parameter Optimization Fitting)",
+        "code_location": "tools/brdf_modeling.py -> fit_brdf_to_patch (scipy.optimize.curve_fit)",
+        "core_function": "使用 Levenberg-Marquardt 等非线性最小二乘算法，逐像素独立拟合 BRDF 参数 (漫反射系数、镜面反射系数、粗糙度)。",
+        "ablation_replacement": "1) 替换为基于深度学习的回归网络 (如 MLP/CNN/Transformer) 直接前向预测参数；2) 引入空间平滑正则化 (如 TV 正则化或 MRF) 进行联合优化；3) 使用查找表 (LUT) 或 KNN 进行快速匹配。",
+        "expected_impact": "深度网络推理速度极快且能利用空间上下文，但需要大量Ground Truth训练；空间正则化能显著减少逐像素独立拟合带来的噪点，提升参数图的空间一致性；LUT 匹配速度最快但精度受限于离散化粒度。"
+      }
+    ]
+  }
+}

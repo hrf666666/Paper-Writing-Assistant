@@ -116,34 +116,36 @@ def generate_tikz_from_architecture(model_architecture, figure_style=None, outpu
 3. 使用 arrows.meta 库设置箭头样式
 4. 使用 shapes.geometric 库获取更多节点形状
 5. **总宽度不超过 \\textwidth（IEEEtran双栏约 7inch / 17.8cm）**，使用 figure* 双栏环境
-6. 使用紧凑布局：`node distance=0.8cm and 1.2cm`，`x=0.5cm, y=0.5cm`
-7. 模块使用圆角矩形：\\node[draw, rounded corners, fill=color!20, minimum width=2cm, minimum height=1cm]
-8. 数据使用平行四边形或圆柱体
-9. 连接使用：\\draw[-{{Stealth[length=2mm]}}, thick] (A) -- (B)
-10. 使用颜色区分不同类型模块：
-   - 编码器/特征提取：蓝色 (fill=blue!20)
-   - 解码器/预测：绿色 (fill=green!20)
-   - 核心创新模块：橙色 (fill=orange!30)
-   - 损失/约束：红色 (fill=red!20)
-11. 标注关键维度和操作名称
-12. {figure_size_hint}
-13. 所有模块名称必须与论文正文中的模块名称完全一致
-14. 数据流方向必须与论文描述的输入→处理→输出流程一致
-15. **布局策略：垂直堆叠优于水平展开，避免宽度超出页边距**
-16. **锚点命名规则（严格遵守）**：TikZ 节点锚点必须使用 PGF 标准名称：
-    - 上: `.north`（不是 `.top`）
-    - 下: `.south`（不是 `.bottom`）
-    - 左: `.west`（不是 `.left`）
-    - 右: `.east`（不是 `.right`）
-    - 例如: `(input.south) -- (decomp.north)`，禁止 `(input.bottom) -- (decomp.top)`
-17. **禁止使用 `&` 字符**：TikZ 节点标签中如需表达"and"语义，使用 `\\&` 或直接用 `and`
+6. 模块使用圆角矩形，数据使用平行四边形
+7. 连接使用 \\draw[-{{Stealth[length=2mm]}}, thick] (A) -- (B)
+8. 颜色方案：编码器=blue!20，解码器=green!20，创新模块=orange!30，损失=red!20
+9. 标注关键维度和操作名称
+10. {figure_size_hint}
+11. **所有模块名称必须与上面的模型架构信息完全一致，不要用"Module A/B"这种占位符**
+12. 数据流方向必须与架构描述一致
+13. **布局策略：垂直堆叠优于水平展开，避免宽度超出页边距**
+
+**锚点命名规则（严格遵守）**：
+TikZ 锚点用 PGF 标准：.north .south .west .east（不是 .top .bottom .left .right）
+
+**防止文字与模块重叠（CRITICAL）**：
+1. **必须设置 text width**：每个节点必须设置 `text width=2.2cm`（或根据文字长度调整），
+   让长文字自动换行，而不是撑大节点导致重叠
+2. **使用边缘间距（outer sep）**：`outer sep=3pt`，确保节点之间有物理间隙
+3. **node distance 是中心距**：如果节点宽 3cm，`node distance=2cm` 意味着中心距 2cm，
+   节点会重叠 1cm！所以 node distance 必须 ≥ max(节点宽度) + 间距
+   推荐：`node distance=1.5cm and 2.5cm`（垂直 1.5cm，水平 2.5cm）
+4. **超过 5 个模块时用两行布局**：第一行放前半，第二行放后半，
+   用箭头连接上下行，不要全部水平排列
+5. **每行不超过 4 个模块**：每个模块 text width=2.2cm + 间距 = 总宽 ~12cm，安全不超 16cm
+6. **使用 `align=center`**：配合 text width 让多行文字居中显示
+7. **字体用 \\footnotesize 或 \\small**：不要用 \\normalsize，节省空间
 
 **重要约束**：
-1. 生成的TikZ代码必须能编译通过。
-2. **所有节点标签、注释、模块名称必须使用英文ONLY**。绝对不要在TikZ代码中使用任何中文字符。
-3. 所有括号使用英文半角符号。
-4. **节点最小宽度 2cm，最大宽度 3.5cm**；禁止 minimum width > 3.5cm
-5. **总坐标范围 x 方向不超过 14cm**（否则在论文中会溢出叠加）
+1. 必须能编译通过
+2. 所有文字必须英文ONLY
+3. **禁止使用 & 字符**（用 \\& 替代）
+4. **每个节点的标签必须是架构中真实的模块名，严禁用"Proposed Module A"这种泛化标签**
 
 请直接给出可编译的TikZ代码，以\\begin{{tikzpicture}}开头，以\\end{{tikzpicture}}结尾。
 不要包含\\documentclass等外层代码。
@@ -195,7 +197,20 @@ def generate_tikz_from_architecture(model_architecture, figure_style=None, outpu
 
     # ── TikZ 节点标签内 & 转义 ──
     # LLM 可能在节点文本中使用裸 &，自动转义为 \&
-    tikz_code = re.sub(r'(?<!\\)&', r'\\&', tikz_code)
+    # 但保留 matrix/tabular 环境中的列分隔符 &
+    def _escape_amp_in_nodes(m):
+        prefix = m.group(1) or ''
+        text = m.group(2)
+        suffix = m.group(3) or ''
+        escaped = text.replace('&', r'\&')
+        return f"{prefix}{escaped}{suffix}"
+
+    tikz_code = re.sub(
+        r'(\\node[^\{]*\{)(.*?)(\})',
+        _escape_amp_in_nodes,
+        tikz_code,
+        flags=re.DOTALL
+    )
 
     # ── ASCII 清洗后处理（约束引擎） ──
     # 不管 LLM 用什么语言输出，强制清洗非 ASCII 字符
@@ -208,6 +223,9 @@ def generate_tikz_from_architecture(model_architecture, figure_style=None, outpu
     except Exception as e:
         logger.warning(f"[TikZ] ASCII 清洗失败（不阻塞）: {e}")
 
+    # ── 编译验证 + 自动修复（最多 1 轮） ──
+    tikz_code = _compile_verify_and_fix(tikz_code)
+
     if output_path:
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -218,6 +236,140 @@ def generate_tikz_from_architecture(model_architecture, figure_style=None, outpu
             logger.error(f"TikZ文件保存失败 {output_path}: {e}")
     
     return tikz_code
+
+
+def _compile_verify_and_fix(tikz_code: str, max_retries: int = 1) -> str:
+    """
+    编译验证 TikZ 代码，失败时让 LLM 自动修复。
+
+    策略：
+    1. 包裹为 standalone 文档 → pdflatex 编译
+    2. 编译成功 → 返回原始 tikz_code
+    3. 编译失败 → 把错误信息喂给 LLM 修复 → 重新编译
+    """
+    import subprocess
+    import tempfile
+    import shutil
+
+    # 包裹为完整文档
+    full_doc = (
+        r"\documentclass[border=4pt]{standalone}" "\n"
+        r"\usepackage{tikz}" "\n"
+        r"\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit, backgrounds}" "\n"
+        r"\usepackage{amsmath,amssymb}" "\n"
+        r"\begin{document}" "\n"
+        + tikz_code + "\n"
+        r"\end{document}"
+    )
+
+    # 查找 pdflatex
+    pdflatex = "pdflatex"
+    for candidate in [
+        "/usr/local/texlive/2026/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2025/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2024/bin/x86_64-linux/pdflatex",
+        "/usr/bin/pdflatex",
+    ]:
+        if os.path.isfile(candidate):
+            pdflatex = candidate
+            break
+
+    tmp_dir = tempfile.mkdtemp(prefix="tikz_verify_")
+    try:
+        # 第 1 次编译
+        tex_path = os.path.join(tmp_dir, "verify.tex")
+        with open(tex_path, "w", encoding="utf-8") as f:
+            f.write(full_doc)
+
+        result = subprocess.run(
+            [pdflatex, "-interaction=nonstopmode", "-halt-on-error", "verify.tex"],
+            cwd=tmp_dir, capture_output=True, text=True, timeout=30,
+        )
+
+        pdf_path = os.path.join(tmp_dir, "verify.pdf")
+        if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 500:
+            logger.info("[TikZ] 编译验证通过 ✅")
+            return tikz_code
+
+        # 编译失败 → LLM 修复
+        error_msg = result.stdout[-600:] if result.stdout else "unknown error"
+        logger.warning(f"[TikZ] 编译验证失败，尝试 LLM 修复: {error_msg[:200]}")
+
+        for attempt in range(max_retries):
+            fix_prompt = f"""Fix the TikZ compilation error. Output ONLY the corrected \\begin{{tikzpicture}}...\\end{{tikzpicture}} code.
+
+## Current Code
+```latex
+{tikz_code[:4000]}
+```
+
+## Compilation Error
+```
+{error_msg[:500]}
+```
+
+## Common Fixes
+- Missing semicolons at end of \\draw or \\node commands
+- Undefined styles → add them to tikzpicture options
+- Unmatched braces {{ }} or brackets [ ]
+- Invalid anchor names (.bottom → .south, .top → .north, .left → .west, .right → .east)
+- Missing \\usetikzlibrary
+
+Output ONLY the fixed tikzpicture code:"""
+
+            try:
+                fixed = _get_api().call_generation(fix_prompt)
+            except Exception as e:
+                logger.error(f"[TikZ] LLM 修复失败: {e}")
+                break
+
+            # 清理修复结果
+            fixed = fixed.strip()
+            if fixed.startswith("```"):
+                lines = fixed.split("\n")
+                fixed = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+            fixed = fixed.strip()
+
+            # 验证修复后的代码
+            fixed_doc = (
+                r"\documentclass[border=4pt]{standalone}" "\n"
+                r"\usepackage{tikz}" "\n"
+                r"\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit, backgrounds}" "\n"
+                r"\usepackage{amsmath,amssymb}" "\n"
+                r"\begin{document}" "\n"
+                + fixed + "\n"
+                r"\end{document}"
+            )
+
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(fixed_doc)
+
+            result2 = subprocess.run(
+                [pdflatex, "-interaction=nonstopmode", "-halt-on-error", "verify.tex"],
+                cwd=tmp_dir, capture_output=True, text=True, timeout=30,
+            )
+
+            if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 500:
+                logger.info(f"[TikZ] LLM 修复成功 ✅ (attempt {attempt + 1})")
+                return fixed
+
+            error_msg = result2.stdout[-600:] if result2.stdout else "still failing"
+            logger.warning(f"[TikZ] LLM 修复后仍编译失败: {error_msg[:200]}")
+
+        logger.warning("[TikZ] 编译验证失败，使用原始代码（可能包含错误）")
+        return tikz_code
+
+    except subprocess.TimeoutExpired:
+        logger.warning("[TikZ] 编译验证超时，使用原始代码")
+        return tikz_code
+    except FileNotFoundError:
+        logger.info("[TikZ] pdflatex 不可用，跳过编译验证")
+        return tikz_code
+    except Exception as e:
+        logger.warning(f"[TikZ] 编译验证异常: {e}，使用原始代码")
+        return tikz_code
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def refine_tikz(tikz_code, feedback):

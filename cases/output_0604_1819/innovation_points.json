@@ -1,0 +1,40 @@
+[
+  {
+    "创新点名称": "三层角信号分解与基于几何特征的材质分类机制",
+    "创新点工作内容": [
+      "提出光场角信号的三层物理分解模型，将信号解耦为DC分量（环境光照）、线性分量（视差/深度引起的EPI斜率）和残差分量（材质/反射特性）。",
+      "摒弃对分辨率要求极高的频域分析（MRI类比），转而提取角梯度（angular gradient）、角相关性（angular correlation）和变异系数等几何与统计特征来表征残差分量。",
+      "构建基于几何特征的随机森林（RF）分类器，实现高精度的朗伯体（Lambertian）与非朗伯体（Non-Lambertian）像素级/区域级分类，为后续深度估计提供材质先验。"
+    ],
+    "创新点价值": "从物理和几何层面揭示了非朗伯体表面破坏EPI线性假设的本质原因。通过几何特征替代频域特征，克服了离散光场采样（如9x9）分辨率不足导致频域特征失效的问题，为复杂场景下的材质感知和深度估计路由提供了高效、可靠的理论依据，避免了在物理假设失效区域盲目计算深度。",
+    "支撑证据": "1. 理论验证：module_verification_v4.md 中引用 Wang 2017 (TPAMI) 的角锥约束和 Cui 2024 (TCSVT) 的双峰分布特征验证了该几何分解的有效性。\n2. 实验证据：Phase 1 随机森林分类器准确率达到 89.6%（>0.85阈值），AUC 达到 0.962（>0.90阈值）；角梯度（angular_gradient）特征的 Cohen's d 达到 0.983，证明了其强大的材质区分能力。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "三层角信号分解与基于几何特征的材质分类机制",
+      "contribution_statement": "We identify that robust depth estimation requires explicitly disentangling angular signals to handle diverse material properties."
+    }
+  },
+  {
+    "创新点名称": "基于双掩码路由与域平衡混合训练的统一深度估计架构",
+    "创新点工作内容": [
+      "设计 GeometricDualMask（几何双掩码）模型架构，利用材质分类生成的掩码将朗伯体与非朗伯体区域解耦，通过掩码路由机制分别处理不同反射特性的区域，以缓解EPI假设失效带来的深度估计误差。",
+      "提出域平衡采样（Domain-balanced sampling）与混合训练策略，结合 WeightedRandomSampler，在包含170个场景的 UrbanLF-Syn 等大规模混合数据集上进行联合训练，以缓解非朗伯体数据极度稀缺的问题。",
+      "实现支持多域数据加载的统一数据集接口（unified_lf_dataset.py）和4方向EPI特征提取网络（EPINet4Dir V3），维持不同数据域之间的曝光和特征平衡。"
+    ],
+    "创新点价值": "有效应对了光场深度估计中非朗伯体数据极度稀缺和域偏移的挑战。双掩码机制在架构层面隔离了物理假设冲突的区域，而域平衡混合训练策略则最大化了现有合成数据的利用率。该架构显著提升了模型在整体和复杂城市混合场景下的深度估计精度，证明了在数据受限情况下通过架构设计和训练策略优化提升泛化能力的可行性。",
+    "支撑证据": "1. 实验指标：FINAL_REPORT.md 显示 Overall MAE 达到 0.133（达成 <0.20 目标），Mixed (Urban) MAE 达到 0.081（达成 <0.22 目标）。\n2. 模型证据：module_verification_v4.md 记录 GeometricDualMask 模型已实现，且 mask gap=0.041（优于0.08的目标阈值）。\n3. 代码证据：config.yaml 中的项目配置，以及 FINAL_REPORT.md 中归档的 datasets/unified_lf_dataset.py 和 scripts/train_epinet_4dir.py 训练脚本。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "基于双掩码路由与域平衡混合训练的统一深度估计架构",
+      "contribution_statement": "We propose a three-layer angular signal decomposition mechanism alongside a unified dual-mask routing architecture to address these material-specific challenges."
+    }
+  }
+]

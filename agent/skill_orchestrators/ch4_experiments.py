@@ -12,13 +12,12 @@ import os
 import json
 import re
 from pathlib import Path
-from tqdm import tqdm
 
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, WORKSPACE_DIR, PROJECT_CODE_PATH,
     RUN_ABLATION, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
 from api.paper_search import search_papers, get_paper_details
 
 import logging
@@ -93,8 +92,8 @@ def _detect_datasets_in_project():
                     for ds in common_datasets:
                         if ds.lower() in content.lower() and ds not in [d["name"] for d in datasets]:
                             datasets.append({"name": ds, "path": "referenced in code"})
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"操作失败: {e}")
     
     return datasets
 
@@ -120,8 +119,8 @@ def _analyze_project_model_code():
                         with open(fpath, 'r', encoding='utf-8', errors='ignore') as fh:
                             content = fh.read()
                         model_code += f"\n--- {fpath.relative_to(project_path)} ---\n{content}\n"
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"操作失败: {e}")
     
     if not model_code.strip():
         return {}
@@ -157,7 +156,8 @@ def _analyze_project_model_code():
         response = _orch.call_reasoning(prompt)
         result = _orch.parse_json(response)
         return result
-    except Exception:
+    except Exception as e:
+        logger.debug(f"模块检测失败: {e}")
         return {"modules": []}
 
 
@@ -212,7 +212,8 @@ def _design_ablation_experiments(innovation_points, model_architecture, experime
     response = _orch.call_reasoning(prompt)
     try:
         ablation_design = _orch.parse_json(response)
-    except Exception:
+    except Exception as e:
+        logger.debug(f"消融设计失败: {e}")
         ablation_design = {"ablation_experiments": []}
     
     # 将模块分析结果附加到消融设计中
@@ -354,7 +355,7 @@ if __name__ == "__main__":
     return ablation_dir
 
 
-def generate_experiments(project_data, ref_data, previous_chapters=None):
+def generate_experiments(project_data, ref_data, previous_chapters=None, citation_context=""):
     """生成第四章 Experiments"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -367,15 +368,13 @@ def generate_experiments(project_data, ref_data, previous_chapters=None):
     domain_info = ref_data.get("domain_info", {})
     article_info = get_article_type_info()
     
-    style_instruction = _build_style_instruction(style_guide, chapter_org)
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Experiments")
     
     # 构建前序章节摘要（提取 Methodology 中的模块名和公式）
     prev_summary = ""
     if previous_chapters:
         if 3 in previous_chapters:
             prev_summary += f"Methodology 摘要:\n{previous_chapters[3][:1500]}\n"
-    
-    style_instruction = _build_style_instruction(style_guide, chapter_org)
     
     innovation_summary = "\n".join([
         f"创新点{i+1}: {ip.get('创新点名称', 'N/A')} - {ip.get('创新点价值', 'N/A')}"
@@ -415,7 +414,8 @@ def generate_experiments(project_data, ref_data, previous_chapters=None):
 3. 如有自定义数据集或预处理，详细说明
 4. 使用表格汇总所有数据集的关键信息
 
-请使用学术英语撰写。Markdown格式（表格使用Markdown表格语法）。直接给出内容：
+请使用学术英语撰写。请直接输出LaTeX代码。表格使用 \\begin{{table*}}...\\end{{table*}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)，整体用 \\resizebox{{\\columnwidth}}{{!}}{{...}} 缩放。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
     
     try:
@@ -447,10 +447,17 @@ def generate_experiments(project_data, ref_data, previous_chapters=None):
 2. 训练超参数：优化器、学习率、scheduler、batch size、epoch数、梯度累积步数等
 3. 数据增强策略
 4. 损失函数各组件的权重设置
-5. 评估指标的定义和计算方式
+5. 评估指标的定义和计算方式（必须包含 MSE、MAE、BadPix 三个指标的定义）
 6. 训练时间
+7. 使用表格汇总关键超参数
 
-请使用学术英语撰写。使用表格汇总关键超参数。Markdown格式。直接给出内容：
+**评估指标定义格式**（必须包含）：
+- MSE (Mean Squared Error): 具体公式
+- MAE (Mean Absolute Error): 具体公式
+- BadPix: 定义为误差大于阈值τ的像素占比，给出具体阈值
+
+请使用学术英语撰写。使用 \\begin{{table}}...\\end{{table}} 汇总关键超参数，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)，整体用 \\resizebox{{\\columnwidth}}{{!}}{{...}} 缩放。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
     
     try:
@@ -498,17 +505,24 @@ def generate_experiments(project_data, ref_data, previous_chapters=None):
 </searched_baselines>
 
 **具体要求**：
-1. 使用表格呈现与SOTA方法的性能对比
-2. 表格包含：方法名、年份、各数据集上的关键指标
-3. 最优结果加粗，次优结果下划线
+1. 使用表格呈现与SOTA方法的性能对比（至少5个对比方法）
+2. 表格必须包含以下指标列：MSE、MAE、BadPix（三个指标缺一不可）
+3. 每个数据集分别报告指标，最优结果加粗
 4. 表格后逐项分析对比结果：
    - 本文方法在哪些指标/数据集上表现最优
-   - 与各baseline相比的优势幅度
+   - 与各baseline相比的优势幅度（用百分比表示）
    - 分析优势的原因（关联到方法设计）
 5. 对于本文方法表现不是最优的情况，分析原因
+6. 引用至少5篇不同的参考文献，使用<citation>标记
 
-请使用学术英语撰写。表格使用LaTeX格式。
-Markdown+LaTeX混合格式。直接给出内容：
+**表格格式要求**：
+- 使用 \\begin{{table*}}...\\end{{table*}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)
+- 整体用 \\resizebox{{\\textwidth}}{{!}}{{...}} 缩放
+- 表格列：Method | Year | HCI New (MSE/MAE/BadPix) | UrbanLF-Syn (MSE/MAE/BadPix) | Non-Lambertian (MSE/MAE/BadPix)
+- 如果表格太宽，按数据集分成2-3个子表格
+
+请使用学术英语撰写。请直接输出LaTeX代码。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 {_prev_summary_block_43}
 """
     
@@ -558,16 +572,26 @@ Markdown+LaTeX混合格式。直接给出内容：
 
 **具体要求**：
 1. 使用表格呈现消融实验结果，包含各配置下的关键指标
-2. 表格格式：Full Model | w/o Module A | w/o Module B | ...
-3. 逐项分析每个消融实验的结果：
-   - 移除/替换该模块后性能如何变化
+2. 表格必须包含以下指标列：MSE、MAE、BadPix（三个指标缺一不可）
+3. 至少设计4个消融配置（如 w/o Module A, w/o Module B, w/o Loss X, w/o Strategy Y）
+4. 逐项分析每个消融实验的结果：
+   - 移除/替换该模块后性能如何变化（用百分比量化）
    - 这证明了该模块的什么作用
    - 与预期的假设是否一致
-4. 在分析中自然关联到方法设计的动机
+5. 在分析中自然关联到方法设计的动机
+6. 引用相关文献支持消融分析，使用<citation>标记
+7. 消融段落中至少提及"ablation"关键词5次以上
 
-请使用学术英语撰写。表格使用LaTeX格式。Markdown+LaTeX混合格式。直接给出内容：
+**表格格式**：
+- 使用 \\begin{{table}}...\\end{{table}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)
+- 整体用 \\resizebox{{\\columnwidth}}{{!}}{{...}} 缩放
+- 列：Configuration | MSE $\downarrow$ | MAE $\downarrow$ | BadPix $\downarrow$
+- Full Model 行放在最前面，最优值用 \textbf{{...}} 加粗
+
+请使用学术英语撰写。请直接输出LaTeX代码。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
-    
+
     try:
         section_4_4 = _orch.call_generation(prompt_4_4)
     except Exception as e:
@@ -575,7 +599,7 @@ Markdown+LaTeX混合格式。直接给出内容：
         section_4_4 = ""
     
     # ==================== 组装完整章节 ====================
-    full_chapter = f"""# 4. Experiments
+    full_chapter = f"""\section{{Experiments}}
 
 {section_4_1}
 
@@ -588,69 +612,17 @@ Markdown+LaTeX混合格式。直接给出内容：
     
     return full_chapter
 
-
-def _build_style_instruction(style_guide, chapter_org):
-    """构建写作风格指导（v9.3: 集成 IEEE Trans 期刊风格配置）"""
-    instruction = """**写作风格指导**：
-- Experiments 特殊要求：
-  1. 数据集描述要详细但简洁，关键信息用表格汇总
-  2. 对比实验要客观，不回避本文方法的不足
-  3. 消融实验的分析要深入，不能只说"性能下降了X%"
-  4. 每个发现都要分析原因，关联到方法设计
-  5. 数值结果要有具体的数字，不用"显著提升"等模糊表述
-"""
-    
-    # v9.3: 加载 IEEE Trans 期刊风格配置（P2 优先级规则）
-    try:
-        import os
-        from config.ieee_trans_style_profile import (
-            get_ieee_trans_style_profile,
-            get_section_requirements,
-        )
-        
-        profile = get_ieee_trans_style_profile()
-        exp_req = get_section_requirements("Experiments")
-        
-        instruction += f"\n**IEEE Transactions 期刊特定规则**（P2 优先级，必须遵守）：\n"
-        instruction += f"\n### Experiments 结构要求\n"
-        instruction += f"- 结构序列：{exp_req.get('structure', 'N/A')}\n"
-        instruction += f"- Setup 必须包含：\n"
-        for req in exp_req.get('setup_must_include', []):
-            instruction += f"  - {req}\n"
-        instruction += f"- 主结果：{exp_req.get('main_results', 'N/A')}\n"
-        instruction += f"- 消融：{exp_req.get('ablation', 'N/A')}\n"
-        instruction += f"- 禁止模式：\n"
-        for anti in exp_req.get('anti_patterns', []):
-            instruction += f"  - {anti}\n"
-        instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[IEEE Trans 风格配置] 加载失败: {e}")
-    
-    if style_guide and isinstance(style_guide, dict):
-        vocabulary = style_guide.get("用词特征", [])
-        if vocabulary:
-            instruction += f"- 学术用词：{vocabulary[:15]}\n"
-    
-    instruction += """
-- 重要要求：
-  1. 文风学术化，禁止口语化
-  2. 数据必须准确，不能编造
-  3. 表格要规范，行列清晰
-"""
-    
-    return instruction
-
-
-def run_chapter4(project_data, ref_data, previous_chapters=None):
+def run_chapter4(project_data, ref_data, previous_chapters=None, citation_context=""):
     """主入口：生成第四章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter4", exist_ok=True)
     
     logger.info("[chapter4] 开始生成第四章 Experiments...")
     try:
-        chapter_content = generate_experiments(project_data, ref_data, previous_chapters)
+        chapter_content = generate_experiments(project_data, ref_data, previous_chapters,
+                                                 citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter4] 第四章生成失败: {e}")
-        chapter_content = "# 4. Experiments\n\n(生成失败，请重新运行)\n"
+        chapter_content = "\\section{Experiments}\n\n(生成失败，请重新运行)\n"
     
     try:
         _orch.save_output("chapter4_experiments.md", chapter_content, subdir="chapter4")

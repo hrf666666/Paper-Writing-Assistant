@@ -1,0 +1,80 @@
+{
+  "passed": false,
+  "compile_log_issues": [
+    {
+      "type": "latex_error",
+      "severity": "critical",
+      "message": "LaTeX Error: LaTeX Error: Something's wrong--perhaps a missing \\item.",
+      "suggestion": "需检查 .tex 语法"
+    },
+    {
+      "type": "package_warning",
+      "severity": "warning",
+      "message": "Package hyperref Warning: Difference (2) between bookmark levels is greater ",
+      "suggestion": "检查 hyperref 包配置"
+    },
+    {
+      "type": "compilation_status",
+      "severity": "critical",
+      "message": "编译 失败: 1 errors",
+      "suggestion": "检查编译日志中的错误信息"
+    }
+  ],
+  "pdf_structure": {
+    "valid": false,
+    "pages": 13,
+    "blank_pages": [
+      13
+    ],
+    "text_coverage": 0.1087182153358624
+  },
+  "element_validation": {
+    "citations_match": false,
+    "missing_citations": [
+      "13",
+      "5",
+      "11",
+      "4",
+      "16",
+      "14",
+      "9",
+      "6",
+      "3",
+      "18",
+      "15",
+      "2",
+      "21",
+      "1",
+      "12",
+      "8",
+      "19",
+      "10",
+      "17",
+      "previous_works",
+      "7",
+      "fixed_heuristic_rules",
+      "20"
+    ],
+    "tables_rendered": 3,
+    "tables_truncated": 0,
+    "figures_rendered": 1,
+    "figures_missing": 0,
+    "formulas_count": 26,
+    "formula_numbering_ok": true,
+    "citations_in_tex": 23,
+    "citations_in_bib": 41,
+    "formula_labels": 30
+  },
+  "auto_fix_attempts": {
+    "total_issues": 3,
+    "fixed": 0,
+    "remaining": 3
+  },
+  "constraint_audit": {
+    "critical": 0,
+    "warnings": 0,
+    "passed": true,
+    "violations": []
+  },
+  "retry_count": 1
+}

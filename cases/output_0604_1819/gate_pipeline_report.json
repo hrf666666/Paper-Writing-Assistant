@@ -1,0 +1,41 @@
+{
+  "passed": false,
+  "weighted_score": 66.1,
+  "total_time": 0.09,
+  "blocked_by": "gate0_format",
+  "gates": [
+    {
+      "name": "gate0_format",
+      "priority": "P0_CRITICAL",
+      "passed": false,
+      "score": 66.10000000000001,
+      "details": "V1_citation_integrity: 引用跳号: 缺 [15, 16, 17, 18]; 引用覆盖率 33%; V5_residual_markers: 发现残留标记: 残留 </citation> 标记: 1 处",
+      "fix_hints": [
+        "运行 CitationManager 解析引用，确保每个 [N] 都有对应参考文献条目",
+        "运行后处理清理所有残留标记"
+      ],
+      "skipped": false,
+      "execution_time": 0.09
+    },
+    {
+      "name": "gate1_consistency",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "跳过（前序 Gate 未通过）",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate2_quality",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "跳过（前序 Gate 未通过）",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    }
+  ]
+}

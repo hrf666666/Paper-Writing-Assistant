@@ -31,13 +31,13 @@ def _load_previous_summary():
                 with open(f, 'r', encoding='utf-8') as fh:
                     content = fh.read()
                 summary += content[:500] + "\n...\n"
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"操作失败: {e}")
     return summary
 
 
 def generate_conclusion(project_data, ref_data, previous_chapters_summary,
-                        skip_limitations=False):
+                        skip_limitations=False, citation_context=""):
     """生成第五章 Conclusion"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -69,12 +69,24 @@ def generate_conclusion(project_data, ref_data, previous_chapters_summary,
     # v9.3: 加载 IEEE Trans 期刊风格配置
     ieee_trans_instruction = ""
     try:
-        from config.ieee_trans_style_profile import get_section_requirements
-        concl_req = get_section_requirements("Conclusion")
-        ieee_trans_instruction = f"\n**IEEE Transactions 期刊特定规则**（必须遵守）：\n"
-        ieee_trans_instruction += f"- 长度：{concl_req.get('length', 'N/A')}\n"
-        ieee_trans_instruction += f"- 必须包含：{', '.join(concl_req.get('must_include', []))}\n"
-        ieee_trans_instruction += f"- 禁止模式：{', '.join(concl_req.get('anti_patterns', []))}\n"
+        # v10.1: 优先使用 StyleManager
+        try:
+            from agent.venue_adapter import VenueAdapter
+            adapter = VenueAdapter()
+            style_text = adapter.build_chapter_style_instruction("Conclusion")
+            if style_text and len(style_text) > 100:
+                ieee_trans_instruction = f"\n{style_text}\n"
+            else:
+                raise ValueError("StyleManager returned insufficient content")
+        except Exception as e:
+            logger.debug(f"风格规则加载失败: {e}")
+            # 降级：原有 IEEE Trans 规则加载
+            from config.ieee_trans_style_profile import get_section_requirements
+            concl_req = get_section_requirements("Conclusion")
+            ieee_trans_instruction = f"\n**IEEE Transactions 期刊特定规则**（必须遵守）：\n"
+            ieee_trans_instruction += f"- 长度：{concl_req.get('length', 'N/A')}\n"
+            ieee_trans_instruction += f"- 必须包含：{', '.join(concl_req.get('must_include', []))}\n"
+            ieee_trans_instruction += f"- 禁止模式：{', '.join(concl_req.get('anti_patterns', []))}\n"
     except Exception as e:
         logger.debug(f"[IEEE Trans 风格配置] 加载失败: {e}")
     
@@ -107,18 +119,19 @@ def generate_conclusion(project_data, ref_data, previous_chapters_summary,
 - 局限性要诚实但不过分贬低，未来工作要自然承接局限性
 - 仿照参考论文的结论写法
 
-请使用学术英语撰写。Markdown格式。直接给出内容：
+请使用学术英语撰写。请直接输出LaTeX代码。不要输出 \section 标题。只输出LaTeX正文代码：
 """
     
     logger.info("[chapter5] 生成第五章 Conclusion...")
     section_5 = _orch.call_generation(prompt)
     
-    full_chapter = f"# 5. Conclusion\n\n{section_5}\n"
+    full_chapter = f"\\section{{Conclusion}}\n\n{section_5}\n"
     
     return full_chapter
 
 
-def run_chapter5(project_data, ref_data, previous_chapters=None, skip_limitations=False):
+def run_chapter5(project_data, ref_data, previous_chapters=None, skip_limitations=False,
+                  citation_context=""):
     """主入口：生成第五章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter5", exist_ok=True)
     
@@ -138,10 +151,11 @@ def run_chapter5(project_data, ref_data, previous_chapters=None, skip_limitation
     logger.info("[chapter5] 开始生成第五章 Conclusion...")
     try:
         chapter_content = generate_conclusion(project_data, ref_data, previous_chapters_summary,
-                                               skip_limitations=skip_limitations)
+                                               skip_limitations=skip_limitations,
+                                               citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter5] 第五章生成失败: {e}")
-        chapter_content = "# 5. Conclusion\n\n(生成失败，请重新运行)\n"
+        chapter_content = "\\section{Conclusion}\n\n(生成失败，请重新运行)\n"
     
     try:
         _orch.save_output("chapter5_conclusion.md", chapter_content, subdir="chapter5")

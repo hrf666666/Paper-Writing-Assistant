@@ -1,0 +1,202 @@
+\subsection{Overall Architecture}
+
+In this section, we present the overall architecture of our proposed Unified Dual-Mask Physical Model, termed GeometricDualMask, designed to address the persistent challenge of depth estimation on non-Lambertian surfaces in light field (LF) imaging. Different from previous works that heavily rely on the ideal Lambertian assumption \cite{smith2023epinet}, our framework explicitly decouples the physical properties of LF angular signals and adaptively routes distinct surface regions to specialized processing branches. As illustrated in Fig.~\ref{fig:architecture}, the architecture comprises a physics-driven decomposition module, a dual-branch feature extraction network, and a mask-guided fusion mechanism. This design effectively tackles the geometric violation caused by specular and translucent materials, enabling accurate and robust depth inference across complex real-world scenes.
+
+The input to our model is a dense LF image consisting of $9 \times 9$ angular views, totaling 81 perspectives. Let $I(u,v)$ denote the local angular signal patch at spatial coordinates $(x,y)$, where $u$ and $v$ represent the angular coordinates ranging from 1 to 9. Before feeding into the network, the raw LF data undergoes a preprocessing pipeline. Specifically, we apply a tone-mapping enhancement to improve the visibility of highlight and shadow regions, followed by spatial normalization to standardize the input intensity distribution. The preprocessed input tensor, with dimensions of $81 \times H \times W$, is then processed by the core modules detailed below.
+
+\subsubsection{Three-Layer Angular Signal Decomposition}
+To overcome the limitations of traditional frequency-domain analyses (e.g., 2D-DFT) which fail under low-resolution discrete angular sampling, we propose a physics-driven three-layer angular signal decomposition model. This module decouples the LF angular signal into three distinct physical components:
+\begin{equation}
+I(u,v) = I_{DC} + a \cdot u + b \cdot v + \varepsilon(u,v)
+\label{eq:ch3_1}
+\end{equation}
+where $I_{DC}$ represents the ambient illumination (DC component), $a \cdot u + b \cdot v$ captures the parallax-induced depth information (linear component), and $\varepsilon(u,v)$ denotes the material-specific reflectance and scattering (residual component). Instead of relying on insufficient spectral features, we extract geometric angular features, such as the angular gradient and correlation coherence, to characterize the residual term $\varepsilon(u,v)$. These geometric features serve as high-discriminability pixel-wise pseudo-labels for subsequent mask supervision, laying the theoretical foundation for our unified physical model.
+
+\subsubsection{Dual-Branch Feature Extraction}
+Drawing upon our in-depth analysis of the physical root causes of Epipolar Plane Image (EPI) failure on non-Lambertian surfaces, we design a dual-branch architecture to process different material regions separately. We empirically verified that specular and scattering surfaces violate the Lambertian angular cone geometric constraints, forming X-shaped patterns rather than linear structures in EPIs \cite{wang2024dualbranch}. 
+
+\textbf{Lambertian EPI Branch:} This branch processes pixels routed by the Lambertian mask. It extracts linear slope features from EPIs and incorporates continuous depth priors, such as the Plane Regularization Sampling Operator (PRSO) or displacement fields, to perform piecewise-smooth depth surface regression. This effectively resolves ambiguities in texture-less regions. The output is the depth feature map and initial depth prediction $D_L$ for Lambertian regions.
+
+\textbf{Non-Lambertian Geometric Branch:} This branch handles pixels routed by the non-Lambertian mask, utilizing tone-mapped enhanced data. Abandoning frequency-domain analysis, it leverages bimodal distribution features and X-shaped geometric patterns in EPIs. Through specialized geometric convolutions, it processes the angular gradient anomalies inherent to non-Lambertian surfaces, outputting the depth feature map and initial prediction $D_{NL}$.
+
+\subsubsection{Dual-Mask Generation and Fusion}
+To seamlessly integrate the outputs from the dual branches, we introduce a Dual-Mask Generation \& Fusion module. The depth features from both branches are first projected into a balanced channel space (FUSE\_DIM = 96). The module generates pixel-wise dual masks, $M_L$ and $M_{NL}$, guided by the geometric pseudo-labels (e.g., angular gradient) extracted from the decomposition module. The final high-precision depth map $D_{final}$ is obtained via mask-weighted fusion:
+\begin{equation}
+D_{final} = M_L \odot D_L + M_{NL} \odot D_{NL}
+\label{eq:ch3_2}
+\end{equation}
+where $\odot$ denotes element-wise multiplication. During training, the mask generation is supervised by a Binary Cross-Entropy (BCE) loss using the geometric pseudo-labels:
+\begin{equation}
+\mathcal{L}_{mask} = \text{BCE}(M, P_{angular\_gradient})
+\label{eq:ch3_3}
+\end{equation}
+This pixel-wise supervision ensures that the mask gap reaches the target threshold, enabling precise routing and robust fusion across complex domains.
+
+\begin{table}[!t]
+\caption{Key Hyperparameters of the GeometricDualMask Architecture}
+\label{tab:hyperparams}
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Angular Resolution & $9 \times 9$ (81 views) \\
+Target Size & $256 \times 256$ \\
+FUSE\_DIM & 96 \\
+Mask Gap Target & 0.08 \\
+Batch Size & 2 \\
+Gradient Accumulation & 8 \\
+NL Oversampling Factor & 10 \\
+Pseudo-label Feature & Angular Gradient \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The key hyperparameters governing the GeometricDualMask architecture are summarized in Table~\ref{tab:hyperparams}. The careful selection of these parameters, particularly the FUSE\_DIM and mask gap target, is crucial for maintaining cross-domain exposure balance and mitigating overfitting on scarce non-Lambertian data, thereby ensuring strong generalization across diverse LF datasets.
+
+\begin{figure*}[!t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    block/.style={rectangle, draw, fill=blue!10, text width=3.5cm, minimum height=1.2cm, align=center, rounded corners=2pt, font=\small},
+    wideblock/.style={rectangle, draw, fill=orange!10, text width=4.5cm, minimum height=1.2cm, align=center, rounded corners=2pt, font=\small},
+    input/.style={rectangle, draw, fill=green!10, text width=2.5cm, minimum height=1cm, align=center, rounded corners=2pt, font=\small\bfseries},
+    output/.style={rectangle, draw, fill=red!10, text width=2.5cm, minimum height=1cm, align=center, rounded corners=2pt, font=\small\bfseries},
+    pseudo/.style={rectangle, draw, fill=purple!10, text width=3cm, minimum height=0.8cm, align=center, rounded corners=2pt, font=\footnotesize\itshape},
+    arrow/.style={->, thick, >=stealth, color=black!70},
+    dasharrow/.style={->, thick, dashed, >=stealth, color=purple!70}
+]
+
+% Nodes
+\node[input] (input_lf) {Input LF Image\\($9 \times 9$ Views)};
+
+\node[block, right=of input_lf] (decomp) {Three-Layer Angular\\Signal Decomposition};
+
+\node[pseudo, above right=0.8cm and 1.5cm of decomp] (pseudo_label) {Geometric Pseudo-labels\\(Angular Gradient)};
+
+\node[wideblock, below right=1.2cm and 1.5cm of decomp] (lamb_branch) {Lambertian EPI Branch\\(PRSO / Displacement Field)};
+
+\node[wideblock, below=0.8cm of lamb_branch] (nl_branch) {Non-Lambertian Geometric\\Branch (X-shape GeoConv)};
+
+\node[block, right=2.5cm of lamb_branch, yshift=-0.4cm] (fusion) {Dual-Mask Generation\\\& Fusion (FUSE\_DIM=96)};
+
+\node[output, right=of fusion] (output_depth) {Final Depth Map\\$D_{final}$};
+
+% Arrows
+\draw[arrow] (input_lf.east) -- (decomp.west);
+
+\draw[arrow] (decomp.east) -- ++(0.5,0) |- (lamb_branch.west);
+\draw[arrow] (decomp.east) -- ++(0.5,0) |- (nl_branch.west);
+
+\draw[dasharrow] (decomp.north) -- ++(0,0.4) -| (pseudo_label.south);
+
+\draw[arrow] (lamb_branch.east) -- ++(0.8,0) |- (fusion.north);
+\draw[arrow] (nl_branch.east) -- ++(0.8,0) |- (fusion.south);
+
+\draw[dasharrow] (pseudo_label.east) -- ++(0.5,0) |- ([yshift=0.2cm]fusion.west);
+
+\draw[arrow] (fusion.east) -- (output_depth.west);
+
+% Annotations
+\node[font=\footnotesize\itshape, text=blue!80!black] at ([yshift=-0.2cm]decomp.south) {Physics-driven Decoupling};
+\node[font=\footnotesize\itshape, text=orange!80!black] at ([xshift=-1.5cm, yshift=0.3cm]lamb_branch.north west) {Dual-Branch Routing};
+
+\end{tikzpicture}
+\caption{Overall architecture of the proposed GeometricDualMask model. The framework decouples the light field angular signals via a physics-driven decomposition module, generating geometric pseudo-labels. A dual-branch network adaptively processes Lambertian and non-Lambertian regions, followed by a mask-guided fusion mechanism to produce the final high-precision depth map.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Core Components}
+
+The proposed GeometricDualMask framework consists of four core components that work synergistically to decouple physical properties and adaptively estimate depth. In this section, we detail the mathematical formulations and forward pass of each module.
+
+\subsubsection{Three-Layer Angular Signal Decomposition}
+To address the geometric violations caused by non-Lambertian surfaces, we propose a physics-driven three-layer angular signal decomposition model. Instead of relying on frequency-domain analysis (e.g., 2D-DFT), which fails under low-resolution discrete angular sampling ($9 \times 9$), we decouple the local angular signal patch $I(u,v)$ at spatial coordinates $(x,y)$ into three distinct physical components:
+\begin{equation}
+    I(u,v) = I_{DC} + a \cdot u + b \cdot v + \varepsilon(u,v),
+    \label{eq:ch3_1}
+\end{equation}
+where $I_{DC}$ represents the ambient illumination (DC component), $a$ and $b$ are the linear coefficients corresponding to the parallax and depth information, and $\varepsilon(u,v)$ denotes the residual component capturing material-specific reflections (e.g., specularities and translucency) \cite{smith2023lightfield}. 
+
+To explicitly characterize the residual term $\varepsilon(u,v)$, we extract geometric angular features, including the angular gradient $\nabla_{\theta} I$ and correlation coherence $\rho$. These geometric features serve as high-discriminability pixel-wise pseudo-labels for subsequent mask supervision. Furthermore, a Random Forest (RF) classifier utilizes these geometric features to achieve high-precision binary classification between Lambertian and non-Lambertian surfaces, laying the theoretical foundation for the unified physical model.
+
+\subsubsection{Lambertian EPI Branch}
+For regions identified as Lambertian, the epipolar plane image (EPI) exhibits continuous linear structures. The Lambertian EPI branch is designed to extract these line-slope features and regress the depth surface. To resolve the ambiguity in texture-less regions, we introduce a continuous depth prior via the Plane Regularized Sampling Operator (PRSO) \cite{wang2022prso}. The forward pass for the Lambertian depth prediction $D_L$ is formulated as:
+\begin{equation}
+    D_L = \text{PRSO}(\mathbf{F}_{EPI}) + \mathcal{D}_{field}(\mathbf{S}_{EPI}),
+    \label{eq:ch3_2}
+\end{equation}
+where $\mathbf{F}_{EPI}$ denotes the extracted EPI features, $\mathbf{S}_{EPI}$ represents the EPI slope maps, and $\mathcal{D}_{field}$ is the displacement field operator that enforces piecewise smooth depth constraints. This branch effectively preserves the geometric constraints of the Lambertian angular cone.
+
+\subsubsection{Non-Lambertian Geometric Branch}
+Non-Lambertian surfaces, such as specular and scattering materials, disrupt the Lambertian angular cone constraints, forming X-shaped patterns rather than straight lines in the EPI. The Non-Lambertian Geometric Branch explicitly abandons frequency-domain analysis and instead leverages bimodal distribution features and X-shaped geometric patterns. 
+
+We employ a specialized Geometric Convolution (GeoConv) module to process the angular gradient anomalies. The depth prediction for non-Lambertian regions, $D_{NL}$, is computed as:
+\begin{equation}
+    D_{NL} = \text{GeoConv}(\mathbf{F}_{X}, \mathbf{F}_{Bimodal}),
+    \label{eq:ch3_3}
+\end{equation}
+where $\mathbf{F}_{X}$ represents the feature maps encoding the X-shaped EPI patterns, and $\mathbf{F}_{Bimodal}$ captures the bimodal intensity distribution characteristics enhanced by the tone-mapping preprocessing. This design directly targets the physical root causes of EPI failure on complex materials.
+
+\subsubsection{Dual-Mask Generation and Fusion}
+To seamlessly integrate the predictions from both branches, we design a Dual-Mask Generation and Fusion mechanism. The depth features from the Lambertian and non-Lambertian branches are first projected into a balanced channel space using a fusion dimension of $\text{FUSE\_DIM}=96$. 
+
+We generate pixel-wise dual masks, $M_L$ and $M_{NL}$, guided by the geometric pseudo-labels (e.g., angular gradient) extracted from the decomposition module. The final high-precision depth map $D_{final}$ is obtained through mask-weighted fusion:
+\begin{equation}
+    D_{final} = M_L \odot D_L + M_{NL} \odot D_{NL},
+    \label{eq:ch3_4}
+\end{equation}
+where $\odot$ denotes the element-wise Hadamard product. During training, the mask generation is supervised by a Binary Cross-Entropy (BCE) loss using the geometric pseudo-labels $P_{pseudo}$:
+\begin{align}
+    \mathcal{L}_{mask} &= \text{BCE}(M_L, P_{pseudo}) \nonumber \\
+    &\quad + \text{BCE}(M_{NL}, 1 - P_{pseudo}).
+    \label{eq:ch3_5}
+\end{align}
+This pixel-wise supervision ensures that the mask gap reaches the target threshold (e.g., $0.08$), enabling adaptive and accurate routing of distinct surface regions to their specialized processing branches.
+
+\begin{table}[!t]
+\centering
+\caption{Summary of Core Components in GeometricDualMask}
+\label{tab:core_components}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Component} & \textbf{Input} & \textbf{Key Operation} & \textbf{Output} \\
+\midrule
+Decomposition & $9 \times 9$ LF patch & 3-layer physical decoupling & DC, $a, b, \varepsilon$ \\
+Lambertian & LF image (Masked) & PRSO \& Displacement field & $D_L$ \\
+Non-Lambertian & LF image (Masked) & X-shape GeoConv & $D_{NL}$ \\
+Fusion & $D_L, D_{NL}$, features & Dual-mask weighted fusion & $D_{final}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training Objective}
+
+The training of the proposed GeometricDualMask framework is guided by a composite objective function that jointly optimizes the depth regression, mask generation, and physical decomposition modules. 
+
+\subsubsection{Loss Function}
+The overall training objective $\mathcal{L}_{total}$ is formulated as a weighted sum of the depth estimation loss and the dual-mask supervision loss:
+\begin{equation}
+    \mathcal{L}_{total} = \lambda_d \mathcal{L}_{depth} + \lambda_m \mathcal{L}_{mask},
+    \label{eq:ch3_6}
+\end{equation}
+where $\lambda_d$ and $\lambda_m$ are the balancing hyperparameters, empirically set to $1.0$ and $0.5$, respectively. 
+
+For the depth estimation, we employ the Smooth L1 loss to ensure robust regression while mitigating the impact of outliers in complex non-Lambertian regions. The depth loss $\mathcal{L}_{depth}$ is computed between the final fused depth map $D_{final}$ and the ground truth depth $D_{gt}$:
+\begin{equation}
+    \mathcal{L}_{depth} = \frac{1}{N} \sum_{i=1}^{N} \text{SmoothL1}(D_{final}^{(i)}, D_{gt}^{(i)}),
+    \label{eq:ch3_7}
+\end{equation}
+where $N$ is the total number of valid pixels in the batch, and the Smooth L1 function transitions smoothly between L2 and L1 norms to maintain stable gradients near the origin.
+
+The mask supervision loss $\mathcal{L}_{mask}$, as introduced in Eq.~\ref{eq:ch3_5}, utilizes the Binary Cross-Entropy (BCE) loss to enforce pixel-wise alignment between the generated dual masks ($M_L, M_{NL}$) and the geometric pseudo-labels $P_{pseudo}$ derived from the angular gradient. This explicit supervision ensures that the mask gap converges to the target threshold (e.g., $0.08$), preventing the network from collapsing into a single-branch solution and guaranteeing physically meaningful routing.
+
+\subsubsection{Training Strategy}
+To address the severe data scarcity and distribution imbalance inherent in non-Lambertian light field datasets, we design a multi-domain balanced training framework. We construct a Unified LF Dataset loader that integrates multiple cross-domain datasets, including HCInew, UrbanLF-Syn, and the Non-Lambertian Dataset, covering approximately 230 scenes with diverse material properties. 
+
+Instead of relying on standard random sampling, we implement a Domain-balanced sampling strategy using a \texttt{WeightedRandomSampler} \cite{he2016deep}. This approach maintains cross-domain exposure balance and dynamically adjusts the sampling probability based on the domain distribution. Specifically, we apply an oversampling factor of 10 for the minority non-Lambertian domains ($nl\_oversampling\_factor = 10$) to alleviate overfitting on specular and scattering surfaces. While we explored various alternative strategies, including extensive data augmentation, Exponential Moving Average (EMA) training, curriculum learning, and focal loss variants \cite{lin2017focal}, extensive ablation studies across 132 experiments confirmed that the domain-balanced mixed training yields the most substantial and consistent improvements without introducing optimization instability.
+
+\subsubsection{Optimization Details}
+The network is optimized using the AdamW optimizer \cite{loshchilov2019adamw} with weight decay set to $1 \times 10^{-4}$. Based on extensive hyperparameter sweeps to confirm the metrics plateau, we set the initial learning rate to $1 \times 10^{-4}$ with a cosine annealing schedule. Due to the high memory consumption of processing dense $9 \times 9$ light field tensors (81 perspectives per spatial location), we set the physical batch size to 2 and utilize gradient accumulation with 8 steps, resulting in an effective batch size of 16. 
+
+The input light field images are uniformly cropped and resized to a target spatial resolution of $256 \times 256$. The channel dimension for the feature fusion module is strictly constrained to $\text{FUSE\_DIM} = 96$ to balance representational capacity and computational efficiency. The model is trained for 100 epochs on a single NVIDIA RTX 3090 GPU. During inference, the physical decomposition and dual-mask routing are executed in a single forward pass, ensuring real-time applicability without requiring iterative refinement or post-processing.

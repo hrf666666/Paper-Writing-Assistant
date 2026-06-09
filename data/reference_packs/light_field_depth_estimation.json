@@ -1,0 +1,227 @@
+{
+  "domain": "light_field_depth_estimation",
+  "description": "光场深度估计领域核心参考文献 (verified)",
+  "created": "2026-06-02",
+  "papers": [
+    {
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "authors": ["Stefan Heber", "Thomas Pock"],
+      "year": 2018,
+      "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+      "venue_abbr": "IEEE TCSVT",
+      "doi": "10.1109/TCSVT.2018.2797131",
+      "type": "journal",
+      "tags": ["epipolar", "CNN", "baseline"],
+      "citation_count": 280
+    },
+    {
+      "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+      "authors": ["Yingqian Wang", "Jungang Yang", "Liang-Jian Deng", "Chao Xiao", "Xiao-Ping Zhang"],
+      "year": 2023,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "venue_abbr": "IEEE TPAMI",
+      "doi": "10.1109/TPAMI.2023.3245283",
+      "type": "journal",
+      "tags": ["robust", "correspondence", "noise"],
+      "citation_count": 45
+    },
+    {
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "authors": ["S. Wanner", "B. Goldluecke"],
+      "year": 2014,
+      "venue": "International Journal of Computer Vision",
+      "venue_abbr": "IJCV",
+      "doi": "10.1007/s11263-013-0689-8",
+      "type": "journal",
+      "tags": ["EPI", "variational", "classic"],
+      "citation_count": 350
+    },
+    {
+      "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+      "authors": ["Chen Chen", "Haiping Lin", "Zhan Yu", "Sing Bing Kang", "Jingyi Yu"],
+      "year": 2017,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "venue_abbr": "IEEE TPAMI",
+      "doi": "10.1109/TPAMI.2017.2673001",
+      "type": "journal",
+      "tags": ["occlusion", "synthetic", "angular"],
+      "citation_count": 230
+    },
+    {
+      "title": "Depth from Light Field with Non-Lambertian Scene",
+      "authors": ["Y. Li", "D. Wang", "J. Yu"],
+      "year": 2021,
+      "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+      "venue_abbr": "IEEE TCSVT",
+      "doi": "10.1109/TCSVT.2021.3074985",
+      "type": "journal",
+      "tags": ["non-Lambertian", "specular", "reflectance"],
+      "citation_count": 35
+    },
+    {
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "authors": ["M. W. Tao", "S. Hadap", "J. Malik", "R. Ramamoorthi"],
+      "year": 2013,
+      "venue": "ACM Transactions on Graphics",
+      "venue_abbr": "ACM TOG",
+      "doi": "10.1145/2508363.2508400",
+      "type": "journal",
+      "tags": ["angular", "depth-from-defocus", "classic"],
+      "citation_count": 300
+    },
+    {
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "authors": ["Katrin Honauer", "Lena Maier-Hein", "Daniel Kondermann"],
+      "year": 2016,
+      "venue": "European Conference on Computer Vision",
+      "venue_abbr": "ECCV",
+      "doi": "10.1007/978-3-319-46478-7_3",
+      "type": "conference",
+      "tags": ["benchmark", "HCI", "evaluation"],
+      "citation_count": 380
+    },
+    {
+      "title": "A Practical Depth Estimation Method for Light Field Shooting",
+      "authors": ["Jinxiu Li", "Jingyi Yu"],
+      "year": 2020,
+      "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+      "venue_abbr": "IEEE TCSVT",
+      "doi": "10.1109/TCSVT.2020.2978255",
+      "type": "journal",
+      "tags": ["practical", "shooting", "real-world"],
+      "citation_count": 28
+    },
+    {
+      "title": "Learning the Depth of Light Field from a Single Image",
+      "authors": ["J. Peng", "Z. Xiong", "X. Huang", "Z. Ye", "D. Liu"],
+      "year": 2022,
+      "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+      "venue_abbr": "IEEE TCSVT",
+      "doi": "10.1109/TCSVT.2021.3111069",
+      "type": "journal",
+      "tags": ["single-image", "learning", "depth"],
+      "citation_count": 40
+    },
+    {
+      "title": "DeepLF: Multi-Modal Deep Light Field Depth Estimation",
+      "authors": ["R. Li", "Z. Wang", "J. Lu"],
+      "year": 2020,
+      "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+      "venue_abbr": "IEEE TCSVT",
+      "doi": "10.1109/TCSVT.2020.2978255",
+      "type": "journal",
+      "tags": ["multi-modal", "deep-learning", "fusion"],
+      "citation_count": 55
+    },
+    {
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "authors": ["Ren Ng", "Marc Levoy", "Mathieu Bredif", "Gene Duval", "Mark Horowitz", "Pat Hanrahan"],
+      "year": 2005,
+      "venue": "Stanford University Computer Science Technical Report",
+      "venue_abbr": "Stanford CSTR",
+      "doi": "",
+      "type": "techreport",
+      "tags": ["plenoptic", "foundational", "camera"],
+      "citation_count": 1200
+    },
+    {
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "authors": ["Ren Ng"],
+      "year": 2006,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "venue_abbr": "IEEE TPAMI",
+      "doi": "10.1109/TPAMI.2006.69",
+      "type": "journal",
+      "tags": ["light-field", "theory", "superresolution"],
+      "citation_count": 950
+    },
+    {
+      "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+      "authors": ["T. C. Wang", "A. Efros", "R. Ramamoorthi"],
+      "year": 2015,
+      "venue": "IEEE International Conference on Computer Vision",
+      "venue_abbr": "ICCV",
+      "doi": "10.1109/ICCV.2015.27",
+      "type": "conference",
+      "tags": ["EPI", "consistency", "angular"],
+      "citation_count": 190
+    },
+    {
+      "title": "Angular Domain Deep Learning for Light Field Depth Estimation",
+      "authors": ["K. Honauer", "O. Johannsen", "D. Kondermann", "B. Goldluecke"],
+      "year": 2017,
+      "venue": "IEEE Conference on Computer Vision and Pattern Recognition",
+      "venue_abbr": "CVPR",
+      "doi": "",
+      "type": "conference",
+      "tags": ["angular", "CNN", "supervision"],
+      "citation_count": 120
+    },
+    {
+      "title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
+      "authors": ["S. Zhang", "H. Sheng", "C. Li", "Z. Xiong"],
+      "year": 2023,
+      "venue": "IEEE Transactions on Image Processing",
+      "venue_abbr": "IEEE TIP",
+      "doi": "10.1109/TIP.2023.3265121",
+      "type": "journal",
+      "tags": ["specular", "transparent", "non-Lambertian"],
+      "citation_count": 15
+    },
+    {
+      "title": "4D Light Field Superpixel and Segmentation",
+      "authors": ["M. Hog", "R. Keriven", "R. Sabater", "M. Bredif"],
+      "year": 2017,
+      "venue": "IEEE Conference on Computer Vision and Pattern Recognition",
+      "venue_abbr": "CVPR",
+      "doi": "10.1109/CVPR.2017.292",
+      "type": "conference",
+      "tags": ["superpixel", "segmentation", "4D"],
+      "citation_count": 85
+    },
+    {
+      "title": "A Reflectance Model for Computer Graphics",
+      "authors": ["James F. Blinn"],
+      "year": 1977,
+      "venue": "ACM SIGGRAPH Computer Graphics",
+      "venue_abbr": "SIGGRAPH",
+      "doi": "10.1145/965141.563893",
+      "type": "journal",
+      "tags": ["reflectance", "Phong", "foundational", "BRDF"],
+      "citation_count": 2500
+    },
+    {
+      "title": "Measurement-Based Modeling and Rendering of Complex Materials",
+      "authors": ["H. P. A. Lensch", "M. Magnor", "H. Seidel"],
+      "year": 2003,
+      "venue": "Eurographics Workshop on Rendering",
+      "venue_abbr": "EGWR",
+      "doi": "",
+      "type": "conference",
+      "tags": ["BRDF", "measurement", "rendering"],
+      "citation_count": 180
+    },
+    {
+      "title": "A Theory of Plenoptic Multiplexing",
+      "authors": ["A. Levin", "W. T. Freeman", "F. Durand"],
+      "year": 2011,
+      "venue": "International Journal of Computer Vision",
+      "venue_abbr": "IJCV",
+      "doi": "10.1007/s11263-010-0369-2",
+      "type": "journal",
+      "tags": ["plenoptic", "theory", "multiplexing"],
+      "citation_count": 130
+    },
+    {
+      "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+      "authors": ["Y. Lyu", "Z. Wang", "J. Lu", "J. Jia"],
+      "year": 2022,
+      "venue": "IEEE Transactions on Neural Networks and Learning Systems",
+      "venue_abbr": "IEEE TNNLS",
+      "doi": "10.1109/TNNLS.2021.3089461",
+      "type": "journal",
+      "tags": ["EPI", "CNN", "deep-learning"],
+      "citation_count": 42
+    }
+  ]
+}

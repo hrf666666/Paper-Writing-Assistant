@@ -9,12 +9,11 @@ Skill: 第三章 - Methodology / 方法设计
 
 import os
 import json
-from tqdm import tqdm
 
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
 
 import logging
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ def generate_tikz_architecture(model_architecture, figure_style, paper_title,
     return tikz_code
 
 
-def generate_methodology(project_data, ref_data, previous_chapters=None):
+def generate_methodology(project_data, ref_data, previous_chapters=None, citation_context=""):
     """生成第三章 Methodology"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -50,8 +49,8 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
     figure_style = ref_data.get("figure_style", {})
     article_info = get_article_type_info()
     
-    style_instruction = _build_style_instruction(style_guide, chapter_org)
-    
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Methodology")
+
     # 构建前序章节摘要
     prev_summary = ""
     if previous_chapters:
@@ -59,17 +58,15 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
             prev_summary += f"Introduction 摘要:\n{previous_chapters[1][:1000]}\n"
         if 2 in previous_chapters:
             prev_summary += f"Related Work 摘要:\n{previous_chapters[2][:1000]}\n"
-    
-    style_instruction = _build_style_instruction(style_guide, chapter_org)
-    
+
     innovation_summary = ""
     for i, ip in enumerate(innovation_points, 1):
         innovation_summary += f"创新点{i}: {ip.get('创新点名称', 'N/A')}\n"
         innovation_summary += f"  内容: {'; '.join(ip.get('创新点工作内容', []))}\n"
-    
+
     # ==================== 3.1 总体架构概述 ====================
     logger.info("[chapter3] 生成 3.1 总体架构概述...")
-    
+
     # 生成TikZ架构图
     logger.info("[chapter3] 生成TikZ架构图...")
     try:
@@ -79,18 +76,18 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
     except Exception as e:
         logger.error(f"[chapter3] TikZ架构图生成失败: {e}")
         tikz_code = "% TikZ architecture figure generation failed"
-    
+
     try:
         with open(f"{OUTPUT_DIR}/chapter3/architecture_figure.tex", 'w', encoding='utf-8') as f:
             f.write(tikz_code)
     except Exception as e:
         logger.error(f"[chapter3] TikZ文件写入失败: {e}")
-    
+
     # 构建前序章节摘要块
     _prev_summary_block = ""
     if prev_summary:
         _prev_summary_block = f"**前序章节摘要（保持术语一致）**:\n{prev_summary}"
-    
+
     prompt_3_1 = f"""
 你是一名{article_info['name']}级别的学术论文写作专家。请为论文"{PAPER_TITLE}"撰写第3.1节"Overall Architecture"。
 
@@ -119,9 +116,9 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
 
 {_prev_summary_block}
 
-请使用学术英语撰写。引用使用<citation>标记。行内公式用 `$...$`，行间公式用 `$$...$$` 格式（直接使用LaTeX数学语法，不需要额外包裹）。
-架构图的引用使用"Fig. X"或"As illustrated in Fig. X"的格式。Markdown格式。
-**重要**：不要输出子节标题（如 "## 3.1 ..."），该标题已由系统自动添加。直接从正文内容开始。直接给出内容：
+请使用学术英语撰写。引用使用<citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
+架构图引用使用 "Fig.~\ref{fig:architecture}" 或 "As illustrated in Fig.~\ref{fig:architecture}"。
+**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     
     try:
@@ -171,6 +168,15 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
 4. 说明该模块与前后模块的衔接关系
 5. 突出该模块的创新点和与现有方法的不同之处
 
+**公式要求**（关键）：
+- 每个子节至少包含1个独立的行间公式（使用 \begin{{equation}}...\end{{equation}} 格式）
+- 不要只给出文字描述，必须有数学形式化
+- 公式中的每个变量都要在正文中定义
+
+**引用要求**：
+- 每个子节至少引用2-3篇不同的文献
+- 使用<citation>标记标注引用
+
 **模型整体架构**（用于保持一致性）：
 {json.dumps(model_architecture, ensure_ascii=False, indent=2)[:2000]}
 
@@ -181,9 +187,9 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
 
 {style_instruction}
 
-请使用学术英语撰写。行内公式用 `$...$`，行间公式用 `$$...$$`（LaTeX数学格式，直接写不用包裹）。
-引用使用<citation>标记。Markdown格式。
-**重要**：不要输出子节标题，直接从正文开始。直接给出内容：
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
+引用使用<citation>标记。
+**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
         
         logger.info(f"[chapter3] 生成 3.{section_num} {module_name}...")
@@ -214,14 +220,23 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
 </loss_config>
 
 **具体要求**：
-1. 给出总体损失函数的定义
-2. 逐项解释每个损失项的物理/几何含义
+1. 给出总体损失函数的定义（必须使用 \begin{{equation}}...\end{{equation}} 行间公式）
+2. 逐项解释每个损失项的物理/几何含义（每个损失项至少一个独立公式）
 3. 说明各损失项之间的权重设置及理由
 4. 如有物理一致性约束或正则化，详细说明其推导过程
 
+**公式要求**：
+- 总体损失函数必须是行间公式
+- 每个损失分量也应有独立的公式定义
+- 确保至少有2-3个行间公式（\begin{{equation}}...\end{{equation}}）
+
+**引用要求**：
+- 引用至少2-3篇相关方法或损失函数设计的文献
+- 使用<citation>标记
+
 {style_instruction}
 
-请使用学术英语撰写。行内公式用 `$...$`，行间公式用 `$$...$$`。Markdown格式。直接给出内容：
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。直接给出LaTeX代码：
 """
     
     logger.info(f"[chapter3] 生成 3.{len(modules)+2} Training Objective...")
@@ -232,109 +247,29 @@ def generate_methodology(project_data, ref_data, previous_chapters=None):
         section_loss = ""
     
     # ==================== 组装完整章节 ====================
-    full_chapter = f"""# 3. Methodology
+    full_chapter = f"""\section{{Methodology}}
 
 {section_3_1}
 
 """
     for idx, (module, content) in enumerate(zip(modules, module_sections)):
-        full_chapter += f"## 3.{idx+2} {module.get('模块名', f'Module {idx+1}')}\n\n{content}\n\n"
+        full_chapter += f"\\subsection{{{module.get('模块名', f'Module {idx+1}')}}}\n\n{content}\n\n"
     
-    full_chapter += f"## 3.{len(modules)+2} Training Objective\n\n{section_loss}\n"
+    full_chapter += f"\\subsection{{Training Objective}}\n\n{section_loss}\n"
     
     return full_chapter, tikz_code
 
-
-def _build_style_instruction(style_guide, chapter_org):
-    """构建写作风格指导（v9.3: 集成 IEEE Trans 期刊风格配置）"""
-    instruction = """**写作风格指导**：
-- Methodology 特殊要求：
-  1. 每个模块先说设计动机，再说具体设计，最后说预期效果
-  2. 公式要完整，每个符号都要定义
-  3. 模块之间的关系和数据流要清晰
-  4. 创新点要在描述中自然突出（"different from previous works that..., our module explicitly..."）
-  5. 架构图中的模块名要与正文完全一致
-"""
-    
-    # v9.3: 加载 IEEE Trans 期刊风格配置（P2 优先级规则）
-    try:
-        import os
-        from config.ieee_trans_style_profile import (
-            get_ieee_trans_style_profile,
-            get_section_requirements,
-        )
-        
-        profile = get_ieee_trans_style_profile()
-        method_req = get_section_requirements("Method")
-        
-        instruction += f"\n**IEEE Transactions 期刊特定规则**（P2 优先级，必须遵守）：\n"
-        instruction += f"\n### Method 结构要求\n"
-        instruction += f"- 入口点：{method_req.get('entry', 'N/A')}\n"
-        instruction += f"- 必须包含：\n"
-        for req in method_req.get('required', []):
-            instruction += f"  - {req}\n"
-        instruction += f"- 禁止模式：\n"
-        for anti in method_req.get('anti_patterns', []):
-            instruction += f"  - {anti}\n"
-        
-        instruction += f"\n### 语言风格\n"
-        lang = profile.get('language_style_profile', {})
-        instruction += f"- 语态：{lang.get('voice', 'N/A')}\n"
-        instruction += f"- 数学密度：{lang.get('mathematical_density', 'N/A')}\n"
-        instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[IEEE Trans 风格配置] 加载失败: {e}")
-    
-    # v9.2: 加载学术写作风格指南（P4 优先级规则）
-    try:
-        import os
-        style_guide_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-            "skills", "academic_writing_style", "style_guide.md"
-        )
-        if os.path.exists(style_guide_path):
-            with open(style_guide_path, 'r', encoding='utf-8') as f:
-                style_guide_content = f.read()
-            instruction += f"\n**学术写作基础规范**（P4 优先级）：\n"
-            instruction += style_guide_content[:1500]  # 截取关键部分
-            instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[风格指南] 加载失败: {e}")
-    
-    if style_guide and isinstance(style_guide, dict):
-        vocabulary = style_guide.get("用词特征", [])
-        if vocabulary:
-            instruction += f"- 学术用词：{vocabulary[:15]}\n"
-    
-    if chapter_org and isinstance(chapter_org, dict):
-        patterns = chapter_org.get("关键句式模板", {})
-        if patterns:
-            instruction += "- 关键句式模板：\n"
-            for k, v in list(patterns.items())[:5]:
-                instruction += f"  {k}: {v}\n"
-    
-    instruction += """
-- 重要要求：
-  1. 文风学术化，禁止口语化
-  2. 公式推导要严谨，符号要统一
-  3. 每个设计决策都要有理由（为什么这么做）
-  4. **严格避免 AI 风格词汇**（如 revolutionize, groundbreaking, unprecedented 等）
-  5. **括号内容不超过 20 词**，超长内容应拆分为独立句子
-"""
-    
-    return instruction
-
-
-def run_chapter3(project_data, ref_data, previous_chapters=None):
+def run_chapter3(project_data, ref_data, previous_chapters=None, citation_context=""):
     """主入口：生成第三章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter3", exist_ok=True)
     
     logger.info("[chapter3] 开始生成第三章 Methodology...")
     try:
-        chapter_content, tikz_code = generate_methodology(project_data, ref_data, previous_chapters)
+        chapter_content, tikz_code = generate_methodology(project_data, ref_data, previous_chapters,
+                                                            citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter3] 第三章生成失败: {e}")
-        chapter_content = "# 3. Methodology\n\n(生成失败，请重新运行)\n"
+        chapter_content = "\\section{Methodology}\n\n(生成失败，请重新运行)\n"
         tikz_code = ""
     
     try:

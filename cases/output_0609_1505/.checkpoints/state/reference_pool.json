@@ -1,0 +1,2115 @@
+[
+  {
+    "paperId": "10.1109/CVPR.2016.90",
+    "title": "Deep Residual Learning for Image Recognition",
+    "year": 2016,
+    "authors": [
+      {
+        "name": "Kaiming He"
+      },
+      {
+        "name": "Xiangyu Zhang"
+      },
+      {
+        "name": "Shaoqing Ren"
+      },
+      {
+        "name": "Jian Sun"
+      }
+    ],
+    "venue": "CVPR",
+    "abstract": "",
+    "citationCount": 180000,
+    "doi": "10.1109/CVPR.2016.90",
+    "externalIds": {
+      "DOI": "10.1109/CVPR.2016.90"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 54000.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Deep_Residual_Learning_for_Image_Recognition.md",
+    "content_kind": "fulltext",
+    "token_estimate": 8224
+  },
+  {
+    "paperId": "10.48550/arxiv.1706.03762",
+    "title": "Attention Is All You Need",
+    "year": 2017,
+    "authors": [
+      {
+        "name": "Ashish Vaswani"
+      },
+      {
+        "name": "Noam Shazeer"
+      },
+      {
+        "name": "Niki Parmar"
+      },
+      {
+        "name": "Jakob Uszkoreit"
+      },
+      {
+        "name": "Llion Jones"
+      },
+      {
+        "name": "Aidan N. Gomez"
+      },
+      {
+        "name": "Lukasz Kaiser"
+      },
+      {
+        "name": "Illia Polosukhin"
+      }
+    ],
+    "venue": "NeurIPS",
+    "abstract": "",
+    "citationCount": 120000,
+    "doi": "10.48550/arxiv.1706.03762",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.1706.03762"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 36000.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Attention_Is_All_You_Need.md",
+    "content_kind": "fulltext",
+    "token_estimate": 10049
+  },
+  {
+    "paperId": "10.1007/978-3-319-24574-4_28",
+    "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+    "year": 2015,
+    "authors": [
+      {
+        "name": "Olaf Ronneberger"
+      },
+      {
+        "name": "Philipp Fischer"
+      },
+      {
+        "name": "Thomas Brox"
+      }
+    ],
+    "venue": "MICCAI",
+    "abstract": "",
+    "citationCount": 90000,
+    "doi": "10.1007/978-3-319-24574-4_28",
+    "externalIds": {
+      "DOI": "10.1007/978-3-319-24574-4_28"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 27000.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/U-Net__Convolutional_Networks_for_Biomedical_Image_Segmentat.md",
+    "content_kind": "fulltext",
+    "token_estimate": 706
+  },
+  {
+    "paperId": "10.48550/arxiv.2010.11929",
+    "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Alexey Dosovitskiy"
+      },
+      {
+        "name": "Lucas Beyer"
+      },
+      {
+        "name": "Alexander Kolesnikov"
+      },
+      {
+        "name": "Dirk Weissenborn"
+      },
+      {
+        "name": "Xiaohua Zhai"
+      },
+      {
+        "name": "Thomas Unterthiner"
+      },
+      {
+        "name": "Mostafa Dehghani"
+      },
+      {
+        "name": "Matthias Minderer"
+      },
+      {
+        "name": "Georg Heigold"
+      },
+      {
+        "name": "Sylvain Gelly"
+      },
+      {
+        "name": "Jakob Uszkoreit"
+      },
+      {
+        "name": "Neil Houlsby"
+      }
+    ],
+    "venue": "ICLR",
+    "abstract": "",
+    "citationCount": 35000,
+    "doi": "10.48550/arxiv.2010.11929",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.2010.11929"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 10500.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/10.48550_arxiv.2010.11929.md",
+    "content_kind": "fulltext",
+    "token_estimate": 14701
+  },
+  {
+    "paperId": "10.1109/ICCV48922.2021.00986",
+    "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Ze Liu"
+      },
+      {
+        "name": "Yutong Lin"
+      },
+      {
+        "name": "Yue Cao"
+      },
+      {
+        "name": "Han Hu"
+      },
+      {
+        "name": "Yixuan Wei"
+      },
+      {
+        "name": "Zheng Zhang"
+      },
+      {
+        "name": "Stephen Lin"
+      },
+      {
+        "name": "Baining Guo"
+      }
+    ],
+    "venue": "ICCV",
+    "abstract": "",
+    "citationCount": 25000,
+    "doi": "10.1109/ICCV48922.2021.00986",
+    "externalIds": {
+      "DOI": "10.1109/ICCV48922.2021.00986"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 7500.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Swin_Transformer__Hierarchical_Vision_Transformer_using_Shif.md",
+    "content_kind": "fulltext",
+    "token_estimate": 8774
+  },
+  {
+    "paperId": "10.1109/CVPR.2017.106",
+    "title": "Feature Pyramid Networks for Object Detection",
+    "year": 2017,
+    "authors": [
+      {
+        "name": "Tsung-Yi Lin"
+      },
+      {
+        "name": "Piotr Dollar"
+      },
+      {
+        "name": "Ross Girshick"
+      },
+      {
+        "name": "Kaiming He"
+      },
+      {
+        "name": "Bharath Hariharan"
+      },
+      {
+        "name": "Serge Belongie"
+      }
+    ],
+    "venue": "CVPR",
+    "abstract": "",
+    "citationCount": 15000,
+    "doi": "10.1109/CVPR.2017.106",
+    "externalIds": {
+      "DOI": "10.1109/CVPR.2017.106"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 4500.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Feature_Pyramid_Networks_for_Object_Detection.md",
+    "content_kind": "fulltext",
+    "token_estimate": 9443
+  },
+  {
+    "paperId": "10.1109/ICCV51070.2023.00900",
+    "title": "Segment Anything",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Alexander Kirillov"
+      },
+      {
+        "name": "Eric Mintun"
+      },
+      {
+        "name": "Nikhila Ravi"
+      },
+      {
+        "name": "Hanzi Mao"
+      },
+      {
+        "name": "Chloe Rolland"
+      },
+      {
+        "name": "Laura Gustafson"
+      },
+      {
+        "name": "Tete Xiao"
+      },
+      {
+        "name": "Spencer Whitehead"
+      },
+      {
+        "name": "Alexander C. Berg"
+      },
+      {
+        "name": "Wan-Yen Lo"
+      },
+      {
+        "name": "Piotr Dollar"
+      },
+      {
+        "name": "Ross Girshick"
+      }
+    ],
+    "venue": "ICCV",
+    "abstract": "",
+    "citationCount": 12000,
+    "doi": "10.1109/ICCV51070.2023.00900",
+    "externalIds": {
+      "DOI": "10.1109/ICCV51070.2023.00900"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 3600.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Joint-Relation_Transformer_for_Multi-Person_Motion_Predictio.md",
+    "content_kind": "fulltext",
+    "token_estimate": 9658
+  },
+  {
+    "paperId": "10.1109/CVPR52688.2022.01553",
+    "title": "Masked Autoencoders Are Scalable Vision Learners",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Kaiming He"
+      },
+      {
+        "name": "Xinlei Chen"
+      },
+      {
+        "name": "Saining Xie"
+      },
+      {
+        "name": "Yanghao Li"
+      },
+      {
+        "name": "Piotr Dollar"
+      },
+      {
+        "name": "Ross Girshick"
+      }
+    ],
+    "venue": "CVPR",
+    "abstract": "",
+    "citationCount": 8000,
+    "doi": "10.1109/CVPR52688.2022.01553",
+    "externalIds": {
+      "DOI": "10.1109/CVPR52688.2022.01553"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 2400.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Masked_Autoencoders_Are_Scalable_Vision_Learners.md",
+    "content_kind": "fulltext",
+    "token_estimate": 8616
+  },
+  {
+    "paperId": "10.1145/3503250",
+    "title": "NeRF",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Ben Mildenhall"
+      },
+      {
+        "name": "Pratul P. Srinivasan"
+      },
+      {
+        "name": "Matthew Tancik"
+      },
+      {
+        "name": "Jonathan T. Barron"
+      },
+      {
+        "name": "Ravi Ramamoorthi"
+      },
+      {
+        "name": "Ren Ng"
+      }
+    ],
+    "venue": "Communications of the ACM",
+    "abstract": "We present a method that achieves state-of-the-art results for synthesizing novel views of complex scenes by optimizing an underlying continuous volumetric scene function using a sparse set of input views. Our algorithm represents a scene using a fully connected (nonconvolutional) deep network, whos",
+    "citationCount": 5731,
+    "doi": "10.1145/3503250",
+    "externalIds": {
+      "DOI": "10.1145/3503250"
+    },
+    "group": "datasets",
+    "_relevance_score": 1799.3,
+    "markdown_path": "./ref_md/NeRF.md",
+    "content_kind": "abstract_only",
+    "token_estimate": 268
+  },
+  {
+    "paperId": "10.1109/TPAMI.2018.2877465",
+    "title": "Learning Depth from Monocular Videos Using Direct Methods",
+    "year": 2019,
+    "authors": [
+      {
+        "name": "C. Godard"
+      },
+      {
+        "name": "O. Mac Aodha"
+      },
+      {
+        "name": "G. J. Brostow"
+      }
+    ],
+    "venue": "IEEE TPAMI",
+    "abstract": "",
+    "citationCount": 4200,
+    "doi": "10.1109/TPAMI.2018.2877465",
+    "externalIds": {
+      "DOI": "10.1109/TPAMI.2018.2877465"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 1260.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/10.1109_tpami.2018.2877465.md",
+    "content_kind": "metadata_only",
+    "token_estimate": 0
+  },
+  {
+    "paperId": "10.48550/arxiv.1406.2283",
+    "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+    "year": 2014,
+    "authors": [
+      {
+        "name": "David Eigen"
+      },
+      {
+        "name": "Christian Puhrsch"
+      },
+      {
+        "name": "Rob Fergus"
+      }
+    ],
+    "venue": "NeurIPS",
+    "abstract": "",
+    "citationCount": 3500,
+    "doi": "10.48550/arxiv.1406.2283",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.1406.2283"
+    },
+    "group": "computer_vision_foundations",
+    "_relevance_score": 1050.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/10.48550_arxiv.1406.2283.md",
+    "content_kind": "fulltext",
+    "token_estimate": 7768
+  },
+  {
+    "paperId": "",
+    "title": "DINOv2: Learning Robust Visual Features without Supervision",
+    "year": 2024,
+    "authors": [
+      {
+        "name": "Maxime Oquab"
+      },
+      {
+        "name": "Timothée Darcet"
+      },
+      {
+        "name": "Théo Moutakanni"
+      },
+      {
+        "name": "Huy Vo"
+      },
+      {
+        "name": "Marc Szafraniec"
+      },
+      {
+        "name": "Vasil Khalidov"
+      },
+      {
+        "name": "Patrick Labatut"
+      },
+      {
+        "name": "Armand Joulin"
+      },
+      {
+        "name": "Piotr Bojanowski"
+      }
+    ],
+    "venue": "TMLR",
+    "abstract": "",
+    "citationCount": 3000,
+    "doi": "",
+    "externalIds": {},
+    "group": "computer_vision_foundations",
+    "_relevance_score": 900.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1145/965141.563893",
+    "title": "A Reflectance Model for Computer Graphics",
+    "year": 1977,
+    "authors": [
+      {
+        "name": "James F. Blinn"
+      }
+    ],
+    "venue": "SIGGRAPH",
+    "abstract": "",
+    "citationCount": 2500,
+    "doi": "10.1145/965141.563893",
+    "externalIds": {
+      "DOI": "10.1145/965141.563893"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 750.0,
+    "_source": "reference_pack",
+    "markdown_path": "./ref_md/Models_of_light_reflection_for_computer_synthesized_pictures.md",
+    "content_kind": "abstract_only",
+    "token_estimate": 253
+  },
+  {
+    "paperId": "10.1007/s11263-010-0390-2",
+    "title": "A Database and Evaluation Methodology for Optical Flow",
+    "year": 2010,
+    "authors": [
+      {
+        "name": "Simon Baker"
+      },
+      {
+        "name": "Daniel Scharstein"
+      },
+      {
+        "name": "John Lewis"
+      },
+      {
+        "name": "Stefan Roth"
+      },
+      {
+        "name": "Michael J. Black"
+      },
+      {
+        "name": "Richard Szeliski"
+      }
+    ],
+    "venue": "International Journal of Computer Vision",
+    "abstract": "The quantitative evaluation of optical flow algorithms by Barron et al. (1994) led to significant advances in performance. The challenges for optical flow algorithms today go beyond the datasets and evaluation methods proposed in that paper. Instead, they center on problems associated with complex n",
+    "citationCount": 2224,
+    "doi": "10.1007/s11263-010-0390-2",
+    "externalIds": {
+      "DOI": "10.1007/s11263-010-0390-2"
+    },
+    "group": "datasets",
+    "_relevance_score": 747.1999999999999,
+    "markdown_path": "./ref_md/A_Database_and_Evaluation_Methodology_for_Optical_Flow.md",
+    "content_kind": "abstract_only",
+    "token_estimate": 409
+  },
+  {
+    "paperId": "robust principal component analysis: exact recovery of corrupted low-rank matrices via convex optimization",
+    "title": "Robust Principal Component Analysis: Exact Recovery of Corrupted Low-Rank Matrices via Convex Optimization",
+    "year": 2009,
+    "authors": [
+      {
+        "name": "John Wright"
+      },
+      {
+        "name": "Arvind Ganesh"
+      },
+      {
+        "name": "Shankar Rao"
+      },
+      {
+        "name": "Yigang Peng"
+      },
+      {
+        "name": "Yi Ma"
+      }
+    ],
+    "venue": "IDEALS (University of Illinois Urbana-Champaign)",
+    "abstract": "Principal component analysis is a fundamental operation in computational data analysis, with myriad applications ranging from web search to bioinformatics to computer vision and image analysis. However, its performance and applicability in real scenarios are limited by a lack of robustness to outlyi",
+    "citationCount": 1443,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 512.9
+  },
+  {
+    "paperId": "10.1109/tgrs.2004.824067",
+    "title": "Aerosol properties over bright-reflecting source regions",
+    "year": 2004,
+    "authors": [
+      {
+        "name": "N. C. Hsu"
+      },
+      {
+        "name": "Si‐Chee Tsay"
+      },
+      {
+        "name": "Michael D. King"
+      },
+      {
+        "name": "J. R. Herman"
+      }
+    ],
+    "venue": "IEEE Transactions on Geoscience and Remote Sensing",
+    "abstract": "Retrieving aerosol properties from satellite remote sensing over a bright surface is a challenging problem in the research of atmospheric and land applications. In this paper we propose a new approach to retrieve aerosol properties over surfaces such as arid, semiarid, and urban areas, where the sur",
+    "citationCount": 1395,
+    "doi": "10.1109/tgrs.2004.824067",
+    "externalIds": {
+      "DOI": "10.1109/tgrs.2004.824067"
+    },
+    "group": "datasets",
+    "_relevance_score": 498.5,
+    "markdown_path": "./ref_md/Aerosol_properties_over_bright-reflecting_source_regions.md",
+    "content_kind": "fulltext",
+    "token_estimate": 11348
+  },
+  {
+    "paperId": "10.1109/cvpr.2018.00212",
+    "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+    "year": 2018,
+    "authors": [
+      {
+        "name": "Zhichao Yin"
+      },
+      {
+        "name": "Jianping Shi"
+      }
+    ],
+    "venue": "",
+    "abstract": "We propose GeoNet, a jointly unsupervised learning framework for monocular depth, optical flow and egomotion estimation from videos. The three components are coupled by the nature of 3D scene geometry, jointly learned by our framework in an end-to-end manner. Specifically, geometric relationships ar",
+    "citationCount": 1273,
+    "doi": "10.1109/cvpr.2018.00212",
+    "externalIds": {
+      "DOI": "10.1109/cvpr.2018.00212"
+    },
+    "group": "datasets",
+    "_relevance_score": 461.9,
+    "markdown_path": "./ref_md/GeoNet__Unsupervised_Learning_of_Dense_Depth,_Optical_Flow_a.md",
+    "content_kind": "fulltext",
+    "token_estimate": 8595
+  },
+  {
+    "paperId": "10.5194/acp-5-827-2005",
+    "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+    "year": 2005,
+    "authors": [
+      {
+        "name": "Jeffrey S. Reid"
+      },
+      {
+        "name": "T. F. Eck"
+      },
+      {
+        "name": "Sundar A. Christopher"
+      },
+      {
+        "name": "R. Koppmann"
+      },
+      {
+        "name": "Оleg Dubovik"
+      },
+      {
+        "name": "Daniel P. Eleuterio"
+      },
+      {
+        "name": "B. N. Holben"
+      },
+      {
+        "name": "Elizabeth A. Reid"
+      },
+      {
+        "name": "Jianglong Zhang"
+      }
+    ],
+    "venue": "Atmospheric chemistry and physics",
+    "abstract": "Abstract. Because of its wide coverage over much of the globe, biomass burning has been widely studied in the context of direct radiative forcing. Such study is warranted as smoke particles scatter and at times absorb solar radiation efficiently. Further, as much of what is known about smoke transpo",
+    "citationCount": 1227,
+    "doi": "10.5194/acp-5-827-2005",
+    "externalIds": {
+      "DOI": "10.5194/acp-5-827-2005"
+    },
+    "group": "datasets",
+    "_relevance_score": 448.09999999999997
+  },
+  {
+    "paperId": "",
+    "title": "Light Field Photography with a Handheld Plenoptic Camera",
+    "year": 2005,
+    "authors": [
+      {
+        "name": "Ren Ng"
+      },
+      {
+        "name": "Marc Levoy"
+      },
+      {
+        "name": "Mathieu Bredif"
+      },
+      {
+        "name": "Gene Duval"
+      },
+      {
+        "name": "Mark Horowitz"
+      },
+      {
+        "name": "Pat Hanrahan"
+      }
+    ],
+    "venue": "Stanford CSTR",
+    "abstract": "",
+    "citationCount": 1200,
+    "doi": "",
+    "externalIds": {},
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 360.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/TPAMI.2006.69",
+    "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+    "year": 2006,
+    "authors": [
+      {
+        "name": "Ren Ng"
+      }
+    ],
+    "venue": "IEEE TPAMI",
+    "abstract": "",
+    "citationCount": 950,
+    "doi": "10.1109/TPAMI.2006.69",
+    "externalIds": {
+      "DOI": "10.1109/TPAMI.2006.69"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 285.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/tip.2020.3042059",
+    "title": "Light Field Image Super-Resolution Using Deformable Convolution",
+    "year": 2020,
+    "authors": [
+      {
+        "name": "Yingqian Wang"
+      },
+      {
+        "name": "Jungang Yang"
+      },
+      {
+        "name": "Longguang Wang"
+      },
+      {
+        "name": "Xinyi Ying"
+      },
+      {
+        "name": "Tianhao Wu"
+      },
+      {
+        "name": "Wei An"
+      },
+      {
+        "name": "Yulan Guo"
+      }
+    ],
+    "venue": "IEEE Transactions on Image Processing",
+    "abstract": "Light field (LF) cameras can record scenes from multiple perspectives, and thus introduce beneficial angular information for image super-resolution (SR). However, it is challenging to incorporate angular information due to disparities among LF images. In this paper, we propose a deformable convoluti",
+    "citationCount": 162,
+    "doi": "10.1109/tip.2020.3042059",
+    "externalIds": {
+      "DOI": "10.1109/tip.2020.3042059"
+    },
+    "group": "datasets",
+    "_relevance_score": 128.6
+  },
+  {
+    "paperId": "10.1109/tcsvt.2022.3187664",
+    "title": "UrbanLF: A Comprehensive Light Field Dataset for Semantic Segmentation of Urban Scenes",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Hao Sheng"
+      },
+      {
+        "name": "Ruixuan Cong"
+      },
+      {
+        "name": "Da Yang"
+      },
+      {
+        "name": "Rongshan Chen"
+      },
+      {
+        "name": "Sizhe Wang"
+      },
+      {
+        "name": "Zhenglong Cui"
+      }
+    ],
+    "venue": "IEEE Transactions on Circuits and Systems for Video Technology",
+    "abstract": "As one of the fundamental technologies for scene understanding, semantic segmentation has been widely explored in the last few years. Light field cameras encode the geometric information by simultaneously recording the spatial information and angular information of light rays, which provides us with",
+    "citationCount": 159,
+    "doi": "10.1109/tcsvt.2022.3187664",
+    "externalIds": {
+      "DOI": "10.1109/tcsvt.2022.3187664"
+    },
+    "group": "datasets",
+    "_relevance_score": 127.69999999999999
+  },
+  {
+    "paperId": "10.1007/978-3-319-46478-7_3",
+    "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+    "year": 2016,
+    "authors": [
+      {
+        "name": "Katrin Honauer"
+      },
+      {
+        "name": "Lena Maier-Hein"
+      },
+      {
+        "name": "Daniel Kondermann"
+      }
+    ],
+    "venue": "ECCV",
+    "abstract": "",
+    "citationCount": 380,
+    "doi": "10.1007/978-3-319-46478-7_3",
+    "externalIds": {
+      "DOI": "10.1007/978-3-319-46478-7_3"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 114.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.3389/fenvs.2022.996513",
+    "title": "LFRSNet: A robust light field semantic segmentation network combining contextual and geometric features",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Da Yang"
+      },
+      {
+        "name": "Tongyu Zhu"
+      },
+      {
+        "name": "Shuai Wang"
+      },
+      {
+        "name": "Sizhe Wang"
+      },
+      {
+        "name": "Zhang Xiong"
+      }
+    ],
+    "venue": "Frontiers in Environmental Science",
+    "abstract": "Light field (LF) semantic segmentation is a newly arisen technology and is widely used in many smart city applications such as remote sensing, virtual reality and 3D photogrammetry. Compared with RGB images, LF images contain multi-layer contextual information and rich geometric information of real-",
+    "citationCount": 92,
+    "doi": "10.3389/fenvs.2022.996513",
+    "externalIds": {
+      "DOI": "10.3389/fenvs.2022.996513"
+    },
+    "group": "datasets",
+    "_relevance_score": 107.6
+  },
+  {
+    "paperId": "10.7498/aps.54.5544",
+    "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+    "year": 2005,
+    "authors": [
+      {
+        "name": "Yuguang Yang"
+      },
+      {
+        "name": "Qiaoyan Wen"
+      },
+      {
+        "name": "Fuchen Zhu"
+      }
+    ],
+    "venue": "Acta Physica Sinica",
+    "abstract": "A multi-party multi-level quantum key distribution protocol based on entanglement swapping is proposed. A perfect complete orthonormal basis of the bi-party three-level systems is first constructed. By using this basis and swapping the entanglement, bi-party quantum key distribution is realized. In ",
+    "citationCount": 17,
+    "doi": "10.7498/aps.54.5544",
+    "externalIds": {
+      "DOI": "10.7498/aps.54.5544"
+    },
+    "group": "core_topic",
+    "_relevance_score": 105.1
+  },
+  {
+    "paperId": "10.1007/s11263-013-0689-8",
+    "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+    "year": 2014,
+    "authors": [
+      {
+        "name": "S. Wanner"
+      },
+      {
+        "name": "B. Goldluecke"
+      }
+    ],
+    "venue": "IJCV",
+    "abstract": "",
+    "citationCount": 350,
+    "doi": "10.1007/s11263-013-0689-8",
+    "externalIds": {
+      "DOI": "10.1007/s11263-013-0689-8"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 105.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "spatial distance analysis method for multispectral feature distribution of land use/cover in remote sensing images",
+    "title": "Spatial Distance Analysis Method for Multispectral Feature Distribution of Land Use/Cover in Remote Sensing Images",
+    "year": 2009,
+    "authors": [
+      {
+        "name": "Jian Lin"
+      }
+    ],
+    "venue": "",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "core_topic",
+    "_relevance_score": 100.0
+  },
+  {
+    "paperId": "research on place-based gis",
+    "title": "Research on Place-Based GIS",
+    "year": 2005,
+    "authors": [
+      {
+        "name": "Yu Liu"
+      }
+    ],
+    "venue": "",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "core_topic",
+    "_relevance_score": 100.0
+  },
+  {
+    "paperId": "10.1145/2508363.2508400",
+    "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+    "year": 2013,
+    "authors": [
+      {
+        "name": "M. W. Tao"
+      },
+      {
+        "name": "S. Hadap"
+      },
+      {
+        "name": "J. Malik"
+      },
+      {
+        "name": "R. Ramamoorthi"
+      }
+    ],
+    "venue": "ACM TOG",
+    "abstract": "",
+    "citationCount": 300,
+    "doi": "10.1145/2508363.2508400",
+    "externalIds": {
+      "DOI": "10.1145/2508363.2508400"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 90.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "",
+    "title": "A Survey on Deep Learning for Monocular Depth Estimation",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "R. M. H. Nguyen"
+      },
+      {
+        "name": "M. Shah"
+      },
+      {
+        "name": "A. G. Schwing"
+      }
+    ],
+    "venue": "IEEE TPAMI",
+    "abstract": "",
+    "citationCount": 300,
+    "doi": "",
+    "externalIds": {},
+    "group": "computer_vision_foundations",
+    "_relevance_score": 90.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "github - qengineering/rpi-image: raspberry pi 4 buster 64-bit os with deep learning examples · github",
+    "title": "GitHub - Qengineering/RPi-image: Raspberry Pi 4 Buster 64-bit OS with deep learning examples · GitHub",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Code Open"
+      },
+      {
+        "name": "Name Name Last"
+      },
+      {
+        "name": "Raspberry Pi"
+      },
+      {
+        "name": "Use Pi"
+      },
+      {
+        "name": "Byte Updated"
+      }
+    ],
+    "venue": "",
+    "abstract": "Qengineering/RPi-image   main Go to file Code Open more actions menu Folders and files Name Name Last commit message Last commit date Latest commit   History 37 Commits 37 Commits LICENSE LICENSE     README.md README.md     View all files Repository files navigation Raspberry Pi 4 Buster DNN image N",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+    "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Navigation Menu Toggle"
+      },
+      {
+        "name": "Open Source"
+      },
+      {
+        "name": "Cancel Submit"
+      },
+      {
+        "name": "Cancel Create"
+      }
+    ],
+    "venue": "",
+    "abstract": "Navigation Menu Toggle navigation Appearance settings Platform APPLICATION SECURITY Solutions BY COMPANY SIZE Resources EXPLORE BY TOPIC SUPPORT & SERVICES Open Source COMMUNITY REPOSITORIES Enterprise ENTERPRISE SOLUTIONS AVAILABLE ADD-ONS Search or jump to... Provide feedback Cancel Submit feedbac",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "bienvenue sur diag34.fr, le diagnostic immobilier sur l'herault et environs",
+    "title": "Bienvenue sur Diag34.fr, le diagnostic immobilier sur l'Herault et environs",
+    "year": 2026,
+    "authors": [
+      {
+        "name": "Loi Carrez"
+      }
+    ],
+    "venue": "",
+    "abstract": "La société Diag34 est un réseau départemental de cabinets d’experts immobiliers, spécialisé dans la recherche des parasites du bois (termites, capricornes…), de matériaux tels que l’amiante ou le plomb, ainsi que dans les relevés de surfaces (Loi Carrez, surface habitable….). Le marché de l’expertis",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "github - pilot34/svwebviewcontroller: a drop-in inline browser for your ios app.",
+    "title": "GitHub - pilot34/SVWebViewController: A drop-in inline browser for your iOS app.",
+    "year": 2014,
+    "authors": [
+      {
+        "name": "Navigation Menu Toggle"
+      },
+      {
+        "name": "Platform Solutions Resources Search"
+      },
+      {
+        "name": "Cancel Submit"
+      },
+      {
+        "name": "Cancel Create"
+      }
+    ],
+    "venue": "",
+    "abstract": "Navigation Menu Toggle navigation Appearance settings Platform Solutions Resources Search or jump to... Cancel Submit feedback Saved searches Use saved searches to filter your results more quickly Cancel Create saved search Appearance settings Resetting focus You signed in with another tab or window",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "[epel-devel] re: what happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - fedora mailing-lists",
+    "title": "[EPEL-devel] Re: What happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - Fedora mailing-lists",
+    "year": 2019,
+    "authors": [
+      {
+        "name": "Fred Gleason"
+      }
+    ],
+    "venue": "",
+    "abstract": "[EPEL-devel] Re: What happened to the 'python34-pycurl' and 'python34-mysql' packages? 2 May '19 1:26 p.m. On 5/2/19 10:10 AM, Fred Gleason wrote: Can you please refile that as two bugs? On python3-pycurl andpython3-mysql? The python34 component is only for python34 itself, you will need togetthose ",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "detect exisiting pipeline configuration for same operation but different data level · issue #34 · viadee/bpmn.ai · github",
+    "title": "Detect exisiting pipeline configuration for same operation but different data level · Issue #34 · viadee/bpmn.ai · GitHub",
+    "year": 2019,
+    "authors": [
+      {
+        "name": "Open Open Detect"
+      },
+      {
+        "name": "Description Issue"
+      },
+      {
+        "name": "Metadata Metadata Assignees No"
+      },
+      {
+        "name": "Labels No"
+      },
+      {
+        "name": "Type No"
+      }
+    ],
+    "venue": "",
+    "abstract": "  #34 Open Open Detect exisiting pipeline configuration for same operation but different data level #34 Copy link Description Issue body actions and stop processing with a message as this leads to an error in the processing (for CSV and KafkaProcessing application) Metadata Metadata Assignees No one",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · pull request #94 · burtek/eslint-config · github",
+    "title": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · Pull Request #94 · burtek/eslint-config · GitHub",
+    "year": 2024,
+    "authors": [
+      {
+        "name": "Merged Uh"
+      },
+      {
+        "name": "Commits Select"
+      }
+    ],
+    "venue": "",
+    "abstract": "New issue Have a question about this project? Sign up for a free GitHub account to open an issue and contact its maintainers and the community. . We’ll occasionally send you account related emails. Already on GitHub? Sign in to your account Merged Uh oh! There was an error while loading. Please re",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+    "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+    "year": 2025,
+    "authors": [
+      {
+        "name": "Company Name"
+      },
+      {
+        "name": "Alfa Aesar Tel"
+      },
+      {
+        "name": "Company Name"
+      },
+      {
+        "name": "Shijiazhuang Sdyano Fine Chemical Co"
+      },
+      {
+        "name": "Company Name"
+      }
+    ],
+    "venue": "",
+    "abstract": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane Suppliers list Company Name: Alfa Aesar Tel: 400-6106006 Email: saleschina@alfa-asia.com Company Name: Shijiazhuang Sdyano Fine Chemical Co., Ltd. Tel: 0311-89250318 031166536426 Email: ",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "3,4-dihydroxybenzoate catabolic process antibodies  invitrogen",
+    "title": "3,4-dihydroxybenzoate catabolic process Antibodies  Invitrogen",
+    "year": 2026,
+    "authors": [
+      {
+        "name": "Disclaimer Clicking"
+      },
+      {
+        "name": "Thermo Fisher Scientific"
+      },
+      {
+        "name": "Primary Antibodies Recent"
+      }
+    ],
+    "venue": "赛默飞世尔科技",
+    "abstract": "筛选 Disclaimer Clicking the images or links will redirect you to a website hosted by BenchSci that provides third-party scientific content. Neither the content nor the BenchSci technology and processes for selection have been evaluated by us; we are providing them as-is and without warranty of any ki",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "baselines",
+    "_relevance_score": 90.0
+  },
+  {
+    "paperId": "10.1109/TCSVT.2018.2797131",
+    "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+    "year": 2018,
+    "authors": [
+      {
+        "name": "Stefan Heber"
+      },
+      {
+        "name": "Thomas Pock"
+      }
+    ],
+    "venue": "IEEE TCSVT",
+    "abstract": "",
+    "citationCount": 280,
+    "doi": "10.1109/TCSVT.2018.2797131",
+    "externalIds": {
+      "DOI": "10.1109/TCSVT.2018.2797131"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 84.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/lgrs.2021.3063379",
+    "title": "Lambertian Model-Based Normal Guided Depth Completion for LiDAR-Camera System",
+    "year": 2022,
+    "authors": [],
+    "venue": "IEEE Geoscience and Remote Sensing Letters",
+    "abstract": "Depth completion is an essential task for the dense scene reconstruction on light detection and ranging (LiDAR)-camera system. Learning-based method achieves precise depth completion results on specific data sets. However, for the general outdoor scenes with insufficient labeled data sets, an effici",
+    "citationCount": 8,
+    "doi": "10.1109/lgrs.2021.3063379",
+    "externalIds": {
+      "DOI": "10.1109/lgrs.2021.3063379"
+    },
+    "group": "datasets",
+    "_relevance_score": 82.4
+  },
+  {
+    "paperId": "10.48550/arxiv.2303.01480",
+    "title": "Delivering Arbitrary-Modal Semantic Segmentation",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Jiaming Zhang"
+      },
+      {
+        "name": "Ruiping Liu"
+      },
+      {
+        "name": "Hao Shi"
+      },
+      {
+        "name": "Kailun Yang"
+      },
+      {
+        "name": "Simon Reiß"
+      },
+      {
+        "name": "Kunyu Peng"
+      },
+      {
+        "name": "Haodong Fu"
+      },
+      {
+        "name": "Kaiwei Wang"
+      },
+      {
+        "name": "Rainer Stiefelhagen"
+      }
+    ],
+    "venue": "arXiv (Cornell University)",
+    "abstract": "Multimodal fusion can make semantic segmentation more robust. However, fusing an arbitrary number of modalities remains underexplored. To delve into this problem, we create the DeLiVER arbitrary-modal segmentation benchmark, covering Depth, LiDAR, multiple Views, Events, and RGB. Aside from this, we",
+    "citationCount": 5,
+    "doi": "10.48550/arxiv.2303.01480",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.2303.01480"
+    },
+    "group": "datasets",
+    "_relevance_score": 81.5
+  },
+  {
+    "paperId": "10.1049/cvi2.12321",
+    "title": "A comprehensive research on light field imaging: Theory and application",
+    "year": 2024,
+    "authors": [
+      {
+        "name": "Fei Liu"
+      },
+      {
+        "name": "Yunlong Wang"
+      },
+      {
+        "name": "Qing Yang"
+      },
+      {
+        "name": "Shubo Zhou"
+      },
+      {
+        "name": "Kunbo Zhang"
+      }
+    ],
+    "venue": "IET Computer Vision",
+    "abstract": "Abstract Computational photography is a combination of novel optical designs and processing methods to capture high‐dimensional visual information. As an emerged promising technique, light field (LF) imaging measures the lighting, reflectance, focus, geometry and viewpoint in the free space, which h",
+    "citationCount": 4,
+    "doi": "10.1049/cvi2.12321",
+    "externalIds": {
+      "DOI": "10.1049/cvi2.12321"
+    },
+    "group": "datasets",
+    "_relevance_score": 81.2
+  },
+  {
+    "paperId": "10.1109/cvprw59228.2023.00346",
+    "title": "EPI-Guided Cost Construction Network for Light Field Disparity Estimation",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Tun Wang"
+      },
+      {
+        "name": "Rongshan Chen"
+      },
+      {
+        "name": "Ruixuan Cong"
+      },
+      {
+        "name": "Da Yang"
+      },
+      {
+        "name": "Zhenglong Cui"
+      },
+      {
+        "name": "Fangping Li"
+      },
+      {
+        "name": "Hao Sheng"
+      }
+    ],
+    "venue": "",
+    "abstract": "Recent learning-based light field (LF) disparity estimation methods construct cost volume by sequentially shifting each sub-aperture image (SAI) with a series of predefined offsets. They only use the visual information of SAIs and lose the geometry of LF. In this paper, we design a simple network th",
+    "citationCount": 4,
+    "doi": "10.1109/cvprw59228.2023.00346",
+    "externalIds": {
+      "DOI": "10.1109/cvprw59228.2023.00346"
+    },
+    "group": "datasets",
+    "_relevance_score": 81.2
+  },
+  {
+    "paperId": "10.34133/research.0328",
+    "title": "Masked Generative Light Field Prompting for Pixel-Level Structure Segmentations",
+    "year": 2024,
+    "authors": [
+      {
+        "name": "Mianzhao Wang"
+      },
+      {
+        "name": "Fan Shi"
+      },
+      {
+        "name": "Cheng Xu"
+      },
+      {
+        "name": "Shengyong Chen"
+      }
+    ],
+    "venue": "Research",
+    "abstract": "Pixel-level structure segmentations have attracted considerable attention, playing a crucial role in autonomous driving within the metaverse and enhancing comprehension in light field-based machine vision. However, current light field modeling methods fail to integrate appearance and geometric struc",
+    "citationCount": 3,
+    "doi": "10.34133/research.0328",
+    "externalIds": {
+      "DOI": "10.34133/research.0328"
+    },
+    "group": "datasets",
+    "_relevance_score": 80.9
+  },
+  {
+    "paperId": "10.48550/arxiv.2307.15588",
+    "title": "OAFuser: Towards Omni-Aperture Fusion for Light Field Semantic Segmentation",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Fei Teng"
+      },
+      {
+        "name": "Jiaming Zhang"
+      },
+      {
+        "name": "Kunyu Peng"
+      },
+      {
+        "name": "Yaonan Wang"
+      },
+      {
+        "name": "Rainer Stiefelhagen"
+      },
+      {
+        "name": "Kailun Yang"
+      }
+    ],
+    "venue": "arXiv (Cornell University)",
+    "abstract": "Light field cameras are capable of capturing intricate angular and spatial details. This allows for acquiring complex light patterns and details from multiple angles, significantly enhancing the precision of image semantic segmentation. However, two significant issues arise: (1) The extensive angula",
+    "citationCount": 1,
+    "doi": "10.48550/arxiv.2307.15588",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.2307.15588"
+    },
+    "group": "datasets",
+    "_relevance_score": 80.3
+  },
+  {
+    "paperId": "10.48550/arxiv.2208.09688",
+    "title": "Learning Sub-Pixel Disparity Distribution for Light Field Depth Estimation",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Wentao Chao"
+      },
+      {
+        "name": "Xuechun Wang"
+      },
+      {
+        "name": "Yingqian Wang"
+      },
+      {
+        "name": "Wang, Guanghui"
+      },
+      {
+        "name": "Fuqing Duan"
+      }
+    ],
+    "venue": "arXiv (Cornell University)",
+    "abstract": "Light field (LF) depth estimation plays a crucial role in many LF-based applications. Existing LF depth estimation methods consider depth estimation as a regression problem, where a pixel-wise L1 loss is employed to supervise the training process. However, the disparity map is only a sub-space proje",
+    "citationCount": 1,
+    "doi": "10.48550/arxiv.2208.09688",
+    "externalIds": {
+      "DOI": "10.48550/arxiv.2208.09688"
+    },
+    "group": "datasets",
+    "_relevance_score": 80.3
+  },
+  {
+    "paperId": "超融合基础设施(hci)-超融合架构-华为企业业务",
+    "title": "超融合基础设施(HCI)-超融合架构-华为企业业务",
+    "year": 2026,
+    "authors": [
+      {
+        "name": "Latin America Middle East Asia Pacific Kazakhstan"
+      }
+    ],
+    "venue": "",
+    "abstract": "企业业务网站 选择区域/语言 企业业务网站 企业商用产品、解决方案和云服务 Latin America Middle East Asia Pacific Kazakhstan - русский Thailand - ไทย Europe 热线电话:400-822-9999 引领新一代超融合基础设施 概述 概述 特性 产品 场景化解决方案 成功案例 相关资源 为什么选择超融合 随着数字化经济的深入发展,众多企业更多将重心逐步转向创新敏捷型业务,业务起步时与成熟高峰期业务量差值极大,IT基础设施往往难以一步到位,轻量起步、敏捷弹性成为创新型企业部署IT基础设施的关键需求。 越来越多的数据在分",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "github - humancomputerinteractionhomework/hcinew · github",
+    "title": "GitHub - HumanComputerInteractionHomework/HCINew · GitHub",
+    "year": 2026,
+    "authors": [
+      {
+        "name": "Navigation Menu Toggle"
+      },
+      {
+        "name": "Cancel Submit"
+      },
+      {
+        "name": "Cancel Create"
+      }
+    ],
+    "venue": "",
+    "abstract": "Navigation Menu Toggle navigation Appearance settings Search or jump to... Cancel Submit feedback Saved searches Use saved searches to filter your results more quickly Cancel Create saved search Appearance settings Resetting focus You signed in with another tab or window. Reload to refresh your sess",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "超融合基础架构(hci)是继服务器虚拟化技... 来自donnie大雄 - 微博",
+    "title": "超融合基础架构(HCI)是继服务器虚拟化技... 来自Donnie大雄 - 微博",
+    "year": 2020,
+    "authors": [],
+    "venue": "微博",
+    "abstract": "超融合基础架构(HCI)是继服务器虚拟化技术之后的一次重大IT技术革新,其特点是通过分布式存储技术将各个计算节点(Hypervisor)的存储资源整合为一个统一的存储资源池,给虚拟化平台提供存储服务,实现计算、存储、网络、虚拟化的统一管理和资源的横向扩展,保障用户业务的高可用。在超融合基础架构中,虚拟化是基础,而分布式存储则是超融合的技术核心。从架构而言,HCI的分布式存储通常有两种方式来支持虚拟化,一种是以Nutanix NGFS为代表的采用控制虚拟机方式支持Hypervisor,如图一;另一种是直接在Hypervisor中集成分布式存储功能,如VSAN。业界除了VSAN外,其它HCI全部采",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "什么是【人机交互】? 以cmu的hci项目为例_南京新东方前途出国的博客-新东方前途出国",
+    "title": "什么是【人机交互】? 以CMU的HCI项目为例_南京新东方前途出国的博客-新东方前途出国",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Computer Interaction"
+      },
+      {
+        "name": "Centered Interaction Design"
+      }
+    ],
+    "venue": "新东方前途出国",
+    "abstract": "发布者: 南京新东方前途出国 分类: 历史文化 2021-06-21 786 浏览 什么是 HCI? 今天给大家介绍一个未来可能在互联网领域会大火的专业 --- 「人机交互」,英文是:Human–Computer Interaction (缩写:HCI ) 人机交互,顾名思义,就是人和计算机的互动。 这是一门研究「系统」与「用户」之间的交互关系的学问。 交互系统的设计应该符合人的需求,即用户中心设计思想(User-Centered Interaction Design)。 HCI的主要目的,是学习和了解人,了解用户,预测他们为什么要和机器进行互动。接着 根据收集到的",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "捷通华声hci技术开创一片新天地_服务器_解决方案技术新知-中关村在线",
+    "title": "捷通华声HCI技术开创一片新天地_服务器_解决方案技术新知-中关村在线",
+    "year": 2011,
+    "authors": [
+      {
+        "name": "Computer Interaction"
+      }
+    ],
+    "venue": "ZOL中关村在线",
+    "abstract": "捷通华声具有人机交互技术(Human-Computer Interaction,简写HCI)特性的产品足迹遍及各个领域,大到车站、机场、银行,小到学习机、智能手机,捷通华声清晰、自然、流畅的语音合成声音,保证着各个行业高品质的服务;捷通华声的另一项核心技术手写识别产品,同样获得了市场普遍的欢迎,现已全面应用在多个领域中,并开始融入到移动互联网之中,它已成为人们手边可最直接体验人机交互技术的产品之一。手写识别,是指将在手写设备上书写时产生的有序轨迹信息化转化为汉字内码的过程,实际上是手写轨迹的坐标序列到汉字的内码的一个映射过程,是人机交互最自然、最方便的手段之一。现在很多嵌入式电子设备设计特点均",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "hci-04-newdisplay 显示技术新进展_百度文库",
+    "title": "HCI-04-NewDisplay 显示技术新进展_百度文库",
+    "year": 2013,
+    "authors": [
+      {
+        "name": "Volume Display"
+      },
+      {
+        "name": "Light Loss Due"
+      },
+      {
+        "name": "Polarized Filtered"
+      },
+      {
+        "name": "Silver Screen"
+      },
+      {
+        "name": "Get Full Colors"
+      }
+    ],
+    "venue": "百度文库",
+    "abstract": "固态体显示 (Solid-Volume Display) • 早期的固态体显示技术 – 如solidFELIX,主要采用一整块立方体水晶作为显示 介质,在水晶中掺杂了稀土元素,当两束相干红外线 激光在水晶内部的某空间点处相交时,它们将激发该 点发光,目前这套系统仍处于实验室阶段。 • 而DepthCube系统 • 缺点 – 低帧率的闪烁 Flicker – 眼镜昂贵且重 – Light Loss Due to Glasses 基于偏振技术的立体显示 Polarized Filtered • 系统组件 – 双投影仪Dual-projectors – 偏振滤光器Polarized filter –",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "美国hci专业是什么? - 考而思在线",
+    "title": "美国HCI专业是什么? - 考而思在线",
+    "year": 2022,
+    "authors": [],
+    "venue": "",
+    "abstract": "2022-03-08 16:21:43 来源:考而思在线 阅读量:580 摘要 美国HCI专业是什么——时下计算机学科中热门方向美国HCI专业是当下最时兴的人机交互专业,也是技术含量要求高的学科项目,在美国设置人机交互的专业学院一般都开设在计算机科学学院,好的人机交互专业院校,就有大家熟悉的CMU计算机牛校。一)美国HCI项目分为艺术类的方面和技术类的方面:1.艺术类一般放在平面设计里,比如说网页设计/媒体设计/交互设计。以网页设计为例,会研究不同的颜色对于浏览者的阅读体验影 美国HCI专业是什么——时下计算机学科中热门方向 美国HCI专业是当下最时兴的人机交互专业,也是技术含量要",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "一篇文章了解人机交互(hci)_马克笔设计留学-站酷zcool",
+    "title": "一篇文章了解人机交互(HCI)_马克笔设计留学-站酷ZCOOL",
+    "year": 2020,
+    "authors": [],
+    "venue": "站酷",
+    "abstract": "首先,让我们明确人机交互(HCI)到底是什么? 人机交互(HCI)是一个多学科的实践,注重于用户(人)和计算机之间的交互以及计算机交互界面的设计。最初,HCI关注的主要对象是计算机,但自20世纪70年代末个人计算机出现后,HCI扩展到几乎所有的信息技术设计变体中。研究人员意识到,他们必须将与计算机的交互扩展到每个人,而不仅仅是信息技术专业人员。HCI主要研究人们如何与计算机交互,以及用户能够在多大程度上与计算机交互。其目标是在计算机和用户之间建立一个成功的交互,并观察哪些领域仍然需要更多的开发。HCI由三个部分组成:用户、计算机以及两者协同工作的方式。 HCI的目标是什么? 简单地说,HCI的",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "超融合基础架构(hci):低成本改变数据中心 - freebuf网络安全行业门户",
+    "title": "超融合基础架构(HCI):低成本改变数据中心 - FreeBuf网络安全行业门户",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Hyperconverged Infrastructure"
+      }
+    ],
+    "venue": "",
+    "abstract": "2022-06-12 15:44:00 每年都会发生大量的技术改革和升级,以简化个人和企业的工作及生活方式。有时,大规模的变化也会影响数据处理中心。 如果说10多年前,数据中心管理人员使用的是大家都熟悉的传统基础架构,那么近年来,这方面可谓发生了巨大的变化。这些变化包括兼顾速度和可用性的 软件定义网络 (software-defined network,SDN), 新型分布式信息技术架构边缘计算 (edge computing), 第五代移动通信 以及 人工智能 等等。 这些技术方面的变化同时也 意味着数据中心运营方式的重大转变 。然而,最重要的是,需要有资质的专家来使用这些技术,这意味着",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "research on syn flood attack defense method based on statistical characteristics",
+    "title": "Research on SYN Flood Attack Defense Method Based on Statistical Characteristics",
+    "year": 2009,
+    "authors": [],
+    "venue": "Southwest Jiaotong University",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "10.1007/978-981-99-8537-1_2",
+    "title": "ContextNet: Learning Context Information for Texture-Less Light Field Depth Estimation",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Wentao Chao"
+      },
+      {
+        "name": "Xuechun Wang"
+      },
+      {
+        "name": "Yiming Kan"
+      },
+      {
+        "name": "Fuqing Duan"
+      }
+    ],
+    "venue": "Lecture notes in computer science",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "10.1007/978-981-99-8537-1_2",
+    "externalIds": {
+      "DOI": "10.1007/978-981-99-8537-1_2"
+    },
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "leveraging spatial and photometric context for calibrated non-lambertian photometric stereo",
+    "title": "Leveraging Spatial and Photometric Context for Calibrated Non-Lambertian Photometric Stereo",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "David Honzátko"
+      }
+    ],
+    "venue": "IEEE International Conference on 3D Vision (3DV)",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "datasets",
+    "_relevance_score": 80.0
+  },
+  {
+    "paperId": "10.1109/cvpr52733.2024.01869",
+    "title": "Masked Spatial Propagation Network for Sparsity-Adaptive Depth Refinement",
+    "year": 2024,
+    "authors": [],
+    "venue": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+    "abstract": "The main function of depth completion is to compensate for an insufficient and unpredictable number of sparse depth measurements of hardware sensors. However, existing research on depth completion assumes that the sparsity - the number of points or LiDAR lines - is fixed for training and testing. He",
+    "citationCount": 4,
+    "doi": "10.1109/cvpr52733.2024.01869",
+    "externalIds": {
+      "DOI": "10.1109/cvpr52733.2024.01869"
+    },
+    "group": "methods",
+    "_relevance_score": 71.2
+  },
+  {
+    "paperId": "10.1007/978-3-031-91838-4_1",
+    "title": "LFdiff: Diffusion-based Light Field Synthesis",
+    "year": 2024,
+    "authors": [],
+    "venue": "Lecture notes in computer science",
+    "abstract": "",
+    "citationCount": 3,
+    "doi": "10.1007/978-3-031-91838-4_1",
+    "externalIds": {
+      "DOI": "10.1007/978-3-031-91838-4_1"
+    },
+    "group": "methods",
+    "_relevance_score": 70.9
+  },
+  {
+    "paperId": "uniblendnet: unified global, multi-scale, and region-adaptive modeling for ambient lighting normalization",
+    "title": "UniBlendNet: Unified Global, Multi-Scale, and Region-Adaptive Modeling for Ambient Lighting Normalization",
+    "year": 2026,
+    "authors": [],
+    "venue": "",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "32790593的博客（发布时间：2018-11-26 15:21:17）",
+    "title": "32790593的博客（发布时间：2018-11-26 15:21:17）",
+    "year": 2018,
+    "authors": [],
+    "venue": "CSDN博客",
+    "abstract": "对其采用db5 小波，进行3 层分解。分解树如下图：所示，左边为三层分解树，右边为点击相应节点得到的分解系数，图示为原始信号（节点（0，0））。根据信号的采样频率即可得每一个分解节点的频带范围，例如假设本里中数据的采样频率为1024Hz，则奈奎斯特频率为512 Hz。则进行三层分解时，共分为2^3 = 8 个频带，每个频带的带宽为512/8 = 64Hz。因此节点（3，0）的频带范围为0~64 Hz，节点（3.1） 的频带范围为65~128 Hz\n分解后每个节点的小波包系数如图所示:\n由此可见，原信号的主要能量集中在前两个频带内，即0~64Hz 和65~128 Hz 内。（观看信号的幅度）\n2",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "高效便捷的信号处理工具（发布时间：2025-05-06 14:44:21）",
+    "title": "高效便捷的信号处理工具（发布时间：2025-05-06 14:44:21）",
+    "year": 2025,
+    "authors": [],
+    "venue": "CSDN博客",
+    "abstract": "小波包分解程序 - 高效便捷的信号处理工具\n【下载地址】小波包分解程序-高效便捷的信号处理工具 小波包分解程序是一款高效便捷的信号处理工具，专为信号处理领域的研究人员和爱好者设计。该程序支持用户自定义数字信号，并进行三层小波包分解，满足多种研究需求。其界面友好，操作简单，即使是初学者也能轻松上手。无论您是进行专业研究还是个人实验，这款程序都能为您提供强大的支持，助您快速完成信号分解任务，提升实验效率。欢迎体验，开启您的信号处理探索之旅！\n项目地址: https://gitcode.com/Premium-Resources/b1f14\n介绍\n欢迎使用小波包分解程序！这是一个实用且高效的工具，能",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "一维信号的小波变换实现与db小波分解（发布时间：2022-07-15 02:16:04）",
+    "title": "一维信号的小波变换实现与DB小波分解（发布时间：2022-07-15 02:16:04）",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Ingrid Daubechies"
+      }
+    ],
+    "venue": "",
+    "abstract": "该程序专注于对一维信号进行三层塔式分解，利用DB小波（Daubechies小波）作为基函数。离散小波变换是信号处理和数据分析中常用的一种技术，它可以将信号分解为不同尺度上的系数，便于进行后续的信号分析和特征提取。\" 知识点详细说明: 1. 一维信号离散小波变换（DWT）: 一维离散小波变换是小波变换的一个分支，专门用于处理一维数据序列。在许多信号处理应用中，如图像压缩、噪声去除、特征提取等，DWT都扮演着重要角色。一维DWT的核心思想是将信号分解为一系列小波系数，这些系数表示了信号在不同尺度和位置的局部特征。 2. 小波与小波系数: 小波是一类函数，它们的积分为零，并且具有快速衰减的特性。在D",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "基于matlab的小波包分解与信号处理实战项目（发布时间：2025-09-12 16:49:40）",
+    "title": "基于MATLAB的小波包分解与信号处理实战项目（发布时间：2025-09-12 16:49:40）",
+    "year": 2025,
+    "authors": [],
+    "venue": "CSDN博客",
+    "abstract": "本文还有配套的精品资源，点击获取\n简介：小波包分析是信号处理中的重要工具，结合小波与频谱分析优势，实现对信号的多尺度、多分辨率分析。本项目基于MATLAB平台，使用db5小波基进行三层小波包分解，通过构建小波包树并选择最优节点，实现对复杂信号的精细化分析与重构。适用于声音处理、图像分析、故障诊断及金融数据建模等实际应用场景，帮助开发者深入理解小波包分解全过程并掌握其工程化实现。\n1. 小波包分析概述\n小波包分析是一种基于小波变换的扩展方法，它通过将信号在多个频带中进行更精细的分解，提升了对信号局部特征的刻画能力。与传统的小波变换相比，小波包分析不仅保留了多分辨率分析的优点，还能对高频部分进行进",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "小波包三层分解在matlab中的实现与db5基函数应用（发布时间：2021-09-29 12:04:25）",
+    "title": "小波包三层分解在MATLAB中的实现与db5基函数应用（发布时间：2021-09-29 12:04:25）",
+    "year": 2021,
+    "authors": [],
+    "venue": "",
+    "abstract": "小波包和小波包分解是现代信号处理中的重要概念和工具，尤其在处理非平稳信号方面表现出色。小波包分解可以看作是小波分解的一种扩展，它允许对信号的高频部分进行更细致的分解。而MATLAB作为一款广泛使用的数学计算和工程仿真软件，提供了强大的小波分析工具箱，使得研究人员和工程师能够轻松地实现小波包分解和重构。 在本文件中，涉及到小波包的使用和小波包分解程序的具体实施，特别是使用了小波基函数db5（Daubechies小波中的五阶小波）进行三层分解。Daubechies小波是一种紧支撑的小波，广泛用于信号和图像处理中，因其良好的局部化特性而备受关注。db5作为其家族成员之一，在保持信号特征的同时，尽可能",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "10.1049/cit2.70093",
+    "title": "A Bridge Transformer Network with Deep Graph Convolution for Hyperspectral Image Classification",
+    "year": 2024,
+    "authors": [
+      {
+        "name": "Yushan Pan"
+      }
+    ],
+    "venue": "CAAI Transactions on Intelligence Technology",
+    "abstract": "ABSTRACT Transformers have been widely applied to hyperspectral image classification, leveraging their self‐attention mechanism for powerful global modelling. However, two key challenges remain as follows: excessive memory and computational costs from calculating correlations between all tokens (esp",
+    "citationCount": 0,
+    "doi": "10.1049/cit2.70093",
+    "externalIds": {
+      "DOI": "10.1049/cit2.70093"
+    },
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "lane change decision combination model for intelligent connected vehicles under multi-communication range",
+    "title": "Lane Change Decision Combination Model for Intelligent Connected Vehicles under Multi-Communication Range",
+    "year": null,
+    "authors": [
+      {
+        "name": "Jiandong Zhao"
+      },
+      {
+        "name": "Xiaoyu He"
+      }
+    ],
+    "venue": "",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "beit: bert pre-training of image transformers",
+    "title": "BEiT: BERT Pre-Training of Image Transformers",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Hangbo Bao"
+      },
+      {
+        "name": "Li Dong"
+      },
+      {
+        "name": "Furu Wei"
+      }
+    ],
+    "venue": "International Conference on Learning Representations",
+    "abstract": "",
+    "citationCount": 0,
+    "doi": "",
+    "externalIds": {},
+    "group": "methods",
+    "_relevance_score": 70.0
+  },
+  {
+    "paperId": "10.1109/TPAMI.2017.2673001",
+    "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+    "year": 2017,
+    "authors": [
+      {
+        "name": "Chen Chen"
+      },
+      {
+        "name": "Haiping Lin"
+      },
+      {
+        "name": "Zhan Yu"
+      },
+      {
+        "name": "Sing Bing Kang"
+      },
+      {
+        "name": "Jingyi Yu"
+      }
+    ],
+    "venue": "IEEE TPAMI",
+    "abstract": "",
+    "citationCount": 230,
+    "doi": "10.1109/TPAMI.2017.2673001",
+    "externalIds": {
+      "DOI": "10.1109/TPAMI.2017.2673001"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 69.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/ICCV.2015.27",
+    "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+    "year": 2015,
+    "authors": [
+      {
+        "name": "T. C. Wang"
+      },
+      {
+        "name": "A. Efros"
+      },
+      {
+        "name": "R. Ramamoorthi"
+      }
+    ],
+    "venue": "ICCV",
+    "abstract": "",
+    "citationCount": 190,
+    "doi": "10.1109/ICCV.2015.27",
+    "externalIds": {
+      "DOI": "10.1109/ICCV.2015.27"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 57.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "",
+    "title": "Measurement-Based Modeling and Rendering of Complex Materials",
+    "year": 2003,
+    "authors": [
+      {
+        "name": "H. P. A. Lensch"
+      },
+      {
+        "name": "M. Magnor"
+      },
+      {
+        "name": "H. Seidel"
+      }
+    ],
+    "venue": "EGWR",
+    "abstract": "",
+    "citationCount": 180,
+    "doi": "",
+    "externalIds": {},
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 54.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1007/s11263-010-0369-2",
+    "title": "A Theory of Plenoptic Multiplexing",
+    "year": 2011,
+    "authors": [
+      {
+        "name": "A. Levin"
+      },
+      {
+        "name": "W. T. Freeman"
+      },
+      {
+        "name": "F. Durand"
+      }
+    ],
+    "venue": "IJCV",
+    "abstract": "",
+    "citationCount": 130,
+    "doi": "10.1007/s11263-010-0369-2",
+    "externalIds": {
+      "DOI": "10.1007/s11263-010-0369-2"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 39.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "",
+    "title": "Angular Domain Deep Learning for Light Field Depth Estimation",
+    "year": 2017,
+    "authors": [
+      {
+        "name": "K. Honauer"
+      },
+      {
+        "name": "O. Johannsen"
+      },
+      {
+        "name": "D. Kondermann"
+      },
+      {
+        "name": "B. Goldluecke"
+      }
+    ],
+    "venue": "CVPR",
+    "abstract": "",
+    "citationCount": 120,
+    "doi": "",
+    "externalIds": {},
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 36.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/CVPR.2017.292",
+    "title": "4D Light Field Superpixel and Segmentation",
+    "year": 2017,
+    "authors": [
+      {
+        "name": "M. Hog"
+      },
+      {
+        "name": "R. Keriven"
+      },
+      {
+        "name": "R. Sabater"
+      },
+      {
+        "name": "M. Bredif"
+      }
+    ],
+    "venue": "CVPR",
+    "abstract": "",
+    "citationCount": 85,
+    "doi": "10.1109/CVPR.2017.292",
+    "externalIds": {
+      "DOI": "10.1109/CVPR.2017.292"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 25.5,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/TPAMI.2023.3245283",
+    "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+    "year": 2023,
+    "authors": [
+      {
+        "name": "Yingqian Wang"
+      },
+      {
+        "name": "Jungang Yang"
+      },
+      {
+        "name": "Liang-Jian Deng"
+      },
+      {
+        "name": "Chao Xiao"
+      },
+      {
+        "name": "Xiao-Ping Zhang"
+      }
+    ],
+    "venue": "IEEE TPAMI",
+    "abstract": "",
+    "citationCount": 45,
+    "doi": "10.1109/TPAMI.2023.3245283",
+    "externalIds": {
+      "DOI": "10.1109/TPAMI.2023.3245283"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 13.5,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/TNNLS.2021.3089461",
+    "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "Y. Lyu"
+      },
+      {
+        "name": "Z. Wang"
+      },
+      {
+        "name": "J. Lu"
+      },
+      {
+        "name": "J. Jia"
+      }
+    ],
+    "venue": "IEEE TNNLS",
+    "abstract": "",
+    "citationCount": 42,
+    "doi": "10.1109/TNNLS.2021.3089461",
+    "externalIds": {
+      "DOI": "10.1109/TNNLS.2021.3089461"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 12.6,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/TCSVT.2021.3111069",
+    "title": "Learning the Depth of Light Field from a Single Image",
+    "year": 2022,
+    "authors": [
+      {
+        "name": "J. Peng"
+      },
+      {
+        "name": "Z. Xiong"
+      },
+      {
+        "name": "X. Huang"
+      },
+      {
+        "name": "Z. Ye"
+      },
+      {
+        "name": "D. Liu"
+      }
+    ],
+    "venue": "IEEE TCSVT",
+    "abstract": "",
+    "citationCount": 40,
+    "doi": "10.1109/TCSVT.2021.3111069",
+    "externalIds": {
+      "DOI": "10.1109/TCSVT.2021.3111069"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 12.0,
+    "_source": "reference_pack"
+  },
+  {
+    "paperId": "10.1109/TCSVT.2021.3074985",
+    "title": "Depth from Light Field with Non-Lambertian Scene",
+    "year": 2021,
+    "authors": [
+      {
+        "name": "Y. Li"
+      },
+      {
+        "name": "D. Wang"
+      },
+      {
+        "name": "J. Yu"
+      }
+    ],
+    "venue": "IEEE TCSVT",
+    "abstract": "",
+    "citationCount": 35,
+    "doi": "10.1109/TCSVT.2021.3074985",
+    "externalIds": {
+      "DOI": "10.1109/TCSVT.2021.3074985"
+    },
+    "group": "light_field_depth_estimation",
+    "_relevance_score": 10.5,
+    "_source": "reference_pack"
+  }
+]

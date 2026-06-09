@@ -1,0 +1,59 @@
+[
+  {
+    "创新点名称": "基于物理先验的三层角信号分解与几何材质分类模型",
+    "创新点工作内容": [
+      "提出三层角信号分解模型 I(u,v) = DC + a·u + b·v + ε(u,v)，将光场角信号在物理层面解耦为环境光照（DC项）、视差深度（线性项）和材质反射（残差项）。",
+      "摒弃在低分辨率离散角度采样下失效的频谱分析（如2D-DFT），转而提取角梯度（angular_gradient）、角相关性（correlation_coherence）等几何角特征来表征残差项。",
+      "构建基于随机森林（RF）的材质分类器，利用提取的5个几何特征实现朗伯体与非朗伯体表面的高精度二分类。"
+    ],
+    "创新点价值": "从物理和几何层面解耦了光场信号，解决了传统频谱方法在9×9离散角度采样下分辨率不足的问题。为非朗伯体表面的精准识别和后续深度估计提供了可靠的几何特征基础，奠定了统一物理模型的理论核心。",
+    "支撑证据": "Phase 1实验中RF分类器准确率达89.6%，AUC为0.962；角梯度特征的Cohen's d效应量达0.983；理论得到Wang 2017 (TPAMI) 角锥约束和Cui 2024 (TCSVT) 几何特征文献的严格验证与支撑。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于物理先验的三层角信号分解与几何材质分类模型",
+      "contribution_statement": "We propose a physics-prior based three-layer angular signal decomposition model to explicitly separate intrinsic geometry and material properties from light fields."
+    }
+  },
+  {
+    "创新点名称": "非朗伯体EPI失效的几何根因剖析与双分支自适应路由机制",
+    "创新点工作内容": [
+      "深入剖析EPI（极平面图像）方法在非朗伯体表面失效的物理根因，证实镜面和散射表面破坏了朗伯体角锥几何约束，在EPI中形成X型图案而非直线结构。",
+      "提出并验证双分支（Dual-branch）架构设计，利用双模态分布特征和X型几何图案作为路由依据，将朗伯体与非朗伯体区域分流至不同分支处理。",
+      "通过132次实验和16个研究方向的穷尽式探索，确立了“假设违反而非参数缺陷”的结论，指导网络架构从单一EPI向几何双分支（Dual-Mask）或非EPI方法演进。"
+    ],
+    "创新点价值": "明确了传统EPI方法的物理局限性边界，避免了在损失函数、学习率等参数层面的无效调参。为复杂光场场景下的网络架构设计提供了明确的理论指导，证明了基于几何特征的双分支路由是解决非朗伯体深度估计退化的有效范式。",
+    "支撑证据": "实验显示Mixed场景MAE为0.081，而Non-Lambertian场景MAE飙升至0.411（5倍性能退化），证实了物理假设失效；181个Dead Ends的实验记录证实了纯EPI调参的无效性；Cui 2024文献验证了X型图案和双分支路由的有效性。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "非朗伯体EPI失效的几何根因剖析与双分支自适应路由机制",
+      "contribution_statement": "We identify the geometric root causes of non-Lambertian EPI failures and resolve them by designing a dual-branch adaptive routing mechanism."
+    }
+  },
+  {
+    "创新点名称": "跨域光场分解特征的全局统计验证与多域平衡训练框架",
+    "创新点工作内容": [
+      "构建统一光场数据集加载器（Unified LF Dataset），支持4种GT格式，覆盖约230个场景的5大跨域数据集（Urban, Mixed, Lambertian, Non-Lambertian等）。",
+      "对三层分解提取的视差幅度 P(x,y) 和材质比例 M(x,y) 进行数据集级别的全局统计验证，计算每个场景的均值、标准差和中位数，并使用Cohen's d效应量评估特征跨域区分度。",
+      "结合WeightedRandomSampler实现多域平衡采样训练，配合Domain-balanced sampling策略，缓解非朗伯体数据稀缺带来的过拟合问题。"
+    ],
+    "创新点价值": "确保了理论分解模型和提取特征不仅在单一场景有效，而且具备跨数据集、跨域的强泛化能力。多域平衡训练框架有效提升了模型在数据分布不均情况下的整体鲁棒性，为统一光场深度估计模型的工程落地提供了可靠的数据和训练支撑。",
+    "支撑证据": "stage2_1_results.json 记录了230个场景的P和M统计计算结果及Cohen's d分析；Overall MAE达到0.133，Mixed (Urban) MAE达到0.081；datasets/unified_lf_dataset.py 和 WeightedRandomSampler 代码实现支撑了多域平衡训练的有效性。",
+    "novelty_score": 0.7,
+    "novelty_verdict": "partially_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "跨域光场分解特征的全局统计验证与多域平衡训练框架",
+      "contribution_statement": "We demonstrate the cross-domain effectiveness of our decomposed features through global statistical verification and a multi-domain balanced training framework."
+    }
+  }
+]

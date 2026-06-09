@@ -1,0 +1,57 @@
+{
+  "content_patterns": {
+    "Introduction": {
+      "opening_style": "application_scenario",
+      "contribution_format": "bulleted_list",
+      "contribution_count": 3,
+      "has_paper_structure_paragraph": false
+    },
+    "Related Work": {
+      "organization": "by_technique",
+      "critique_style": "end_of_group",
+      "comparison_depth": "moderate"
+    },
+    "Methodology": {
+      "starts_with": "overview",
+      "derivation_style": "moderate",
+      "has_algorithm_box": false,
+      "subsection_count": 4
+    },
+    "Experiments": {
+      "dataset_description": "mixed",
+      "ablation_style": "table",
+      "comparison_style": "table",
+      "has_failure_analysis": false
+    }
+  },
+  "argument_rhythm": {
+    "data_placement": "after_each_claim",
+    "figure_density": "high",
+    "citation_density": "high",
+    "paragraph_length": "medium(5-7)"
+  },
+  "depth_gradients": {
+    "Methodology": "key_formulas_only",
+    "Experiments": "comprehensive"
+  },
+  "figure_preferences": {
+    "architecture_style": "detailed_boxes",
+    "color_scheme": "colorful",
+    "annotation_level": "moderate",
+    "preferred_layout": "horizontal_flow"
+  },
+  "content_emphasis": {
+    "primary_focus": "experimental_validation",
+    "novelty_presentation": "explicit_claims"
+  },
+  "journal_red_flags": [
+    "Omitting computational complexity and efficiency analysis (e.g., FLOPs, latency, FPS, memory usage, hardware resource consumption)",
+    "Missing standard video-specific objective quality metrics (e.g., PSNR, SSIM, BD-rate, bitrate, mAP) in comparative studies",
+    "Purely theoretical or mathematical formulations without practical video, circuit, system, or hardware implementation considerations",
+    "Absence of ablation studies to justify the necessity of individual proposed architectural components or modules",
+    "Relying solely on image classification or non-video datasets to validate a general-purpose vision/video backbone without extensive validation on standard video datasets",
+    "Using overly dense or complex mathematical proofs for standard deep learning operations or simple architectural modifications",
+    "Failing to compare against recent state-of-the-art baselines (e.g., Transformers, GNNs) or relying solely on qualitative results without rigorous quantitative benchmarking",
+    "Overly long philosophical or historical introductions without a quick transition to the specific technical motivation and application scenario"
+  ]
+}

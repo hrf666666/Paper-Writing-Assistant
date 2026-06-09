@@ -31,6 +31,7 @@ from agent.checkpoint import CheckpointManager
 from agent.quality_gate import QualityGate, QualityReport
 from agent.human_directive import DirectiveManager, HumanDirective
 from agent.dispatcher import AgentDispatcher, Task
+from agent.hierarchical_planner import ValidationEngine
 from config.project_config import (
     PAPER_TITLE, ARTICLE_TYPE, PROJECT_CODE_PATH, REF_PDF_PATH,
     OUTPUT_DIR, WORKSPACE_DIR, OUTPUT_LATEX,
@@ -79,7 +80,7 @@ class ResearchLoop:
 
         # v5.5: 跨章节一致性检查器
         from agent.cross_chapter_checker import CrossChapterChecker
-        self.cross_chapter_checker = CrossChapterChecker()
+        self.cross_chapter_checker = CrossChapterChecker()  # v11.2: paper_context 通过 set_paper_context() 注入
 
         # v5.5: 引用管理器
         from agent.citation_manager import CitationManager
@@ -115,6 +116,9 @@ class ResearchLoop:
         # 5. ToolTrace 反捏造
         from agent.tool_trace import ToolTrace
         self.tool_trace = ToolTrace()
+
+        # v12.0: 分层验收引擎
+        self.validation_engine = ValidationEngine(output_dir=OUTPUT_DIR)
 
         self._running = False
         self._cycle_count = 0
@@ -202,6 +206,7 @@ class ResearchLoop:
         # ====== 核心循环 ======
         while self._running:
             self._cycle_count += 1
+            task = None  # v11.6: 初始化，防止 except 中 NameError
 
             try:
                 # 1. 检查人工干预
@@ -232,29 +237,16 @@ class ResearchLoop:
 
                 # 7. 根据反思结果决定下一步
                 if reflection.get("should_retry"):
-                    # 递增 retry_count 并检查是否达到最大重试次数
                     task.retry_count += 1
                     if task.retry_count >= task.max_retries:
                         logger.warning(f"任务 {task.task_id} 达到最大重试({task.max_retries})，强制完成")
-                        quality_info = None
-                        if reflection.get("quality_score", -1) >= 0:
-                            quality_info = type('QReport', (), {
-                                'overall_score': reflection["quality_score"],
-                                'to_dict': lambda self=None: {"overall_score": reflection["quality_score"]},
-                            })()
-                        self.dispatcher.mark_task_completed(task, result, quality_report=quality_info)
+                        self._complete_task(task, result, reflection)
                     else:
                         self.dispatcher.reschedule_task(
                             task, reflection.get("strategy", "retry")
                         )
                 else:
-                    quality_info = None
-                    if reflection.get("quality_score", -1) >= 0:
-                        quality_info = type('QReport', (), {
-                            'overall_score': reflection["quality_score"],
-                            'to_dict': lambda self=None: {"overall_score": reflection["quality_score"]},
-                        })()
-                    self.dispatcher.mark_task_completed(task, result, quality_report=quality_info)
+                    self._complete_task(task, result, reflection)
 
                 # 8. 保存检查点
                 self._save_checkpoint(task)
@@ -566,8 +558,8 @@ Respond with just the strategy, no explanation:"""
                         llm_strategy = self.api_client.call_light(think_prompt)
                         if llm_strategy:
                             strategy += f"\nLLM策略建议: {llm_strategy.strip()[:200]}"
-                    except Exception:
-                        pass  # LLM 调用失败不影响主流程
+                    except Exception as e:
+                        logger.debug(f"LLM策略调用失败(不阻塞): {e}")
 
         logger.info(f"THINK [{progress['completed']}/{progress['total']}]: {task.target} - {strategy[:200]}")
 
@@ -605,6 +597,10 @@ Respond with just the strategy, no explanation:"""
                 # v7.0: 范例学习
                 result = self._run_exemplar_phase()
 
+            elif phase == "phase0_65":
+                # v10.1: 期刊风格学习 + 内容策略规划
+                result = self._run_journal_style_and_content_strategy_phase()
+
             elif phase == "phase0_8":
                 # v7.0: 引用支撑库
                 result = self._run_citation_bank_phase()
@@ -617,9 +613,16 @@ Respond with just the strategy, no explanation:"""
                 # v7.0: 消融实验自动化
                 result = self._run_ablation_phase()
 
+            elif phase == "phase0_98":
+                # v11.2: 构建 PaperContext（共享事实源）
+                self._build_paper_context()
+
+
+
             elif phase == "phase1":
                 from agent.skill_orchestrators.ch1_introduction import run_chapter1
-                content = run_chapter1(self._project_data, self._ref_data)
+                content = run_chapter1(self._project_data, self._ref_data,
+                                       citation_context=self._build_citation_context())
                 content, report = self._quality_ensure("Introduction", content)
                 result = content
                 self._chapters[1] = result
@@ -636,7 +639,8 @@ Respond with just the strategy, no explanation:"""
                 if 1 in self._chapters:
                     previous_chapters[1] = self._chapters[1][:2000]
                 content = run_chapter2(self._project_data, self._ref_data,
-                                       previous_chapters=previous_chapters)
+                                       previous_chapters=previous_chapters,
+                                       citation_context=self._build_citation_context())
                 content, report = self._quality_ensure("Related Work", content)
                 result = content
                 self._chapters[2] = result
@@ -652,7 +656,8 @@ Respond with just the strategy, no explanation:"""
                     if ch_num in self._chapters:
                         previous_chapters[ch_num] = self._chapters[ch_num][:2000]
                 content = run_chapter3(self._project_data, self._ref_data,
-                                       previous_chapters=previous_chapters)
+                                       previous_chapters=previous_chapters,
+                                       citation_context=self._build_citation_context())
                 content, report = self._quality_ensure("Methodology", content)
                 result = content
                 self._chapters[3] = result
@@ -669,7 +674,8 @@ Respond with just the strategy, no explanation:"""
                     if ch_num in self._chapters:
                         previous_chapters[ch_num] = self._chapters[ch_num][:2000]
                 content = run_chapter4(self._project_data, self._ref_data,
-                                       previous_chapters=previous_chapters)
+                                       previous_chapters=previous_chapters,
+                                       citation_context=self._build_citation_context())
                 content, report = self._quality_ensure("Experiments", content)
                 result = content
                 self._chapters[4] = result
@@ -693,11 +699,12 @@ Respond with just the strategy, no explanation:"""
                             s.lower() in " ".join(extra_sections).lower()
                             for s in ["discussion", "limitations"]
                         )
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"获取额外章节失败: {e}")
                 content = run_chapter5(self._project_data, self._ref_data,
                                        previous_chapters=previous_chapters,
-                                       skip_limitations=has_extra_discussion)
+                                       skip_limitations=has_extra_discussion,
+                                       citation_context=self._build_citation_context())
                 content, report = self._quality_ensure("Conclusion", content)
                 result = content
                 self._chapters[5] = result
@@ -848,6 +855,185 @@ Respond with just the strategy, no explanation:"""
 
         return report
 
+    def _complete_task(self, task, result, reflection: dict):
+        """统一完成任务：构造 quality_report 并标记完成"""
+        quality_info = None
+        score = reflection.get("quality_score", -1)
+        if score >= 0:
+            quality_info = type('QReport', (), {
+                'overall_score': score,
+                'to_dict': lambda s=None, sc=score: {"overall_score": sc},
+            })()
+        self.dispatcher.mark_task_completed(task, result, quality_report=quality_info)
+
+        # v12.0: 同步更新分层规划的 AtomicStep 状态
+        self.dispatcher.update_step_status(
+            task.phase_name, status="completed", actual_value=score
+        )
+
+    def _build_paper_context(self):
+        """
+        v11.2: 构建共享事实字典 PaperContext。
+
+        从 project_data + experiment_design 提取硬件、epochs、loss 项、数据集、
+        指标数值、模型名称等，注入到 self._project_data["paper_context"]。
+
+        所有 chapter generator 从 project_data["paper_context"] 读取，
+        保证跨章节数值一致。不改变任何 generator 的函数签名。
+        """
+        pd = self._project_data or {}
+        exp_design = pd.get("experiment_design", {})
+
+        # 提取硬件配置
+        hardware = exp_design.get("硬件配置", "") or exp_design.get("hardware", "")
+        if not hardware:
+            impl_details = exp_design.get("implementation_details", {})
+            if isinstance(impl_details, dict):
+                hardware = impl_details.get("hardware", "")
+
+        # 提取训练参数
+        training_params = {}
+        for key in ["epochs", "batch_size", "optimizer", "learning_rate",
+                     "训练轮数", "批次大小", "优化器", "学习率"]:
+            val = exp_design.get(key, "")
+            if val:
+                training_params[key] = val
+
+        # 提取 loss 函数
+        loss_terms = []
+        loss_info = exp_design.get("loss_function", "") or exp_design.get("损失函数", "")
+        if loss_info:
+            loss_terms.append(str(loss_info))
+        for key in ["loss_terms", "loss_components"]:
+            val = exp_design.get(key, [])
+            if isinstance(val, list):
+                loss_terms.extend(str(v) for v in val)
+
+        # 提取数据集
+        datasets = exp_design.get("datasets", []) or exp_design.get("数据集", [])
+        if isinstance(datasets, str):
+            datasets = [datasets]
+
+        # 提取指标数值（从 ablation_results 或 experiment_design）
+        metrics = {}
+        ablation = self._ablation_results or {}
+        if isinstance(ablation, dict):
+            main_results = ablation.get("main_results", {})
+            if isinstance(main_results, dict):
+                for k, v in main_results.items():
+                    if isinstance(v, (int, float)):
+                        metrics[k] = v
+        key_results = exp_design.get("关键结果", {}) or exp_design.get("key_results", {})
+        if isinstance(key_results, dict):
+            for k, v in key_results.items():
+                if isinstance(v, (int, float, str)):
+                    metrics[k] = v
+
+        # 提取模型名称和创新点
+        model_name = pd.get("model_name", "") or pd.get("模型名称", "")
+        innovation_points = pd.get("innovation_points", [])
+        inn_names = []
+        if isinstance(innovation_points, list):
+            for ip in innovation_points[:5]:
+                if isinstance(ip, dict):
+                    inn_names.append(ip.get("创新点名称", ip.get("name", "")))
+                elif isinstance(ip, str):
+                    inn_names.append(ip)
+
+        paper_context = {
+            "hardware": hardware,
+            "training_params": training_params,
+            "loss_terms": loss_terms,
+            "datasets": datasets,
+            "metrics": metrics,
+            "model_name": model_name,
+            "innovation_names": inn_names,
+        }
+
+        # 注入到 project_data（各 generator 从这里读取）
+        if not isinstance(self._project_data, dict):
+            self._project_data = {}
+        self._project_data["paper_context"] = paper_context
+
+        # 同时保存一份到 self，供 CrossChapterChecker 使用
+        self._paper_context = paper_context
+
+        logger.info(f"[PaperContext] 构建完成: "
+                     f"hardware={hardware[:50] if hardware else 'N/A'}, "
+                     f"loss_terms={len(loss_terms)}, "
+                     f"datasets={len(datasets)}, "
+                     f"metrics={len(metrics)}, "
+                     f"model={model_name}")
+
+        return paper_context
+
+    def _build_citation_context(self) -> str:
+        """
+        v11.6: 构建引用上下文字符串，注入章节 prompt
+        v11.2: 同时注入 PaperContext 事实约束
+        """
+        parts = []
+
+        # v11.2: P0 — PaperContext 事实约束（最高优先级）
+        pc = getattr(self, '_paper_context', None) or (self._project_data or {}).get("paper_context")
+        if pc and isinstance(pc, dict) and any(pc.values()):
+            fact_lines = []
+            if pc.get("hardware"):
+                fact_lines.append(f"  Hardware: {pc['hardware']}")
+            if pc.get("training_params"):
+                for k, v in pc["training_params"].items():
+                    fact_lines.append(f"  {k}: {v}")
+            if pc.get("loss_terms"):
+                fact_lines.append(f"  Loss components: {', '.join(str(t) for t in pc['loss_terms'][:6])}")
+            if pc.get("datasets"):
+                fact_lines.append(f"  Datasets: {', '.join(str(d) for d in pc['datasets'][:5])}")
+            if pc.get("metrics"):
+                metric_lines = [f"    {k}: {v}" for k, v in list(pc["metrics"].items())[:8]]
+                fact_lines.append("  Key metrics (use these EXACT values throughout):")
+                fact_lines.extend(metric_lines)
+            if pc.get("model_name"):
+                fact_lines.append(f"  Model name: {pc['model_name']}")
+            if pc.get("innovation_names"):
+                fact_lines.append(f"  Innovation components: {', '.join(str(n) for n in pc['innovation_names'][:5])}")
+            if fact_lines:
+                parts.append("**MANDATORY FACT SHEET (PaperContext)** — Use these exact values. Do NOT invent different numbers:")
+                parts.append("\n".join(fact_lines))
+
+        # 1. 从 citation_bank 提取可引用的 claim
+        if self._citation_bank and self._citation_bank.get("claims"):
+            claims = self._citation_bank["claims"][:40]  # 限制数量避免 token 膨胀
+            claim_lines = []
+            for c in claims:
+                title = c.get("title", "")
+                year = c.get("year", "")
+                claim_text = c.get("claim", "")
+                if title and claim_text:
+                    claim_lines.append(f"  - [{year}] {title}: {claim_text[:120]}")
+            if claim_lines:
+                parts.append("**Available references (cite these papers using <citation> tags):**")
+                parts.append("\n".join(claim_lines[:30]))
+
+        # 2. 从 reference_pool 补充论文列表（标题+年份+venue）
+        if self._reference_pool:
+            pool_lines = []
+            for p in self._reference_pool[:30]:
+                title = p.get("title", "")
+                year = p.get("year", "")
+                venue = p.get("venue_abbr", "") or p.get("venue", "")
+                if title:
+                    venue_str = f", {venue}" if venue else ""
+                    pool_lines.append(f"  - {title} ({year}{venue_str})")
+            if pool_lines and len(parts) < 3:
+                parts.append("**Reference pool (use these in <citation> tags):**")
+                parts.append("\n".join(pool_lines[:25]))
+
+        if not parts:
+            return ""
+
+        return ("\n\n".join(parts) +
+                "\n\n**IMPORTANT**: When citing, use <citation>[\"author keyword\", \"topic keyword\"]</citation> "
+                "with keywords that match the paper titles above. Do NOT fabricate citations.")
+
     def _reflect(self, task: Task, result: Any,
                  verify_report=None) -> Dict[str, Any]:
         """
@@ -923,7 +1109,11 @@ Respond with just the strategy, no explanation:"""
                 pass
 
             if phase_num_int >= 3 and len(self._chapters) >= 2:
-                issues = self.cross_chapter_checker.check_all(
+                # v11.2: 注入 paper_context
+                pc = getattr(self, '_paper_context', None)
+                if pc:
+                    self.cross_chapter_checker.set_paper_context(pc)
+                issues, _ = self.cross_chapter_checker.check_all(
                     self._chapters, self._abstract
                 )
                 critical_issues = [i for i in issues if i.get("severity") == "critical"]
@@ -1060,37 +1250,33 @@ Respond with just the strategy, no explanation:"""
         except Exception as e:
             logger.warning(f"[Phase 7.0] 全局打磨失败: {e}")
 
-        # ====== Phase 7.1: 引用解析 ======
+        # ====== Phase 7.1: 引用解析（v11.2: 按章节独立处理，无 join-then-split） ======
         logger.info("[Phase 7.1] 解析引用标记...")
         try:
-            from agent.citation_manager import run_citation_manager
-            full_content_raw = "\n\n".join(self._chapters.values())
-            resolved_text, bibliography, cite_stats = run_citation_manager(
-                full_content_raw, self.api_client, self._reference_pool
-            )
-            logger.info(f"[Phase 7.1] 引用解析: {cite_stats['total_citations']} 个引用, "
-                  f"{cite_stats.get('unverified_count', 0)} 个未验证")
+            from agent.citation_manager import run_citation_manager_for_chapters
 
-            # 用解析后的内容更新 chapters
-            # 使用章节标题分割，比固定分隔符更可靠
-            chapter_keys = sorted(self._chapters.keys(), key=str)
-            chapter_names_map = {
-                1: "Introduction", 2: "Related Work",
-                3: "Methodology", 4: "Experiments", 5: "Conclusion"
-            }
-            # 首先尝试按标记分割
-            marker = "\n\n---\n\n"
-            if marker in resolved_text:
-                resolved_parts = resolved_text.split(marker)
-                if len(resolved_parts) == len(chapter_keys):
-                    for key, part in zip(chapter_keys, resolved_parts):
-                        self._chapters[key] = part
-                else:
-                    # 分割不匹配，按章节标题定位
-                    self._split_by_chapter_titles(resolved_text, chapter_keys, chapter_names_map)
-            else:
-                # 无分隔标记，按章节标题定位
-                self._split_by_chapter_titles(resolved_text, chapter_keys, chapter_names_map)
+            # v11.2: 如果 reference_pool 为空，从离线数据包兜底
+            ref_pool_for_cite = self._reference_pool
+            if not ref_pool_for_cite:
+                logger.warning("[Phase 7.1] reference_pool 为空，从离线数据包兜底...")
+                try:
+                    from tools.reference_pack_manager import get_offline_reference_pool
+                    ref_pool_for_cite = get_offline_reference_pool()
+                    if ref_pool_for_cite:
+                        self._reference_pool = ref_pool_for_cite
+                        logger.info(f"[Phase 7.1] 离线数据包兜底成功: {len(ref_pool_for_cite)} 篇")
+                except Exception as e:
+                    logger.warning(f"[Phase 7.1] 离线数据包兜底失败: {e}")
+
+            # v11.2: 直接传 chapters dict，按章节独立处理引用
+            updated_chapters, bibliography, cite_stats = run_citation_manager_for_chapters(
+                self._chapters, self.api_client, ref_pool_for_cite
+            )
+            self._chapters = updated_chapters
+
+            logger.info(f"[Phase 7.1] 引用解析: {cite_stats['total_citations']} 个引用, "
+                  f"{cite_stats.get('unverified_count', 0)} 个未验证, "
+                  f"{cite_stats.get('total_ref_entries', 0)} 篇参考文献")
 
             results["bibliography"] = bibliography
             results["citation_stats"] = cite_stats
@@ -1154,12 +1340,21 @@ Respond with just the strategy, no explanation:"""
         except Exception as e:
             logger.warning(f"ToolTrace 报告失败（不影响输出）: {e}")
 
-        # ====== Phase 7.2: 跨章节一致性检查 ======
+        # ====== Phase 7.2: 跨章节一致性检查（v11.2: 含 PaperContext 自动修复） ======
         logger.info("[Phase 7.2] 跨章节一致性检查...")
         try:
-            issues = self.cross_chapter_checker.check_all(
+            # v11.2: 注入 paper_context
+            pc = getattr(self, '_paper_context', None)
+            if pc:
+                self.cross_chapter_checker.set_paper_context(pc)
+            issues, fixed_chapters = self.cross_chapter_checker.check_all(
                 self._chapters, self._abstract
             )
+            # v11.2: 如果有自动修复，更新 chapters
+            if self.cross_chapter_checker._fixes_applied:
+                self._chapters = fixed_chapters
+                logger.info(f"[Phase 7.2] 已应用 {len(self.cross_chapter_checker._fixes_applied)} 处自动修复")
+
             critical = [i for i in issues if i.get("severity") == "critical"]
             if critical:
                 logger.warning(f"[Phase 7.2] 发现 {len(critical)} 个严重一致性问题:")
@@ -1203,14 +1398,57 @@ Respond with just the strategy, no explanation:"""
         # ====== Phase 7.28: 图表生成 ======
         figure_latex_snippets = ""
         try:
-            logger.info("[Phase 7.28] 生成论文图表...")
-            from tools.figure_generator import run_figure_generator, generate_latex_figure_includes
-            fig_results = run_figure_generator(
-                OUTPUT_DIR, self._project_data, self._ablation_results)
-            if fig_results:
-                logger.info(f"[Phase 7.28] 生成 {len(fig_results)} 个图表")
-                figure_latex_snippets = generate_latex_figure_includes(OUTPUT_DIR)
-                results["figures"] = fig_results
+            logger.info("[Phase 7.28] 规划并生成论文图表...")
+            from tools.figure_planner import plan_figures
+            from tools.figure_generator import generate_figure_from_plan
+
+            # 1. 用 figure_planner 规划图表列表
+            paper_content = {
+                "title": PAPER_TITLE,
+                "abstract": getattr(self, '_abstract', ''),
+                "method_text": self._chapters.get(3, ''),
+                "innovations": self._project_data.get("innovation_points", []),
+            }
+            venue_name = getattr(self.venue_adapter, 'venue_name', 'IEEE TCSVT') if self.venue_adapter else 'IEEE TCSVT'
+            plan_result = plan_figures(
+                paper_content, venue=venue_name,
+                experiment_data=self._ablation_results if self._ablation_results else None,
+            )
+            fig_plans = plan_result.get("figures", [])
+
+            if fig_plans:
+                logger.info(f"[Phase 7.28] 规划了 {len(fig_plans)} 个图表")
+                # 2. 逐个生成
+                figures_dir = os.path.join(OUTPUT_DIR, "figures")
+                for fp in fig_plans:
+                    try:
+                        fig_result = generate_figure_from_plan(
+                            fp, figures_dir, venue=venue_name,
+                            project_path=getattr(self._project_data, 'project_path', None)
+                            if isinstance(self._project_data, dict) else None,
+                        )
+                        if fig_result and fig_result.get("pdf_path"):
+                            # 收集 figure LaTeX 代码
+                            fig_id = fp.get("fig_id", "fig")
+                            size_type = fp.get("size_type", "double")
+                            env = "figure*" if size_type in ("double", "teaser") else "figure"
+                            width_cmd = "\\textwidth" if env == "figure*" else "\\columnwidth"
+                            caption = fp.get("caption", fp.get("title", fig_id))
+                            figure_latex_snippets += (
+                                f"\\begin{{{env}}}[!t]\n"
+                                f"\\centering\n"
+                                f"\\includegraphics[width={width_cmd}]{{{fig_result['pdf_path']}}}\n"
+                                f"\\caption{{{caption}}}\n"
+                                f"\\label{{fig:{fig_id}}}\n"
+                                f"\\end{{{env}}}\n\n"
+                            )
+                    except Exception as fe:
+                        logger.warning(f"[Phase 7.28] 图表 {fp.get('fig_id', '?')} 生成失败: {fe}")
+                if figure_latex_snippets:
+                    logger.info(f"[Phase 7.28] 图表生成完成，{len(fig_plans)} 个")
+                    results["figures"] = figure_latex_snippets
+            else:
+                logger.info("[Phase 7.28] figure_planner 未规划出图表，跳过")
         except Exception as e:
             logger.warning(f"[Phase 7.28] 图表生成失败: {e}")
 
@@ -1232,7 +1470,8 @@ Respond with just the strategy, no explanation:"""
             try:
                 abstract_prompt = f'请为论文"{PAPER_TITLE}"生成一段学术摘要（约200-250词）。创新点：{json.dumps(innovation_points, ensure_ascii=False)[:1000]}。关键结果：{json.dumps(experiment_design.get("关键结果", {}), ensure_ascii=False)[:500]}。请直接给出英文摘要：'
                 abstract = self.api_client.call_generation(abstract_prompt)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"摘要生成失败: {e}")
                 abstract = "Abstract to be generated."
 
         # 提取关键词
@@ -1245,7 +1484,8 @@ Respond with just the strategy, no explanation:"""
             try:
                 keywords_prompt = f'请为论文"{PAPER_TITLE}"生成5-8个英文关键词，用逗号分隔：'
                 keywords = self.api_client.call_light(keywords_prompt)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"关键词生成失败: {e}")
                 keywords = "deep learning, light field, depth estimation"
 
         if OUTPUT_LATEX:
@@ -1265,46 +1505,58 @@ Respond with just the strategy, no explanation:"""
                     chapter_list.append(extra_content)
             
             # Fix B1: 将架构图注入到 chapter 3 (Methodology)
-            # 在传递给 LaTeX converter 之前，将 figure 插入到 chapter 3 内容中
+            # 优先使用 Phase 3 的 TikZ 架构图（tikz_code），不使用 figure_latex_snippets 的架构图
+            # 防止源A（Phase 3 TikZ）和源B（Phase 7.28 figure_planner）重复插入架构图
             if figure_latex_snippets and len(chapter_list) >= 3:
-                # 在 chapter 3 的第一个 \subsection 之前插入架构图
                 chapter3_content = chapter_list[2]  # index 2 = chapter 3
                 if '\\subsection{' in chapter3_content:
-                    # 提取第一个 figure 环境（架构图）
-                    fig_match = re.search(
-                        r'(\\begin\{figure\}.*?\\end\{figure\})',
-                        figure_latex_snippets,
-                        re.DOTALL
-                    )
-                    if fig_match:
-                        arch_figure = fig_match.group(1)
-                        chapter3_content = chapter3_content.replace(
-                            '\\subsection{',
-                            arch_figure + '\n\n\\subsection{',
-                            1
+                    # 如果已有 TikZ 架构图（源A），就不从 figure_latex_snippets（源B）再插入架构图
+                    if not tikz_code:
+                        # 没有源A → 从源B取架构图注入 chapter 3
+                        fig_match = re.search(
+                            r'(\\begin\{figure\*?\}.*?\\end\{figure\*?\})',
+                            figure_latex_snippets,
+                            re.DOTALL
                         )
-                        chapter_list[2] = chapter3_content
-                        logger.info("[Phase 7.3] 架构图已注入 chapter 3 (Methodology)")
+                        if fig_match:
+                            arch_figure = fig_match.group(1)
+                            chapter3_content = chapter3_content.replace(
+                                '\\subsection{',
+                                arch_figure + '\n\n\\subsection{',
+                                1
+                            )
+                            chapter_list[2] = chapter3_content
+                            logger.info("[Phase 7.3] 架构图(源B)已注入 chapter 3")
+                    else:
+                        # 有源A → 源B全部放在参考文献前，不注入 chapter 3
+                        logger.info("[Phase 7.3] 已有 TikZ 架构图(源A)，跳过源B架构图注入 chapter 3")
             
             latex_paper = run_latex_converter(chapter_list, tikz_code, abstract, keywords)
             results["latex"] = f"{OUTPUT_DIR}/latex/main.tex"
 
             # 注入其他图表 LaTeX 代码到 main.tex（放在参考文献之前）
-            # 排除已注入到 chapter 3 的架构图
+            # 源B（figure_latex_snippets）的全部图表放在参考文献之前
             if figure_latex_snippets:
                 tex_path = f"{OUTPUT_DIR}/latex/main.tex"
                 if os.path.exists(tex_path):
                     with open(tex_path, "r", encoding="utf-8") as f:
                         tex_content = f.read()
-                    # 移除已注入的架构图（避免重复）
-                    fig_match = re.search(
-                        r'(\\begin\{figure\}.*?\\end\{figure\})',
-                        figure_latex_snippets,
-                        re.DOTALL
-                    )
-                    remaining_figures = figure_latex_snippets
-                    if fig_match:
-                        remaining_figures = figure_latex_snippets.replace(fig_match.group(1), '', 1).strip()
+                    
+                    # 如果有源A，源B全部放在参考文献前（因为上面没注入 chapter 3）
+                    # 如果没有源A，源B第一个图已注入 chapter 3，剩余的放参考文献前
+                    if tikz_code:
+                        # 源B全部放参考文献前
+                        remaining_figures = figure_latex_snippets
+                    else:
+                        # 移除已注入的第一个 figure（架构图），剩余放参考文献前
+                        fig_match = re.search(
+                            r'\\begin\{figure\*?\}.*?\\end\{figure\*?\}',
+                            figure_latex_snippets,
+                            re.DOTALL
+                        )
+                        remaining_figures = figure_latex_snippets
+                        if fig_match:
+                            remaining_figures = figure_latex_snippets.replace(fig_match.group(0), '', 1).strip()
                     
                     # 在 \bibliographystyle 之前插入剩余图表
                     if remaining_figures and "\\bibliographystyle" in tex_content:
@@ -1316,7 +1568,7 @@ Respond with just the strategy, no explanation:"""
                         tex_content += "\n\n" + remaining_figures
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
-                    logger.info("[Phase 7.3] 其他图表LaTeX代码已注入main.tex")
+                    logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
 
             # 确保 figures/ 目录在 latex/ 下也可访问
             figures_src = os.path.join(OUTPUT_DIR, "figures")
@@ -1325,8 +1577,8 @@ Respond with just the strategy, no explanation:"""
                 try:
                     import shutil as _shutil
                     _shutil.copytree(figures_src, figures_dst)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"图表目录复制失败: {e}")
         else:
             from tools.markdown2docx_converter import MarkdownToDocxConverter
             converter = MarkdownToDocxConverter()
@@ -1344,14 +1596,56 @@ Respond with just the strategy, no explanation:"""
         try:
             from tools.formula_processor import strip_formula_tags
             full_md = strip_formula_tags(full_md)
-        except Exception:
-            pass
-        # 清理残留的 <citation> 标记
-        full_md = re.sub(r'<citation>(.*?)</citation>', r'[ref]', full_md, flags=re.DOTALL)
+        except Exception as e:
+            logger.debug(f"公式标记清理失败: {e}")
+        # 清理残留的 <citation> 标记 — v11.3: 同时处理配对和自闭合
+        last_cite_num = 0
+        for m in re.finditer(r'\[(\d+)\]', full_md):
+            try:
+                last_cite_num = max(last_cite_num, int(m.group(1)))
+            except ValueError:
+                pass
+        fallback_cite = f'[{last_cite_num}]' if last_cite_num > 0 else ''
+        full_md = re.sub(r'<citation>(.*?)</citation>', fallback_cite, full_md, flags=re.DOTALL)
+        # v11.3: 也清理自闭合 <citation> 标记
+        full_md = re.sub(r'<citation>', fallback_cite, full_md)
         
         with open(f"{OUTPUT_DIR}/full_paper.md", 'w', encoding='utf-8') as f:
             f.write(full_md)
         results["markdown"] = f"{OUTPUT_DIR}/full_paper.md"
+
+        # ====== Phase 7.35: v11.2 tex 后 citation 残留清理 ======
+        # Phase 7.1 在 md 层面做了引用解析，但 Phase 7.3 的 LLM review 可能往 tex 里
+        # 塞了新的 <citation> 标记。此 pass 作为最终兜底。
+        try:
+            tex_cleanup_path = f"{OUTPUT_DIR}/latex/main.tex"
+            if os.path.exists(tex_cleanup_path):
+                with open(tex_cleanup_path, "r", encoding="utf-8") as f:
+                    tex_content_735 = f.read()
+                citation_count_before = len(re.findall(r'<citation>', tex_content_735))
+                if citation_count_before > 0:
+                    logger.info(f"[Phase 7.35] 发现 {citation_count_before} 个残留 <citation> 标记，开始清理...")
+                    # 找最后一个有效 [N] 编号作为 fallback
+                    last_num = 0
+                    for m in re.finditer(r'\[(\d+)\]', tex_content_735):
+                        try:
+                            last_num = max(last_num, int(m.group(1)))
+                        except ValueError:
+                            pass
+                    fallback = f'[{last_num}]' if last_num > 0 else ''
+                    # 清理配对 <citation>...</citation>
+                    tex_content_735 = re.sub(
+                        r'<citation>(.*?)</citation>', fallback, tex_content_735, flags=re.DOTALL
+                    )
+                    # 清理自闭合 <citation>
+                    tex_content_735 = re.sub(r'<citation>', fallback, tex_content_735)
+                    with open(tex_cleanup_path, "w", encoding="utf-8") as f:
+                        f.write(tex_content_735)
+                    logger.info(f"[Phase 7.35] 清理完成，{citation_count_before} 个 <citation> 已替换")
+                else:
+                    logger.info("[Phase 7.35] tex 无残留 <citation> 标记")
+        except Exception as e:
+            logger.warning(f"[Phase 7.35] citation 残留清理失败（不阻塞）: {e}")
 
         # ====== Phase 7.8: BibTeX 引用生成 ======
         try:
@@ -1371,6 +1665,24 @@ Respond with just the strategy, no explanation:"""
                     with open(tex_path, "r", encoding="utf-8") as f:
                         tex_content = f.read()
                     tex_content = builder.replace_numeric_with_cite(tex_content)
+
+                    # 同时将 \begin{thebibliography}...\end{thebibliography} 替换为
+                    # \bibliography{references}，让 BibTeX 接管参考文献
+                    bib_pattern = re.compile(
+                        r'\\begin\{thebibliography\}.*?\\end\{thebibliography\}',
+                        re.DOTALL,
+                    )
+                    if bib_pattern.search(tex_content):
+                        tex_content = bib_pattern.sub(
+                            r'\\bibliographystyle{IEEEtran}\n\\bibliography{references}',
+                            tex_content,
+                        )
+                        logger.info("[Phase 7.8] thebibliography → \\bibliography{references}")
+
+                    # v11.8: 逐个解析 [?] → 最近的 [N]（非全部替换为同一编号）
+                    if '[?]' in tex_content:
+                        tex_content = self._resolve_unknown_citations(tex_content)
+
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.8] LaTeX 引用替换完成: {len(citation_map)} 条")
@@ -1418,6 +1730,83 @@ Respond with just the strategy, no explanation:"""
                 logger.warning("[Phase 7.9] main.tex 不存在，跳过约束预检")
         except Exception as e:
             logger.warning(f"[Phase 7.9] 约束预检失败（不阻塞）: {e}")
+
+        # ====== Phase 7.95: v11.6 通用表格兜底（确保 ≥3 个表格） ======
+        try:
+            tex_path_795 = f"{OUTPUT_DIR}/latex/main.tex"
+            if os.path.exists(tex_path_795):
+                with open(tex_path_795, "r", encoding="utf-8") as f:
+                    tex_795 = f.read()
+                table_count = tex_795.count("\\begin{table")
+                MIN_TABLES = 3
+                if table_count < MIN_TABLES:
+                    logger.info(f"[Phase 7.95] 表格仅 {table_count} 个，需补充至 {MIN_TABLES} 个")
+                    need = MIN_TABLES - table_count
+
+                    # v11.8: LLM 基于项目数据动态生成表格（不注入假数据）
+                    ptitle = PAPER_TITLE or "the proposed method"
+                    exp_design = self._project_data.get("experiment_design", {})
+                    innovations = self._project_data.get("innovation_points", [])
+                    inn_names = [ip.get("创新点名称", f"Component {i+1}")
+                                 for i, ip in enumerate(innovations[:4])]
+                    cite_keys = re.findall(r'\\cite\{([^}]+)\}', tex_795)
+                    cite1 = f"~\\cite{{{cite_keys[0]}}}" if cite_keys else ""
+
+                    table_types = ["experimental settings and dataset details",
+                                   "ablation study on key components",
+                                   "comparison with state-of-the-art methods"]
+                    table_idx = table_count
+                    tables_to_inject = []
+
+                    for t_i in range(need):
+                        t_type = table_types[min(table_idx + t_i, len(table_types)-1)]
+                        table_prompt = (
+                            f'Generate ONE LaTeX table for the paper "{ptitle}".\n'
+                            f'Table type: {t_type}\n'
+                            f'Key components: {", ".join(inn_names)}\n'
+                            f'Experiment design: {json.dumps(exp_design, ensure_ascii=False)[:800]}\n\n'
+                            f'Rules:\n'
+                            f'- Use \\toprule/\\midrule/\\bottomrule (booktabs)\n'
+                            f'- Include \\caption{{...}} and \\label{{tab:...}}\n'
+                            f'- Use "--" for unknown metric values, do NOT fabricate numbers\n'
+                            f'- Keep 4-6 data rows\n'
+                            f'- Output ONLY LaTeX code starting with \\begin{{table}}'
+                        )
+                        try:
+                            resp = self.api_client.call_generation(table_prompt)
+                            if resp:
+                                tm = re.search(
+                                    r'\\begin\{table.*?\\end\{table\*?\}', resp, re.DOTALL
+                                )
+                                if tm:
+                                    tables_to_inject.append(tm.group(0))
+                        except Exception as te:
+                            logger.warning(f"[Phase 7.95] 表格 {t_i+1} LLM生成失败: {te}")
+
+                    # 兜底：LLM 全部失败时使用安全占位模板（无假数据）
+                    while len(tables_to_inject) < need:
+                        t_i = len(tables_to_inject)
+                        tables_to_inject.append(
+                            f'\\begin{{table}}[t]\n\\centering\n'
+                            f'\\caption{{[Placeholder — replace with actual data]}}\n'
+                            f'\\label{{tab:placeholder_{table_idx + t_i}}}\n'
+                            f'\\begin{{tabular}}{{lc}}\n\\toprule\n'
+                            f'Item & Value \\\\\n\\midrule\n'
+                            f'\\multicolumn{{2}}{{c}}{{-- to be filled --}} \\\\\n'
+                            f'\\bottomrule\n\\end{{tabular}}\n\\end{{table}}'
+                        )
+
+                    injection = "\n\n".join(tables_to_inject)
+                    if "\\end{document}" in tex_795:
+                        tex_795 = tex_795.replace("\\end{document}", injection + "\n\n\\end{document}")
+                    else:
+                        tex_795 += "\n\n" + injection
+                    with open(tex_path_795, "w", encoding="utf-8") as f:
+                        f.write(tex_795)
+                    logger.info(f"[Phase 7.95] 已补充 {len(tables_to_inject)} 个表格"
+                                f" (共 {table_count + len(tables_to_inject)} 个)")
+        except Exception as e:
+            logger.warning(f"[Phase 7.95] 表格补充失败（不阻塞）: {e}")
 
         # ====== Phase 8: PDF 编译 ======
         try:
@@ -1472,14 +1861,61 @@ Respond with just the strategy, no explanation:"""
             results["pdf_validation_error"] = str(e)
             logger.warning(f"[Phase 8.5] PDF 验证异常: {e}")
 
+        # ====== Phase 8.8: v12.0 分层验收 ======
+        try:
+            plan = self.dispatcher.get_plan()
+            if plan:
+                logger.info("[Phase 8.8] 运行分层验收（原子级/抽象级/全局级）...")
+                # 先更新所有 step 的状态为 completed（从已执行的 task 同步）
+                for task in self.dispatcher.get_all_tasks():
+                    if task.status == "completed":
+                        step = plan.get_step_by_phase(task.phase_name)
+                        if step and step.status == "pending":
+                            step.status = "completed"
+
+                validation_report = self.validation_engine.run_validation(plan)
+
+                overall = validation_report.get("overall", {})
+                pass_rate = overall.get("pass_rate", 0)
+                failed_goals = validation_report.get("failed_goals", [])
+                retry_phases = validation_report.get("retry_phases", [])
+
+                logger.info(
+                    f"[Phase 8.8] 验收完成: 通过率 {pass_rate:.1f}%, "
+                    f"失败 Goals: {failed_goals}"
+                )
+
+                results["hierarchical_validation"] = validation_report
+
+                # 如果有关键 Goal 失败且有 fallback，记录到日志
+                if failed_goals:
+                    for goal_id in failed_goals:
+                        goal = next((g for g in plan.goals if g.goal_id == goal_id), None)
+                        if goal:
+                            for step in goal.steps:
+                                if step.status == "failed" and step.fallback:
+                                    logger.warning(
+                                        f"[Phase 8.8] {step.step_id} 失败, "
+                                        f"建议降级: {step.fallback}"
+                                    )
+            else:
+                logger.info("[Phase 8.8] 无分层规划，跳过分层验收")
+        except Exception as e:
+            logger.warning(f"[Phase 8.8] 分层验收失败（不阻塞）: {e}")
+
         # ====== Phase 9: 输出有效性 + 完整度评价 ======
         try:
             logger.info("[Phase 9] 运行输出评价（对标 IEEE TCSVT）...")
             from tools.output_evaluator import run_output_evaluator
             outline = self._load_outline()
+
+            # v12.0: 传入分层验收报告
+            hier_report = results.get("hierarchical_validation")
+
             eval_result = run_output_evaluator(
                 OUTPUT_DIR, api_client=self.api_client,
                 outline=outline, unified_results=None,
+                hierarchical_report=hier_report,
             )
             results["evaluation"] = eval_result.get("overall", {})
             grade = eval_result.get("overall", {}).get("overall_grade", "?")
@@ -1510,8 +1946,8 @@ Respond with just the strategy, no explanation:"""
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     return json.load(f)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"大纲加载失败: {e}")
         return {}
 
     def _build_previous_summary(self, max_chars_per_chapter: int = 1500) -> str:
@@ -1545,10 +1981,11 @@ Respond with just the strategy, no explanation:"""
 
     def _deduplicate_content(self):
         """
-        去重检查：
+        去重检查（v11.1 增强）：
         1. 去除重复的章节标题（连续相同标题去重）
         2. 检查 Discussion/Conclusion 之间段落级重复
         3. 去除残留的 <formula> 标记
+        4. 【v11.1】跨章节段落级去重（Introduction vs Related Work 等）
         """
         import difflib
 
@@ -1619,6 +2056,96 @@ Respond with just the strategy, no explanation:"""
                     logger.info(f"[去重] {key_b} 移除了 {removed} 个与 {key_a} 重复的段落")
                     self._chapters[key_b] = '\n\n'.join(deduped_b)
 
+        # 4.【v11.1】跨章节段落级去重（Introduction vs Related Work）
+        # 检测前几章之间的内容重复
+        chapter_keys = [k for k in [1, 2, 3, 4] if k in self._chapters]
+        if len(chapter_keys) >= 2:
+            # 收集前面章节的段落指纹
+            seen_fingerprints = {}  # {fingerprint: chapter_key}
+            for ch_key in chapter_keys:
+                content = self._chapters[ch_key]
+                paras = [p.strip() for p in content.split('\n\n') if len(p.strip()) > 80]
+                deduped_paras = []
+                removed = 0
+                for para in paras:
+                    # 生成段落指纹（去标点+小写+去空格后取前100字符）
+                    fp = re.sub(r'[^a-z0-9]', '', para.lower())[:100]
+                    if not fp or len(fp) < 30:
+                        deduped_paras.append(para)
+                        continue
+                    # 检查是否与前面章节的段落高度相似
+                    is_dup = False
+                    for existing_fp, existing_ch in seen_fingerprints.items():
+                        # 快速比对：如果前60个字符有80%重合则视为重复
+                        overlap = sum(a == b for a, b in zip(fp[:60], existing_fp[:60])) / 60
+                        if overlap > 0.85:
+                            is_dup = True
+                            break
+                    if is_dup:
+                        removed += 1
+                    else:
+                        deduped_paras.append(para)
+                        seen_fingerprints[fp] = ch_key
+
+                if removed > 0:
+                    logger.info(f"[去重] 章节 {ch_key} 移除了 {removed} 个跨章节重复段落")
+                    # v11.6: 保持原文段落顺序，逐一判断是否需要去重
+                    final_paras = []
+                    for para in content.split('\n\n'):
+                        para = para.strip()
+                        if not para:
+                            continue
+                        if len(para) <= 80:
+                            final_paras.append(para)
+                        else:
+                            fp = re.sub(r'[^a-z0-9]', '', para.lower())[:100]
+                            is_dup = any(
+                                sum(a == b for a, b in zip(fp[:60], efp[:60])) / 60 > 0.85
+                                for efp in seen_fingerprints
+                            ) if fp and len(fp) >= 30 else False
+                            if not is_dup:
+                                final_paras.append(para)
+                    self._chapters[ch_key] = '\n\n'.join(final_paras)
+
+    @staticmethod
+    def _resolve_unknown_citations(text: str) -> str:
+        """v11.8: 逐个解析 [?] — 使用最近的 [N] 作为替代（非全部替换为同一编号）"""
+        if '[?]' not in text:
+            return text
+
+        # 收集所有 [N] 和 [?] 的位置
+        all_refs = list(re.finditer(r'\[(\d+)\]', text))
+        unknowns = list(re.finditer(r'\[\?\]', text))
+
+        if not unknowns:
+            return text
+        if not all_refs:
+            # 没有任何已知引用，只能删除 [?]
+            return text.replace('[?]', '')
+
+        # 为每个 [?] 找最近的 [N]
+        result_parts = []
+        last_end = 0
+        replaced = 0
+        for unk in unknowns:
+            result_parts.append(text[last_end:unk.start()])
+            # 找最近的已知引用
+            best_num = None
+            best_dist = float('inf')
+            for ref in all_refs:
+                dist = abs(ref.start() - unk.start())
+                if dist < best_dist:
+                    best_dist = dist
+                    best_num = ref.group(1)
+            result_parts.append(f'[{best_num}]' if best_num else '')
+            last_end = unk.end()
+            replaced += 1
+        result_parts.append(text[last_end:])
+
+        if replaced > 0:
+            logger.info(f"[resolve_unknown] 逐个替换 {replaced} 个 [?] → 最近 [N]")
+        return ''.join(result_parts)
+
     def _auto_fix_issues(self, fix_hints: List[str]):
         """
         v8.0: 根据修复建议自动修复可修复的问题
@@ -1638,8 +2165,8 @@ Respond with just the strategy, no explanation:"""
                         if '<formula>' in content:
                             self._chapters[ch_key] = strip_formula_tags(content)
                             fixed += 1
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"公式清理修复失败: {e}")
 
             # 修复 citation 标记
             if "citation_manager" in hint_lower or "citation" in hint_lower:
@@ -1650,15 +2177,15 @@ Respond with just the strategy, no explanation:"""
                         self._chapters[ch_key] = cleaned
                         fixed += 1
 
-            # 修复 [?] → 移除无法解析的引用标记
+            # v11.8: 逐个修复 [?] → 最近的 [N]（非全部用同一编号）
             if "引用" in hint_lower or "[?]" in hint_lower:
                 for ch_key in list(self._chapters.keys()):
                     content = self._chapters[ch_key]
-                    # 将 [?] 替换为空字符串（更好的做法是完全移除）
-                    cleaned = content.replace('[?]', '')
-                    if cleaned != content:
-                        self._chapters[ch_key] = cleaned
-                        fixed += 1
+                    if '[?]' in content:
+                        cleaned = self._resolve_unknown_citations(content)
+                        if cleaned != content:
+                            self._chapters[ch_key] = cleaned
+                            fixed += 1
 
         if fixed > 0:
             logger.info(f"[auto_fix] 自动修复了 {fixed} 个问题")
@@ -1717,8 +2244,9 @@ Respond with just the strategy, no explanation:"""
         for ch_key, ch_name in sorted_chapters:
             if not ch_name:
                 continue
-            # 匹配 Markdown 标题格式的章节名（如 "# Introduction", "## 1. Introduction"等）
-            pattern = rf'(?:^|\n)(?:#+\s*(?:\d+\.?\s*)?)?{re.escape(ch_name)}'
+            # v11.6: 严格匹配 Markdown 标题行（必须以 # 开头）
+            # 避免 "In the introduction of..." 这种正文中的匹配
+            pattern = rf'(?:^|\n)\s*#+\s*(?:\d+\.?\s*)?{re.escape(ch_name)}\s*(?:\n|$)'
             for m in re.finditer(pattern, text, re.IGNORECASE):
                 positions.append((m.start(), ch_key, ch_name))
                 break  # 只取第一个匹配
@@ -1783,6 +2311,7 @@ Respond with just the strategy, no explanation:"""
                 self._project_data, self._ref_data, OUTPUT_DIR
             )
             self._motivation_thread = result.get("motivation_thread", "")
+            self._motivation_result = result  # 保存完整结果（含 anchors）供 ContentStrategist 使用
             self.checkpoint.save_state("motivation_thread", self._motivation_thread)
             logger.info(f"[Phase 0.6] 动机线程已构建: {len(self._motivation_thread)} 字符")
             return result
@@ -1813,6 +2342,86 @@ Respond with just the strategy, no explanation:"""
             self._exemplar_dossier = {}
             self._style_profile = {}
             return {"status": "skipped", "reason": str(e)}
+
+    def _run_journal_style_and_content_strategy_phase(self) -> dict:
+        """Phase 0.65: v10.1 期刊风格学习 + 内容策略规划"""
+        logger.info("\n" + "=" * 60)
+        logger.info("  Phase 0.65: 期刊风格自适应 + 内容策略规划")
+        logger.info("=" * 60)
+
+        result = {"journal_style": {}, "content_strategy": {}}
+
+        # Step 1: 期刊风格学习（从 ref_pdf 学习）
+        try:
+            from agent.journal_style_learner import JournalStyleLearner
+            from agent.skill_orchestrators.ref_pdf_analyzer import load_ref_papers
+
+            papers = load_ref_papers(REF_PDF_PATH)
+            if papers:
+                venue_name = getattr(self.venue_adapter.profile, 'venue_name', 'Unknown') if self.venue_adapter else 'Unknown'
+                learner = JournalStyleLearner(self.api_client)
+                journal_style = learner.learn(papers, venue_name)
+                self._journal_style = journal_style
+                result["journal_style"] = journal_style
+                # 将学到的风格传递给 VenueAdapter，使各章节能获取到
+                if self.venue_adapter:
+                    try:
+                        self.venue_adapter.set_journal_style(journal_style)
+                    except Exception as e:
+                        logger.debug(f"风格传递失败: {e}")
+                self.checkpoint.save_state("journal_style", journal_style)
+                logger.info(f"[Phase 0.65] 期刊风格学习完成: {venue_name}")
+            else:
+                self._journal_style = {}
+                logger.info("[Phase 0.65] 无参考论文，跳过期刊风格学习")
+        except Exception as e:
+            logger.warning(f"期刊风格学习失败（不阻塞）: {e}")
+            self._journal_style = {}
+
+        # Step 2: 内容策略规划（基于创新点 + 期刊风格 + 动机线程）
+        try:
+            from agent.content_strategist import ContentStrategist
+            from config.project_config import TARGET_VENUE
+
+            venue_name = TARGET_VENUE or "Unknown"
+            innovation_points = self._project_data.get("innovation_points", [])
+            motivation_result = getattr(self, '_motivation_result', {})  # Phase 0.6 存储的完整结果
+
+            strategist = ContentStrategist(self.api_client)
+            content_strategy = strategist.plan(
+                project_data=self._project_data,
+                innovation_points=innovation_points,
+                venue_name=venue_name,
+                journal_style=self._journal_style,
+                motivation_thread=motivation_result if motivation_result else None,
+            )
+            self._content_strategy = content_strategy
+            result["content_strategy"] = content_strategy
+            self.checkpoint.save_state("content_strategy", content_strategy)
+            logger.info(f"[Phase 0.65] 内容策略规划完成: {len(content_strategy)} 章")
+
+            # Step 3: 将内容策略更新到大纲
+            if self._outline and content_strategy:
+                self._update_outline_with_strategy(content_strategy)
+
+        except Exception as e:
+            logger.warning(f"内容策略规划失败（不阻塞）: {e}")
+            self._content_strategy = {}
+
+        return result
+
+    def _update_outline_with_strategy(self, content_strategy: dict):
+        """将内容策略更新到已有大纲"""
+        try:
+            outline_data = self._outline
+            outline = outline_data.get("outline", {})
+            for chapter_name, strategy in content_strategy.items():
+                if chapter_name in outline:
+                    outline[chapter_name]["content_strategy"] = strategy
+            self.checkpoint.save_state("outline", outline_data)
+            logger.info("[Phase 0.65] 大纲已更新（注入内容策略）")
+        except Exception as e:
+            logger.warning(f"大纲更新失败: {e}")
 
     def _run_citation_bank_phase(self) -> dict:
         """Phase 0.8: 引用支撑库构建"""

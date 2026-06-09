@@ -1,0 +1,727 @@
+[
+  {
+    "phase_name": "phase1",
+    "timestamp": 1780546875.7745323,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (6 严重, 3 警告)",
+    "issue_count": 10,
+    "critical_count": 6,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（1 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: ['# 1.']",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解与几何特征的光场材质分类方法' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于三层角信号分解与几何特征的光场材质分类方法'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解与几何特征的光场材质分类方法' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '面向多域光场数据的领域平衡采样与统一深度估计训练策略'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '光场EPI假设失效的物理边界界定与根因分析' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '光场EPI假设失效的物理边界界定与根因分析'",
+        "suggestion": "在章节中补充对 '光场EPI假设失效的物理边界界定与根因分析' 的描述"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"light field imaging\", \"depth estimation\"]</citation>",
+        "evidence": "搜索关键词: ['light field imaging', 'depth estimation'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"3D reconstruction\", \"autonomous driving\"]</citation>",
+        "evidence": "搜索关键词: ['3D reconstruction', 'autonomous driving'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"epipolar plane image\", \"EPI slope\"]</citation>",
+        "evidence": "搜索关键词: ['epipolar plane image', 'EPI slope'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"specular reflection\", \"volumetric scattering\"]</citation>",
+        "evidence": "搜索关键词: ['specular reflection', 'volumetric scattering'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"dual-branch architecture\", \"attention mechanism\"]</citation>",
+        "evidence": "搜索关键词: ['dual-branch architecture', 'attention mechanism'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"2D-DFT\", \"frequency domain analysis\"]</citation>",
+        "evidence": "搜索关键词: ['2D-DFT', 'frequency domain analysis'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1780547412.6864176,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (10 严重, 0 警告)",
+    "issue_count": 10,
+    "critical_count": 10,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI gradient\", \"structure tensor\"]</citation>",
+        "evidence": "搜索关键词: ['EPI gradient', 'structure tensor'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"defocus cue\", \"correspondence cue\"]</citation>",
+        "evidence": "搜索关键词: ['defocus cue', 'correspondence cue'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"occlusion-aware\", \"robust matching\"]</citation>",
+        "evidence": "搜索关键词: ['occlusion-aware', 'robust matching'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI structure\", \"occlusion handling\"]</citation>",
+        "evidence": "搜索关键词: ['EPI structure', 'occlusion handling'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPINET\", \"multi-view CNN\"]</citation>",
+        "evidence": "搜索关键词: ['EPINET', 'multi-view CNN'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"DistgDepth\", \"disentangled convolution\"]</citation>",
+        "evidence": "搜索关键词: ['DistgDepth', 'disentangled convolution'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Light Field Transformer\", \"epipolar attention\"]</citation>",
+        "evidence": "搜索关键词: ['Light Field Transformer', 'epipolar attention'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#8无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"angular frequency\", \"material decoupling\"]</citation>",
+        "evidence": "搜索关键词: ['angular frequency', 'material decoupling'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"dual-branch\", \"specular masking\"]</citation>",
+        "evidence": "搜索关键词: ['dual-branch', 'specular masking'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#10无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI structure\", \"physics-aware\"]</citation>",
+        "evidence": "搜索关键词: ['EPI structure', 'physics-aware'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1780548646.109413,
+    "passed": true,
+    "summary": "审计完成: 7 个问题 (0 严重, 7 警告)",
+    "issue_count": 7,
+    "critical_count": 0,
+    "warning_count": 7,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解与几何特征的光场材质分类方法' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于三层角信号分解与几何特征的光场材质分类方法'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解与几何特征的光场材质分类方法' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '面向多域光场数据的领域平衡采样与统一深度估计训练策略'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '光场EPI假设失效的物理边界界定与根因分析' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '光场EPI假设失效的物理边界界定与根因分析'",
+        "suggestion": "在章节中补充对 '光场EPI假设失效的物理边界界定与根因分析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '名称' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 名称",
+        "suggestion": "在实验章节中补充对 名称 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '规模' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 规模",
+        "suggestion": "在实验章节中补充对 规模 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '场景类型' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 场景类型",
+        "suggestion": "在实验章节中补充对 场景类型 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '划分方式' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 划分方式",
+        "suggestion": "在实验章节中补充对 划分方式 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1780549384.4569697,
+    "passed": true,
+    "summary": "审计完成: 6 个问题 (0 严重, 4 警告)",
+    "issue_count": 6,
+    "critical_count": 0,
+    "warning_count": 4,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '名称' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 名称",
+        "suggestion": "在实验章节中补充对 名称 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '规模' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 规模",
+        "suggestion": "在实验章节中补充对 规模 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '场景类型' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 场景类型",
+        "suggestion": "在实验章节中补充对 场景类型 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '划分方式' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 划分方式",
+        "suggestion": "在实验章节中补充对 划分方式 的描述"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '指标名称' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 指标名称",
+        "suggestion": "在实验章节中补充对 指标名称 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '目标值' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 目标值",
+        "suggestion": "在实验章节中补充对 目标值 的评估结果"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1780549517.9523413,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 1 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'future'",
+        "location": "Conclusion",
+        "evidence": "在章节中未找到 'future' 相关内容",
+        "suggestion": "确保章节包含与 'future' 相关的论述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_1",
+    "timestamp": 1780549674.684681,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase5_2",
+    "timestamp": 1780549823.5803273,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase1",
+    "timestamp": 1780550974.7075644,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (6 严重, 3 警告)",
+    "issue_count": 10,
+    "critical_count": 6,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（1 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: ['# 1.']",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解与几何特征的光场材质分类方法' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于三层角信号分解与几何特征的光场材质分类方法'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解与几何特征的光场材质分类方法' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '面向多域光场数据的领域平衡采样与统一深度估计训练策略'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '光场EPI假设失效的物理边界界定与根因分析' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '光场EPI假设失效的物理边界界定与根因分析'",
+        "suggestion": "在章节中补充对 '光场EPI假设失效的物理边界界定与根因分析' 的描述"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"light field imaging\", \"depth estimation\"]</citation>",
+        "evidence": "搜索关键词: ['light field imaging', 'depth estimation'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"3D reconstruction\", \"autonomous driving\"]</citation>",
+        "evidence": "搜索关键词: ['3D reconstruction', 'autonomous driving'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"epipolar plane image\", \"EPI slope\"]</citation>",
+        "evidence": "搜索关键词: ['epipolar plane image', 'EPI slope'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"specular reflection\", \"volumetric scattering\"]</citation>",
+        "evidence": "搜索关键词: ['specular reflection', 'volumetric scattering'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"dual-branch architecture\", \"attention mechanism\"]</citation>",
+        "evidence": "搜索关键词: ['dual-branch architecture', 'attention mechanism'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"2D-DFT\", \"frequency domain analysis\"]</citation>",
+        "evidence": "搜索关键词: ['2D-DFT', 'frequency domain analysis'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1780551210.6310134,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (10 严重, 0 警告)",
+    "issue_count": 10,
+    "critical_count": 10,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI gradient\", \"structure tensor\"]</citation>",
+        "evidence": "搜索关键词: ['EPI gradient', 'structure tensor'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"defocus cue\", \"correspondence cue\"]</citation>",
+        "evidence": "搜索关键词: ['defocus cue', 'correspondence cue'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"occlusion-aware\", \"robust matching\"]</citation>",
+        "evidence": "搜索关键词: ['occlusion-aware', 'robust matching'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI structure\", \"occlusion handling\"]</citation>",
+        "evidence": "搜索关键词: ['EPI structure', 'occlusion handling'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPINET\", \"multi-view CNN\"]</citation>",
+        "evidence": "搜索关键词: ['EPINET', 'multi-view CNN'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"DistgDepth\", \"disentangled convolution\"]</citation>",
+        "evidence": "搜索关键词: ['DistgDepth', 'disentangled convolution'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Light Field Transformer\", \"epipolar attention\"]</citation>",
+        "evidence": "搜索关键词: ['Light Field Transformer', 'epipolar attention'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#8无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"angular frequency\", \"material decoupling\"]</citation>",
+        "evidence": "搜索关键词: ['angular frequency', 'material decoupling'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"dual-branch\", \"specular masking\"]</citation>",
+        "evidence": "搜索关键词: ['dual-branch', 'specular masking'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#10无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"EPI structure\", \"physics-aware\"]</citation>",
+        "evidence": "搜索关键词: ['EPI structure', 'physics-aware'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1780551680.2815893,
+    "passed": true,
+    "summary": "审计完成: 7 个问题 (0 严重, 7 警告)",
+    "issue_count": 7,
+    "critical_count": 0,
+    "warning_count": 7,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解与几何特征的光场材质分类方法' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于三层角信号分解与几何特征的光场材质分类方法'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解与几何特征的光场材质分类方法' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '面向多域光场数据的领域平衡采样与统一深度估计训练策略'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的领域平衡采样与统一深度估计训练策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '光场EPI假设失效的物理边界界定与根因分析' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '光场EPI假设失效的物理边界界定与根因分析'",
+        "suggestion": "在章节中补充对 '光场EPI假设失效的物理边界界定与根因分析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '名称' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 名称",
+        "suggestion": "在实验章节中补充对 名称 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '规模' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 规模",
+        "suggestion": "在实验章节中补充对 规模 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '场景类型' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 场景类型",
+        "suggestion": "在实验章节中补充对 场景类型 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '划分方式' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 划分方式",
+        "suggestion": "在实验章节中补充对 划分方式 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1780551680.2946703,
+    "passed": true,
+    "summary": "审计完成: 6 个问题 (0 严重, 4 警告)",
+    "issue_count": 6,
+    "critical_count": 0,
+    "warning_count": 4,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '名称' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 名称",
+        "suggestion": "在实验章节中补充对 名称 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '规模' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 规模",
+        "suggestion": "在实验章节中补充对 规模 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '场景类型' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 场景类型",
+        "suggestion": "在实验章节中补充对 场景类型 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '划分方式' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 划分方式",
+        "suggestion": "在实验章节中补充对 划分方式 的描述"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '指标名称' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 指标名称",
+        "suggestion": "在实验章节中补充对 指标名称 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '目标值' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 目标值",
+        "suggestion": "在实验章节中补充对 目标值 的评估结果"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1780551680.296341,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 1 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'future'",
+        "location": "Conclusion",
+        "evidence": "在章节中未找到 'future' 相关内容",
+        "suggestion": "确保章节包含与 'future' 相关的论述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_5",
+    "timestamp": 1780551680.296555,
+    "passed": true,
+    "summary": "摘要审计完成: 5 个问题 (0 严重, 5 警告)",
+    "issue_count": 5,
+    "critical_count": 0,
+    "warning_count": 5,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 达到0.133的整体平均绝对误差（MAE）和0.081的混合城市MAE",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文摘录（特别是第4章实验部分）中并未出现这些具体的MAE数值，建议核实完整版正文中的实验结果表格以确保数据准确对应。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 明确定义了EPI方法在非朗伯特表面上的物理失效边界（MAE=0.411）",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文摘录中未提及“MAE=0.411”这一失效边界数值，建议在正文的实验或讨论部分补充该系统性评估的具体证明过程。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 双分支架构具体包含“一个EPI分支和一个几何分支，并在掩膜加权融合之前处理各自区域”",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文第3章仅提及“双分支深度估计网络”，未明确说明分支的具体名称（EPI分支和几何分支）以及“掩膜加权融合”的操作细节。建议在正文方法论部分补充这些架构细节。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 提取几何角度特征以生成“逐像素”的双掩膜",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文仅提到了双层掩膜模型，但未明确说明其是否为“逐像素”级别。建议在正文第3章中增加对“pixel-wise”特性的描述。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 采用了“渐进式训练策略”",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文第5章仅提到了“域平衡训练策略”，未明确提及“渐进式训练”。建议检查正文中是否有相关描述，若没有，需在正文补充或从摘要中删去该词汇。"
+      }
+    ]
+  }
+]

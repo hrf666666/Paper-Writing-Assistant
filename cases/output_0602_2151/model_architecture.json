@@ -1,0 +1,45 @@
+{
+  "总体架构": "输入为9x9角度采样的光场数据（子孔径图像或EPI）。模型采用双分支（Dual-Path）架构，包含Lambertian EPI分支和Non-Lambertian几何特征分支。首先，通过三层角度信号分解（DC、线性视差、残差）提取几何角度特征（如angular_gradient），生成像素级双掩码（Dual-Mask）以区分Lambertian和Non-Lambertian区域。随后，Lambertian分支利用EPI和连续深度先验（如PRSO或位移场）提取深度特征，Non-Lambertian分支利用几何特征提取反射/材质特征。最后，通过平衡投影（Balanced Projection）和掩码加权融合（Mask-Weighted Fusion）机制整合双分支特征，输出最终的连续深度图。",
+  "模块详情": [
+    {
+      "模块名": "三层角度信号分解与掩码生成模块",
+      "输入": "9x9角度光场数据 (Batch, 9, 9, H, W, 3) 或 EPI",
+      "核心操作": "将角度信号分解为DC（环境光）、线性项（视差/深度）和残差（材质）。计算几何角度特征（如angular_gradient），基于特征阈值或分类器生成像素级Lambertian/Non-Lambertian双掩码，提供伪标签监督。",
+      "输出": "几何角度特征图 (Batch, H, W, C_geo)，双掩码 (Batch, 2, H, W)",
+      "关键公式": "I(u,v) = DC + a·u + b·v + ε(u,v); P(x,y) = √(a²+b²); Mask = σ(α · angular_gradient + β)"
+    },
+    {
+      "模块名": "Lambertian EPI 分支",
+      "输入": "光场EPI数据 (Batch, C_epi, H, W)，双掩码中的Lambertian掩码",
+      "核心操作": "利用EPI斜率结构提取深度特征，结合平面正则采样算子（PRSO）或位移场（Displacement Field）引入连续分段平滑深度先验，增强Lambertian区域的深度一致性和表面平滑度。",
+      "输出": "Lambertian深度特征图 (Batch, C_lam, H, W)",
+      "关键公式": "F_lam = EPI_Encoder(EPI) + PRSO(Depth_Prior); Depth_Lam = MLP(F_lam)"
+    },
+    {
+      "模块名": "Non-Lambertian 几何分支",
+      "输入": "几何角度特征图 (Batch, C_geo, H, W)，双掩码中的Non-Lambertian掩码",
+      "核心操作": "针对非朗伯体表面的X型EPI模式和双峰分布，利用几何特征（如角度梯度、相关一致性、变异系数）提取材质和反射特征，避免依赖被破坏的EPI线性假设。",
+      "输出": "Non-Lambertian深度/材质特征图 (Batch, C_nl, H, W)",
+      "关键公式": "F_nl = Geo_Encoder(angular_gradient, correlation_coherence); Depth_NL = MLP(F_nl)"
+    },
+    {
+      "模块名": "平衡投影与掩码加权融合模块",
+      "输入": "F_lam (Batch, C_lam, H, W), F_nl (Batch, C_nl, H, W), 双掩码 (Batch, 2, H, W)",
+      "核心操作": "使用1x1卷积将双分支特征投影到统一的平衡维度（FUSE_DIM=96），解决原架构中严重的通道不平衡问题。然后利用双掩码进行像素级加权融合，得到最终深度特征并回归深度值。",
+      "输出": "融合后的深度特征 (Batch, 96, H, W)，最终深度图 (Batch, 1, H, W)",
+      "关键公式": "F_fuse = Mask_Lam * Proj_Lam(F_lam) + Mask_NL * Proj_NL(F_nl); Depth = Decoder(F_fuse)"
+    }
+  ],
+  "模块连接": "光场数据首先并行输入到“三层角度信号分解与掩码生成模块”和“Lambertian EPI分支”。分解模块输出的几何特征输入到“Non-Lambertian几何分支”，同时生成的双掩码分别发送给Lambertian分支、Non-Lambertian分支和融合模块。Lambertian分支和Non-Lambertian分支分别输出各自的特征图，这两个特征图与双掩码共同输入到“平衡投影与掩码加权融合模块”。融合模块输出最终的深度特征，经过解码器回归出最终的像素级深度图。数据流呈现“分解->双分支并行提取->掩码引导融合”的拓扑结构。",
+  "关键超参数": {
+    "FUSE_DIM": 96,
+    "Batch_Size": 2,
+    "Gradient_Accumulation_Steps": 8,
+    "NL_Oversampling_Factor": 10,
+    "Target_Mask_Gap": 0.08,
+    "Learning_Rate": 0.0001,
+    "Angular_Resolution": "9x9",
+    "Tone_Mapping_Augmentation": true,
+    "Max_Epochs": 6
+  }
+}

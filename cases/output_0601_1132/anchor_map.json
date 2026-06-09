@@ -1,0 +1,16 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "基于三层角信号分解的几何特征材质分类机制",
+    "contribution_statement": "We identify that the entanglement of material properties in mixed-reflection scenes creates a fundamental bottleneck for accurate depth estimation."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "面向混合反射场景的统一双掩码（Dual-Mask）深度估计架构",
+    "contribution_statement": "We propose an integrated framework that sequentially combines a three-layer angular signal decomposition mechanism for material classification with a unified dual-mask architecture for robust depth estimation."
+  }
+}

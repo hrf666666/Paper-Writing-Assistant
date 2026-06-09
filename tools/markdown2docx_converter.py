@@ -10,7 +10,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement, parse_xml
 import latex2mathml.converter
-import mathml2omml
+try:
+    import mathml2omml
+except ImportError:
+    mathml2omml = None
 from lxml import etree
 
 logger = logging.getLogger(__name__)
@@ -74,6 +77,8 @@ class MarkdownToDocxConverter:
             mathml = latex2mathml.converter.convert(latex_string)
             
             # 第二步：MathML → OMML
+            if mathml2omml is None:
+                raise ImportError("mathml2omml 未安装")
             omml = mathml2omml.convert(mathml)
             
             return omml

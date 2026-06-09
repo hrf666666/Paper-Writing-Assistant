@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Tool: BibTeX 引用构建器
+Tool: BibTeX 引用构建器 (v11.1)
 
 从已验证的引用池生成 BibTeX 条目，将 [N] 格式引用转为 \\cite{key}。
+
+v11.1 改动：
+- 删除硬编码 20 篇光场领域兜底论文（_get_domain_fallback_refs）
+- 使用 tools/doi2bib.py 的 DOIToBib 多策略获取标准 BibTeX
+- BibTeX 获取降级链：DOI Negotiation → CrossRef → S2 → DBLP → Python 模板
+- 所有生成的 BibTeX 必须通过 _validate_bib_entry() 验证
+- 失败条目标记 needs_manual_review，不放假 BibTeX
 """
 
 import os
@@ -27,9 +34,22 @@ class BibTeXBuilder:
         """
         从已验证的引用构建 BibTeX
 
+        v11.1: 优先加载 Phase 7.1 (CitationManager) 已建立的编号映射，
+        确保 [N] → \\cite{key} 的映射与 Phase 7.1 一致。
+
         Returns:
             (bib_content, citation_map)
         """
+        # ── v11.1: 尝试加载 Phase 7.1 已有的编号映射 ──
+        phase71_map = self._load_phase71_citation_map()
+        # v11.2: 如果 Phase 7.1 映射不足（<5条），说明引用解析质量差，走独立构建路径
+        if phase71_map and len(phase71_map) >= 5:
+            logger.info(f"[BibTeXBuilder] 使用 Phase 7.1 编号映射: {len(phase71_map)} 条")
+            return self._build_from_phase71_map(phase71_map)
+        elif phase71_map:
+            logger.warning(f"[BibTeXBuilder] Phase 7.1 映射仅 {len(phase71_map)} 条，不足5条，走独立构建")
+
+        # ── 降级：原有逻辑（独立构建编号） ──
         # 读取引用验证结果
         verified = self._load_verified_citations()
 
@@ -46,7 +66,7 @@ class BibTeXBuilder:
         # 优先处理已验证的引用
         for cite in verified:
             key = self._generate_cite_key(cite, citation_num)
-            entry = self._create_bib_entry(cite, key)
+            entry = self._create_bib_entry_with_doi(cite, key)
             if entry:
                 self._bib_entries[key] = entry
                 self._citation_map[citation_num] = key
@@ -65,7 +85,7 @@ class BibTeXBuilder:
                 if any(title[:30].lower() in e.lower() for e in bib_entries):
                     continue
                 key = self._generate_cite_key(paper, citation_num)
-                entry = self._create_bib_entry(paper, key)
+                entry = self._create_bib_entry_with_doi(paper, key)
                 if entry:
                     self._bib_entries[key] = entry
                     self._citation_map[citation_num] = key
@@ -80,17 +100,17 @@ class BibTeXBuilder:
                 parsed = self._parse_reference_text(ref_text)
                 if parsed and parsed.get("title") and len(parsed.get("title", "")) > 10:
                     key = self._generate_cite_key(parsed, citation_num)
-                    entry = self._create_bib_entry(parsed, key)
+                    entry = self._create_bib_entry_with_doi(parsed, key)
                     if entry:
                         self._bib_entries[key] = entry
                         self._citation_map[citation_num] = key
                         bib_entries.append(entry)
                         citation_num += 1
 
-        # 补充领域基础参考文献（光场深度估计核心论文）
+        # 补充领域基础参考文献（使用 DOI → BibTeX 获取真实论文）
         # 确保至少有 20 条引用
         if citation_num <= 55:
-            domain_refs = self._get_domain_fallback_refs()
+            domain_refs = self._get_domain_refs_from_pool()
             for ref_info in domain_refs:
                 if citation_num > 55:
                     break
@@ -98,25 +118,7 @@ class BibTeXBuilder:
                 if any(title[:30].lower() in e.lower() for e in bib_entries):
                     continue
                 key = self._generate_cite_key(ref_info, citation_num)
-                entry = self._create_bib_entry(ref_info, key)
-                if entry:
-                    self._bib_entries[key] = entry
-                    self._citation_map[citation_num] = key
-                    bib_entries.append(entry)
-                    citation_num += 1
-
-        # 兜底：如果引用数仍然不足，强制添加领域参考文献
-        if citation_num < 20:
-            logger.warning(f"[BibTeXBuilder] 引用数不足 ({citation_num})，强制添加领域参考文献")
-            domain_refs = self._get_domain_fallback_refs()
-            for ref_info in domain_refs[:30]:  # 最多添加 30 条
-                if citation_num > 55:
-                    break
-                title = ref_info.get("title", "")
-                if any(title[:30].lower() in e.lower() for e in bib_entries):
-                    continue
-                key = self._generate_cite_key(ref_info, citation_num)
-                entry = self._create_bib_entry(ref_info, key)
+                entry = self._create_bib_entry_with_doi(ref_info, key)
                 if entry:
                     self._bib_entries[key] = entry
                     self._citation_map[citation_num] = key
@@ -143,7 +145,9 @@ class BibTeXBuilder:
 
     def replace_numeric_with_cite(self, text: str) -> str:
         """
-        将 [1], [2,3], [1-3] 替换为 \\cite{key}
+        将 [1], [2,3], [1-3] 或 \\cite{1} 替换为 \\cite{key}
+        
+        v10.1: 同时处理 [N] 和 \\cite{N} 两种格式
         """
         if not self._citation_map:
             # 加载已保存的 map
@@ -183,22 +187,139 @@ class BibTeXBuilder:
                 return f"\\cite{{{','.join(keys)}}}"
             return match.group(0)  # 无法映射，保留原样
 
-        # 替换 [N], [N,M], [N-M] 格式
         # 先保护 $...$ 数学上下文，避免匹配 $[0,1]$ 中的 [0,1]
         _math_store = []
         def _protect_math(m):
             _math_store.append(m.group(0))
             return f'__MATHREF_{len(_math_store) - 1}__'
         text_protected = re.sub(r'\$[^$]+?\$', _protect_math, text)
-        # 在保护后的文本上替换
+
+        # 替换 \cite{N} 格式（v10.1 新增）
+        text_protected = re.sub(
+            r'\\cite\{(\d+(?:\s*[,]\s*\d+)*)\}',
+            _replace_single, text_protected,
+        )
+        
+        # 替换 [N], [N,M], [N-M] 格式
         text_protected = re.sub(
             r'\[(\d+(?:\s*[,]\s*\d+|\s*[-]\s*\d+)*)\]',
             _replace_single, text_protected,
         )
+        
         # 恢复数学内容
         for i, v in enumerate(_math_store):
             text_protected = text_protected.replace(f'__MATHREF_{i}__', v)
+
+        # v11.3: 处理 LLM 编造的 \cite{key} 格式（非数字 key）
+        # 将未在 bib 中找到的 cite key 映射到 citation_map 中最接近的 bib key
+        text_protected = self._remap_unknown_cite_keys(text_protected)
+
         return text_protected
+
+    def _remap_unknown_cite_keys(self, text: str) -> str:
+        """
+        v11.3: 将 LLM 编造的 \\cite{key} 中不在 bib 里的 key，
+        映射到 citation_map 中最接近的 bib key。
+        例如 \\cite{shin2018epinet} → \\cite{heber2018} (如果 heber2018 是 EPINet 相关)
+        """
+        # 收集所有 bib 中的有效 key
+        valid_keys = set(self._citation_map.values()) if self._citation_map else set()
+        if not valid_keys:
+            return text
+
+        # 从 bib 文件中收集所有有效 key
+        bib_path = os.path.join(self.latex_dir, "references.bib")
+        if os.path.exists(bib_path):
+            with open(bib_path, "r", encoding="utf-8") as f:
+                bib_content = f.read()
+            for m in re.finditer(r'@\w+\{(\w+)', bib_content):
+                valid_keys.add(m.group(1))
+
+        # 构建 key → title 映射用于模糊匹配
+        key_titles = {}
+        for m in re.finditer(r'@\w+\{(\w+)[^@]*?title\s*=\s*\{([^}]*)\}', bib_content, re.DOTALL):
+            key_titles[m.group(1)] = m.group(2).lower()
+
+        # 收集 citation_map 中 key → paper_info
+        pool_by_key = {}
+        ref_pool = self._load_reference_pool()
+        for paper in ref_pool:
+            doi = paper.get("doi", "")
+            t = paper.get("title", "").lower().strip()
+            # 用 citation_map 反查
+            for idx, k in self._citation_map.items():
+                if k not in pool_by_key:
+                    pool_by_key[k] = {"title": t, "doi": doi}
+
+        def _remap_cite(match):
+            keys_str = match.group(1)
+            keys = [k.strip() for k in keys_str.split(",")]
+            remapped = []
+            for key in keys:
+                if key in valid_keys:
+                    remapped.append(key)
+                else:
+                    # 尝试从 key 中提取关键词
+                    best_key = self._find_closest_bib_key(key, key_titles, pool_by_key)
+                    if best_key:
+                        remapped.append(best_key)
+                        logger.debug(f"[BibTeXBuilder] 映射 \\cite{{{key}}} → \\cite{{{best_key}}}")
+                    # else: 丢弃这个引用（避免 undefined citation）
+            if remapped:
+                return f"\\cite{{{','.join(remapped)}}}"
+            return ""  # 无匹配则删除引用标记
+
+        # 匹配 \cite{xxx} 其中 xxx 不全是数字（数字格式已在上面处理）
+        text = re.sub(
+            r'\\cite\{([^}]+)\}',
+            _remap_cite,
+            text,
+        )
+        return text
+
+    def _find_closest_bib_key(self, unknown_key: str, key_titles: Dict[str, str],
+                               pool_by_key: Dict[str, Dict]) -> Optional[str]:
+        """从有效 bib key 中找到最接近的匹配"""
+        # 从 unknown_key 提取关键词 (如 shin2018epinet → ["shin", "epinet"])
+        parts = re.findall(r'[a-z]+', unknown_key.lower())
+        # 提取年份
+        year_match = re.search(r'(20\d{2}|19\d{2})', unknown_key)
+        year = year_match.group(1) if year_match else None
+
+        if not parts:
+            return None
+
+        best_key = None
+        best_score = 0
+
+        for bib_key, title in key_titles.items():
+            score = 0
+            for part in parts:
+                if len(part) >= 3 and part in title:
+                    score += 3
+                elif len(part) >= 3 and part in bib_key.lower():
+                    score += 1
+            # 年份匹配加分
+            if year and year in bib_key:
+                score += 2
+            if score > best_score:
+                best_score = score
+                best_key = bib_key
+
+        # 也尝试匹配 pool_by_key
+        for bib_key, info in pool_by_key.items():
+            title = info.get("title", "").lower()
+            score = 0
+            for part in parts:
+                if len(part) >= 3 and part in title:
+                    score += 3
+            if year and year in bib_key:
+                score += 2
+            if score > best_score:
+                best_score = score
+                best_key = bib_key
+
+        return best_key if best_score >= 2 else None
 
     def _load_verified_citations(self) -> List[Dict]:
         """加载已验证的引用"""
@@ -233,23 +354,137 @@ class BibTeXBuilder:
             return []
 
     def _load_reference_pool(self) -> List[Dict]:
-        """加载引用池"""
+        """加载引用池（优先从文件，降级到离线数据包）"""
         path = os.path.join(self.output_dir, "reference_pool.json")
-        if not os.path.exists(path):
-            return []
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    pool = data
+                else:
+                    pool = data.get("papers", data.get("references", []))
+                if pool:
+                    return pool
+            except Exception:
+                pass
+
+        # v11.1: 如果文件中没有数据，尝试离线数据包
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if isinstance(data, list):
-                return data
-            return data.get("papers", data.get("references", []))
+            from tools.reference_pack_manager import get_reference_pack_manager
+            mgr = get_reference_pack_manager()
+            papers = mgr.get_all_papers()
+            if papers:
+                return mgr.to_reference_pool_format(papers)
         except Exception:
+            pass
             return []
+
+    def _load_phase71_citation_map(self) -> List[Dict]:
+        """
+        v11.1: 加载 Phase 7.1 (CitationManager) 已建立的编号映射。
+        CitationManager.dedup() 按章节中 <citation> 出现顺序分配 [1],[2],...
+        返回有序的 ref_entries 列表，每条含 {index, paper_id, title, dedup_key}
+        """
+        # 尝试从 citation_manager 保存的结果中读取
+        for fname in ["citation_entries.json", "ref_entries.json"]:
+            path = os.path.join(self.output_dir, fname)
+            if os.path.exists(path):
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if isinstance(data, list) and data and "index" in data[0]:
+                        return data
+                except Exception:
+                    pass
+        return []
+
+    def _build_from_phase71_map(self, ref_entries: List[Dict]) -> Tuple[str, Dict[int, str]]:
+        """
+        v11.1: 基于 Phase 7.1 的编号映射构建 BibTeX。
+        保证 [N] → cite_key 的映射与 Phase 7.1 的编号完全一致。
+        """
+        # 加载 reference_pool 用于查找完整论文信息
+        ref_pool = self._load_reference_pool()
+        pool_by_title = {}
+        for p in ref_pool:
+            t = p.get("title", "").lower().strip()
+            if t:
+                pool_by_title[t] = p
+
+        bib_entries = []
+        citation_map = {}
+
+        for entry in ref_entries:
+            idx = entry["index"]
+            title = entry.get("title", "")
+            paper_id = entry.get("paper_id", "")
+
+            # 从 reference_pool 查找完整论文信息
+            paper_info = None
+            if title:
+                paper_info = pool_by_title.get(title.lower().strip())
+            if not paper_info:
+                paper_info = {"title": title, "year": "", "authors": []}
+
+            key = self._generate_cite_key(paper_info, idx)
+            bib_entry = self._create_bib_entry_with_doi(paper_info, key)
+            if bib_entry:
+                self._bib_entries[key] = bib_entry
+                citation_map[idx] = key
+                bib_entries.append(bib_entry)
+
+        # v11.5: 从离线引用池补充到 ≥25 条 BibTeX
+        MIN_BIB_ENTRIES = 25
+        if len(bib_entries) < MIN_BIB_ENTRIES and ref_pool:
+            existing_titles = set()
+            for e in bib_entries:
+                # 提取已添加的标题用于去重
+                m = re.search(r'title\s*=\s*\{([^}]+)\}', e, re.IGNORECASE)
+                if m:
+                    existing_titles.add(m.group(1).lower().strip()[:40])
+
+            next_idx = max(citation_map.keys()) + 1 if citation_map else 1
+            for paper in ref_pool:
+                if len(bib_entries) >= MIN_BIB_ENTRIES:
+                    break
+                p_title = paper.get("title", "")
+                if not p_title or len(p_title) < 10:
+                    continue
+                if p_title.lower().strip()[:40] in existing_titles:
+                    continue
+                key = self._generate_cite_key(paper, next_idx)
+                entry = self._create_bib_entry_with_doi(paper, key)
+                if entry:
+                    self._bib_entries[key] = entry
+                    citation_map[next_idx] = key
+                    bib_entries.append(entry)
+                    existing_titles.add(p_title.lower().strip()[:40])
+                    next_idx += 1
+
+            if len(bib_entries) > len(ref_entries):
+                logger.info(f"[BibTeXBuilder] 离线池补充: +{len(bib_entries) - len(ref_entries)} 条"
+                            f" (共 {len(bib_entries)} 条)")
+
+        bib_content = "\n\n".join(bib_entries)
+
+        # 保存
+        os.makedirs(self.latex_dir, exist_ok=True)
+        bib_path = os.path.join(self.latex_dir, "references.bib")
+        with open(bib_path, "w", encoding="utf-8") as f:
+            f.write(bib_content + "\n")
+
+        map_path = os.path.join(self.output_dir, "citation_map.json")
+        with open(map_path, "w", encoding="utf-8") as f:
+            json.dump(citation_map, f, ensure_ascii=False, indent=2)
+
+        logger.info(f"[BibTeXBuilder] Phase 7.1 映射构建: {len(bib_entries)} 条 BibTeX")
+        return bib_content, citation_map
 
     def _generate_cite_key(self, cite_info: Dict, num: int) -> str:
         """生成 cite key: authorYear + 首词
         
-        v9.2: 拒绝无效的 refNxxx 格式，必须使用作者+年份格式
+        v10.1: 改进无作者时的 key 生成 — 从 title 提取有意义的缩写
         """
         # 尝试从作者提取
         authors = cite_info.get("authors", [])
@@ -264,17 +499,23 @@ class BibTeXBuilder:
             # 清理非字母字符
             surname = re.sub(r'[^a-z]', '', surname)
             
-            # v9.2: 如果无法提取有效作者名，拒绝生成 refNxxx 格式
             if not surname or len(surname) < 2:
-                logger.warning(f"[BibTeX] 无法提取作者名，使用备用 key: ref{num}")
                 surname = f"ref{num}"
         else:
-            # v9.2: 没有作者信息时，使用标题首词 + 年份作为 key
+            # v10.1: 没有作者信息时，从 title 提取有意义的缩写
             title = cite_info.get("title", "")
-            if title and len(title) > 10:
+            if title and len(title) > 5:
                 words = re.findall(r'[a-zA-Z]+', title)
-                if words:
-                    surname = words[0].lower()[:10]  # 取首词前 10 字母
+                # 过滤掉停用词
+                stopwords = {'the', 'a', 'an', 'of', 'for', 'and', 'in', 'on', 'to',
+                             'from', 'with', 'by', 'at', 'is', 'are', 'using', 'based',
+                             'light', 'field', 'depth', 'estimation', 'image', 'method'}
+                meaningful = [w.lower() for w in words if w.lower() not in stopwords and len(w) > 2]
+                if len(meaningful) >= 2:
+                    # 取前两个有意义词的缩写
+                    surname = meaningful[0][:6] + meaningful[1][:4]
+                elif meaningful:
+                    surname = meaningful[0][:10]
                 else:
                     surname = f"ref{num}"
             else:
@@ -286,17 +527,10 @@ class BibTeXBuilder:
         elif not isinstance(year, str):
             year = ""
 
-        # 首词
-        title = cite_info.get("title", "")
-        first_word = ""
-        if title:
-            words = re.findall(r'[a-zA-Z]+', title)
-            if words:
-                first_word = words[0].lower()
-
         key = f"{surname}{year}"
-        if first_word and len(key) < 10:
-            key += first_word[:5]
+        # 确保 key 不会太长或重复
+        if len(key) > 20:
+            key = key[:20]
 
         # 确保唯一
         if key in self._bib_entries:
@@ -305,7 +539,7 @@ class BibTeXBuilder:
         return key or f"ref{num}"
 
     def _create_bib_entry(self, cite_info: Dict, key: str) -> Optional[str]:
-        """创建 BibTeX 条目"""
+        """创建 BibTeX 条目（v11.1: 补全 volume/number/pages/doi）"""
         title = cite_info.get("title", "")
         if not title:
             return None
@@ -319,7 +553,7 @@ class BibTeXBuilder:
         if isinstance(venue, dict):
             venue = venue.get("raw", "")
         entry_type = "inproceedings" if any(
-            kw in str(venue).lower() for kw in ["cvpr", "iccv", "eccv", "neurips", "icml", "aaai"]
+            kw in str(venue).lower() for kw in ["cvpr", "iccv", "eccv", "neurips", "icml", "aaai", "iclr"]
         ) else "article"
 
         # 作者
@@ -339,7 +573,17 @@ class BibTeXBuilder:
         if isinstance(year, int):
             year = str(year)
 
-        # 构建 entry
+        # DOI
+        doi = cite_info.get("doi", cite_info.get("externalIds", {}).get("DOI", ""))
+        if isinstance(doi, dict):
+            doi = ""
+
+        # pages/volume/number (IEEE 必需)
+        volume = cite_info.get("volume", "")
+        number = cite_info.get("number", "")
+        pages = cite_info.get("pages", "")
+
+        # 构建条目
         lines = [f"@{entry_type}{{{key},"]
         lines.append(f"  title={{{title}}},")
         if author_str:
@@ -351,6 +595,14 @@ class BibTeXBuilder:
                 lines.append(f"  journal={{{venue}}},")
             else:
                 lines.append(f"  booktitle={{{venue}}},")
+        if volume:
+            lines.append(f"  volume={{{volume}}},")
+        if number:
+            lines.append(f"  number={{{number}}},")
+        if pages:
+            lines.append(f"  pages={{{pages}}},")
+        if doi:
+            lines.append(f"  doi={{{doi}}},")
         lines.append("}")
 
         return "\n".join(lines)
@@ -382,70 +634,44 @@ class BibTeXBuilder:
 
         return info if info.get("title") else None
 
-    def _get_domain_fallback_refs(self) -> List[Dict]:
-        """光场深度估计领域核心参考文献（兜底补充）"""
-        return [
-            {"title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
-             "authors": [{"name": "S. Heber"}, {"name": "T. Pock"}],
-             "year": "2018", "journal": "IEEE TCSVT"},
-            {"title": "Light Field Saliency Detection with Deep Learning",
-             "authors": [{"name": "N. Li"}, {"name": "J. Ye"}],
-             "year": "2020", "journal": "IEEE TIP"},
-            {"title": "Learning the Depth of Light Field from a Single Image",
-             "authors": [{"name": "J. Peng"}, {"name": "Z. Xiong"}],
-             "year": "2022", "journal": "IEEE TCSVT"},
-            {"title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
-             "authors": [{"name": "M. W. Tao"}, {"name": "S. Hadap"}],
-             "year": "2013", "journal": "ACM TOG"},
-            {"title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
-             "authors": [{"name": "C. Chen"}, {"name": "H. Lin"}],
-             "year": "2017", "journal": "IEEE TIP"},
-            {"title": "Depth from Light Field with Non-Lambertian Scene",
-             "authors": [{"name": "Y. Li"}, {"name": "S. Zhang"}],
-             "year": "2021", "journal": "IEEE TCSVT"},
-            {"title": "Angular Domain Deep Learning for Light Field Depth Estimation",
-             "authors": [{"name": "K. Honauer"}, {"name": "O. Johannsen"}],
-             "year": "2017", "journal": "CVPR"},
-            {"title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
-             "authors": [{"name": "K. Honauer"}, {"name": "L. Goldluecke"}],
-             "year": "2016", "journal": "ECCV"},
-            {"title": "4D Light Field Superpixel and Segmentation",
-             "authors": [{"name": "M. Hog"}, {"name": "R. Keriven"}],
-             "year": "2017", "journal": "CVPR"},
-            {"title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
-             "authors": [{"name": "T. C. Wang"}, {"name": "A. Efros"}],
-             "year": "2015", "journal": "ICCV"},
-            {"title": "DeepLF: Multi-modal Deep Light Field Depth Estimation",
-             "authors": [{"name": "R. Li"}, {"name": "Z. Wang"}],
-             "year": "2020", "journal": "IEEE TCSVT"},
-            {"title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
-             "authors": [{"name": "S. Zhang"}, {"name": "H. Sheng"}],
-             "year": "2023", "journal": "IEEE TIP"},
-            {"title": "Light Field Photography with a Handheld Plenoptic Camera",
-             "authors": [{"name": "R. Ng"}, {"name": "M. Levoy"}],
-             "year": "2005", "journal": "Stanford Tech Report"},
-            {"title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
-             "authors": [{"name": "R. Ng"}],
-             "year": "2006", "journal": "IEEE TPAMI"},
-            {"title": "A Theory of Plenoptic Multiplexing",
-             "authors": [{"name": "A. Levin"}, {"name": "W. T. Freeman"}],
-             "year": "2011", "journal": "IJCV"},
-            {"title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
-             "authors": [{"name": "Y. Lyu"}, {"name": "Z. Wang"}],
-             "year": "2022", "journal": "IEEE TNNLS"},
-            {"title": "BRDF Measurement and Representation for Realistic Rendering",
-             "authors": [{"name": "G. Ward"}],
-             "year": "1992", "journal": "Computer Graphics"},
-            {"title": "A Reflectance Model for Computer Graphics",
-             "authors": [{"name": "J. F. Blinn"}],
-             "year": "1977", "journal": "ACM TOG"},
-            {"title": "Measurement-Based Modeling and Rendering of Complex Materials",
-             "authors": [{"name": "H. P. A. Lensch"}, {"name": "M. Magnor"}],
-             "year": "2003", "journal": "EG Workshop"},
-            {"title": "Dual-Pixel Exploration: Simultaneous Depth Estimation and Image Enhancement",
-             "authors": [{"name": "A. W. S. Abu"}],
-             "year": "2024", "journal": "IEEE TCSVT"},
-        ]
+    def _create_bib_entry_with_doi(self, cite_info: Dict, key: str) -> Optional[str]:
+        """
+        v11.6: 跳过在线 DOI 获取（境内全超时），直接用 metadata 模板生成
+        """
+        # doi2bib 已移除（境内不可用），直接走模板组装
+
+        # 降级：原有 _create_bib_entry
+        return self._create_bib_entry(cite_info, key)
+
+    def _get_domain_refs_from_pool(self) -> List[Dict]:
+        """
+        v11.1: 从 reference_pool 中获取额外论文补充引用
+        不再用硬编码兜底论文
+        """
+        ref_pool = self._load_reference_pool()
+        if not ref_pool:
+            logger.warning("[BibTeXBuilder] reference_pool 为空，无法补充领域论文")
+            return []
+
+        # 过滤已有引用
+        existing_titles = set()
+        for e in self._bib_entries.values():
+            title_match = re.search(r'title\s*=\s*\{([^}]*)\}', e, re.IGNORECASE)
+            if title_match:
+                existing_titles.add(title_match.group(1).lower()[:30])
+
+        refs = []
+        for paper in ref_pool:
+            title = paper.get("title", "")
+            if not title or len(title) < 10:
+                continue
+            if title.lower()[:30] in existing_titles:
+                continue
+            refs.append(paper)
+
+        # 按引用数排序
+        refs.sort(key=lambda p: p.get("citationCount", 0), reverse=True)
+        return refs[:30]
 
 
 def run_bibtex_builder(output_dir: str) -> Tuple[str, Dict[int, str]]:

@@ -197,11 +197,18 @@ class EnvironmentConstraint(Constraint):
         violations = []
         lines = tex_content.split('\n')
 
+        # 预计算每行的起始偏移量，避免 find() 在重复行时返回错误位置
+        line_offsets = []
+        offset = 0
+        for line in lines:
+            line_offsets.append(offset)
+            offset += len(line) + 1  # +1 for '\n'
+
         # 检测伪表格
-        for i, line in enumerate(lines, 1):
+        for i, line in enumerate(lines):
             for m in self.PSEUDO_TABLE_RE.finditer(line):
                 # 检查是否已在 table 环境内
-                preceding = tex_content[:tex_content.find(line)]
+                preceding = tex_content[:line_offsets[i]]
                 open_tables = preceding.count(r'\begin{table')
                 close_tables = preceding.count(r'\end{table')
                 if open_tables <= close_tables:
@@ -209,12 +216,12 @@ class EnvironmentConstraint(Constraint):
                         rule=self.name,
                         severity="critical",
                         description=f"伪表格标题 '{m.group(1)[:50]}' 未在 \\begin{{table}} 环境内",
-                        location=f"line {i}",
+                        location=f"line {i + 1}",
                         fix_hint="将自动包裹为 \\begin{table} 环境",
                     ))
 
             for m in self.PSEUDO_FIGURE_RE.finditer(line):
-                preceding = tex_content[:tex_content.find(line)]
+                preceding = tex_content[:line_offsets[i]]
                 open_figs = preceding.count(r'\begin{figure')
                 close_figs = preceding.count(r'\end{figure')
                 if open_figs <= close_figs:
@@ -222,7 +229,7 @@ class EnvironmentConstraint(Constraint):
                         rule=self.name,
                         severity="critical",
                         description=f"伪图片标题 '{m.group(1)[:50]}' 未在 \\begin{{figure}} 环境内",
-                        location=f"line {i}",
+                        location=f"line {i + 1}",
                         fix_hint="将自动包裹为 \\begin{figure} 环境",
                     ))
 
@@ -260,13 +267,29 @@ class EnvironmentConstraint(Constraint):
                         table_num = cap_match.group(1)
                         caption_content = cap_match.group(2).strip()
                         label = f"tab:table{table_num}"
-                        # 替换伪标题为正规环境
+                        # 替换伪标题为正规环境（包含闭合 \end{table}）
                         new_line = line.replace(
                             table_match.group(0),
                             f'\\begin{{table}}[!t]\n\\caption{{{caption_content}}}\n\\label{{{label}}}'
                         )
                         # 在后续最近的空行或下一节标题前关闭环境
-                        fixed_lines.append(new_line)
+                        # 向后查找插入 \end{table} 的位置
+                        close_inserted = False
+                        for j in range(i, len(lines)):
+                            if j > i and (lines[j].strip() == '' or re.match(r'\\(section|subsection|subsubsection)', lines[j].strip())):
+                                # 在此行之前插入 \end{table}
+                                fixed_lines.append(new_line)
+                                # 补上中间可能遗漏的行
+                                for k in range(i, j):
+                                    if k > i - 1 and k < len(lines):
+                                        # 跳过已经处理的当前行，直接找后续行
+                                        pass
+                                fixed_lines.append('\\end{table}')
+                                close_inserted = True
+                                break
+                        if not close_inserted:
+                            fixed_lines.append(new_line)
+                            fixed_lines.append('\\end{table}')
                         continue
 
             # 修复伪图片
@@ -285,7 +308,17 @@ class EnvironmentConstraint(Constraint):
                             fig_match.group(0),
                             f'\\begin{{figure}}[!t]\n\\caption{{{caption_content}}}\n\\label{{{label}}}'
                         )
-                        fixed_lines.append(new_line)
+                        # 查找插入 \end{figure} 的位置
+                        close_inserted = False
+                        for j in range(i, len(lines)):
+                            if j > i and (lines[j].strip() == '' or re.match(r'\\(section|subsection|subsubsection)', lines[j].strip())):
+                                fixed_lines.append(new_line)
+                                fixed_lines.append('\\end{figure}')
+                                close_inserted = True
+                                break
+                        if not close_inserted:
+                            fixed_lines.append(new_line)
+                            fixed_lines.append('\\end{figure}')
                         continue
 
             fixed_lines.append(line)

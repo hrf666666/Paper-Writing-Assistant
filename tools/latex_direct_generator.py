@@ -217,47 +217,93 @@ def _call_llm(prompt: str, max_tokens: int = 16384) -> str:
 # LaTeX 通用 prompt 规则
 # ═══════════════════════════════════════════════════════════════
 
-LATEX_OUTPUT_RULES = """**OUTPUT FORMAT RULES (STRICT — violation = rejection)**:
+LATEX_OUTPUT_RULES = r"""**OUTPUT FORMAT RULES (STRICT — violation = rejection)**:
+
+═══ BASIC FORMAT ═══
 1. Output ONLY LaTeX code. No Markdown, no triple backticks, no explanations.
-2. Do NOT include \\documentclass, \\begin{document}, \\end{document}, \\usepackage, or any preamble.
-3. Use \\section{...} for the chapter title, \\subsection{...} for sub-sections.
-4. Mathematics: $...$ for inline, \\begin{equation}...\\end{equation} for display (add \\label{eq:chN_M}).
+2. Do NOT include \documentclass, \begin{document}, \end{document}, \usepackage, or any preamble.
+3. Use \section{...} for the chapter title, \subsection{...} for sub-sections.
+4. Bold: \textbf{...}. Italic: \textit{...}.
+5. Lists: \begin{itemize} \item ... \end{itemize}.
+6. ALL braces {} MUST be properly paired and nested.
+7. Use [!t] for all floats. NEVER use [h] or [H] or [!h].
+8. \PRESERVE ALL CONTENT**: Do NOT summarize, shorten, or omit anything.
+9. Citations: \cite{key}. Ampersands in text: \& (bare & only as column separator in tabular).
 
-5. **TABLE SIZING — CRITICAL WIDTH RULE (OVERFLOW PREVENTION)**:
-   IEEEtran two-column layout: \\textwidth = full page width (~7in), \\columnwidth = single column (~3.5in).
-   - \\begin{table}[!t] (single-column): ALWAYS use \\columnwidth. NEVER use \\textwidth.
-     Wrap tabular in \\resizebox{\\columnwidth}{!}{...}.
-   - \\begin{table*}[!t] (double-column): use \\textwidth.
-     Wrap tabular in \\resizebox{\\textwidth}{!}{...}.
-   - Choose: ≤4 columns with short text → table; >4 columns or long text → table*.
-   - ALWAYS use booktabs: \\toprule, \\midrule, \\bottomrule (NOT \\hline).
-   - ALWAYS include \\caption{...} and \\label{tab:...}.
-   - For columns with long text, use p{2cm} instead of l.
-   - If table is dense, add \\small or \\footnotesize before tabular.
+═══ EQUATION WIDTH CONTROL (CRITICAL — single column = 3.5in ≈ 252pt) ═══
+IEEEtran single column is only ~3.5 inches wide. MOST display equations with subscripts, 
+fractions, sums, or Greek letters WILL overflow unless you actively prevent it.
 
-6. **FIGURE SIZING — CRITICAL WIDTH RULE (OVERFLOW PREVENTION)**:
-   Same \\columnwidth/\\textwidth rule as tables:
-   - \\begin{figure}[!t] (single-column): use width=\\columnwidth. NEVER use \\textwidth.
-   - \\begin{figure*}[!t] (double-column): use width=\\textwidth.
-   - TikZ diagrams: ALWAYS wrap \\begin{tikzpicture}...\\end{tikzpicture} in
-     \\resizebox{\\columnwidth or \\textwidth}{!}{...tikzpicture...} to prevent overflow.
-     This is MANDATORY — a bare tikzpicture WILL overflow.
-   - Use PGF anchors: .south, .north, .east, .west (NOT .bottom/.top/.left/.right).
-   - In tikzpicture, avoid absolute coordinates > 6cm for single-column or > 14cm for double-column.
+RULE: If a display equation has MORE THAN 2 of these: \frac, \sum, \prod, \left[, subscripts, 
+superscripts — it WILL overflow. You MUST use one of these formats instead of \begin{equation}:
 
-7. **OVERFLOW PREVENTION — UNIVERSAL RULES**:
-   - NEVER use hardcoded widths like width=10cm or width=5in. Always use \\columnwidth or \\textwidth.
-   - Every tabular MUST be inside \\resizebox{\\columnwidth/\\textwidth}{!}{...}.
-   - Every tikzpicture MUST be inside \\resizebox{\\columnwidth/\\textwidth}{!}{...}.
-   - Use \\sloppy for paragraphs with long identifiers/URLs to allow flexible hyphenation.
+For LONG single equations (one logical expression that doesn't fit one line):
+\begin{multline}
+  first_part_of_expression \\
+  second_part_of_expression
+  \label{eq:chN_M}
+\end{multline}
 
-8. Bold: \\textbf{...}. Italic: \\textit{...}. Lists: \\begin{itemize} \\item ... \\end{itemize}.
-9. Citations: \\cite{key} (use descriptive keys like author2024method).
-10. Ampersands: use \\& in text, but bare & as column separator in tabular environments.
-11. ALL braces {} MUST be properly paired and nested. Count them.
-12. **PRESERVE ALL CONTENT**: Do NOT summarize, shorten, or omit any paragraph, table, or formula.
-13. **FIXED POSITIONING**: Use [!t] for all floats. Never use [h] or [H] or [!h].
-14. For display equations with multiple lines, use \\begin{align}...\\end{align} with & alignment and \\\\ line breaks.
+For MULTI-LINE equations (multiple related expressions):
+\begin{align}
+  \text{short_name} &= expression_one \label{eq:chN_M1} \\
+  \text{short_name} &= expression_two \label{eq:chN_M2}
+\end{align}
+
+For a SINGLE equation that needs alignment points:
+\begin{equation}
+  \begin{aligned}
+    L &= \frac{1}{N}\sum_{i}\bigl[ \alpha \cdot f(x_i) \\
+      &\quad + \beta \cdot g(x_i) \bigr]
+  \end{aligned}
+  \label{eq:chN_M}
+\end{equation}
+
+NEVER output a \begin{equation}...\end{equation} longer than ~80 characters on one line.
+If in doubt, use align or multline — it is ALWAYS safer than equation.
+
+═══ TABLE SIZE CONTROL (CRITICAL) ═══
+Layout: \columnwidth ≈ 3.5in (single column), \textwidth ≈ 7in (double column).
+
+MANDATORY TEMPLATE for every table:
+── Single-column (≤4 cols, short text) ──
+\begin{table}[!t]
+\caption{...}\label{tab:...}
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+... \\
+\midrule
+... \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+── Double-column (>4 cols OR long text cells) ──
+\begin{table*}[!t]
+\caption{...}\label{tab:...}
+\centering\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllllll}
+\toprule
+... \\
+\midrule
+... \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+DECISION RULE: Count your columns. ≤4 and all cells < 10 chars → table. 
+Otherwise → table*.
+ALWAYS use booktabs (\toprule, \midrule, \bottomrule). NEVER \hline.
+ALWAYS wrap tabular in \resizebox. This is NOT optional.
+
+═══ FIGURE / TikZ SIZE CONTROL ═══
+Every tikzpicture MUST be wrapped in \resizebox{\columnwidth or \textwidth}{!}{...tikzpicture...}.
+Use relative positioning (right=of, below=of). NEVER use absolute coordinates like at (5,3).
+Max coordinates: 6cm for single-column, 14cm for double-column.
+Use PGF anchors: .south, .north, .east, .west.
 """
 
 
@@ -381,7 +427,6 @@ def _validate_float_sizing(latex_code: str) -> str:
         col_count = len(re.findall(r'[lcrp]', clean_spec))
         
         if col_count <= 4:
-            # 4列以下不应用 table*，降级为 table
             logger.info(f"[float_sizing] table* ({col_count} cols) → table (downgrade)")
             result = env_content.replace('\\begin{table*}', '\\begin{table}', 1)
             result = result.replace('\\end{table*}', '\\end{table}', 1)
@@ -460,8 +505,6 @@ def _fix_textwidth_confusion(latex_code: str) -> str:
     \\textwidth 替换为 \\columnwidth，防止单栏元素撑到双栏宽度溢出。
     """
     # ── 单栏 table 环境 ──
-    # 先标记所有 table* 位置，避免误替换
-    # 匹配 table（非 table*）环境
     def _fix_table_env(match):
         env = match.group(0)
         old = env
@@ -470,9 +513,12 @@ def _fix_textwidth_confusion(latex_code: str) -> str:
             logger.info("[fix_textwidth] 单栏 table 中 \\textwidth → \\columnwidth")
         return env
 
-    # 使用负向前瞻确保 table 后面不是 *
+    # 匹配 \begin{table} 到 \end{table}，但排除 \begin{table*} 到 \end{table*}
+    # 使用负向前瞻确保 \begin{table} 后面不是 *
+    # 同时确保 \end{table} 后面不是 *
+    # 简单策略：用 (?!...) 做前后约束
     latex_code = re.sub(
-        r'\\begin\{table\}(?!\*)[^\\]*?(?=\\begin\{tabular)|\\begin\{table\}(?!\*).*?\\end\{table\}(?!\*)',
+        r'\\begin\{table\}(?!\*).*?\\end\{table\}(?!\*)',
         _fix_table_env, latex_code, flags=re.DOTALL,
     )
 
@@ -497,7 +543,8 @@ def _fix_textwidth_confusion(latex_code: str) -> str:
 def _ensure_table_resizebox(latex_code: str) -> str:
     """
     后处理：为缺少 \\resizebox 缩放包裹的 tabular 环境自动添加缩放。
-    只处理单栏 table 环境。
+    同时处理单栏 table 和双栏 table* 环境。
+    v10.1: 对宽表格（>5列）强制添加 \\small/\\footnotesize 缩小字体。
     """
     def _fix_one_table(match):
         env = match.group(0)
@@ -514,6 +561,19 @@ def _ensure_table_resizebox(latex_code: str) -> str:
         is_star = r'\begin{table*}' in env
         width_cmd = r'\textwidth' if is_star else r'\columnwidth'
 
+        # 检测列数，宽表格需要缩小字体
+        col_spec_match = re.search(r'\\begin\{tabular[*]?\}(?:\{[^}]*\})?\{([^}]+)\}', env)
+        col_count = 0
+        font_size_prefix = ''
+        if col_spec_match:
+            clean_spec = re.sub(r'@\{[^}]*\}', '', col_spec_match.group(1))
+            clean_spec = re.sub(r'\{[^}]*\}', '', clean_spec)
+            col_count = len(re.findall(r'[lcrp]', clean_spec))
+            if col_count > 5:
+                font_size_prefix = '\\footnotesize\n'
+            elif col_count > 4:
+                font_size_prefix = '\\small\n'
+
         # 在 \begin{tabular} 前插入 \resizebox{width}{!}{
         before = env[:tabular_start.start()]
         tabular_and_rest = env[tabular_start.start():]
@@ -528,13 +588,13 @@ def _ensure_table_resizebox(latex_code: str) -> str:
 
         # 包裹 resizebox
         result = (
-            before +
+            before + font_size_prefix +
             r'\resizebox{' + width_cmd + r'}{!}{%' + '\n' +
             tabular_body + '%' + '\n' + '}' +
             after
         )
 
-        logger.info(f"[ensure_resizebox] table{'*' if is_star else ''} 添加 resizebox({width_cmd})")
+        logger.info(f"[ensure_resizebox] table{'*' if is_star else ''} ({col_count} cols) 添加 resizebox({width_cmd})")
         return result
 
     # 匹配所有 table 环境（含 table*）
@@ -595,74 +655,117 @@ def _ensure_tikz_fits(latex_code: str) -> str:
 def _fix_long_equations(latex_code: str) -> str:
     """
     后处理：将可能溢出的长 equation 环境转为 multline 环境，并在合适位置拆行。
-    
+
     关键处理：
-    1. \left/\right 不能跨行 → 替换为 \Big/\Big
+    1. \\left/\\right 不能跨行 → 替换为 \\Big/\\Big（按行分别替换）
     2. 在 + 或 = 处拆行
-    3. 只处理真正长（>100字符）且没有多行结构的公式
+    3. 只处理真正长（>80字符）且没有多行结构的公式
     """
     def _fix_one_eq(match):
         content = match.group(1)
         label_match = re.search(r'(\\label\{[^}]+\})', content)
         label = label_match.group(1) if label_match else ''
         body = re.sub(r'\\label\{[^}]+\}', '', content).strip()
-        
-        # 短公式不处理（IEEEtran 单栏 ≈ 252pt，约 150+ 字符的复杂公式才会溢出）
-        if len(body) < 150:
+
+        # 短公式不处理
+        if len(body) < 80:
             return match.group(0)
-        
-        # 已有多行结构不处理
-        if '\\\\' in body or 'begin{align' in body or 'begin{multline' in body:
+
+        # 已有多行结构不处理 —— 但排除内部环境（bmatrix/pmatrix/vmatrix/cases）的 \\
+        # 这些环境的 \\ 是矩阵行分隔，不是 equation 的多行拆分
+        inner_envs = ['bmatrix', 'pmatrix', 'vmatrix', 'Vmatrix', 'cases', 'array',
+                      'matrix', 'Bmatrix', 'smallmatrix', 'aligned', 'alignedat',
+                      'gathered', 'split', 'subarray']
+        body_without_inner = body
+        for env in inner_envs:
+            body_without_inner = re.sub(
+                r'\\begin\{' + re.escape(env) + r'\}.*?\\end\{' + re.escape(env) + r'\}',
+                '', body_without_inner, flags=re.DOTALL,
+            )
+
+        db_check = '\\\\' in body_without_inner
+        al_check = 'begin{align' in body
+        ml_check = 'begin{multline' in body
+        if db_check or al_check or ml_check:
             return match.group(0)
-        
-        # 将 \left...\right 替换为 \Big...\Big（可跨行）
-        body_safe = re.sub(r'\\left\[', r'\\Big[', body)
-        body_safe = re.sub(r'\\right\]', r'\\Big]', body_safe)
-        body_safe = re.sub(r'\\left\(', r'\\Big(', body_safe)
-        body_safe = re.sub(r'\\right\)', r'\\Big)', body_safe)
-        body_safe = re.sub(r'\\left\\|', r'\\Big\\|', body_safe)
-        body_safe = re.sub(r'\\right\\|', r'\\Big\\|', body_safe)
-        body_safe = re.sub(r'\\left\\\{', r'\\Big\\{', body_safe)
-        body_safe = re.sub(r'\\right\\\}', r'\\Big\\}', body_safe)
-        
+
         # 在 "+ " 处拆分（找最接近中间的 + 号）
-        plus_positions = [m.start() for m in re.finditer(r'\+ ', body_safe)]
-        if not plus_positions:
+        # 备选：在 "= " 处拆分（等号赋值）
+        plus_positions = [m.start() for m in re.finditer(r'\+ ', body)]
+        eq_positions = [m.start() for m in re.finditer(r'= ', body)]
+
+        if plus_positions:
+            mid_pos = len(body) // 2
+            best_split = min(plus_positions, key=lambda p: abs(p - mid_pos))
+        elif eq_positions:
+            # 在第二个 = 处拆分（第一个通常是定义符 J = ...）
+            if len(eq_positions) > 1:
+                best_split = eq_positions[1]
+            else:
+                best_split = eq_positions[0]
+        else:
             return match.group(0)
-        
-        # 找最接近中间位置的 +
-        mid_pos = len(body_safe) // 2
-        best_split = min(plus_positions, key=lambda p: abs(p - mid_pos))
-        
-        line1 = body_safe[:best_split].rstrip()
-        line2 = body_safe[best_split:].lstrip()
-        
-        # 确保第一行末尾括号匹配（如果以 \Big[ 结尾则不拆）
-        open_big = line1.count('\\Big[') + line1.count('\\Big(')
-        close_big = line1.count('\\Big]') + line1.count('\\Big)')
-        if open_big > close_big:
-            # 第一行有未闭合的大括号，在 ] 或 ) 后面的 + 处拆
-            # 找到第一个 ] 或 ) 后的 +
-            for i, pos in enumerate(plus_positions):
-                prefix = body_safe[:pos]
-                o = prefix.count('\\Big[') + prefix.count('\\Big(')
-                c = prefix.count('\\Big]') + prefix.count('\\Big)')
-                if o <= c and pos > len(body_safe) * 0.3:
-                    best_split = pos
-                    break
-            line1 = body_safe[:best_split].rstrip()
-            line2 = body_safe[best_split:].lstrip()
-        
-        result = f'\\begin{{multline}}\n{line1} \\\\\n{line2}\n{label}\n\\end{{multline}}'
-        logger.info("[fix_long_equations] equation → multline (拆行)")
+
+        line1 = body[:best_split].rstrip()
+        line2 = body[best_split:].lstrip()
+
+        # 处理 \left/\right 跨行不匹配问题
+        # 拆行后，\left 和 \right 可能被分到不同行，导致 LaTeX 编译错误
+        # 解决方案：将 \left → \Bigl, \right → \Bigr（不需要跨行配对）
+        line1 = _fix_left_right_for_line(line1)
+        line2 = _fix_left_right_for_line(line2)
+
+        result = f'\\begin{{multline}}\n{label}\n{line1} \\\\\n{line2}\n\\end{{multline}}'
+        logger.info("[fix_long_equations] equation -> multline")
         return result
-    
+
     latex_code = re.sub(
         r'\\begin\{equation\}(.*?)\\end\{equation\}',
         _fix_one_eq, latex_code, flags=re.DOTALL,
     )
-    
+
     return latex_code
+
+
+def _fix_left_right_for_line(line: str) -> str:
+    """
+    修复拆行后 \\left/\\right 不匹配问题。
+
+    \\left 和 \\right 必须在同一行配对出现。拆行后可能导致：
+    - 第一行有 \\left 但没有对应的 \\right（被分到第二行）
+    - 第二行有 \\right 但没有对应的 \\left
+
+    解决方案：当 \\left 和 \\right 数量不配对时，
+    全部替换为固定大小的定界符 \\Bigl/\\Bigr（不要求同行配对）。
+
+    Args:
+        line: 拆分后的单行公式
+    """
+    left_count = len(re.findall(r'\\left\b', line))
+    right_count = len(re.findall(r'\\right\b', line))
+
+    if left_count == right_count:
+        # 已经配对，不需要修复
+        return line
+
+    # 不配对 → 用 string replace 一次性替换（避免正则回溯灾难）
+    # 先替换 \leftX → \BiglX，再替换 \rightX → \BigrX
+    # 注意：必须先替换 \left 再替换 \right，且用字符串替换而非正则
+    for old, new in [
+        (r'\left(', r'\Bigl('),
+        (r'\left[', r'\Bigl['),
+        (r'\left\{', r'\Bigl\{'),
+        (r'\left|', r'\Bigl|'),
+        (r'\left.', r'\Bigl.'),
+        (r'\right)', r'\Bigr)'),
+        (r'\right]', r'\Bigr]'),
+        (r'\right\}', r'\Bigr\}'),
+        (r'\right|', r'\Bigr|'),
+        (r'\right.', r'\Bigr.'),
+    ]:
+        line = line.replace(old, new)
+
+    return line
 
 
 def _overflow_heal_loop(
@@ -1112,6 +1215,15 @@ def assemble_full_paper(chapter_latex_parts: List[str],
     paper += "\\bibliography{references}\n"
 
     paper += LATEX_CLOSING
+
+    # ═══ 全局后处理：确保拼装后的完整论文也经过修复 ═══
+    paper = _fix_textwidth_confusion(paper)
+    paper = _ensure_table_resizebox(paper)
+    paper = _ensure_tikz_fits(paper)
+    paper = _validate_float_sizing(paper)
+    paper = _fix_long_equations(paper)
+    logger.info("[assemble] 全局后处理完成 (5 步修复链)")
+
     return paper
 
 

@@ -1,0 +1,425 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于三层角信号分解与几何特征的光场材质感知机制 - 该机制从物理和几何层面深刻揭示了非朗伯体表面导致EPI（极平面图像）假设失效的根本原因。通过几何特征替代频域特征，克服了离散角采样分辨率不足的限制，提供了一种高效、鲁棒的材质感知方法，为解决非朗伯体光场深度估计这一长期难题提供了全新的理论视角和前置路由依据。",
+        "Contribution: 基于双掩码路由与领域平衡采样的统一光场深度估计框架 - 该框架通过双掩码机制有效缓解了复杂纹理和非朗伯体表面带来的EPI斜率模糊与结构破坏问题。同时，领域平衡策略在训练数据极度受限（特别是非朗伯体场景仅有4个）的硬约束下，最大化了模型对混合/城市场景的泛化能力，显著提升了整体和特定领域的深度估计精度。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景 (Research Background)",
+          "核心任务": "阐述CNN在计算机视觉领域的传统统治地位，以及Transformer在自然语言处理（NLP）中的巨大成功，引出将Transformer架构迁移至视觉领域的研究趋势（如ViT）。"
+        },
+        {
+          "子节名称": "领域差异与现有挑战 (Domain Differences & Challenges)",
+          "核心任务": "深入剖析视觉与语言领域的本质差异（如视觉实体尺度变化大、图像像素分辨率高），并指出直接将NLP Transformer应用于视觉任务时面临的计算复杂度爆炸和缺乏多尺度特征等局限性。"
+        },
+        {
+          "子节名称": "提出方法 (Proposed Method)",
+          "核心任务": "介绍Swin Transformer的核心架构设计（层级特征图构建、移动窗口机制），并从原理上解释这些设计如何完美解决前述挑战（实现线性计算复杂度、支持多尺度建模）。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "光场深度估计的物理瓶颈（非朗伯体/复杂纹理导致EPI失效）",
+          "现有方法在低角分辨率下的局限性",
+          "本文的核心贡献与物理/几何视角的引入"
+        ],
+        "depth_map": {
+          "background_and_motivation": "moderate",
+          "limitations_of_existing_work": "deep",
+          "proposed_contributions": "deep",
+          "paper_structure": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "motivation_hook锚点：明确光场深度估计受限于物理反射假设与EPI斜率模糊",
+          "3个编号的贡献列表（包含预期定量提升或明确的技术突破点）",
+          "论文结构段落（The remainder of this paper is organized as follows...）",
+          "至少1个具体现象或数据说明非朗伯体导致的EPI失效严重性",
+          "[动机锚点] The introduction must establish: Light field depth estimation is fundamentally bottlenecked by the p",
+          "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+        ],
+        "should_avoid": [
+          "详细的方法公式推导与网络架构细节",
+          "过多的参考文献堆砌（每段避免>10篇）",
+          "过度主观、宣传性或非学术的语言"
+        ],
+        "target_emphasis": "确立非朗伯体表面物理反射特性是光场深度估计的根本瓶颈，并清晰概述本文如何通过材质感知与双掩码路由解决此问题。"
+      }
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "CNNs in Computer Vision",
+          "核心任务": "回顾卷积神经网络在视觉领域的统治地位及经典架构演进，指出其在建模长距离依赖和全局感受野方面的固有局限性。"
+        },
+        {
+          "子节名称": "Transformers in NLP",
+          "核心任务": "简述Transformer架构及自注意力机制在自然语言处理领域的巨大成功，确立其处理序列和全局依赖的有效性，为跨领域应用做理论铺垫。"
+        },
+        {
+          "子节名称": "Transformers in Computer Vision",
+          "核心任务": "系统梳理现有将Transformer引入视觉领域的工作（如ViT、DETR等），重点剖析其在计算复杂度（二次方）和缺乏多尺度/层级特征表达上的缺陷，从而精准引出本文Swin Transformer的创新动机。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "光场深度估计技术的演进与EPI假设的局限",
+          "材质/反射感知在计算机视觉中的应用",
+          "多领域与不平衡数据训练策略"
+        ],
+        "depth_map": {
+          "lf_depth_estimation": "moderate",
+          "material_aware_methods": "moderate",
+          "multi_domain_training": "brief",
+          "gap_analysis": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "gap_bridge锚点：指出现有方法未解决物理反射假设与离散角采样（如9x9）之间的矛盾",
+          "按技术分类的组织结构（by_technique）",
+          "每组文献末尾的批判性总结（end_of_group critique）",
+          "高引用密度以展示对领域的全面掌握",
+          "[动机锚点] Transition to method by showing existing approaches do not address: Light field depth estimation is "
+        ],
+        "should_avoid": [
+          "简单罗列文献而无批判性分析与对比",
+          "深入探讨与光场深度估计无关的通用材质识别方法",
+          "提前剧透本文的具体数学公式或网络细节"
+        ],
+        "target_emphasis": "梳理现有光场深度估计与材质感知方法，明确指出它们在低角分辨率和非朗伯体物理建模上的空白，为本文方法铺平道路。"
+      }
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 输入预处理模块 (Input Normalization)",
+          "description": "对每个样本在通道维度上进行Min-Max归一化，并将数值范围线性映射到 [-1, 1] 区间，以加速网络收敛并统一不同光照条件下的输入分布。"
+        },
+        {
+          "title": "3.3 双掩码深度估计主干网络 (DualMaskDepthModel)",
+          "description": "采用双分支架构（Lambertian EPI分支与Non-Lambertian几何分支）提取特征。结合三层角信号分解先验，通过网络前向传播预测场景的几何结构与材质属性，并利用掩码机制融合双分支特征。"
+        },
+        {
+          "title": "3.4 相位正则化模块 (Phase Regularization)",
+          "description": "计算向量场V在空间维度（x和y）上的梯度平方和，并利用反射率r的Sigmoid反转值作为权重。该操作旨在惩罚非朗伯体区域（r_pred较大时权重较小）的向量场梯度，保持朗伯体区域的平滑性。"
+        },
+        {
+          "title": "3.5 物理一致性损失模块 (Physical Consistency Loss)",
+          "description": "计算预测的向量场与反射率之间的物理一致性约束，确保深度和材质预测符合光场成像的物理规律（具体内部实现封装在 physical_consistency_loss 函数中）。"
+        },
+        {
+          "title": "3.6 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出三层角信号分解物理模型，将光场角信号解耦为DC分量（环境光照）、线性项（视差/深度EPI斜率）和残差项（材质/反射类型），从物理层面分离深度与材质信息。; 摒弃了在低角分辨率（如9×9离散采样）下失效的2D-DFT频域分析方法（MRI类比），转而提取几何角特征（如角梯度、角相关性、变异系数等）来表征不同材质的反射差异。; 设计并训练基于几何特征的随机森林（RF）分类器，实现高精度的朗伯体与非朗伯体（高光、散射）表面像素级分类，为后续深度估计网络提供可靠的材质先验掩码。",
+        "Module motivation and design: 构建GeometricDualMask（几何双掩码）模型架构，利用材质感知机制生成的双掩码，对朗伯体和非朗伯体/复杂纹理区域进行特征路由与分支处理，缓解单一EPI架构的假设冲突。; 采用4方向EPI（EPINet4Dir V3）作为基础特征提取器，结合多领域数据集（如包含170个场景的UrbanLF-Syn）进行联合训练，以捕获丰富的视差结构信息。; 设计并实施领域平衡采样（Domain-balanced sampling）与加权随机采样器（WeightedRandomSampler）策略，动态调整不同数据域（Mixed, Lambertian, Non-Lambertian）的采样权重，防止模型在少数域上过拟合。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Overall Architecture",
+          "核心任务": "介绍Swin Transformer的宏观网络结构，包括Patch Partition、Linear Embedding以及分层设计的各个Stage，确立模型的基础骨架和分层特征图生成机制。"
+        },
+        {
+          "子节名称": "Shifted Window based Self-Attention",
+          "核心任务": "详细阐述核心创新机制。分析全局自注意力瓶颈，提出局部窗口自注意力（W-MSA），引入移动窗口机制（SW-MSA）实现跨窗口交互，并介绍高效批量计算方法和相对位置偏置。"
+        },
+        {
+          "子节名称": "Architecture Variants",
+          "核心任务": "列出模型的不同规模变体（如Swin-T/S/B/L），提供具体的超参数配置（如层数、通道数、头数），为后续实验部分的消融和对比做铺垫。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "三层角信号分解与材质感知物理模型",
+          "GeometricDualMask双掩码路由架构设计",
+          "领域平衡采样与联合训练策略"
+        ],
+        "depth_map": {
+          "problem_formulation": "moderate",
+          "three_layer_material_perception": "deep",
+          "geometric_dual_mask_framework": "deep",
+          "domain_balanced_training_strategy": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "primary",
+          "创新点2": "primary"
+        },
+        "must_include": [
+          "问题定义与核心数学公式（key_formulas_only，避免过度密集证明）",
+          "创新点1的三层分解物理模型与几何特征（角梯度、变异系数等）提取逻辑",
+          "创新点2的GeometricDualMask架构图（detailed_boxes, horizontal_flow, colorful）",
+          "包含算法伪代码的Algorithm Box",
+          "各模块与核心动机（解决EPI失效）的明确连接",
+          "计算复杂度、延迟或硬件资源分析",
+          "[动机锚点] Each module should be justified by connecting back to the core motivation"
+        ],
+        "should_avoid": [
+          "过于冗长且缺乏直观物理/几何解释的数学证明",
+          "基础特征提取器（如EPINet4Dir V3）的过度细节描述",
+          "缺失模块间数据流与张量维度说明"
+        ],
+        "target_emphasis": "详细阐述基于物理分解的材质感知机制与双掩码路由框架的数学原理与架构设计，证明其如何从根源上缓解EPI假设冲突。"
+      }
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: 名称与描述, 划分与采样方式"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Image Classification on ImageNet-1K",
+          "核心任务": "在标准图像分类基准上评估Swin Transformer作为基础视觉Backbone的特征提取能力和分类精度，验证其相较于CNN和其他ViT变体的优势。"
+        },
+        {
+          "子节名称": "Object Detection and Instance Segmentation on COCO",
+          "核心任务": "在COCO数据集上评估模型在密集预测任务中的表现，验证其多尺度特征建模能力以及作为通用Backbone在目标检测和实例分割中的迁移性能。"
+        },
+        {
+          "子节名称": "Semantic Segmentation on ADE20K",
+          "核心任务": "在ADE20K数据集上评估模型在像素级语义分割任务中的性能，进一步证明其在处理高分辨率图像和复杂场景理解时的有效性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "多数据集（特别是UrbanLF-Syn）上的SOTA定量对比",
+          "验证各模块有效性的严格消融实验",
+          "定性可视化与物理可解释性分析"
+        ],
+        "depth_map": {
+          "datasets_and_setup": "brief",
+          "sota_comparison": "deep",
+          "ablation_study": "deep",
+          "visualization_and_complexity": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "evidence_support锚点：实验设计直接验证材质感知和双掩码路由的贡献",
+          "完整的消融实验表格（验证RF分类器、双掩码、领域平衡采样）",
+          "与最新SOTA在标准大规模基准上的定量对比表（包含BadPix等指标）",
+          "高分辨率、色彩丰富的EPI与深度图可视化对比（高figure_density）",
+          "计算复杂度、参数量与推理延迟的对比分析",
+          "[动机锚点] Design experiments that directly validate each contribution claim"
+        ],
+        "should_avoid": [
+          "失败案例分析（failure_analysis，根据journal style要求避免）",
+          "过度吹嘘结果或使用非学术语言",
+          "缺乏直接SOTA对比或回避非朗伯体场景的特定指标"
+        ],
+        "target_emphasis": "通过全面的定量对比、严格的消融实验和直观的可视化，提供坚实的实证证据，证明所提框架在混合/非朗伯体场景下的优越性。"
+      }
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "方法总结与贡献回顾",
+          "核心任务": "简要回顾本文提出的Swin Transformer架构及其核心创新点（层级化设计、移动窗口机制），强调其作为通用视觉骨干网络的设计初衷"
+        },
+        {
+          "子节名称": "实验成果总结",
+          "核心任务": "汇总在多个基准任务（图像分类、目标检测、语义分割）上取得的关键性能指标，突出相较于先前SOTA的提升幅度"
+        },
+        {
+          "子节名称": "更广泛的影响与意义",
+          "核心任务": "讨论Swin Transformer对视觉领域的潜在推动作用，说明Transformer架构在视觉任务中替代CNN的可行性与前景"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "核心贡献与技术突破总结",
+          "物理动机呼应与更广泛影响",
+          "客观局限性与未来研究方向"
+        ],
+        "depth_map": {
+          "summary_of_contributions": "moderate",
+          "broader_impact_and_motivation_echo": "deep",
+          "future_work": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "contribution_claim锚点：呼应核心叙事，重申光场深度估计的物理瓶颈及本文的突破",
+          "对两个创新点核心价值的精炼总结（材质先验与双掩码路由）",
+          "客观的局限性探讨与未来工作展望（如向真实世界无监督场景扩展）",
+          "[动机锚点] Echo the core narrative: Light field depth estimation is fundamentally bottlenecked by the physical "
+        ],
+        "should_avoid": [
+          "引入新的方法细节、公式或实验数据",
+          "过度宣传、主观性语言或简单复制摘要内容",
+          "提出与本文核心贡献无关的宽泛未来工作"
+        ],
+        "target_emphasis": "凝练本文在光场物理建模与深度估计框架上的核心突破，呼应引言动机，并为后续研究指明方向。"
+      }
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "Markdown（禁止混用 LaTeX 块级元素）"
+  }
+}

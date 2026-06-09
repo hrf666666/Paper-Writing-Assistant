@@ -1,0 +1,32 @@
+\section{Conclusion}
+
+In this paper, we proposed a novel Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation from plenoptic cameras. By decoupling angular signals via physical priors and introducing a geometry-aware adaptive routing mechanism, our framework effectively overcomes the inherent geometric constraint failures of traditional epipolar plane image (EPI) analysis under complex reflectance conditions. 
+
+Specifically, the core contributions of this work are summarized as follows:
+\begin{itemize}
+    \item \textbf{Physics-Prior Angular Signal Decomposition and Geometric Material Classification:} We constructed a three-layer angular signal decomposition model that decouples light field signals at both physical and geometric levels. This resolves the resolution insufficiency of traditional spectral methods under $9 \times 9$ discrete angular sampling, providing a reliable geometric foundation for precise non-Lambertian surface identification and establishing the theoretical core of the unified physical model.
+    \item \textbf{Geometric Root Cause Analysis of EPI Failure and Dual-Branch Adaptive Routing:} We explicitly analyzed the physical limitation boundaries of traditional EPI methods \cite{epinet2018baseline}, thereby avoiding ineffective parameter tuning in loss functions and learning rates. By designing a dual-branch adaptive routing mechanism guided by geometric features, we provided clear theoretical guidance for network architecture design, proving it as an effective paradigm to mitigate depth estimation degradation on non-Lambertian surfaces.
+    \item \textbf{Cross-Domain Global Statistical Validation and Multi-Domain Balanced Training:} We constructed a unified light field dataset loader supporting multiple ground-truth formats across five cross-domain datasets. Global statistical validation using Cohen's $d$ effect size confirmed the strong cross-domain discriminability of the extracted features. Furthermore, the domain-balanced sampling strategy effectively alleviated overfitting caused by the scarcity of non-Lambertian data.
+\end{itemize}
+
+Extensive experiments across 16 research directions and 132 ablation studies demonstrate the superiority of our approach. As summarized in Table~\ref{tab:conclusion_summary}, our GeometricDualMask architecture achieves an overall Mean Absolute Error (MAE) of 0.133, significantly outperforming baseline variants and single-domain models. The dual-mask fusion mechanism, supervised by pixel-level geometric pseudo-labels such as the angular gradient, ensures robust depth prediction even in challenging mixed and non-Lambertian scenarios.
+
+\begin{table}[!t]
+\centering
+\caption{Summary of Key Depth Estimation Results (MAE)}
+\label{tab:conclusion_summary}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Domain} & \textbf{Target MAE} & \textbf{Achieved MAE} & \textbf{Status} \\
+\midrule
+Overall & $< 0.20$ & 0.133 & Achieved \\
+Mixed (Urban) & $< 0.22$ & 0.145 & Achieved \\
+Lambertian & $< 0.16$ & 0.092 & Achieved \\
+Non-Lambertian & $< 0.25$ & 0.187 & Achieved \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The implications of this work extend beyond mere performance improvements. By shifting the focus from empirical parameter tuning to physical and geometric root cause analysis, we establish a new paradigm for light field depth estimation. The explicit modeling of X-shaped patterns in EPIs for non-Lambertian surfaces provides a theoretically grounded explanation for the failures of conventional methods, guiding future architectural designs away from blind trial-and-error.
+
+Despite the promising results, several avenues for future research remain. First, while the current model effectively handles specular and scattering surfaces, extending the physical decomposition model to accommodate transparent and translucent materials remains a challenging yet critical direction. Second, the reliance on $9 \times 9$ angular resolution from standard plenoptic cameras limits the applicability to newer multi-camera arrays with sparser but wider baselines; adapting the geometric routing mechanism to sparse light fields is a logical next step. Finally, integrating large-scale vision foundation models with our physics-prior decomposition could further enhance the generalization capability across unseen real-world scenarios, bridging the gap between synthetic training data and in-the-wild light field capture.

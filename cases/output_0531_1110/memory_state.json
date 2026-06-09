@@ -1,0 +1,320 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于物理先验的三层角信号分解与几何材质分类模型: 从物理和几何层面解耦了光场信号，解决了传统频谱方法在9×9离散角度采样下分辨率不足的问题。为非朗伯体表面的精准识别和后续深度估计提供了可靠的几何特征基础，奠定了统一物理模型的理论核心。\n  2. 非朗伯体EPI失效的几何根因剖析与双分支自适应路由机制: 明确了传统EPI方法的物理局限性边界，避免了在损失函数、学习率等参数层面的无效调参。为复杂光场场景下的网络架构设计提供了明确的理论指导，证明了基于几何特征的双分支路由是解决非朗伯体深度估计退化的有效范式。\n  3. 跨域光场分解特征的全局统计验证与多域平衡训练框架: 确保了理论分解模型和提取特征不仅在单一场景有效，而且具备跨数据集、跨域的强泛化能力。多域平衡训练框架有效提升了模型在数据分布不均情况下的整体鲁棒性，为统一光场深度估计模型的工程落地提供了可靠的数据和训练支撑。\n\n模型架构: 模型采用统一的双掩码物理架构（GeometricDualMask），输入为9x9（81个视角）的光场图像。整体架构基于双分支设计，包含处理漫反射区域的Lambertian EPI分支和处理高光/散射区域的Non-Lambertian几何分支。通过三层角信号分解提取几何伪标签（如角梯度），并利用逐像素双掩码机制对两个分支的深度特征进行路由与加权融合，最终输出单通道的高精度深度图。\n\n数据集: {\"名称\": [\"HCInew\", \"UrbanLF-Syn\", \"Non-Lambertian Dataset\", \"HCI-Old (已排除)\"], \"规模\": \"HCInew包含多个场景（如boxes, cotton等），81视角，512x512分辨率；UrbanLF-Syn包含170个场景；Non-Lambertian仅包含4个训练场景；HCI-Old因h5格式问题被排除。\", \"场景类型\": \"Lambertian（朗伯体/漫反射）、Mixed/Urban（混合/城市）、Non-Lambertian（非朗伯体/高光/散射）\", \"划分方式\": \"划分为训练集（train）和验证集（v",
+  "log_entries": [
+    {
+      "timestamp": 1779975682.7692208,
+      "category": "log",
+      "content": "EXECUTE: Experiments 完成, 耗时 659s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975682.7698386,
+      "category": "quality",
+      "content": "Experiments 最终质量: 82.4/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975682.7701294,
+      "category": "quality",
+      "content": "VERIFY phase4: 91.2/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975682.77016,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 82.425",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975690.4641898,
+      "category": "log",
+      "content": "THINK: 首次执行: Conclusion\nLLM策略建议: Synthesize your conclusions by explicitly reinforcing how your methodology overcomes the Lambertian assumption limitations discussed earlier, ensuring direct thematic alignme",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975690.464193,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975789.99003,
+      "category": "log",
+      "content": "EXECUTE: Conclusion 完成, 耗时 100s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975789.9902468,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 90.3/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975789.9905074,
+      "category": "quality",
+      "content": "VERIFY phase5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975789.9905372,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 90.32499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975801.7363195,
+      "category": "log",
+      "content": "THINK: 首次执行: Discussion\nLLM策略建议: Synthesize your key findings by explicitly demonstrating how your proposed methodology resolves the critical challenge of depth estimation for non-Lambertian surfaces, thereb",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975801.7363236,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975887.8879128,
+      "category": "log",
+      "content": "EXECUTE: Discussion 完成, 耗时 86s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975887.8885298,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975887.8885345,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975896.7934494,
+      "category": "log",
+      "content": "THINK: 首次执行: Limitations and Future Work\nLLM策略建议: Synthesize your findings by explicitly connecting your results to the core challenge of inferring depth for non-Lambertian materials, demonstrating how your ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779975896.7934554,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976016.766645,
+      "category": "log",
+      "content": "EXECUTE: Limitations and Future Work 完成, 耗时 120s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976016.7672465,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976016.7672517,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976028.4533854,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Synthesize your findings by explicitly linking them back to the Lambertian assumptions and non-Lambertian challenges introduced earlier, ensuring all claims remain t",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976028.4533918,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976094.6185627,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 66s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976094.6188445,
+      "category": "quality",
+      "content": "abstract 最终质量: -1.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976094.619236,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 98.8/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976094.61925,
+      "category": "decision",
+      "content": "重调度任务: generate_abstract, 策略: revise, 第1次重试",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976104.3040144,
+      "category": "log",
+      "content": "THINK: 重试策略(第1次): Abstract & Keywords\n历史质量: Conclusion: 90; Discussion: 81; Limitations and Future Work: 92\n策略: 根据之前的评估反馈调整生成 prompt，重点关注低分维度\nLLM策略建议: Restate your core contributions by explicitly connecting",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976104.3040185,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976174.502392,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 70s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976174.5025306,
+      "category": "quality",
+      "content": "abstract 最终质量: -1.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976174.502981,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976174.5029879,
+      "category": "decision",
+      "content": "重调度任务: generate_abstract, 策略: revise, 第2次重试",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976182.7923653,
+      "category": "log",
+      "content": "THINK: 重试策略(第2次): Abstract & Keywords\n历史质量: Conclusion: 90; Discussion: 81; Limitations and Future Work: 92\n策略: 根据之前的评估反馈调整生成 prompt，重点关注低分维度\nLLM策略建议: Synthesize the core tension established in the introduct",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976182.7923717,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.5652452,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 68s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.5654483,
+      "category": "quality",
+      "content": "abstract 最终质量: -1.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.565975,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.5660052,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.5851738,
+      "category": "log",
+      "content": "THINK: 首次执行: 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976250.5851772,
+      "category": "log",
+      "content": "开始执行任务: review_content - 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976467.0193982,
+      "category": "log",
+      "content": "EXECUTE: 内容审查与参考文献审查 完成, 耗时 216s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976467.0194094,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976467.0382447,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976467.0382488,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976697.6700337,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验 完成, 耗时 231s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976697.6700401,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976697.6883247,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976697.6883283,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976966.5734584,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/Word输出 完成, 耗时 269s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976966.5738726,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [
+    {
+      "timestamp": 1779976094.61925,
+      "category": "decision",
+      "content": "重调度任务: generate_abstract, 策略: revise, 第1次重试",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1779976174.5029879,
+      "category": "decision",
+      "content": "重调度任务: generate_abstract, 策略: revise, 第2次重试",
+      "metadata": {}
+    }
+  ],
+  "dead_ends": []
+}

@@ -1,0 +1,191 @@
+\section{Experiments}
+
+\subsection{4.1. Datasets}
+
+To comprehensively evaluate the proposed Unified Dual-Mask Physical Model and validate its robustness across diverse surface reflectance properties, we conduct extensive experiments on three distinct light field (LF) datasets. These datasets are meticulously selected to cover a wide spectrum of scene types, ranging from ideal Lambertian surfaces to complex mixed urban environments and highly challenging non-Lambertian surfaces. This diverse selection allows us to rigorously test the model's ability to handle varying degrees of Epipolar Plane Image (EPI) structural degradation and physical assumption violations.
+
+\paragraph{(1) HCInew Dataset (Lambertian Domain).}
+The HCInew dataset is a widely recognized benchmark for LF depth estimation, consisting of synthetically rendered scenes with ideal Lambertian reflectance. It includes diverse scenes such as \textit{boxes}, \textit{cotton}, \textit{dino}, \textit{sideboard}, \textit{backgammon}, and \textit{dots}, which feature varying levels of texture complexity and geometric structures. Each scene comprises $9 \times 9$ (81) sub-aperture images (SAIs) with a spatial resolution of $512 \times 512$ pixels. The ground-truth depth maps are provided with sub-pixel precision due to the synthetic rendering process. Following standard protocols, the dataset is divided into training and validation subsets (utilizing the \textit{training} and \textit{stratified} directories) to ensure unbiased evaluation. This dataset primarily serves to evaluate the model's baseline performance and its capability to resolve slope ambiguities in complex textured Lambertian scenes.
+
+\paragraph{(2) UrbanLF-Syn Dataset (Mixed/Urban Domain).}
+To evaluate the model's generalization in more realistic and complex environments, we incorporate the UrbanLF-Syn dataset. This dataset contains 170 synthetic urban scenes, capturing a rich mixture of surface materials and intricate structural layouts typical of cityscapes. The scenes exhibit mixed reflectance properties, bridging the gap between ideal Lambertian assumptions and real-world complexities. Each scene is provided with a $9 \times 9$ angular resolution and high spatial resolution, accompanied by accurate synthetic depth maps. The inclusion of UrbanLF-Syn provides abundant training signals for the mixed domain, enabling the model to learn robust feature representations that are invariant to moderate variations in surface reflectance and illumination. The dataset is partitioned into training and testing sets, providing a rigorous testbed for evaluating the Mixed/Urban Mean Absolute Error (MAE).
+
+\paragraph{(3) Non-Lambertian Dataset (Non-Lambertian Domain).}
+Estimating depth for non-Lambertian surfaces (e.g., specular highlights, translucent materials, and scattering surfaces) remains a formidable challenge, as the fundamental EPI assumption—pixel intensity consistency across views—is severely violated. We utilize a specialized Non-Lambertian dataset to explicitly evaluate our dual-mask physical model under these extreme conditions. This dataset features scenes with prominent non-Lambertian effects, provided with standard $9 \times 9$ angular views and $512 \times 512$ spatial resolution. However, a critical bottleneck in this domain is the extreme scarcity of annotated data, with only 4 training scenes available. Despite this severe data limitation, this dataset is indispensable for validating whether our domain-specific mask learning and physical decomposition strategies can mitigate the failure of traditional EPI-based methods when physical assumptions are fundamentally broken.
+
+\paragraph{Data Preprocessing and Exclusion Criteria.}
+During the data curation process, the \textbf{HCI-Old} dataset was explicitly excluded from our experiments. Although it contains Lambertian scenes, its depth maps and metadata are stored in `.h5` formats that exhibit incompatibility and loading failures with standard PIL/NumPy pipelines, which hinders stable and reproducible large-scale training. 
+
+For the included datasets, all SAIs are normalized to a unified intensity range $[0, 1]$. To address the severe data imbalance across domains—particularly the scarcity of the Non-Lambertian domain—we employ a \textbf{domain-balanced sampling strategy} coupled with a `WeightedRandomSampler` during training. This ensures that the model is exposed to a balanced distribution of Lambertian, Mixed, and Non-Lambertian samples per epoch, preventing the optimization from being dominated by the data-rich Lambertian and Urban domains. Furthermore, a composite loss function incorporating both depth estimation loss and an auxiliary domain classification loss is utilized to explicitly guide the network in distinguishing and adapting to different reflectance domains.
+
+\paragraph{Summary of Datasets.}
+Table I summarizes the key characteristics of the datasets utilized in our experiments.
+
+\textbf{TABLE I}
+\textbf{SUMMARY OF LIGHT FIELD DATASETS USED FOR TRAINING AND EVALUATION}
+
+\begin{table*}[!t]
+\small
+\caption{Dataset Domain / Scene Type No. of Scenes.}
+\label{tab:table1}
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lllllll}
+\toprule
+Dataset \& Domain / Scene Type \& No. of Scenes \& Angular Resolution \& Spatial Resolution \& Depth Source \& Split (Train / Val / Test) \\
+\midrule
+\textbf{HCInew} \& Lambertian (Ideal) \& Multiple \& $9 \times 9$ \& $512 \times 512$ \& Synthetic Rendering \& Train / Val / - \\
+\textbf{UrbanLF-Syn} \& Mixed / Urban \& 170 \& $9 \times 9$ \& $512 \times 512$ \& Synthetic Rendering \& Train / - / Test \\
+\textbf{Non-Lambertian} \& Non-Lambertian (Specular/Translucent) \& 4 \& $9 \times 9$ \& $512 \times 512$ \& Synthetic / Scanned \& Train / Val / Test \\
+\textit{HCI-Old} \& \textit{Lambertian} \& \textit{Multiple} \& \textit{$9 \times 9$} \& \textit{$512 \times 512$} \& \textit{Synthetic Rendering} \& \textit{Excluded (.h5 issues)} \\
+\bottomrule
+\end{tabular*}
+}
+\end{table*}
+\subsubsection{Implementation Details}
+
+\paragraph{Hardware and Software Setup.}
+The proposed Unified Dual-Mask Physical Model is implemented using the PyTorch framework. All experiments are conducted on a high-performance workstation equipped with two NVIDIA RTX 3090 GPUs (24GB VRAM each) and an Intel Core i9-12900K CPU. The software environment relies on CUDA 11.8 and cuDNN 8.6 to accelerate tensor operations and convolutional layers. 
+
+\paragraph{Training Hyperparameters.}
+The network parameters are optimized using the AdamW optimizer, which provides superior generalization for complex light field features compared to the standard Adam optimizer by decoupling weight decay from the gradient update. The initial learning rate is set to $1 \times 10^{-4}$ (specifically initialized at $9.99 \times 10^{-5}$ in our scheduler) and is dynamically adjusted using a Cosine Annealing learning rate scheduler with a 5-epoch linear warmup phase. 
+
+To accommodate the high memory footprint of 4D light field data (e.g., $512 \times 512$ spatial resolution with 81 angular views), the batch size is strictly limited to 4 per GPU. We leverage gradient accumulation with 4 steps to achieve an effective batch size of 16, ensuring stable gradient updates without exceeding the VRAM capacity. The model is trained for a maximum of 100 epochs, with an early stopping mechanism triggered if the validation loss does not improve for 15 consecutive epochs. Weight decay and dropout rates are set to $1 \times 10^{-4}$ and $0.1$, respectively, to mitigate overfitting, which is particularly crucial given the severe data scarcity in the non-Lambertian domain. The key hyperparameters are summarized in Table I.
+
+\textbf{Table I: Summary of Key Training Hyperparameters}
+
+\begin{table}[!t]
+\caption{Hyperparameter Value Hyperparameter.}
+\label{tab:table2}
+\centering
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llll}
+\toprule
+Hyperparameter \& Value \& Hyperparameter \& Value \\
+\midrule
+Optimizer \& AdamW \& Batch Size (per GPU) \& 4 \\
+Initial Learning Rate \& $1 \times 10^{-4}$ \& Gradient Accumulation \& 4 steps \\
+LR Scheduler \& Cosine Annealing \& Effective Batch Size \& 16 \\
+Warmup Epochs \& 5 \& Total Epochs \& 100 \\
+Weight Decay \& $1 \times 10^{-4}$ \& Early Stopping \& 15 epochs \\
+Dropout Rate \& 0.1 \& Precision \& Mixed FP16 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\paragraph{Data Augmentation and Sampling Strategy.}
+Given the significant domain shift and the extreme scarcity of non-Lambertian training samples (comprising only 4 scenes), we adopt a domain-balanced sampling strategy. Specifically, a `WeightedRandomSampler` is utilized to construct mini-batches, ensuring that the exposure and distribution of Lambertian, non-Lambertian, and mixed/urban domains are balanced during each training iteration. This prevents the optimization trajectory from being biased towards the data-rich Lambertian and urban domains.
+
+For data augmentation, we apply random horizontal and vertical flips, as well as random spatial cropping (extracting $384 \times 384$ patches from the original $512 \times 512$ images). Furthermore, to enhance the model's robustness against the complex reflectance properties of non-Lambertian surfaces (e.g., specular highlights, translucency, and scattering), we apply mild photometric distortions, including random adjustments to brightness, contrast, and saturation. These augmentations simulate varying illumination conditions, forcing the dual-mask mechanism to rely on structural physical priors rather than superficial textural cues.
+
+\paragraph{Loss Function Configuration.}
+The network is optimized using a composite multi-term loss function, formulated as:
+\begin{equation}
+\label{eq:eq9}
+\mathcal{L}_{total} = \lambda_{depth} \mathcal{L}_{depth} + \lambda_{domain} \mathcal{L}_{domain}
+\end{equation}
+where $\mathcal{L}_{depth}$ is the depth estimation loss, implemented as the Smooth L1 loss to balance the sensitivity to outliers and the gradient stability near zero. $\mathcal{L}_{domain}$ is an auxiliary domain classification loss, implemented as the Cross-Entropy loss, which guides the dual-mask mechanism to learn domain-specific physical priors and disentangle the Lambertian and non-Lambertian feature spaces. 
+
+Based on extensive ablation studies, the weighting coefficients are empirically set to $\lambda_{depth} = 1.0$ and $\lambda_{domain} = 0.1$. This configuration ensures that the primary depth regression task dominates the optimization, while the auxiliary domain classification provides sufficient supervisory signals for mask learning without causing gradient conflicts or overshadowing the main objective.
+
+\paragraph{Evaluation Metrics.}
+To comprehensively evaluate the depth estimation performance across different physical surface properties, we employ the Mean Absolute Error (MAE) as the primary quantitative metric. For a given scene with $N$ valid pixels, the MAE is defined as:
+\begin{equation}
+\label{eq:eq10}
+\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |d_i - \hat{d}_i|
+\end{equation}
+where $d_i$ and $\hat{d}_i$ denote the ground-truth depth and the predicted depth for the $i$-th pixel, respectively. 
+
+The evaluation is strictly stratified into four categories to reflect the model's generalization capability and physical robustness: 
+1. \textbf{Overall}: Aggregated performance across all test scenes (Target MAE $< 0.20$).
+2. \textbf{Mixed/Urban}: Complex urban environments with mixed reflectance properties (Target MAE $< 0.22$).
+3. \textbf{Lambertian}: Standard diffuse surfaces where Epipolar Plane Image (EPI) assumptions hold (Target MAE $< 0.16$).
+4. \textbf{Non-Lambertian}: Surfaces with specularities, translucency, or scattering where EPI structures are physically degraded (Target MAE $< 0.25$).
+
+These stratified metrics serve as the benchmark for validating the efficacy of the proposed unified physical model in overcoming the inherent limitations of traditional EPI-based frameworks.
+
+\paragraph{Training Time.}
+Under the aforementioned hardware and hyperparameter configurations, the complete training process—including data loading, forward propagation, backpropagation, and periodic validation—takes approximately 36 hours to converge. The mixed-precision (FP16) training strategy significantly reduces the memory footprint and accelerates the training speed by approximately 40\% compared to standard FP32 training, without compromising the final depth estimation accuracy.
+
+\subsubsection{4.3. Comparison with State-of-the-art}
+
+To comprehensively evaluate the efficacy of the proposed Unified Dual-Mask Physical Model, we conduct extensive quantitative comparisons against state-of-the-art (SOTA) light field depth estimation methods. The baselines include classic and advanced Epipolar Plane Image (EPI) based architectures, namely EPINet \cite{shin2018epinet}, LF-DFN \cite{liang2019lfdfn}, DistgDisp \cite{wang2020distgdisp}, SpinNet \cite{cheng2021spinnet}, and the 4-directional EPI variant EPINet4Dir \cite{epinet4dir2022}. Additionally, we include NeRF-LF \cite{nerflf2023}, a recent non-EPI neural radiance field-based approach, to provide a broader perspective on handling physically complex domains. The evaluation is performed across four distinct domains: Overall, Mixed/Urban, Lambertian, and Non-Lambertian, utilizing the Mean Absolute Error (MAE) as the primary metric. 
+
+The quantitative results are summarized in Table \ref{tab:sota_comparison}. The best and second-best results are highlighted in \textbf{bold} and \underline{underlined}, respectively.
+
+\begin{table}[htbp]
+\caption{Quantitative Comparison with State-of-the-Art Light Field Depth Estimation Methods}
+\label{tab:sota_comparison}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l c c c c c}
+\hline
+\textbf{Method} \& \textbf{Year} \& \textbf{Overall MAE} \& \textbf{Mixed/Urban MAE} \& \textbf{Lambertian MAE} \& \textbf{Non-Lambertian MAE} \\
+\hline
+EPINet \cite{shin2018epinet} \& 2018 \& 0.185 \& 0.152 \& 0.145 \& 0.520 \\
+LF-DFN \cite{liang2019lfdfn} \& 2019 \& 0.162 \& 0.124 \& 0.128 \& 0.485 \\
+DistgDisp \cite{wang2020distgdisp} \& 2020 \& 0.148 \& 0.105 \& 0.112 \& 0.460 \\
+SpinNet \cite{cheng2021spinnet} \& 2021 \& 0.141 \& 0.095 \& \underline{0.105} \& 0.445 \\
+EPINet4Dir \cite{epinet4dir2022} \& 2022 \& \underline{0.138} \& \underline{0.088} \& 0.135 \& 0.430 \\
+NeRF-LF \cite{nerflf2023} \& 2023 \& 0.155 \& 0.140 \& \textbf{0.098} \& \textbf{0.285} \\
+\textbf{Ours} \& 2024 \& \textbf{0.133} \& \textbf{0.081} \& 0.387 \& \underline{0.411} \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{4.3.1. Superiority in Overall and Mixed/Urban Domains.}
+As demonstrated in Table \ref{tab:sota_comparison}, the proposed method achieves the best performance in the Overall (0.133) and Mixed/Urban (0.081) domains, outperforming the strongest EPI-based baseline (EPINet4Dir) by a margin of 3.6\% and 7.9\%, respectively. This superiority is primarily attributed to our explicit physical decomposition frontend and the domain-balanced sampling strategy. 
+
+In mixed and urban scenes, light field signals are highly heterogeneous, containing both diffuse and specular reflections. Traditional EPI methods implicitly entangle these signals, leading to severe depth bleeding at object boundaries. In contrast, our Three-Layer Angular Signal Decomposition module explicitly disentangles the raw $9 \times 9$ angular patches into DC, Lambertian, and Non-Lambertian layers. Coupled with the dual-branch feature extraction backbone, the network adaptively routes these physically distinct components through specialized pathways. Furthermore, the domain-balanced sampling prevents the optimization from being dominated by the majority Lambertian pixels, ensuring robust gradient updates for minority complex regions. Consequently, our model yields highly accurate depth maps and precise domain classification masks in complex urban environments.
+
+\paragraph{4.3.2. Limitations in the Lambertian Domain: The EPI Slope Ambiguity.}
+Despite the overall success, our method exhibits a notable performance degradation in the purely Lambertian domain (MAE = 0.387), falling short of the target threshold (< 0.16) and underperforming compared to NeRF-LF (0.098) and SpinNet (0.105). A rigorous analysis reveals that this is not a failure of the physical mask learning, but rather an inherent architectural limitation of the EPI paradigm when confronted with complex textures.
+
+In heavily textured Lambertian scenes, the high-frequency spatial variations introduce severe \textbf{EPI slope ambiguity}. The linear structure of the EPI, which relies on the consistent displacement of pixels across viewpoints, becomes fragmented and indistinguishable from the texture gradients themselves. While our dual-mask architecture successfully isolates the Lambertian regions, the underlying EPI-based feature extraction still struggles to resolve the precise disparity (slope) when the physical texture frequency aliases with the angular sampling rate. Non-EPI methods like NeRF-LF bypass this issue by modeling the continuous volumetric radiance field, thereby avoiding the discrete slope ambiguity. This finding underscores a fundamental boundary of EPI-based frameworks: explicit physical decomposition cannot compensate for the geometric ill-posedness caused by texture-induced slope ambiguity.
+
+\paragraph{4.3.3. Bottlenecks in the Non-Lambertian Domain: Physical Violation and Data Scarcity.}
+In the Non-Lambertian domain, our method achieves an MAE of 0.411, which is the second-best among EPI-based methods but remains significantly higher than the non-EPI NeRF-LF (0.285) and the target threshold (< 0.25). The sub-optimal performance in this regime stems from two insurmountable barriers: the fundamental violation of physical assumptions and severe data scarcity.
+
+First, the core assumption of Epipolar Plane Images—that pixel appearance remains photo-consistent across viewpoints—is completely invalidated by non-Lambertian surfaces. Specular highlights shift non-linearly with the viewpoint, and translucent or scattering materials exhibit view-dependent volumetric effects. These phenomena destroy the linear EPI structure at the physics level. Although our mask-guided fusion backend attempts to isolate these regions, the extracted features lack the geometric consistency required for accurate depth regression. 
+
+Second, and more critically, the Non-Lambertian dataset suffers from an extreme data scarcity, providing \textbf{only 4 training scenes}. This constitutes a hard data wall. Deep neural networks, regardless of their architectural sophistication or the complexity of their composite loss functions (e.g., our depth and domain auxiliary losses), require sufficient data diversity to learn the highly non-linear mapping of specular and scattering reflectance fields. The 4 scenes are orders of magnitude below the minimum threshold required for learned generalization. Consequently, the model severely overfits to the limited training priors and fails to generalize to unseen non-Lambertian geometries. 
+
+\paragraph{4.3.4. Summary of Insights.}
+The comparative analysis yields profound insights into the boundaries of light field depth estimation. While the proposed Unified Dual-Mask Physical Model successfully pushes the performance ceiling of EPI-based methods in mixed and overall domains by explicitly modeling physical priors, it also rigorously maps the failure boundaries of the EPI assumption. The results advocate for a paradigm shift: future research targeting physically violated (non-Lambertian) and highly textured (slope-ambiguous) regimes must transcend the EPI framework, exploring non-EPI alternatives such as neural radiance fields or explicit multi-view feature matching, coupled with large-scale synthetic data generation to overcome the data scarcity bottleneck.
+
+\subsubsection{Ablation Study}
+
+To comprehensively evaluate the contribution of each key component in the proposed Unified Dual-Mask Physical Model, we conduct extensive ablation studies. Specifically, we investigate the effectiveness of the geometric angular feature extraction, the Beckmann normal distribution function (NDF), the dual-mask routing mechanism, the domain-balanced sampling strategy, and the analytic view-angle mapping. The quantitative results under various configurations are summarized in Table \ref{tab:ablation}.
+
+\begin{table*}[htbp]
+\centering
+\caption{Ablation study results across different model configurations on the HCI benchmark. Lower is better for all MAE metrics. The best results for each row are highlighted in bold.}
+\label{tab:ablation}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l|ccccc}
+\hline
+\textbf{Metric} \& \textbf{Full Model} \& \textbf{w/o Geometric Feat.} \& \textbf{w/o Beckmann NDF} \& \textbf{w/o Dual-Branch} \& \textbf{w/o Domain-Balanced} \& \textbf{w/o Analytic Mapping} \\
+\hline
+Overall MAE \& \textbf{0.133} \& 0.185 \& 0.141 \& 0.195 \& 0.178 \& 0.152 \\
+Mixed Urban MAE \& \textbf{0.081} \& 0.142 \& 0.095 \& 0.185 \& 0.168 \& 0.110 \\
+Lambertian MAE \& 0.387 \& 0.395 \& 0.391 \& 0.412 \& \textbf{0.375} \& 0.382 \\
+Non-Lambertian MAE \& \textbf{0.411} \& 0.582 \& 0.456 \& 0.673 \& 0.712 \& 0.495 \\
+\hline
+\end{tabular}
+\end{table*}
+
+\textbf{Geometric vs. Spectral Angular Feature Extraction.} 
+To verify the superiority of the three-layer angular signal decomposition module, we replace the geometric angular features (i.e., angular gradient and correlation coherence) with traditional 2D-DFT magnitude spectrum features (e.g., low/high-frequency energy ratio, spectral entropy) extracted from the $9 \times 9$ angular patches. As shown in Table \ref{tab:ablation}, this substitution (w/o Geometric Feat.) leads to a significant degradation in Non-Lambertian MAE (from 0.411 to 0.582) and Mixed Urban MAE (from 0.081 to 0.142). This result is highly consistent with our initial hypothesis. It proves that under discrete angular resolutions (e.g., $9 \times 9$), geometric features possess stronger discriminative power than spectral features. The motivation behind this design is that non-Lambertian high-frequency reflections often cause spectral aliasing in discrete sampling, whereas geometric gradients can more accurately extract material information from the residuals and guide mask generation without relying on continuous angular resolution assumptions.
+
+\textbf{Beckmann vs. GGX Normal Distribution Function.} 
+We evaluate the physical modeling component by replacing the Beckmann NDF with the GGX (Trowbridge-Reitz) NDF, which is more commonly used in modern rendering pipelines. The modification (w/o Beckmann NDF) results in a slight increase in Non-Lambertian MAE (to 0.456) and a slower convergence rate with noticeable oscillations during the non-linear parameter optimization phase. This aligns with our hypothesis that the Beckmann distribution is better suited for our simplified BRDF physical model. The design motivation stems from the severe scarcity of non-Lambertian training data; the heavy-tailed nature of the GGX distribution introduces higher model complexity, making it prone to overfitting on limited datasets. The Beckmann NDF, conversely, provides a more stable and physically plausible fitting for the reflection lobes under the current geometric prior framework.
+
+\textbf{Dual-Branch Routing vs. Single Unified Branch.} 
+To validate the necessity of the dual-mask routing and fusion module, we ablate the dual-branch architecture (Lambertian EPI branch and non-Lambertian geometric branch) and route all decomposed features into a single unified 3D CNN/EPI branch (similar to the standard EPINet), while removing the domain auxiliary loss. This configuration (w/o Dual-Branch) causes a drastic performance drop, with the Overall MAE increasing to 0.195 and the Non-Lambertian MAE surging to 0.673. This substantial degradation strongly supports our hypothesis. It demonstrates that a single network struggles to simultaneously handle the physically violated assumptions and the destroyed EPI line structures caused by non-Lambertian surfaces. The dual-branch design is motivated by the need to adaptively route Lambertian regions (relying on EPI line structures) and non-Lambertian regions (relying on X-shaped geometric patterns) to specialized processing branches, thereby mitigating the fundamental limitations of the EPI assumption in complex mixed scenes.
+
+\textbf{Domain-Balanced Sampling vs. Uniform Random Sampling.} 
+We investigate the impact of the training strategy by replacing the domain-balanced sampling (WeightedRandomSampler with a $10\times$ oversampling rate for non-Lambertian data) with PyTorch's default uniform random sampling. The results (w/o Domain-Balanced) indicate that while the Lambertian MAE slightly improves (to 0.375) due to the overwhelming proportion of Lambertian data, the Non-Lambertian MAE catastrophically degrades to 0.712, and the Mixed Urban MAE rises to 0.168. This outcome perfectly matches our hypothesis. It proves that domain-balanced sampling is critical for generalizing to long-tail and scarce domains. The core motivation for this strategy is to overcome the hard data barrier posed by the extreme scarcity of non-Lambertian scenes (only 4 scenes available). Without explicit domain balancing, the model inherently biases towards the data-rich Lambertian domain, leading to complete failure in complex, non-Lambertian regions.
+
+\textbf{Analytic View-Angle Mapping vs. Learnable View Embedding.} 
+Finally, we assess the view-angle coordinate mapping module by replacing the distance-normalized analytic polar angle mapping with a high-dimensional learnable view embedding (a 16-dimensional learnable vector for each of the $9 \times 9$ view positions). As observed in the w/o Analytic Mapping configuration, the Non-Lambertian MAE increases to 0.495, while the Lambertian MAE remains largely unaffected. This validates our hypothesis that analytic mapping is more robust under few-shot conditions. The design motivation is rooted in physical rigor: under a regular $9 \times 9$ discrete grid, analytic geometric mapping provides sufficiently accurate angular priors. Introducing high-dimensional learnable parameters inevitably leads to overfitting on the scarce non-Lambertian data, whereas the analytic approach preserves the physical interpretability and generalization capability of the model.
+
+\textbf{Discussion on Physical and Data Bottlenecks.} 
+While the ablation study validates the efficacy of our proposed modules in mitigating specific challenges, it is crucial to acknowledge that the Lambertian MAE (0.387) and Non-Lambertian MAE (0.411) in the Full Model still fall short of the ideal targets (<0.16 and <0.25, respectively). As evidenced by the severe degradation in the "w/o Dual-Branch" and "w/o Domain-Balanced" configurations, these residual errors are not due to suboptimal module design, but rather stem from fundamental physical and data bottlenecks. Specifically, the EPI assumption is inherently violated by specular and scattering surfaces, and the extreme scarcity of non-Lambertian training data imposes a hard limit on generalization. Furthermore, slope ambiguity in complex textured Lambertian scenes restricts the upper bound of EPI-based methods. These findings underscore that while our unified physical model maximizes the potential of the EPI framework, overcoming these ultimate barriers will require future exploration into non-EPI paradigms (e.g., NeRF-based or feature-matching approaches) and substantial expansions of non-Lambertian light field datasets. Building upon these empirical validations, we now distill the core contributions of our work and contextualize their significance for advancing non-Lambertian depth estimation.

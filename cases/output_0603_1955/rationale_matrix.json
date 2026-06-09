@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "Adoption of the three-layer angular signal physical decomposition model (I(u,v) = DC + a·u + b·v + ε(u,v))",
+      "motivation": "Traditional methods treat light field signals as a whole, causing ambient illumination, depth disparity, and material reflections to couple, making it difficult for networks to distinguish depth edges from material highlights.",
+      "sota_gap": "Unlike methods that directly input raw light fields or only use EPI slopes, physical decomposition explicitly strips the DC term (illumination) and linear term (disparity), leaving the residual term to purely reflect material properties.",
+      "scenario": "Most effective in light field images containing complex illumination variations and mixed materials, such as UrbanLF-Syn and Mixed scenes.",
+      "evidence": "Module verification experiments show that when using the decomposed residual term for material classification, the Random Forest classifier achieves an AUC of 0.962, proving the effectiveness of the decoupling.",
+      "section": "Methodology: Three-Layer Angular Signal Decomposition",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Extraction of geometric angular features (e.g., angular_gradient, correlation_coherence) to replace traditional 2D-DFT/MRI frequency-domain analysis",
+      "motivation": "Under low angular resolution (e.g., 9x9 discrete sampling), frequency-domain analysis fails due to insufficient sampling points causing spectral aliasing, making it impossible to reliably extract material features.",
+      "sota_gap": "Overcomes the resolution limitation bottleneck of traditional frequency-domain methods (e.g., Fourier-based EPI analysis) at low angular resolutions; geometric features exhibit stronger statistical discriminative power on discrete grids.",
+      "scenario": "Specifically applicable to low angular resolution (e.g., 9x9 or lower) light field datasets containing non-Lambertian surfaces (highlights, scattering).",
+      "evidence": "Experiments prove that the Cohen's d of the angular_gradient feature reaches 0.983, demonstrating extremely strong statistical discriminative power in distinguishing Lambertian from non-Lambertian materials.",
+      "section": "Methodology: Geometric Material Feature Extraction",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Construction of a Random Forest (RF) classifier based on multi-source geometric features to generate pixel-level material masks",
+      "motivation": "Depth estimation networks lack prior knowledge of non-Lambertian regions, prone to generating depth artifacts in highlight or transparent areas that violate the EPI linearity assumption.",
+      "sota_gap": "Compared to relying on networks to implicitly learn material features or mask-less global processing, the RF classifier provides high-precision, interpretable physical prior masks, preventing the network from blindly learning physical noise.",
+      "scenario": "Provides reliable region partitioning for subsequent networks in the Non-Lambertian Dataset and Mixed/Urban scenes containing abundant reflective surfaces.",
+      "evidence": "Phase 1 experimental evidence shows that the RF classifier combining 5 geometric features achieves an accuracy of 89.6% and an AUC of up to 0.962, meeting the requirement for generating high-quality prior masks.",
+      "section": "Methodology: Material Classification and Mask Generation",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Design of the GeometricDualMask dual-branch network architecture for mask-based routing and adaptive weighting",
+      "motivation": "When a single EPI assumption is enforced globally, it causes severe error amplification and depth estimation collapse in non-Lambertian regions (e.g., where specular reflection destroys the angular cone constraint).",
+      "sota_gap": "Unlike single-branch networks or simple attention mechanisms, dual-mask routing explicitly isolates regions violating physical assumptions, allowing the Lambertian branch to focus on EPI slopes and the non-Lambertian branch on geometric features.",
+      "scenario": "Performs best in scenes with complex reflective surfaces and depth discontinuities, such as cotton/boxes in HCInew and UrbanLF-Syn.",
+      "evidence": "module_verification_v4.md confirms that the mask gap of the GeometricDualMask model is 0.041, outperforming the design target of 0.08, proving the effectiveness of dual-branch processing.",
+      "section": "Methodology: Unified Dual-Mask Routing Architecture",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Implementation of Domain-balanced sampling via WeightedRandomSampler combined with mixed training on large-scale synthetic data",
+      "motivation": "Non-Lambertian training data is extremely scarce (only 4 scenes), causing severe overfitting on complex materials, while large-scale synthetic data (e.g., 170 scenes in UrbanLF-Syn) remains underutilized.",
+      "sota_gap": "Solves the underfitting problem for minority classes (non-Lambertian) under long-tail data distributions inherent in traditional training strategies, offering better generalization than single-dataset training or simple data augmentation.",
+      "scenario": "Highly effective in cross-domain evaluation, particularly when generalizing from the synthetic domain (UrbanLF-Syn) to real/mixed domains (Mixed/Urban scenes).",
+      "evidence": "FINAL_REPORT.md shows this strategy achieves an excellent MAE of 0.081 in Urban/Mixed scenes, significantly lower than the target threshold of <0.22.",
+      "section": "Experiments: Training Strategy and Domain Generalization",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Establishment of an empirical theoretical verification pipeline to quantitatively analyze the physical root cause of EPI assumption failure",
+      "motivation": "Existing literature only qualitatively points out that non-Lambertian surfaces cause EPI failure, lacking quantitative mathematical descriptions and empirical verification of how specular and scattering surfaces destroy the 'Angular Cone Constraint'.",
+      "sota_gap": "Fills the gap in quantitative analysis of physical assumption failure in light field depth estimation, providing deeper physical explanations than traditional methods that rely solely on final MAE metrics.",
+      "scenario": "Applicable for analyzing the Non-Lambertian Dataset containing specular, translucent, and scattering surfaces, as well as extreme pixels where EPI line structures are broken or exhibit X-shaped bimodal distributions.",
+      "evidence": "The theoretical verification pipeline successfully calculates the cone_score distribution differences across various material surfaces, quantitatively proving the physical essence of EPI line structure breakage caused by non-Lambertian surfaces.",
+      "section": "Theoretical Analysis: Physical Root Cause of EPI Failure",
+      "priority": "should"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| Adoption of the three-layer angular sign | Traditional methods treat light field signals as a | Unlike methods that directly input raw light field | Most effective in light field images con | Module verification experiments show tha | Methodology: Three-Layer Angular Signal Decomposition | must |\n| Extraction of geometric angular features | Under low angular resolution (e.g., 9x9 discrete s | Overcomes the resolution limitation bottleneck of  | Specifically applicable to low angular r | Experiments prove that the Cohen's d of  | Methodology: Geometric Material Feature Extraction | must |\n| Construction of a Random Forest (RF) cla | Depth estimation networks lack prior knowledge of  | Compared to relying on networks to implicitly lear | Provides reliable region partitioning fo | Phase 1 experimental evidence shows that | Methodology: Material Classification and Mask Generation | must |\n| Design of the GeometricDualMask dual-bra | When a single EPI assumption is enforced globally, | Unlike single-branch networks or simple attention  | Performs best in scenes with complex ref | module_verification_v4.md confirms that  | Methodology: Unified Dual-Mask Routing Architecture | must |\n| Implementation of Domain-balanced sampli | Non-Lambertian training data is extremely scarce ( | Solves the underfitting problem for minority class | Highly effective in cross-domain evaluat | FINAL_REPORT.md shows this strategy achi | Experiments: Training Strategy and Domain Generalization | must |\n| Establishment of an empirical theoretica | Existing literature only qualitatively points out  | Fills the gap in quantitative analysis of physical | Applicable for analyzing the Non-Lambert | The theoretical verification pipeline su | Theoretical Analysis: Physical Root Cause of EPI Failure | should |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

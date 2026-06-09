@@ -1,0 +1,45 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Ablation of Three-Layer Angular Signal Decomposition",
+      "target_module": "三层角信号分解 (Three-Layer Angular Signal Decomposition)",
+      "hypothesis": "物理层面的三层分解（DC、线性、残差）能有效解耦光照、视差和材质反射特性，比传统的频域分析或原始信号更能提供鲁棒的材质分类特征，克服低角分辨率下的频域混叠问题。",
+      "modification": "在代码中注释掉 `ThreeLayerAngularDecomposition` 模块，将输入角视图信号 `I(u,v)` 直接传递给新引入的 `AngularFFTFeatureExtractor` 模块（实现2D-DFT频域特征提取），或直接计算均值/方差作为替代特征输入到后续模块。",
+      "expected_result": "Phase 1 随机森林分类准确率显著下降（低于85%目标），AUC降低，导致生成的掩码噪声增加，最终Overall MAE和Non-Lambertian MAE上升，证明物理分解在低分辨率光场下的优越性。",
+      "comparison_with": "2D-DFT频域分析 (Angular FFT) 或 原始角信号统计特征"
+    },
+    {
+      "experiment_name": "Ablation of Geometric Feature & Random Forest Mask Generation",
+      "target_module": "几何特征与掩码生成 (Geometric Feature & Mask Generation)",
+      "hypothesis": "基于几何特征（如角梯度）和随机森林的分类器比端到端可学习的CNN掩码预测器在低分辨率光场下更鲁棒，且能避免像素级伪标签噪声带来的过拟合问题。",
+      "modification": "移除基于角梯度和随机森林的 `GeometricMaskGenerator`，替换为 `LearnableCNNMaskPredictor`。该预测器使用简单的3层CNN结构，并通过像素级BCE Loss（使用伪标签）与深度估计网络进行端到端联合训练。",
+      "expected_result": "掩码间隙（mask gap）增大（超过0.08目标），Mixed/Urban场景下的MAE显著上升，模型在Non-Lambertian边缘区域出现严重的深度估计伪影，证明几何特征与RF分类器的有效性。",
+      "comparison_with": "基于CNN和BCE Loss的可学习掩码预测器 (Learnable CNN Mask Predictor)"
+    },
+    {
+      "experiment_name": "Ablation of Dual-Mask Routing and Dual-Branch Architecture",
+      "target_module": "面向混合反射场景的统一双掩码（Dual-Mask）深度估计架构 (GeometricDualMask)",
+      "hypothesis": "双掩码路由机制和专门的双分支架构能有效隔离Non-Lambertian区域对Lambertian区域EPI线性假设的破坏，单一网络无法同时处理两种截然不同的物理反射模型。",
+      "modification": "移除 `LambertianEPIBranch`、`NonLambertianGeometricBranch` 和 `DualMaskFusion` 模块。将掩码生成后的光场数据直接输入到单一的 `UnifiedEPINet4Dir`（基础EPINet变体）中，直接回归最终深度图 `D_final`。",
+      "expected_result": "Overall MAE 退化至 0.20 以上，Non-Lambertian MAE 显著恶化（>0.25），高光和非朗伯体表面出现严重的深度崩溃和结构扭曲，证明双掩码路由架构的必要性。",
+      "comparison_with": "单一分支基础网络 (Unified EPINet4Dir Baseline)"
+    },
+    {
+      "experiment_name": "Ablation of Non-Lambertian Specific Geometric Branch",
+      "target_module": "Non-Lambertian 几何分支 (Non-Lambertian Geometric Branch)",
+      "hypothesis": "Non-Lambertian区域具有X型图案和双峰分布特征，需要专门的交叉引导和几何特征匹配机制，使用处理Lambertian的EPI线结构方法无法有效估计其深度。",
+      "modification": "保留双分支架构和掩码路由，但将 `NonLambertianGeometricBranch` 替换为 `LambertianEPIBranch` 的权重共享副本（即两个分支结构完全相同，仅输入掩码区域不同），移除交叉引导和双峰匹配逻辑。",
+      "expected_result": "Non-Lambertian MAE 显著上升，无法有效处理高光区域的X型EPI结构，导致Non-Lambertian区域的深度平滑度下降和误差增大，证明专门设计的Non-Lambertian分支的有效性。",
+      "comparison_with": "与Lambertian分支结构相同的普通EPI分支 (Shared Lambertian EPI Branch)"
+    },
+    {
+      "experiment_name": "Ablation of Domain-Balanced Sampling Strategy",
+      "target_module": "域平衡采样与加权随机采样器 (Domain-balanced sampling & WeightedRandomSampler)",
+      "hypothesis": "Non-Lambertian数据存在严重的稀缺问题，域平衡采样和过采样策略是防止模型在混合场景下对Lambertian区域过拟合、提升Non-Lambertian泛化能力的关键。",
+      "modification": "在训练数据加载器（DataLoader）中，移除 `WeightedRandomSampler` 和域平衡逻辑，替换为 PyTorch 默认的 `torch.utils.data.RandomSampler`，使每个样本被采样的概率均等（Uniform Sampling）。",
+      "expected_result": "模型在训练后期对Non-Lambertian区域严重欠拟合，Non-Lambertian MAE 大幅上升，Mixed (Urban) MAE 无法达到 <0.22 的目标，验证集上出现明显的域偏移现象，证明平衡采样策略的不可或缺性。",
+      "comparison_with": "均匀随机采样 (Uniform Random Sampling)"
+    }
+  ],
+  "_model_analysis": {}
+}

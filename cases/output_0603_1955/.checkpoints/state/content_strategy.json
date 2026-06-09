@@ -1,0 +1,152 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "The physical root cause of EPI failure on non-Lambertian surfaces",
+      "Limitations of traditional frequency-domain methods under low angular resolution",
+      "The proposed physics-aware decoupling and dual-mask routing contributions"
+    ],
+    "depth_map": {
+      "background_and_motivation": "moderate",
+      "limitations_of_existing_methods": "deep",
+      "proposed_contributions": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "mention"
+    },
+    "must_include": [
+      "motivation_hook: Explicitly state that traditional frequency-domain methods fail to decouple material reflections under low angular resolution",
+      "contribution_claim: 3 clear contributions formatted as paragraphs with quantitative hints",
+      "At least one concrete data point or physical observation demonstrating the severity of EPI line structure breakage on non-Lambertian surfaces",
+      "[动机锚点] The introduction must establish: Traditional frequency-domain methods fail to decouple material refl",
+      "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+    ],
+    "should_avoid": [
+      "Paper structure paragraph (e.g., 'The rest of this paper is organized as...')",
+      "Detailed mathematical derivations or dense equations",
+      "Overloading the introduction with excessive citations (>10 per paragraph)"
+    ],
+    "target_emphasis": "Establish the physical root cause of EPI failure in non-Lambertian regions and present the proposed physics-aware decoupling and dual-mask routing as the definitive solution."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "Light field depth estimation (EPI-based and learning-based)",
+      "Material reflection decoupling and angular signal analysis",
+      "Non-Lambertian handling and domain adaptation strategies"
+    ],
+    "depth_map": {
+      "light_field_depth_estimation": "moderate",
+      "material_reflection_decoupling": "moderate",
+      "non_lambertian_handling_and_domain_adaptation": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "supporting"
+    },
+    "must_include": [
+      "gap_bridge: Transition to method by showing existing approaches do not address how traditional frequency-domain methods fail to decouple material reflections",
+      "Integrated critique of recent SOTA methods rather than isolated summaries",
+      "High citation density covering latest TCSVT, CVPR, ICCV, and ECCV works",
+      "[动机锚点] Transition to method by showing existing approaches do not address: Traditional frequency-domain met"
+    ],
+    "should_avoid": [
+      "Chronological listing of papers without synthesized critique",
+      "Excessive detail on unrelated 3D reconstruction or NeRF tasks",
+      "Superficial comparisons that do not highlight the specific low-angular-resolution bottleneck"
+    ],
+    "target_emphasis": "Synthesize prior art to highlight the critical gap in handling low-angular-resolution material decoupling and justify the need for our physics-guided geometric features and domain-balanced training."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "Three-layer physical decomposition and geometric feature extraction",
+      "GeometricDualMask network architecture and dual-mask routing",
+      "Domain-balanced sampling and mixed training strategy"
+    ],
+    "depth_map": {
+      "overview_and_physical_analysis": "moderate",
+      "three_layer_physical_decomposition_and_geometric_features": "deep",
+      "geometric_dual_mask_network_architecture": "deep",
+      "domain_balanced_sampling_and_mixed_training": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "contribution_claim: Justify each module by connecting back to the core motivation of overcoming EPI failure",
+      "Key formulas only for the physical decomposition model (I(u,v) = DC + a·u + b·v + ε(u,v))",
+      "Description of a clean, colorful, horizontal flowchart figure for the GeometricDualMask architecture",
+      "Discussion on computational cost, scalability, and hardware efficiency of the proposed modules",
+      "[动机锚点] Each module should be justified by connecting back to the core motivation"
+    ],
+    "should_avoid": [
+      "Algorithm boxes (strictly avoided per journal style)",
+      "Lengthy mathematical proofs for simple architectural modifications like the Random Forest classifier",
+      "Over-formalizing the WeightedRandomSampler with unnecessary complex mathematical proofs"
+    ],
+    "target_emphasis": "Detail the physics-inspired signal decoupling and the dual-mask routing architecture, ensuring every design choice is rigorously justified by the physical limitations of EPI assumptions."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "Quantitative comparison with SOTA methods on mixed datasets",
+      "Comprehensive ablation studies for all proposed modules",
+      "Qualitative visualization and physical validation analysis"
+    ],
+    "depth_map": {
+      "datasets_and_implementation_details": "brief",
+      "quantitative_comparison_with_sota": "deep",
+      "ablation_studies": "deep",
+      "qualitative_visualization_and_physical_validation": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "supporting"
+    },
+    "must_include": [
+      "evidence_support: Experiments directly validating each contribution claim (e.g., RF classification accuracy, depth estimation on non-Lambertian surfaces)",
+      "Comprehensive ablation tables justifying the geometric features, dual-mask routing, and WeightedRandomSampler",
+      "Comparison tables against current SOTA using standard metrics (MSE, BadPix) on UrbanLF-Syn and real-world datasets",
+      "Analysis of processing speed, computational cost, and hardware efficiency",
+      "[动机锚点] Design experiments that directly validate each contribution claim"
+    ],
+    "should_avoid": [
+      "Dedicated failure analysis section (strictly avoided per journal style, integrate limitations briefly if necessary)",
+      "Relying solely on qualitative visual results without rigorous quantitative validation",
+      "Using non-standard, outdated, or insufficient evaluation metrics and weak baselines"
+    ],
+    "target_emphasis": "Provide comprehensive quantitative and qualitative evidence proving that the proposed physics-aware decoupling and domain-balanced training significantly outperform SOTA, especially in challenging non-Lambertian regions."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "Summary of core contributions and quantitative achievements",
+      "Implications of the physical validation system for future research",
+      "Transition to non-EPI methods based on theoretical findings"
+    ],
+    "depth_map": {
+      "summary_of_contributions": "moderate",
+      "implications_of_physical_validation": "moderate",
+      "future_work_and_limitations": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "contribution_claim: Echo the core narrative that traditional frequency-domain methods fail to decouple material reflections and our approach resolves this",
+      "Reflection on the 'hypothesis validation-dead end identification' research loop (Innovation 3)",
+      "Brief mention of limitations and the strategic pivot towards non-EPI methods like NeRF for future work",
+      "[动机锚点] Echo the core narrative: Traditional frequency-domain methods fail to decouple material reflections "
+    ],
+    "should_avoid": [
+      "Introducing new experimental data, figures, or references",
+      "Overly detailed repetition of the methodology or network architecture",
+      "Making unsubstantiated broad claims without grounding in the paper's findings"
+    ],
+    "target_emphasis": "Reinforce the paradigm shift from purely data-driven EPI methods to physics-aware decoupling, highlighting the theoretical validation system that guides future research directions."
+  }
+}

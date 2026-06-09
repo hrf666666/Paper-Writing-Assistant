@@ -1,0 +1,60 @@
+{
+  "句式特征": {
+    "问题导向与挑战陈述句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "Inferring the depth of transparent or mirror (ToM) surfaces represents a hard challenge for either sensors, algorithms, or deep networks.",
+      "However, real-world LF images often encounter reflective and transparent surfaces and the related regions contain depth information from the reflection and background layers, which can be modeled as dual-layer scenes."
+    ],
+    "方法提出与贡献声明句式": [
+      "In this paper, we derive a spatially-varying (SV)BRDF-invariant theory for recovering 3D shape and reflectance from light-field cameras.",
+      "We propose a simple pipeline for learning to estimate depth properly for such surfaces with neural networks, without requiring any ground-truth annotation.",
+      "In this paper, we propose a novel decoupling-and-aggregating strategy and develop a dual-layer depth estimation network for LF images with complex reflections."
+    ],
+    "对比与转折句式": [
+      "In contrast, our model can work on general 1-lobe BRDFs, and can also recover reflectance in addition to shape (Sec. 5.2), which has not been achieved by previous light-field shape acquisition approaches.",
+      "On the one hand, the definition of depth itself might appear ambiguous in such cases... On the other hand, as humans can deal with this through experience, depth sensing techniques based on deep learning hold the potential to address this challenge.",
+      "While this changes the form of equations obtainable through differential motions, we show that a BRDF-invariant equation of similar form as in [5, 6, 7] can still be obtained for half-angle BRDFs (Sec. 4)."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": [
+      "宏观背景与现象描述引入：如 'Light-fields implicitly capture the 3D geometry and reflectance properties of a scene...' 或 'In our daily lives, we often interact with several objects of various appearances.'",
+      "核心概念定义与特性引入：如 'Light Field (LF) [1] records both positional and directional information of the light, thus describing scenes with richer structural information...'",
+      "痛点与转折直接切入：如 'Unfortunately, light reflection and refraction over ToM surfaces violate also the working principles of most active depth sensors...'"
+    ],
+    "段内论证逻辑": [
+      "现象描述 -> 揭示原因 -> 阐述影响：先描述特定表面带来的挑战，接着用 'This difficulty arises because...' 解释原因，最后说明对现有系统的影响。",
+      "现有方法梳理 -> 指出具体局限 -> 对比本文优势：在Related Work中，先列举前人方法，用 'However' 指出其假设或模型的缺陷，最后用 'In contrast' 凸显本文方法的优越性。",
+      "理论推导 -> 步骤分解 -> 结果验证：先提出核心方程或理论，接着用 'After this equation is derived...' 或 'Specifically...' 分步骤说明算法流程，最后提及实验验证。"
+    ],
+    "段落结尾收束方式": [
+      "总结核心贡献并列表呈现：如 'Our main contributions are: 1)... 2)...' 或 'Our main contributions can be resumed as follows: ...'",
+      "强调实验结果与方法有效性：如 'It successfully separates the background and reflection layers and achieves accurate depth estimation results in both layers.'",
+      "承上启下，引出后续章节：如 '...which is discussed in Sec. 4.1.' 或 '... (Sec. 6, Figs. 5 and 6).'"
+    ]
+  },
+  "用词特征": [
+    "过渡词 (Transition Words)：However, In contrast, Specifically, Moreover, Therefore, Furthermore, Nonetheless, On the one hand... On the other hand, In short, As a result.",
+    "强调词 (Emphasis Words)：explicitly, extensive, dramatic, remarkably, novel, successfully, accurately, properly, reliably, primarily.",
+    "限定词 (Qualifiers/Hedging)：often, mostly, generally, up to, in many instances, arguably (we argue that), might (might appear ambiguous).",
+    "学术动词与短语 (Academic Verbs & Phrases)：derive, propose, demonstrate, validate, formulate, address this challenge, violate the working principles, leverage, fine-tune, hallucinate, distill, tackle, encounter."
+  ],
+  "论证模式": [
+    "模式1：背景引入 -> 指出缺陷（However/Unfortunately） -> 分析原因（because/since） -> 提出本文方法（In this paper, we propose） -> 列举贡献（Our main contributions）。（经典的Problem-Solution模式）",
+    "模式2：现有方法回顾（Related Work） -> 指出具体局限性（However/Fails to） -> 对比凸显本文优势（In contrast/Our model can）。（对比分析模式，常用于引言和相关工作）",
+    "模式3：理论推导/核心洞察（Key theoretical insight） -> 算法步骤分解（First/Then/Finally） -> 实验验证（Extensive synthetic/real-world examples）。（方法论展开模式）",
+    "模式4：先总后分（Total-Part）：Abstract和Introduction先概述整体Pipeline和核心Insight，随后在Method部分分模块详细阐述（如decoupling module, aggregating module）。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": [
+      "句末引用（事实支撑/方法归类）：将引用置于句末或分句末，作为观点或事实的支撑。例如：'...have been primarily used in rendering [12, 17].' 或 '...remains a challenging problem for both computer vision algorithms and deep networks [64].'",
+      "句中/主语引用（强调特定作者/具体工作）：将作者或文献序号作为句子主语或定语。例如：'Tao et al. [27] proposed a clustering method...' 或 'A follow-up work [26] adopts...'",
+      "概念紧跟引用（术语溯源）：在专业术语首次出现时紧跟引用。例如：'Light Field (LF) [1] records...' 或 'Lytro [2] and Raytrix [3]'."
+    ],
+    "引用与论述的衔接方式": [
+      "归纳总结式衔接：将多篇文献归纳为一类方法，后接统一评价。例如：'Many depth estimation methods... have been proposed [9, 13, 15...].'",
+      "递进/转折式衔接：先客观介绍前人工作，随后用转折词指出不足。例如：'Tao et al. [27] proposed... However, they attempt...' 或 'A follow-up work [26] adopts... However, the dichromatic model fails...'",
+      "对比式衔接：在阐述前人工作后，直接使用对比词引出本文方法的区别。例如：'In contrast to the differential motions he uses... we only have...'"
+    ]
+  }
+}

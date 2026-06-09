@@ -1,0 +1,23 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "三层角信号分解模型与几何特征材质解耦",
+    "contribution_statement": "We identify that traditional Light Field EPI hypotheses fail in complex scenes due to undefined physical boundaries, and we systematically define these limits."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "基于双掩码与几何路由的混合场景深度估计架构",
+    "contribution_statement": "We propose a three-layer angular signal decomposition model to fundamentally decouple geometric features from material properties."
+  },
+  "innovation_3": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.4",
+    "experiment_section": "4.5",
+    "name": "光场EPI假设失效的根因分析与物理边界系统性界定",
+    "contribution_statement": "We demonstrate the effectiveness of our approach through a novel dual-mask and geometry-routing architecture that significantly improves depth estimation in mixed scenes."
+  }
+}

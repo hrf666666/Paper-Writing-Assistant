@@ -1,0 +1,157 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "Application scenarios of light field depth estimation",
+      "Limitations of EPI linearity assumption in non-Lambertian surfaces",
+      "Proposed contributions and quantitative evidence"
+    ],
+    "depth_map": {
+      "background_and_scenario": "brief",
+      "problem_statement_and_limitations": "moderate",
+      "contributions": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "motivation_hook: Explicitly establish that current light field depth estimation relies on the EPI linearity assumption and fails on non-Lambertian surfaces",
+      "contribution_claim: Enumerate exactly 3 bulleted contributions (Geometric dual-mask physical model, Domain-balanced 4-directional EPI framework, Extensive multi-domain SOTA results) with quantitative evidence",
+      "At least one concrete data point showing performance drop of existing methods on non-Lambertian surfaces",
+      "Clear gap statement bridging the physical limitation to the proposed solutions",
+      "[动机锚点] Establish the problem of Current light field depth estimation relies on the EPI linearity assumption",
+      "[动机锚点] Enumerate contributions: 基于三层角信号分解的几何双掩码物理模型, 面向多域光场数据的域平衡四方向EPI统一估计框架, with quantitative evidence"
+    ],
+    "should_avoid": [
+      "Detailed method descriptions or network architecture specifics",
+      "Overly long philosophical or historical introductions without a quick transition to the specific technical motivation",
+      "Paper structure paragraph (e.g., 'The rest of this paper is organized as...')",
+      "More than 10 citations per paragraph"
+    ],
+    "target_emphasis": "To establish the critical failure of the EPI linearity assumption on non-Lambertian surfaces and clearly present the proposed physical and unified framework solutions with quantitative backing."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "EPI-based light field depth estimation",
+      "Non-Lambertian and complex material handling in multi-view",
+      "Multi-domain and cross-dataset learning strategies"
+    ],
+    "depth_map": {
+      "epi_based_methods": "moderate",
+      "non_lambertian_handling": "moderate",
+      "multi_domain_learning": "brief",
+      "gap_summary": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "gap_bridge: Show existing methods lack robust handling when current light field depth estimation relies on the EPI linearity assumption, bridging to our physical model",
+      "Critique at the end of each technique group (by_technique organization)",
+      "Comparison with recent SOTA baselines including Transformers and GNNs in light field processing",
+      "High citation density to cover recent multi-domain and material-aware vision papers",
+      "[动机锚点] Show existing methods lack Current light field depth estimation relies on the EPI linea, bridging to"
+    ],
+    "should_avoid": [
+      "Exhaustive listing of all deep learning papers without categorization",
+      "Detailed mathematical formulations of prior work",
+      "Failing to group by technique or missing the end-of-group critique"
+    ],
+    "target_emphasis": "To systematically categorize prior works by technique, highlight their failure to address EPI linearity breakdown and domain imbalance, and bridge the gap to our proposed solutions."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "Three-layer angular signal decomposition and geometric dual-mask",
+      "EPINet4Dir V3 architecture and 4-directional EPI extraction",
+      "Domain-balanced sampling and unified dataset loader"
+    ],
+    "depth_map": {
+      "overview": "brief",
+      "three_layer_decomposition_and_dual_mask": "deep",
+      "epinet4dir_v3_architecture": "deep",
+      "domain_balanced_training": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary"
+    },
+    "must_include": [
+      "contribution_claim: Justify each module by connecting to the failure of the EPI linearity assumption",
+      "Key formulas only for the three-layer angular signal decomposition (DC, linear, residual)",
+      "Detailed horizontal flow architecture figure with colorful detailed boxes and moderate annotations",
+      "Data flow explanation between the dual-mask and EPINet4Dir V3",
+      "Computational complexity and hardware implementation considerations for the dual-mask routing",
+      "[动机锚点] Justify each module (基于三层角信号分解的几何双掩码物理模型, 面向多域光场数据的域平衡四方向EPI统一估计框架) by connecting to: Current light "
+    ],
+    "should_avoid": [
+      "Overly dense or complex mathematical proofs for standard deep learning operations",
+      "Algorithm boxes (strictly avoided per journal style)",
+      "Purely theoretical formulations without practical video, circuit, system, or hardware implementation considerations",
+      "Adding a 5th subsection (strictly maintain 4 subsections)"
+    ],
+    "target_emphasis": "To provide a clear, physically grounded, and computationally practical explanation of the dual-mask physical model and the unified 4-directional EPI framework."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "SOTA comparison on multi-domain LF datasets",
+      "Ablation studies on physical model and domain-balanced strategy",
+      "Efficiency and computational complexity analysis",
+      "Qualitative visualization on non-Lambertian regions"
+    ],
+    "depth_map": {
+      "dataset_and_setup": "brief",
+      "sota_comparison": "deep",
+      "ablation_study": "deep",
+      "efficiency_and_complexity": "moderate",
+      "qualitative_analysis": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "evidence_support: Validate both innovations via comprehensive ablation and SOTA comparison tables",
+      "Standard light field depth objective metrics (e.g., MSE, BadPix 0.07) and multi-domain evaluation",
+      "Computational complexity and efficiency analysis (FLOPs, latency, FPS, memory usage, hardware resource consumption)",
+      "Comparison against recent state-of-the-art baselines (e.g., Transformers, GNNs) with rigorous quantitative benchmarking",
+      "High figure density for qualitative EPI and depth map visualizations highlighting non-Lambertian improvements",
+      "[动机锚点] Design experiments validating 基于三层角信号分解的几何双掩码物理模型, 面向多域光场数据的域平衡四方向EPI统一估计框架 via ablation and SOTA co"
+    ],
+    "should_avoid": [
+      "Failure analysis (strictly avoided per journal style)",
+      "Relying solely on qualitative results without rigorous quantitative benchmarking",
+      "Omitting computational complexity and efficiency analysis",
+      "Using solely image classification or non-video/non-light-field datasets"
+    ],
+    "target_emphasis": "To comprehensively and rigorously validate the proposed methods through extensive quantitative benchmarking, ablation studies, and crucial efficiency analyses across multiple light field domains."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "Summary of the physical model and unified framework",
+      "Reiteration of quantitative achievements",
+      "Future practical deployment directions"
+    ],
+    "depth_map": {
+      "summary_of_contributions": "moderate",
+      "quantitative_achievements": "brief",
+      "future_work": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "contribution_claim: Echo how the geometric dual-mask and domain-balanced framework successfully address the EPI linearity assumption problem",
+      "Final quantitative highlight summarizing the overall performance and efficiency gains",
+      "Brief mention of hardware or real-world system deployment potential for light field cameras",
+      "[动机锚点] Echo how 基于三层角信号分解的几何双掩码物理模型, 面向多域光场数据的域平衡四方向EPI统一估计框架 successfully addresses Current light field de"
+    ],
+    "should_avoid": [
+      "Introducing new concepts, methods, or references",
+      "Overly long repetitions of the methodology or experimental setup",
+      "Vague or overly broad future work statements"
+    ],
+    "target_emphasis": "To concisely reinforce how the proposed physical decomposition and domain-balanced framework resolve the EPI linearity bottleneck and advance practical light field depth estimation."
+  }
+}

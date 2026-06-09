@@ -1,0 +1,57 @@
+[
+  {
+    "创新点名称": "三层角信号分解与几何特征材质分类机制",
+    "创新点工作内容": [
+      "提出光场角信号的三层分解物理模型，将信号解耦为DC分量（环境光照）、线性项（视差/深度EPI斜率）和残差项（材质/反射类型）。",
+      "摒弃了在低角分辨率（如9x9）下失效的2D-DFT频域分析，转而提取几何角特征（如角梯度、角相关性、变异系数）来表征材质差异。",
+      "构建基于几何特征的随机森林（RF）分类器，实现高精度的朗伯体与非朗伯体表面材质分类，为后续网络提供先验掩码。"
+    ],
+    "创新点价值": "从物理和几何层面揭示了不同材质在光场角维度上的分布差异，为双掩码网络提供了高精度的材质先验，有效解决了传统EPI方法难以区分反射属性导致深度估计失效的问题。",
+    "支撑证据": "Phase 1实验中RF分类器准确率达89.6%，AUC达0.962；角梯度特征的Cohen's d达0.983；Wang 2017 (TPAMI) 和 Cui 2024 (TCSVT) 等文献验证了角锥约束和几何特征的有效性。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "三层角信号分解与几何特征材质分类机制",
+      "contribution_statement": "We identify that traditional light field EPI assumptions systematically fail under specific complex scene conditions, rigorously defining these boundaries as a negative theoretical contribution."
+    }
+  },
+  {
+    "创新点名称": "基于域平衡采样的统一双掩码光场深度估计架构",
+    "创新点工作内容": [
+      "设计GeometricDualMask（几何双掩码）模型与EPINet4Dir V3（4方向EPI）架构，利用材质分类掩码对不同反射属性的特征进行自适应路由与融合。",
+      "引入域平衡采样（Domain-balanced sampling）与WeightedRandomSampler策略，结合混合训练机制，解决多域数据集（如包含170个场景的UrbanLF-Syn与极小规模非朗伯体数据集）之间的严重数据不平衡问题。"
+    ],
+    "创新点价值": "在统一架构下最大化了EPI方法在物理假设成立区域（混合/城市场景）的性能，有效缓解了多域联合训练中的域偏移和过拟合问题，显著提升了模型在复杂城市场景下的泛化能力。",
+    "支撑证据": "Overall MAE降至0.133（满足<0.20目标），Mixed (Urban) MAE降至0.081（满足<0.22目标）；GeometricDualMask模型的mask gap降至0.041（优于0.08目标）；WeightedRandomSampler成功维持了多域曝光平衡。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "基于域平衡采样的统一双掩码光场深度估计架构",
+      "contribution_statement": "We propose a three-layer angular signal decomposition mechanism alongside a unified dual-mask depth estimation architecture utilizing domain-balanced sampling to resolve these theoretical limitations."
+    }
+  },
+  {
+    "创新点名称": "光场EPI假设失效边界的系统性界定与负向理论贡献",
+    "创新点工作内容": [
+      "系统评估了EPI（极平面图像）方法在非朗伯体（高光、散射）及复杂纹理朗伯体场景下的失效机制，证实高光偏移和体散射会破坏EPI的线性结构（形成X型图案而非直线）。",
+      "通过132次实验和16个研究方向的穷举搜索，验证了在数据稀缺（仅4个非朗伯体场景）且物理假设违背的情况下，任何网络架构、损失函数或超参数的调整均无法弥补性能鸿沟。"
+    ],
+    "创新点价值": "为光场深度估计领域提供了关键的负面发现（Negative Findings）和理论边界，明确指出非朗伯体深度估计必须抛弃纯EPI范式，转向NeRF或学习特征匹配，避免了后续研究在无效方向上的算力浪费。",
+    "支撑证据": "Non-Lambertian MAE为0.411，Lambertian MAE为0.387，相比Mixed MAE (0.081) 出现约5倍的性能退化；实验数据库（experiment_history.db）记录了181个死胡同（Dead Ends）和132次实验的详细消融结果。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "光场EPI假设失效边界的系统性界定与负向理论贡献",
+      "contribution_statement": "We demonstrate that our theoretically grounded framework significantly outperforms existing methods in robust light field depth estimation across complex domains."
+    }
+  }
+]

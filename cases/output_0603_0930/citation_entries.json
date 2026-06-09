@@ -1,0 +1,16 @@
+[
+  {
+    "index": 1,
+    "entry": "[1] Katrin Honauer, Lena Maier-Hein, Daniel Kondermann, \"A Benchmark and Evaluation Framework for Light Field Depth Estimation,\" ECCV, 2016.",
+    "paper_id": "10.1007/978-3-319-46478-7_3",
+    "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+    "dedup_key": "10.1007/978-3-319-46478-7_3"
+  },
+  {
+    "index": 2,
+    "entry": "[2] Stefan Heber, Thomas Pock, \"EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images,\" IEEE TCSVT, 2018.",
+    "paper_id": "10.1109/TCSVT.2018.2797131",
+    "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+    "dedup_key": "10.1109/TCSVT.2018.2797131"
+  }
+]

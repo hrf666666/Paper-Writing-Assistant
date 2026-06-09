@@ -1,0 +1,26 @@
+[
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 0.133，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 0.133"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 0.081，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 0.081"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 0.962，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 0.962"
+  },
+  {
+    "severity": "warning",
+    "type": "citation_gap",
+    "description": "引用编号存在跳号: 缺少 [13]",
+    "location": "全文引用"
+  }
+]

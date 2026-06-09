@@ -141,7 +141,7 @@ def apply_revisions(chapter_content, issues):
 4. 修改后的文本必须更加学术化、逻辑更清晰
 5. 保持原有的<citation>和<formula>标记
 
-请直接给出修改后的完整章节内容（Markdown格式），无需解释修改了什么：
+请直接给出修改后的完整章节LaTeX代码（保持LaTeX格式），无需解释修改了什么：
 """
     
     revised_content = _orch.call_generation(prompt)

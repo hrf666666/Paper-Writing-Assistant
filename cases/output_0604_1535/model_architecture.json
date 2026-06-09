@@ -1,0 +1,54 @@
+{
+  "总体架构": "模型输入为光场图像（如9x9视角采样），首先经过三层角信号分解模块提取物理与几何特征（DC光照、视差幅度、材质比例、角向梯度）。随后，利用这些几何特征通过像素级双掩码生成模块生成朗伯与非朗伯区域的逐像素掩码。特征提取部分采用双分支架构：朗伯EPI分支利用EPI斜率与PRSO/位移场先验处理朗伯区域；非朗伯几何分支利用X形模式与双峰分布等几何特征处理非朗伯区域。最后，通过掩码加权融合模块将双分支的深度预测进行通道平衡与加权融合，最终输出统一的深度图（Depth Map）以及域分类掩码。",
+  "模块详情": [
+    {
+      "模块名": "三层角信号分解模块 (Three-Layer Angular Signal Decomposition)",
+      "输入": "光场角向采样信号 I(u,v) (如9x9视角图像块)",
+      "核心操作": "将角向信号分解为直流分量、线性分量和残差分量，并计算几何特征（如角向梯度、相关一致性）以区分材质反射类型。",
+      "输出": "DC光照图、视差幅度图 P(x,y)、材质比例图 M(x,y)、角向梯度特征图 (angular_gradient)",
+      "关键公式": "I(u,v) = DC + a*u + b*v + \\epsilon(u,v); P(x,y) = \\sqrt{a^2 + b^2}"
+    },
+    {
+      "模块名": "像素级双掩码生成模块 (Pixel-wise Dual-Mask Generation)",
+      "输入": "角向梯度特征图、视差幅度图 P(x,y)、材质比例图 M(x,y)",
+      "核心操作": "利用具有高区分度（Cohen's d=0.983）的几何伪标签（如angular_gradient），通过轻量级网络或分类器生成逐像素的朗伯/非朗伯掩码，替代场景级BCE监督以降低标签噪声。",
+      "输出": "朗伯掩码 Mask_L、非朗伯掩码 Mask_NL",
+      "关键公式": "Mask_{L/NL} = \\sigma(W \\cdot [angular\\_gradient, P, M] + b)"
+    },
+    {
+      "模块名": "朗伯EPI分支 (Lambertian EPI Branch)",
+      "输入": "中心视角图像、EPI特征、朗伯掩码 Mask_L",
+      "核心操作": "利用EPI线结构提取深度，结合PRSO（平面规则采样算子）或位移场（Displacement Field）引入连续、分段平滑的几何表面先验，优化朗伯 textured 场景的深度估计。",
+      "输出": "朗伯区域深度预测 Depth_L",
+      "关键公式": "Depth_L = PRSO(EPI\\_features) \\odot Mask_L"
+    },
+    {
+      "模块名": "非朗伯几何分支 (Non-Lambertian Geometric Branch)",
+      "输入": "中心视角图像、角向几何特征（X-shape patterns, bimodal distribution）、非朗伯掩码 Mask_NL",
+      "核心操作": "检测非朗伯区域在EPI中产生的X形模式和双峰分布特征，利用几何约束（而非频率特征）进行深度回归，并结合tone-mapping数据增强解决数据稀缺问题。",
+      "输出": "非朗伯区域深度预测 Depth_NL",
+      "关键公式": "Depth_{NL} = GeoConv(Angular\\_features) \\odot Mask_{NL}"
+    },
+    {
+      "模块名": "掩码加权融合模块 (Mask-Weighted Fusion)",
+      "输入": "Depth_L, Depth_NL, Mask_L, Mask_NL",
+      "核心操作": "通过平衡投影层统一双分支的通道维度，解决通道不平衡问题，然后利用掩码对双分支的深度预测进行加权融合。",
+      "输出": "最终统一深度图 Depth_final",
+      "关键公式": "Depth_{final} = Proj(Depth_L) \\cdot Mask_L + Proj(Depth_{NL}) \\cdot Mask_{NL}"
+    }
+  ],
+  "模块连接": "输入光场数据并行进入三层角信号分解模块和主干特征提取网络。分解模块输出的物理与几何特征（P, M, angular_gradient）输入到像素级双掩码生成模块，生成 Mask_L 和 Mask_NL。主干网络提取的EPI特征和角向几何特征分别输入到朗伯EPI分支和非朗伯几何分支，这两个分支在推理时分别结合对应的掩码进行特征调制。最后，两个分支输出的深度预测图与对应的掩码一起输入到掩码加权融合模块，通过FUSE_DIM=96的通道平衡投影后相加，得到最终的统一深度图。训练时，掩码生成模块受逐像素几何伪标签监督，深度分支受depth_loss和domain_loss联合监督。",
+  "关键超参数": {
+    "FUSE_DIM": 96,
+    "Batch_Size": 2,
+    "Gradient_Accumulation_Steps": 8,
+    "NL_Oversampling_Rate": 10,
+    "Learning_Rate": 0.0001,
+    "Mask_Supervision_Type": "per-pixel geometric pseudo-labels",
+    "Target_Mask_Gap": 0.08,
+    "Loss_Weights": {
+      "depth_loss": 1.0,
+      "domain_loss": 1.0
+    }
+  }
+}

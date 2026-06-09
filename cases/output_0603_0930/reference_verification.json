@@ -1,0 +1,105 @@
+{
+  "citation_tags": [
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"light field depth estimation\", \"3D vision\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"non-Lambertian reflection\", \"EPI structure\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"traditional EPI slope extraction\", \"Fourier analysis in light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"directional EPI networks\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention in light field\", \"defocus cues depth\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPI structure tensor\", \"light field depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"defocus and correspondence cues\", \"depth from defocus\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"sub-pixel phase shift\", \"multi-view stereo light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"light field depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"deformable EPI\", \"multi-scale light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"MacPI\", \"macropixel light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"LF-Transformer\", \"light field attention\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"4D cost volume\", \"light field stereo\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention mechanism\", \"viewpoint weighting\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"confidence mask\", \"light field depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"specular robust\", \"epipolar plane image\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"angular spectrum\", \"reflection separation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"tensor decomposition\", \"light field reflection\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"domain adaptation\", \"light field depth\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"hard example mining\", \"complex scenes\"]"
+    }
+  ],
+  "bibliography_entries": []
+}

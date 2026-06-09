@@ -173,3 +173,128 @@ class BaseOrchestrator:
         except Exception as e:
             self._logger.error(f"加载文件失败 {filepath}: {e}")
             return None
+
+
+def build_style_instruction(style_guide: dict, chapter_org: dict,
+                           chapter_name: str = None,
+                           is_related_work: bool = False) -> str:
+    """
+    统一的写作风格指导构建函数（替代 ch1/ch2/ch3/ch4 各自的 _build_style_instruction 副本）
+
+    优先级：VenueAdapter (P1) → IEEE Trans profile (P2) → 学术写作指南 (P4) → style_guide → chapter_org
+    """
+    # P1: VenueAdapter（统一风格中心）
+    if chapter_name:
+        try:
+            from agent.venue_adapter import VenueAdapter
+            adapter = VenueAdapter()
+            style_text = adapter.build_chapter_style_instruction(chapter_name)
+            if style_text and len(style_text) > 100:
+                return style_text
+        except Exception as e:
+            logger.debug(f"VenueAdapter 加载失败: {e}")
+
+    instruction = "**写作风格指导**：\n"
+
+    # P2: IEEE Trans 期刊风格配置
+    try:
+        from config.ieee_trans_style_profile import (
+            get_ieee_trans_style_profile,
+            get_section_requirements,
+            get_red_flags,
+        )
+        profile = get_ieee_trans_style_profile()
+        sec_name = chapter_name or "Introduction"
+        sec_req = get_section_requirements(sec_name)
+
+        instruction += f"\n**IEEE Transactions 期刊特定规则**（P2 优先级，必须遵守）：\n"
+        if sec_req:
+            for key, val in sec_req.items():
+                if isinstance(val, list):
+                    instruction += f"- {key}：\n"
+                    for item in val:
+                        instruction += f"  - {item}\n"
+                else:
+                    instruction += f"- {key}：{val}\n"
+
+        try:
+            red_flags = get_red_flags()
+            if red_flags:
+                instruction += f"\n### 禁止模式 (Red Flags)\n"
+                for flag in red_flags[:5]:
+                    instruction += f"- {flag}\n"
+        except Exception:
+            pass
+
+        lang = profile.get('language_style_profile', {})
+        if lang:
+            instruction += f"\n### 语言风格\n"
+            for k, v in lang.items():
+                instruction += f"- {k}：{v}\n"
+        instruction += "\n"
+    except Exception as e:
+        logger.debug(f"IEEE Trans 风格配置加载失败: {e}")
+
+    # P3: 特殊章节要求
+    if is_related_work:
+        instruction += """
+- Related Work 特殊要求：
+  1. 每篇被讨论的工作用1-2段描述，先说方法核心思路再说结果/局限
+  2. 工作之间的过渡句要体现递进或对比关系
+  3. 每个小节的最后一段集中讨论该类方法的不足
+  4. 不足的论述要具体
+  5. 引用要自然融入句式
+"""
+
+    # P4: 学术写作风格指南
+    try:
+        style_guide_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "skills", "academic_writing_style", "style_guide.md"
+        )
+        if os.path.exists(style_guide_path):
+            with open(style_guide_path, 'r', encoding='utf-8') as f:
+                style_guide_content = f.read()
+            instruction += f"\n**学术写作基础规范**（P4 优先级）：\n"
+            instruction += style_guide_content[:1500]
+            instruction += "\n"
+    except Exception as e:
+        logger.debug(f"风格指南加载失败: {e}")
+
+    # P5: 参考论文提取的风格
+    if style_guide and isinstance(style_guide, dict):
+        sentence_patterns = style_guide.get("句式特征", {})
+        if sentence_patterns:
+            instruction += "- 常用句式模式：\n"
+            for pattern_type, examples in sentence_patterns.items():
+                if isinstance(examples, (list, dict)):
+                    instruction += f"  {pattern_type}: {examples}\n"
+        vocabulary = style_guide.get("用词特征", [])
+        if vocabulary:
+            instruction += f"- 学术用词：{vocabulary[:20]}\n"
+        citation_style = style_guide.get("引用风格", {})
+        if citation_style:
+            instruction += f"- 引用风格：{citation_style}\n"
+
+    if chapter_org and isinstance(chapter_org, dict):
+        structure = chapter_org.get("章节结构", [])
+        if structure:
+            instruction += f"- 参考组织结构：{structure}\n"
+        patterns = chapter_org.get("关键句式模板", {})
+        if patterns:
+            instruction += f"- 关键句式模板：\n"
+            for k, v in patterns.items():
+                instruction += f"  {k}: {v}\n"
+
+    instruction += """
+- 重要要求：
+  1. 文风必须学术化，禁止口语化表达
+  2. 每句话都要有明确的论述目的，避免空洞的过渡句
+  3. 论述要有逻辑层次：从宏观到微观，从问题到方案
+  4. 引用要自然融入句式，不能生硬堆砌
+  5. **严格避免 AI 风格词汇**（如 revolutionize, groundbreaking, unprecedented 等）
+  6. **括号内容不超过 20 词**，超长内容应拆分为独立句子
+  7. **句子长度控制在 20-30 词**，避免超过 40 词的长句
+"""
+
+    return instruction

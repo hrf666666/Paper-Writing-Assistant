@@ -1,0 +1,88 @@
+{
+  "passed": false,
+  "compile_log_issues": [
+    {
+      "type": "file_not_found",
+      "severity": "critical",
+      "message": "File './output/figures/fig5.pdf' not found",
+      "suggestion": "检查路径或替换为占位符"
+    },
+    {
+      "type": "file_not_found",
+      "severity": "critical",
+      "message": "File './output/figures/fig4.pdf' not found",
+      "suggestion": "检查路径或替换为占位符"
+    },
+    {
+      "type": "file_not_found",
+      "severity": "critical",
+      "message": "File './output/figures/fig3.pdf' not found",
+      "suggestion": "检查路径或替换为占位符"
+    },
+    {
+      "type": "latex_error",
+      "severity": "critical",
+      "message": "LaTeX Error: Package pgfkeys Error: I do not know the key '/tikz/on background layer' and",
+      "suggestion": "需检查 .tex 语法"
+    },
+    {
+      "type": "latex_error",
+      "severity": "critical",
+      "message": "LaTeX Error: Package graphics Error: Division by 0.",
+      "suggestion": "需检查 .tex 语法"
+    },
+    {
+      "type": "latex_error",
+      "severity": "critical",
+      "message": "LaTeX Error: Package graphics Error: Division by 0.",
+      "suggestion": "需检查 .tex 语法"
+    },
+    {
+      "type": "latex_error",
+      "severity": "critical",
+      "message": "LaTeX Error: Package graphics Error: Division by 0.",
+      "suggestion": "需检查 .tex 语法"
+    },
+    {
+      "type": "compilation_status",
+      "severity": "critical",
+      "message": "编译 失败: 10 errors",
+      "suggestion": "检查编译日志中的错误信息"
+    }
+  ],
+  "pdf_structure": {
+    "valid": false,
+    "pages": 11,
+    "blank_pages": [
+      11
+    ],
+    "text_coverage": 0.10498253479536902
+  },
+  "element_validation": {
+    "citations_match": false,
+    "missing_citations": [
+      "ref"
+    ],
+    "tables_rendered": 1,
+    "tables_truncated": 0,
+    "figures_rendered": 4,
+    "figures_missing": 3,
+    "formulas_count": 3,
+    "formula_numbering_ok": true,
+    "citations_in_tex": 2,
+    "citations_in_bib": 1,
+    "formula_labels": 5
+  },
+  "auto_fix_attempts": {
+    "total_issues": 8,
+    "fixed": 0,
+    "remaining": 8
+  },
+  "constraint_audit": {
+    "critical": 0,
+    "warnings": 0,
+    "passed": true,
+    "violations": []
+  },
+  "retry_count": 1
+}

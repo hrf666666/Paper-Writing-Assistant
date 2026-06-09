@@ -1,0 +1,587 @@
+{
+  "plan": {
+    "figures": [
+      {
+        "fig_id": "fig1",
+        "fig_type": "teaser",
+        "fig_role": "main",
+        "title": "Overall Framework of Unified Dual-Mask Physical Model",
+        "caption": "The overall framework of our proposed method. The light field signal is first decoupled via Three-Layer Angular Signal Decomposition to extract physical priors. These priors guide the GeometricDualMask architecture to adaptively route Lambertian and non-Lambertian regions through specialized branches, followed by a pixel-wise dual-mask fusion for robust depth estimation.",
+        "size_type": "teaser",
+        "layout_direction": "left_to_right",
+        "modules": [
+          {
+            "id": "m1",
+            "label": "Light Field Input",
+            "group": "input",
+            "is_innovation": false
+          },
+          {
+            "id": "m2",
+            "label": "Signal Decomposition",
+            "group": "decomposition",
+            "is_innovation": true
+          },
+          {
+            "id": "m3",
+            "label": "Dual-Branch Routing",
+            "group": "routing",
+            "is_innovation": true
+          },
+          {
+            "id": "m4",
+            "label": "Dual-Mask Fusion",
+            "group": "fusion",
+            "is_innovation": true
+          },
+          {
+            "id": "m5",
+            "label": "Depth Output",
+            "group": "output",
+            "is_innovation": false
+          }
+        ],
+        "connections": [
+          {
+            "from": "m1",
+            "to": "m2",
+            "label": "Raw EPIs"
+          },
+          {
+            "from": "m2",
+            "to": "m3",
+            "label": "Physical Priors"
+          },
+          {
+            "from": "m3",
+            "to": "m4",
+            "label": "Branch Features"
+          },
+          {
+            "from": "m4",
+            "to": "m5",
+            "label": "Fused Depth"
+          }
+        ],
+        "groups": [
+          {
+            "id": "g1",
+            "label": "Physical Prior Extraction",
+            "module_ids": [
+              "m2"
+            ],
+            "style": "dashed_box"
+          },
+          {
+            "id": "g2",
+            "label": "Adaptive Routing & Fusion",
+            "module_ids": [
+              "m3",
+              "m4"
+            ],
+            "style": "solid_box"
+          }
+        ],
+        "annotations": [
+          "Key insight: Three-layer decomposition replaces traditional frequency-domain analysis.",
+          "Dual-branch design explicitly handles X-shaped EPI patterns in non-Lambertian regions."
+        ],
+        "layout_template": "pipeline"
+      },
+      {
+        "fig_id": "fig2",
+        "fig_type": "module_detail",
+        "fig_role": "supporting",
+        "title": "Three-Layer Angular Signal Decomposition",
+        "caption": "Detailed design of the physical signal decomposition module. The input EPI signal is decoupled into ambient illumination, parallax-induced depth, and material-specific residual components. The material residual is utilized to compute angular gradient pseudo-labels for robust material classification.",
+        "size_type": "single",
+        "layout_direction": "top_to_bottom",
+        "modules": [
+          {
+            "id": "m1",
+            "label": "EPI Input",
+            "group": "input",
+            "is_innovation": false
+          },
+          {
+            "id": "m2",
+            "label": "Ambient Layer",
+            "group": "layers",
+            "is_innovation": true
+          },
+          {
+            "id": "m3",
+            "label": "Parallax Layer",
+            "group": "layers",
+            "is_innovation": true
+          },
+          {
+            "id": "m4",
+            "label": "Material Layer",
+            "group": "layers",
+            "is_innovation": true
+          },
+          {
+            "id": "m5",
+            "label": "Angular Gradient",
+            "group": "output",
+            "is_innovation": true
+          }
+        ],
+        "connections": [
+          {
+            "from": "m1",
+            "to": "m2",
+            "label": ""
+          },
+          {
+            "from": "m1",
+            "to": "m3",
+            "label": ""
+          },
+          {
+            "from": "m1",
+            "to": "m4",
+            "label": ""
+          },
+          {
+            "from": "m4",
+            "to": "m5",
+            "label": "Pseudo-labels"
+          }
+        ],
+        "groups": [
+          {
+            "id": "g1",
+            "label": "Decoupled Physical Layers",
+            "module_ids": [
+              "m2",
+              "m3",
+              "m4"
+            ],
+            "style": "dashed_box"
+          }
+        ],
+        "annotations": [
+          "Avoids frequency-domain limitations of low angular resolution commercial cameras."
+        ],
+        "layout_template": "parallel"
+      },
+      {
+        "fig_id": "fig3",
+        "fig_type": "module_detail",
+        "fig_role": "supporting",
+        "title": "GeometricDualMask Architecture",
+        "caption": "The dual-branch adaptive routing architecture. The EPI branch with Plane Regularized Sampling Operator (PRSO) processes diffuse Lambertian surfaces, while the Geometric Convolution branch leverages X-shaped patterns for reflective non-Lambertian surfaces. A pixel-wise mask seamlessly integrates the outputs.",
+        "size_type": "double",
+        "layout_direction": "left_to_right",
+        "modules": [
+          {
+            "id": "m1",
+            "label": "Feature Input",
+            "group": "input",
+            "is_innovation": false
+          },
+          {
+            "id": "m2",
+            "label": "PRSO Operator",
+            "group": "lambertian",
+            "is_innovation": true
+          },
+          {
+            "id": "m3",
+            "label": "EPI Branch",
+            "group": "lambertian",
+            "is_innovation": false
+          },
+          {
+            "id": "m4",
+            "label": "Geometric Conv",
+            "group": "non_lambertian",
+            "is_innovation": true
+          },
+          {
+            "id": "m5",
+            "label": "Pixel-wise Mask",
+            "group": "fusion",
+            "is_innovation": true
+          },
+          {
+            "id": "m6",
+            "label": "Fused Output",
+            "group": "output",
+            "is_innovation": false
+          }
+        ],
+        "connections": [
+          {
+            "from": "m1",
+            "to": "m2",
+            "label": ""
+          },
+          {
+            "from": "m2",
+            "to": "m3",
+            "label": ""
+          },
+          {
+            "from": "m1",
+            "to": "m4",
+            "label": ""
+          },
+          {
+            "from": "m3",
+            "to": "m6",
+            "label": ""
+          },
+          {
+            "from": "m4",
+            "to": "m6",
+            "label": ""
+          },
+          {
+            "from": "m5",
+            "to": "m6",
+            "label": "Mask Weights"
+          }
+        ],
+        "groups": [
+          {
+            "id": "g1",
+            "label": "Lambertian Stream",
+            "module_ids": [
+              "m2",
+              "m3"
+            ],
+            "style": "dashed_box"
+          },
+          {
+            "id": "g2",
+            "label": "Non-Lambertian Stream",
+            "module_ids": [
+              "m4"
+            ],
+            "style": "dashed_box"
+          }
+        ],
+        "annotations": [
+          "PRSO enforces plane regularization for diffuse regions.",
+          "Geometric Conv captures bimodal distributions of X-shaped EPI patterns."
+        ],
+        "layout_template": "dual_branch"
+      },
+      {
+        "fig_id": "fig4",
+        "fig_type": "qualitative",
+        "fig_role": "supporting",
+        "title": "Qualitative Comparison on Mixed Scenes",
+        "caption": "Visual comparison of depth estimation results on mixed scenes containing both Lambertian and non-Lambertian materials. Our method successfully recovers depth in specular and glossy regions where baseline EPI methods suffer from severe structural discontinuities.",
+        "size_type": "double",
+        "layout_direction": "grid",
+        "modules": [
+          {
+            "id": "m1",
+            "label": "Input RGB",
+            "group": "input",
+            "is_innovation": false
+          },
+          {
+            "id": "m2",
+            "label": "EPI Patterns",
+            "group": "input",
+            "is_innovation": false
+          },
+          {
+            "id": "m3",
+            "label": "Baseline Depth",
+            "group": "comparison",
+            "is_innovation": false
+          },
+          {
+            "id": "m4",
+            "label": "Ours Depth",
+            "group": "comparison",
+            "is_innovation": false
+          },
+          {
+            "id": "m5",
+            "label": "Ground Truth",
+            "group": "gt",
+            "is_innovation": false
+          }
+        ],
+        "connections": [
+          {
+            "from": "m1",
+            "to": "m2",
+            "label": ""
+          },
+          {
+            "from": "m2",
+            "to": "m3",
+            "label": ""
+          },
+          {
+            "from": "m2",
+            "to": "m4",
+            "label": ""
+          },
+          {
+            "from": "m2",
+            "to": "m5",
+            "label": ""
+          }
+        ],
+        "groups": [],
+        "annotations": [
+          "Red boxes highlight non-Lambertian regions with X-shaped EPI patterns.",
+          "Our method significantly reduces depth ambiguity in reflective surfaces."
+        ],
+        "layout_template": "parallel"
+      },
+      {
+        "fig_id": "fig5",
+        "fig_type": "ablation",
+        "fig_role": "supporting",
+        "title": "Ablation Study of Core Components",
+        "caption": "Ablation study demonstrating the contribution of each proposed module. The unified multi-domain balanced training framework and the dual-branch architecture provide the most significant performance gains, especially in non-Lambertian regions.",
+        "size_type": "single",
+        "layout_direction": "top_to_bottom",
+        "modules": [
+          {
+            "id": "m1",
+            "label": "Baseline Model",
+            "group": "ablation",
+            "is_innovation": false
+          },
+          {
+            "id": "m2",
+            "label": "With Decomposition",
+            "group": "ablation",
+            "is_innovation": true
+          },
+          {
+            "id": "m3",
+            "label": "With Dual-Branch",
+            "group": "ablation",
+            "is_innovation": true
+          },
+          {
+            "id": "m4",
+            "label": "With Balanced Training",
+            "group": "ablation",
+            "is_innovation": true
+          },
+          {
+            "id": "m5",
+            "label": "Full Model",
+            "group": "ablation",
+            "is_innovation": true
+          }
+        ],
+        "connections": [
+          {
+            "from": "m1",
+            "to": "m2",
+            "label": ""
+          },
+          {
+            "from": "m2",
+            "to": "m3",
+            "label": ""
+          },
+          {
+            "from": "m3",
+            "to": "m4",
+            "label": ""
+          },
+          {
+            "from": "m4",
+            "to": "m5",
+            "label": ""
+          }
+        ],
+        "groups": [
+          {
+            "id": "g1",
+            "label": "Progressive Additions",
+            "module_ids": [
+              "m1",
+              "m2",
+              "m3",
+              "m4",
+              "m5"
+            ],
+            "style": "solid_box"
+          }
+        ],
+        "annotations": [
+          "Balanced training mitigates the severe data scarcity bottleneck of non-Lambertian scenes."
+        ],
+        "layout_template": "pipeline"
+      }
+    ]
+  },
+  "figures": [
+    {
+      "fig_id": "fig1",
+      "pdf_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig1.pdf",
+      "png_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig1.png",
+      "tikz_source": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig1_source.tex",
+      "iterations": 1,
+      "final_score": 7.35,
+      "passed": true,
+      "report": {
+        "scores": {
+          "content_completeness": 8,
+          "information_clarity": 7,
+          "visual_design": 7
+        },
+        "overall": 7.35,
+        "passed": true,
+        "issues": [
+          {
+            "dimension": "visual_design",
+            "severity": "medium",
+            "description": "The grouping boxes (dashed and solid) have similar visual weight, making it slightly unclear which group contains which modules. The dashed box for 'Physical Prior Extraction' and solid box for 'Adaptive Routing & Fusion' could be more distinct to improve hierarchy.",
+            "suggestion": "Use a more distinct style for the grouping boxes, such as different line styles (dashed vs. solid) with varying opacity or colors, and ensure the boxes properly enclose all sub-nodes without overlapping. For example, make the 'Physical Prior Extraction' box dashed with a lighter blue and the 'Adaptive Routing & Fusion' box solid with a slightly darker blue to enhance visual separation."
+          }
+        ],
+        "summary": "A well-structured framework diagram with clear data flow and prominent innovation modules, though grouping boxes could be more visually distinct."
+      }
+    },
+    {
+      "fig_id": "fig2",
+      "pdf_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig2.pdf",
+      "png_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig2.png",
+      "tikz_source": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig2_source.tex",
+      "iterations": 2,
+      "final_score": 7.35,
+      "passed": true,
+      "report": {
+        "scores": {
+          "content_completeness": 8,
+          "information_clarity": 7,
+          "visual_design": 7
+        },
+        "overall": 7.35,
+        "passed": true,
+        "issues": [
+          {
+            "dimension": "visual_design",
+            "severity": "low",
+            "description": "Annotation text 'Avoids frequency-domain limitations of low angular resolution commercial cameras.' is partially cut off at the bottom.",
+            "suggestion": "Extend the figure height or reduce font size to ensure full text visibility."
+          }
+        ],
+        "summary": "The figure effectively visualizes the three-layer angular signal decomposition with clear data flow and prominent innovation modules, though minor text truncation exists."
+      }
+    },
+    {
+      "fig_id": "fig3",
+      "pdf_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig3.pdf",
+      "png_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig3.png",
+      "tikz_source": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig3_source.tex",
+      "iterations": 1,
+      "final_score": 7.35,
+      "passed": true,
+      "report": {
+        "scores": {
+          "content_completeness": 8,
+          "information_clarity": 7,
+          "visual_design": 7
+        },
+        "overall": 7.35,
+        "passed": true,
+        "issues": [
+          {
+            "dimension": "visual_design",
+            "severity": "medium",
+            "description": "Pixel-wise Mask module lacks distinct visual differentiation from other innovation modules, reducing emphasis on its role in fusion.",
+            "suggestion": "Apply a unique fill color or border style (e.g., dashed border) to the Pixel-wise Mask node to visually distinguish it while maintaining harmony with the blue innovation theme."
+          }
+        ],
+        "summary": "The figure effectively communicates the dual-branch architecture with clear data flow and proper module grouping, though the Pixel-wise Mask could be more visually distinct."
+      }
+    },
+    {
+      "fig_id": "fig4",
+      "pdf_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig4.pdf",
+      "png_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig4.png",
+      "tikz_source": null,
+      "iterations": 2,
+      "final_score": 3.5,
+      "passed": false,
+      "report": {
+        "scores": {
+          "content_completeness": 3,
+          "information_clarity": 3,
+          "visual_design": 5
+        },
+        "overall": 3.5,
+        "passed": false,
+        "issues": [
+          {
+            "dimension": "content_completeness",
+            "severity": "high",
+            "description": "缺少关键组件（Baseline Depth、Ours Depth、Ground Truth深度图），无法展示深度估计结果的对比，与caption描述的“visual comparison of depth estimation results”不匹配",
+            "suggestion": "添加Baseline Depth、Ours Depth和Ground Truth的深度图子图，与Input子图对应，形成“Input→Baseline→Ours→Ground Truth”的对比逻辑"
+          },
+          {
+            "dimension": "information_clarity",
+            "severity": "high",
+            "description": "核心创新点（深度估计在混合场景的效果）未通过视觉元素（如深度图）展示，无法一眼看出方法优势，数据流逻辑（输入→处理→输出）不清晰",
+            "suggestion": "将深度图作为主要对比元素，用视觉突出（如边框加粗、颜色区分）展示Baseline、Ours和Ground Truth的差异，明确数据流方向"
+          },
+          {
+            "dimension": "visual_design",
+            "severity": "medium",
+            "description": "子图布局因缺少关键内容而显得信息不完整，视觉上缺乏顶刊论文的专业感，白空间利用不足",
+            "suggestion": "调整布局，确保深度图子图清晰展示，保持子图间合理间距，使用统一配色（不超过4种主色调）增强专业感"
+          }
+        ],
+        "summary": "图表严重缺失深度估计结果的关键组件，无法有效传达核心创新，视觉设计因内容不完整而缺乏专业感"
+      }
+    },
+    {
+      "fig_id": "fig5",
+      "pdf_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig5.pdf",
+      "png_path": "/home/bigboss/code/paper-writing-assistant/output/quick_test/figures/fig5.png",
+      "tikz_source": null,
+      "iterations": 2,
+      "final_score": 2.0,
+      "passed": false,
+      "report": {
+        "scores": {
+          "content_completeness": 2,
+          "information_clarity": 2,
+          "visual_design": 2
+        },
+        "overall": 2.0,
+        "passed": false,
+        "issues": [
+          {
+            "dimension": "content_completeness",
+            "severity": "high",
+            "description": "Figure is a placeholder with no actual components (Baseline Model, innovation modules, etc.) displayed, failing to show the ablation study's core content as described in the caption.",
+            "suggestion": "Replace the placeholder with a diagram containing all expected modules (Baseline Model, With Decomposition, With Dual-Branch, With Balanced Training, Full Model) and group them as 'Progressive Additions' to demonstrate component contributions."
+          },
+          {
+            "dimension": "information_clarity",
+            "severity": "high",
+            "description": "No data or module relationships are visualized, so the core innovation points and ablation logic cannot be understood from the figure.",
+            "suggestion": "Add visual elements (e.g., nodes for each module, arrows showing progressive additions) and performance metrics to clarify how each component contributes to the final model."
+          },
+          {
+            "dimension": "visual_design",
+            "severity": "high",
+            "description": "The placeholder lacks professional academic chart elements (e.g., labeled modules, clear grouping, visual hierarchy), making it unsuitable for a top-tier journal.",
+            "suggestion": "Design the figure with a balanced layout, distinct visual styles for innovation modules (e.g., bold borders, unique colors), and ensure all text (module names, labels) is fully visible within nodes."
+          }
+        ],
+        "summary": "The figure is a placeholder with no actual content, failing to meet academic chart standards for an ablation study."
+      }
+    }
+  ],
+  "summary": "PGEI v10 完成: 3/5 通过, 耗时 742.3s"
+}

@@ -1,0 +1,71 @@
+{
+  "数据集": [
+    {
+      "名称": "MERL BRDF dataset",
+      "规模": "包含100种真实测量的BRDF材质（文中提及entire MERL BRDF dataset）。",
+      "特点": "提供广泛的合成数据，涵盖各种非朗伯体（SVBRDF）材质，用于验证形状和反射率恢复理论。",
+      "来源": "SVBRDF-Invariant Shape and Reﬂectance Estimation from Light-Field Cameras"
+    },
+    {
+      "名称": "Lytro Illum / Real-world LF datasets",
+      "规模": "包含多组真实世界场景的光场图像（文中提及extensive real-world examples）。",
+      "特点": "使用商用光场相机拍摄，包含复杂的高光、金属、塑料、陶瓷等非朗伯体表面以及真实反射场景。",
+      "来源": "SVBRDF-Invariant Shape and Reﬂectance Estimation from Light-Field Cameras / Exploiting Sequence Analysis for Accurate Light-Field Depth Estimation"
+    },
+    {
+      "名称": "Booster dataset",
+      "规模": "包含多个真实场景的图像序列（公开数据集，文中未明确具体数量）。",
+      "特点": "专门针对透明或镜面（ToM）表面，场景中的反射和折射会引入误导性的几何视觉信息。",
+      "来源": "Learning Depth Estimation for Transparent and Mirror Surfaces"
+    },
+    {
+      "名称": "Dual-layer synthetic LF dataset",
+      "规模": "作者构建的合成数据集（文中未明确具体图像数量）。",
+      "特点": "具有双层属性（反射层和背景层），解决了真实反射场景下难以获取真实视差图（Ground Truth）的挑战。",
+      "来源": "Decoupling and Aggregating: Dual-layer Light Field Depth Estimation with Reflective and Transparent Surfaces"
+    }
+  ],
+  "baseline方法": [
+    {
+      "名称": "PLC / SDC / PSSM",
+      "年份": "文中未明确具体年份（引用文献[26], [25], [13]）",
+      "核心思路": "传统的光场深度估计算法，主要依赖朗伯体（Lambertian）假设或光度一致性（photo-consistency）等标准线索进行深度计算。",
+      "性能": "在处理高光（glossy）或非朗伯体表面时失效，会在镜面反射区域产生明显的伪影（visible artifacts）。"
+    },
+    {
+      "名称": "DPT",
+      "年份": "文中未明确具体年份（引用文献[37]）",
+      "核心思路": "基于Transformer的单目深度估计网络，通过提取全局和局部特征进行深度预测。",
+      "性能": "原始权重在透明或镜面（ToM）表面表现不佳，通过无真值伪标签微调后能显著改善对ToM表面的深度估计。"
+    },
+    {
+      "名称": "CREStereo",
+      "年份": "文中未明确具体年份（引用文献[22]）",
+      "核心思路": "基于迭代优化和自适应相关层的双目/立体深度估计网络。",
+      "性能": "原始权重难以处理ToM表面的反射和折射，微调后能够有效应对此类表面的深度估计挑战。"
+    },
+    {
+      "名称": "Classic LF methods (Structural tensor, Parallelogram, Sparse representation)",
+      "年份": "早期经典方法（文中未明确具体年份）",
+      "核心思路": "利用手工设计的特征算子测量极平面图像（EPI）中的直线斜率，并结合优化技术计算深度。",
+      "性能": "可解释性较差，且在复杂场景下的深度估计精度和鲁棒性有待提高，难以处理非朗伯体导致的EPI线断裂或混叠。"
+    }
+  ],
+  "评估指标": [
+    {
+      "名称": "Disparity/Depth Error (视差/深度误差)",
+      "定义": "预测的视差图或深度图与真实值（Ground Truth）之间的定量差异。在双层场景中，需分别评估背景层和反射层的误差。",
+      "典型值范围": "文中未提供具体数值范围，通常以MSE、MAE或BadPix百分比衡量，值越小越好。"
+    },
+    {
+      "名称": "Shape and Reflectance Recovery Error (形状与反射率恢复误差)",
+      "定义": "评估3D几何形状（深度/法线）以及表面反射属性（BRDF）的恢复精度，通常通过合成数据与Ground Truth对比计算。",
+      "典型值范围": "文中未提供具体数值范围，通常使用均方误差（MSE）或角度误差（针对法线）来衡量。"
+    },
+    {
+      "名称": "Qualitative Visual Artifacts (定性视觉伪影评估)",
+      "定义": "通过将输入图像纹理映射到深度结果上，定性观察算法在非朗伯体（如高光、透明、反射区域）是否产生可见的伪影或结构失效。",
+      "典型值范围": "无具体数值范围，以视觉上无明显伪影、边缘清晰、双层分离准确、纹理映射无扭曲为佳。"
+    }
+  ]
+}

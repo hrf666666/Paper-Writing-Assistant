@@ -1,0 +1,80 @@
+{
+  "innovation_points": [
+    {
+      "创新点名称": "基于几何特征的三层角信号分解与非朗伯体检测机制",
+      "创新点工作内容": [
+        "提出三层角信号分解物理模型 I(u,v) = DC + a·u + b·v + ε(u,v)，将环境光照(DC)、视差/深度(线性项)与材质/反射类型(残差项ε)进行有效解耦。",
+        "摒弃了在离散低分辨率(如9×9)光场下失效的2D-DFT频域分析(MRI类比)方法，转而提取角梯度(angular gradient)、相关性一致性(correlation coherence)等几何角特征。",
+        "利用随机森林(RF)分类器结合5个核心几何特征，实现对朗伯体与非朗伯体(镜面反射、散射等)区域的高精度像素级分类与掩码生成。"
+      ],
+      "创新点价值和意义": "从物理和几何层面揭示了传统EPI方法在非朗伯体表面失效的根本原因(角锥约束被破坏)，并提供了一种在低角度分辨率光场下鲁棒的非朗伯体检测机制。该机制为后续的双分支路由或掩码引导的深度估计网络提供了可靠的物理先验，有效缓解了非朗伯体材质对EPI斜率计算的干扰。",
+      "支撑证据": "Phase 1实验中，基于5个几何特征的RF分类器准确率达到89.6%，AUC达到0.962；角梯度(angular_gradient)特征的Cohen's d效应量高达0.983；理论验证引用了Wang 2017 (TPAMI) 的角锥约束和Cui 2024 (TCSVT) 的X型图案特征，证实了几何分解机制的有效性。"
+    },
+    {
+      "创新点名称": "统一双掩码物理模型与多领域平衡训练策略",
+      "创新点工作内容": [
+        "构建GeometricDualMask(几何双掩码)网络架构，利用三层分解得到的视差幅度P(x,y)和材质比例M(x,y)生成双掩码，在统一模型内对不同反射特性的区域进行自适应特征路由与深度回归。",
+        "设计并实施领域平衡采样(Domain-balanced sampling)与混合训练(Mixed training)策略，利用WeightedRandomSampler在多领域数据集(如包含170个场景的UrbanLF-Syn)中维持各领域的曝光与梯度平衡。",
+        "采用4方向EPI输入(EPINet4Dir V3)作为基础特征提取器，结合双掩码机制优化复杂纹理和混合材质场景下的深度图生成，避免单一模型在处理异质材质时的特征混淆。"
+      ],
+      "创新点价值和意义": "通过双掩码机制在统一架构下有效隔离并处理了不同材质区域的深度估计难题，提升了模型对非理想反射表面的容忍度。同时，领域平衡训练策略克服了多源光场数据集分布不均和特定领域(如非朗伯体)数据稀缺的问题，显著提升了模型在真实世界复杂混合场景(如城市场景)中的泛化能力和整体精度。",
+      "支撑证据": "最终模型在Overall MAE上达到0.133(优于<0.20的目标阈值)，在Mixed (Urban)场景MAE达到0.081(优于<0.22的目标阈值)；GeometricDualMask模型的mask gap降至0.041(优于0.08的目标)；132次实验记录证实Domain-balanced sampling结合WeightedRandomSampler在多领域下保持了稳定的训练收敛与性能提升。"
+    }
+  ],
+  "novelty_scores": [
+    {
+      "index": 0,
+      "name": "基于几何特征的三层角信号分解与非朗伯体检测机制",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 1,
+      "name": "统一双掩码物理模型与多领域平衡训练策略",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    }
+  ],
+  "progression": {
+    "type": "unknown",
+    "chain": [
+      {
+        "name": "基于几何特征的三层角信号分解与非朗伯体检测机制",
+        "role": "method",
+        "contribution": "This component serves as the foundational feature processing module, isolating critical geometric features and explicitly identifying problematic non-Lambertian regions via a three-layer angular signal decomposition.",
+        "connects_to_next": "By accurately isolating non-Lambertian regions and extracting structured physical priors, it provides the essential spatial and angular inputs required to effectively drive the subsequent physical model and training strategy."
+      },
+      {
+        "name": "统一双掩码物理模型与多领域平衡训练策略",
+        "role": "method",
+        "contribution": "This component formulates an advanced optimization architecture that processes the decomposed signals using a unified dual-mask physical model, while employing a balanced training strategy to ensure robust generalization across multiple data domains.",
+        "connects_to_next": "Together, these components integrate to form an end-to-end framework that seamlessly translates fundamental signal analysis into robust, generalized physical modeling across diverse environments."
+      }
+    ],
+    "story_line": "To address the complex reflectance challenges in physical modeling, we first introduce a geometric feature-based three-layer angular signal decomposition to explicitly isolate and detect non-Lambertian regions. Building upon these precise physical priors, we develop a unified dual-mask physical model coupled with a multi-domain balanced training strategy to achieve robust cross-domain generalization.",
+    "contribution_statements": [
+      "We identify that complex non-Lambertian surfaces can be effectively separated and analyzed by dissecting geometric features through a three-layer angular signal decomposition.",
+      "We propose a unified dual-mask physical model integrated with a multi-domain balanced training strategy that leverages the decomposed signals to optimize the learning process.",
+      "We demonstrate that coupling our angular decomposition mechanism with the dual-mask training framework significantly enhances both physical accuracy and cross-domain robustness."
+    ],
+    "progression_type": "C"
+  },
+  "anchor_map": {
+    "innovation_1": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于几何特征的三层角信号分解与非朗伯体检测机制",
+      "contribution_statement": "We identify that complex non-Lambertian surfaces can be effectively separated and analyzed by dissecting geometric features through a three-layer angular signal decomposition."
+    },
+    "innovation_2": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "统一双掩码物理模型与多领域平衡训练策略",
+      "contribution_statement": "We propose a unified dual-mask physical model integrated with a multi-domain balanced training strategy that leverages the decomposed signals to optimize the learning process."
+    }
+  }
+}

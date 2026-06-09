@@ -1,0 +1,2150 @@
+{
+  "final_report": [
+    {
+      "path": "FINAL_REPORT.md",
+      "size": 7163
+    },
+    {
+      "path": "workspace/FINAL_PROJECT_REPORT.md",
+      "size": 12659
+    },
+    {
+      "path": "workspace/FINAL_REPORT.md",
+      "size": 22516
+    },
+    {
+      "path": "_closure_archive/FINAL_REPORT_ENGLISH.md",
+      "size": 5726
+    },
+    {
+      "path": "_closure_archive/FINAL_REPORT.md",
+      "size": 12443
+    }
+  ],
+  "closure_report": [
+    {
+      "path": "TERMINAL_CLOSURE_REPORT_C143.md",
+      "size": 7998
+    },
+    {
+      "path": "workspace/FINAL_CLOSURE_REPORT.md",
+      "size": 8965
+    }
+  ],
+  "project_brief": [
+    {
+      "path": "PROJECT_BRIEF.md",
+      "size": 6613
+    },
+    {
+      "path": "data/HCI-Old/README.txt",
+      "size": 3250
+    }
+  ],
+  "model_code": [
+    {
+      "path": "workspace/paper_research_2026-05-28_module_verification_v4.md",
+      "size": 19198
+    },
+    {
+      "path": "workspace/paper_research_2026-05-28_roadmap_deviation_module_verification.md",
+      "size": 17081
+    },
+    {
+      "path": "workspace/paper_research_2026-05-28_module_verification.md",
+      "size": 19911
+    },
+    {
+      "path": "workspace/paper_research_module_verification.md",
+      "size": 11297
+    },
+    {
+      "path": "tools/brdf_modeling.py",
+      "size": 7030
+    }
+  ],
+  "train_script": [
+    {
+      "path": "PERSISTENT_CONSTRAINTS.md",
+      "size": 1458
+    },
+    {
+      "path": "outputs/exp_da_epinet/training_history.json",
+      "size": 33847
+    },
+    {
+      "path": "model_snapshots/cycle_205_domain_adversarial_epinet.py",
+      "size": 3253
+    },
+    {
+      "path": "data/HCInew/train.txt",
+      "size": 292
+    },
+    {
+      "path": "models/domain_adversarial_epinet.py",
+      "size": 3253
+    },
+    {
+      "path": "scripts/dry_run.py",
+      "size": 8810
+    },
+    {
+      "path": "scripts/train_da_epinet.py",
+      "size": 11357
+    },
+    {
+      "path": "scripts/train_focal_oversample.py",
+      "size": 13276
+    },
+    {
+      "path": "scripts/train_geometric_dualmask.py",
+      "size": 12425
+    },
+    {
+      "path": "scripts/train_epinet_extended.py",
+      "size": 11101
+    },
+    {
+      "path": "scripts/train_transfer_nol.py",
+      "size": 12368
+    },
+    {
+      "path": "scripts/train_aged_net.py",
+      "size": 13769
+    },
+    {
+      "path": "tools/dry_run.py",
+      "size": 9484
+    },
+    {
+      "path": "tools/dry_run_forward.py",
+      "size": 2762
+    }
+  ],
+  "eval_script": [
+    {
+      "path": "outputs/energy_maps/comprehensive_validation_report.json",
+      "size": 3960
+    },
+    {
+      "path": "docs/comprehensive_validation_report.md",
+      "size": 4717
+    },
+    {
+      "path": "analysis/defocus_validation.py",
+      "size": 18428
+    },
+    {
+      "path": "analysis/angular_freq_validate.py",
+      "size": 10434
+    },
+    {
+      "path": "data/HCInew/test.txt",
+      "size": 140
+    },
+    {
+      "path": "scripts/eval_best.py",
+      "size": 7972
+    },
+    {
+      "path": "workspace/angular_cone_validation.txt",
+      "size": 524
+    },
+    {
+      "path": "tools/_test_nl_load.py",
+      "size": 652
+    },
+    {
+      "path": "tools/_test_lf_load.py",
+      "size": 647
+    },
+    {
+      "path": "tools/comprehensive_validation.py",
+      "size": 16252
+    },
+    {
+      "path": "tools/_test_angular.py",
+      "size": 1171
+    },
+    {
+      "path": "tools/eval_checkpoint.py",
+      "size": 3508
+    },
+    {
+      "path": "tools/validate_angular_cone.py",
+      "size": 2965
+    },
+    {
+      "path": "tools/eval_fixed_split.py",
+      "size": 6239
+    }
+  ],
+  "dataset": [
+    {
+      "path": "DATASET_MANIFEST.json",
+      "size": 157907
+    },
+    {
+      "path": "datasets/real_lf_dataset.py",
+      "size": 3647
+    },
+    {
+      "path": "datasets/unified_lf_dataset.py",
+      "size": 17384
+    },
+    {
+      "path": "workspace/paper_research_2025-01-27_data_scarcity.md",
+      "size": 11183
+    },
+    {
+      "path": "workspace/DATASET_MANIFEST.json",
+      "size": 166446
+    },
+    {
+      "path": "tools/stage2_dataset_decomposition.py",
+      "size": 13755
+    }
+  ],
+  "config": [
+    {
+      "path": "config.yaml",
+      "size": 2857
+    }
+  ],
+  "loss": [],
+  "utils": [],
+  "other": [
+    {
+      "path": "TERMINATION_CYCLE141.md",
+      "size": 5102
+    },
+    {
+      "path": "TERMINATION_CONFIRMED_C122.md",
+      "size": 2908
+    },
+    {
+      "path": "state.json",
+      "size": 4934
+    },
+    {
+      "path": "STATUS_CONFIRMATION_C117.md",
+      "size": 3226
+    },
+    {
+      "path": "FINAL_TERMINAL_REPORT.md",
+      "size": 5675
+    },
+    {
+      "path": "TERMINATION_STATEMENT_C126.md",
+      "size": 3287
+    },
+    {
+      "path": "STRATEGY_RULES.json",
+      "size": 969
+    },
+    {
+      "path": "TERMINATION_CYCLE136.md",
+      "size": 6257
+    },
+    {
+      "path": "STATUS_CONFIRMATION_C115.md",
+      "size": 375
+    },
+    {
+      "path": "cycle_153_terminal_reaffirmation.md",
+      "size": 1541
+    },
+    {
+      "path": "FINAL_CYCLE_REPORT_C124.md",
+      "size": 3023
+    },
+    {
+      "path": "TERMINATION_CYCLE138.md",
+      "size": 7947
+    },
+    {
+      "path": "TERMINATION_FINAL_CYCLE142.md",
+      "size": 8306
+    },
+    {
+      "path": "_sandbox_last_verdict.json",
+      "size": 163
+    },
+    {
+      "path": "TERMINAL_CLOSURE_CYCLE156_FINAL.md",
+      "size": 3949
+    },
+    {
+      "path": "TERMINATION_CYCLE137.md",
+      "size": 4130
+    },
+    {
+      "path": "TERMINATION_REQUEST.md",
+      "size": 3114
+    },
+    {
+      "path": "TERMINAL_CLOSURE_FINAL_C148.md",
+      "size": 6135
+    },
+    {
+      "path": "RESEARCH_ROADMAP.md",
+      "size": 5916
+    },
+    {
+      "path": "MEMORY_LOG.md",
+      "size": 3886
+    },
+    {
+      "path": "TERMINATION_CYCLE140.md",
+      "size": 5320
+    },
+    {
+      "path": "IMPLEMENTATION_STATUS.json",
+      "size": 2136
+    },
+    {
+      "path": "FINAL_CLOSURE_CYCLE134.md",
+      "size": 12673
+    },
+    {
+      "path": "TERMINAL_CLOSURE_C152_FALSIFIABILITY.md",
+      "size": 1254
+    },
+    {
+      "path": "datasets/__init__.py",
+      "size": 251
+    },
+    {
+      "path": "outputs/orthogonal_removal_analysis_report.md",
+      "size": 5936
+    },
+    {
+      "path": "outputs/geo_correction_analysis_report.md",
+      "size": 4393
+    },
+    {
+      "path": "outputs/aged_net/results.json",
+      "size": 18721
+    },
+    {
+      "path": "outputs/exp_dualmask_v2_osc_fix/results.json",
+      "size": 4399
+    },
+    {
+      "path": "outputs/exp_focal_ema_fix/results.json",
+      "size": 21962
+    },
+    {
+      "path": "docs/FALSIFIABILITY_ANNOTATIONS.md",
+      "size": 4334
+    },
+    {
+      "path": "docs/stage1_exploration_report.md",
+      "size": 11574
+    },
+    {
+      "path": "model_snapshots/cycle_042_angular_freq_depth_net_v2.py",
+      "size": 7045
+    },
+    {
+      "path": "model_snapshots/cycle_024_epinet_defocus.py",
+      "size": 8299
+    },
+    {
+      "path": "model_snapshots/cycle_068_defocus_only_net.py",
+      "size": 6437
+    },
+    {
+      "path": "model_snapshots/cycle_211_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_080_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_175_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_039_angular_freq_depth_net_v2.py",
+      "size": 7045
+    },
+    {
+      "path": "model_snapshots/cycle_169_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_004_epinet_v4.py",
+      "size": 7803
+    },
+    {
+      "path": "model_snapshots/cycle_078_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_244_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_021_aged_net.py",
+      "size": 4140
+    },
+    {
+      "path": "model_snapshots/cycle_025_epinet_defocus.py",
+      "size": 6536
+    },
+    {
+      "path": "model_snapshots/cycle_145_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_098_geometric_pseudo_labels.py",
+      "size": 3654
+    },
+    {
+      "path": "model_snapshots/cycle_019_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_097_geometric_pseudo_labels.py",
+      "size": 3453
+    },
+    {
+      "path": "model_snapshots/cycle_032_epinet_defocus.py",
+      "size": 7737
+    },
+    {
+      "path": "model_snapshots/cycle_051_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_229_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_026_angular_freq_net.py",
+      "size": 2805
+    },
+    {
+      "path": "model_snapshots/cycle_040_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_235_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_018_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_023_epinet_defocus.py",
+      "size": 9001
+    },
+    {
+      "path": "model_snapshots/cycle_223_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_220_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_202_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_009_svd_routed_pilot.py",
+      "size": 5542
+    },
+    {
+      "path": "model_snapshots/cycle_056_epinet_fft_residual.py",
+      "size": 4507
+    },
+    {
+      "path": "model_snapshots/cycle_001_epinet_v4.py",
+      "size": 7803
+    },
+    {
+      "path": "model_snapshots/cycle_217_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_093_geometric_dualmask.py",
+      "size": 9079
+    },
+    {
+      "path": "model_snapshots/cycle_033_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_043_dual_branch_simple.py",
+      "size": 3319
+    },
+    {
+      "path": "model_snapshots/cycle_151_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_157_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_205_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_021_material_dualcue_net.py",
+      "size": 16011
+    },
+    {
+      "path": "model_snapshots/cycle_030_angular_freq_net.py",
+      "size": 3428
+    },
+    {
+      "path": "model_snapshots/cycle_077_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_172_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_188_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_084_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_037_angular_freq_depth_net_v2.py",
+      "size": 7045
+    },
+    {
+      "path": "model_snapshots/cycle_208_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_107_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_006_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_040_angular_freq_depth_net_v2.py",
+      "size": 7045
+    },
+    {
+      "path": "model_snapshots/cycle_020_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_076_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_012_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_046_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_082_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_025_angular_freq_net.py",
+      "size": 2805
+    },
+    {
+      "path": "model_snapshots/cycle_032_angular_freq_net.py",
+      "size": 3428
+    },
+    {
+      "path": "model_snapshots/cycle_172_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_160_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_196_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_065_defocus_only_net.py",
+      "size": 6437
+    },
+    {
+      "path": "model_snapshots/cycle_139_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_064_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_166_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_099_geometric_pseudo_labels.py",
+      "size": 3654
+    },
+    {
+      "path": "model_snapshots/cycle_024_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_042_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_029_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_035_epinet_4dir.py",
+      "size": 4026
+    },
+    {
+      "path": "model_snapshots/cycle_027_epinet_defocus.py",
+      "size": 9001
+    },
+    {
+      "path": "model_snapshots/cycle_031_epinet_defocus.py",
+      "size": 7737
+    },
+    {
+      "path": "model_snapshots/cycle_050_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_002_epinet_v4.py",
+      "size": 7803
+    },
+    {
+      "path": "model_snapshots/cycle_226_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_190_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_038_epinet_multimodal.py",
+      "size": 5554
+    },
+    {
+      "path": "model_snapshots/cycle_073_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_011_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_175_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_027_angular_freq_net.py",
+      "size": 3428
+    },
+    {
+      "path": "model_snapshots/cycle_069_defocus_only_net.py",
+      "size": 6437
+    },
+    {
+      "path": "model_snapshots/cycle_085_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_232_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_202_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_079_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_075_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_010_svd_routed_pilot.py",
+      "size": 5542
+    },
+    {
+      "path": "model_snapshots/cycle_034_angular_freq_net.py",
+      "size": 3428
+    },
+    {
+      "path": "model_snapshots/cycle_238_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_047_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_033_epinet_defocus.py",
+      "size": 7737
+    },
+    {
+      "path": "model_snapshots/cycle_181_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_187_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_184_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_074_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_136_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_148_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_022_epinet_defocus.py",
+      "size": 6536
+    },
+    {
+      "path": "model_snapshots/cycle_154_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_035_material_dualcue_net.py",
+      "size": 8333
+    },
+    {
+      "path": "model_snapshots/cycle_003_epinet_v4.py",
+      "size": 7803
+    },
+    {
+      "path": "model_snapshots/cycle_013_svd_routed_pilot.py",
+      "size": 5542
+    },
+    {
+      "path": "model_snapshots/cycle_061_defocus_only_net.py",
+      "size": 6437
+    },
+    {
+      "path": "model_snapshots/cycle_214_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_178_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_059_epinet_fft_residual.py",
+      "size": 4507
+    },
+    {
+      "path": "model_snapshots/cycle_044_dual_branch_simple.py",
+      "size": 3319
+    },
+    {
+      "path": "model_snapshots/cycle_199_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_036_epinet_defocus.py",
+      "size": 7737
+    },
+    {
+      "path": "model_snapshots/cycle_008_svd_routed_pilot.py",
+      "size": 5542
+    },
+    {
+      "path": "model_snapshots/cycle_031_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_034_epinet_defocus.py",
+      "size": 3385
+    },
+    {
+      "path": "model_snapshots/cycle_163_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_049_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_052_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_048_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_028_angular_freq_net.py",
+      "size": 3428
+    },
+    {
+      "path": "model_snapshots/cycle_041_angular_freq_depth_net_v2.py",
+      "size": 7045
+    },
+    {
+      "path": "model_snapshots/cycle_045_dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "model_snapshots/cycle_241_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_017_epinet_4dir.py",
+      "size": 4610
+    },
+    {
+      "path": "model_snapshots/cycle_037_material_dualcue_net.py",
+      "size": 8333
+    },
+    {
+      "path": "model_snapshots/cycle_142_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "model_snapshots/cycle_106_geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "model_snapshots/cycle_028_epinet_defocus.py",
+      "size": 9001
+    },
+    {
+      "path": "model_snapshots/cycle_036_material_dualcue_net.py",
+      "size": 8333
+    },
+    {
+      "path": "model_snapshots/cycle_070_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_016_material_dualcue_net.py",
+      "size": 16011
+    },
+    {
+      "path": "model_snapshots/cycle_038_material_dualcue_net.py",
+      "size": 8333
+    },
+    {
+      "path": "model_snapshots/cycle_014_material_dualcue_net.py",
+      "size": 16011
+    },
+    {
+      "path": "model_snapshots/cycle_083_defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "model_snapshots/cycle_193_angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "analysis/angular_freq_results.json",
+      "size": 4955
+    },
+    {
+      "path": "analysis/defocus_results/summary.txt",
+      "size": 1527
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image275/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image260/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image264/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image267/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image272/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image270/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image278/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image261/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image263/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image256/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image266/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image254/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image280/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image255/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image262/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image252/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image259/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image268/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image265/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image277/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image258/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image257/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image271/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image279/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image276/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image253/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image251/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image273/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image269/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image274/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/HCInew/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/vis.txt",
+      "size": 140
+    },
+    {
+      "path": "data/HCInew/generate.txt",
+      "size": 483
+    },
+    {
+      "path": "data/HCInew/invalid.txt",
+      "size": 182
+    },
+    {
+      "path": "data/HCInew/training/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/boxes/parameters.cfg",
+      "size": 763
+    },
+    {
+      "path": "data/HCInew/training/boxes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/dino/parameters.cfg",
+      "size": 781
+    },
+    {
+      "path": "data/HCInew/training/dino/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/sideboard/parameters.cfg",
+      "size": 771
+    },
+    {
+      "path": "data/HCInew/training/sideboard/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/cotton/parameters.cfg",
+      "size": 770
+    },
+    {
+      "path": "data/HCInew/training/cotton/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/stripes/parameters.cfg",
+      "size": 669
+    },
+    {
+      "path": "data/HCInew/stratified/stripes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/dots/parameters.cfg",
+      "size": 667
+    },
+    {
+      "path": "data/HCInew/stratified/dots/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/backgammon/parameters.cfg",
+      "size": 730
+    },
+    {
+      "path": "data/HCInew/stratified/backgammon/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/pyramids/parameters.cfg",
+      "size": 672
+    },
+    {
+      "path": "data/HCInew/stratified/pyramids/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/pens/parameters.cfg",
+      "size": 803
+    },
+    {
+      "path": "data/HCInew/additional/pens/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/tower/parameters.cfg",
+      "size": 796
+    },
+    {
+      "path": "data/HCInew/additional/tower/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/dishes/parameters.cfg",
+      "size": 795
+    },
+    {
+      "path": "data/HCInew/additional/dishes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/tomb/parameters.cfg",
+      "size": 776
+    },
+    {
+      "path": "data/HCInew/additional/tomb/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/rosemary/parameters.cfg",
+      "size": 816
+    },
+    {
+      "path": "data/HCInew/additional/rosemary/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/pillows/parameters.cfg",
+      "size": 805
+    },
+    {
+      "path": "data/HCInew/additional/pillows/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/vinyl/parameters.cfg",
+      "size": 805
+    },
+    {
+      "path": "data/HCInew/additional/vinyl/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/museum/parameters.cfg",
+      "size": 774
+    },
+    {
+      "path": "data/HCInew/additional/museum/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/antinous/parameters.cfg",
+      "size": 799
+    },
+    {
+      "path": "data/HCInew/additional/antinous/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/platonic/parameters.cfg",
+      "size": 780
+    },
+    {
+      "path": "data/HCInew/additional/platonic/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/medieval2/parameters.cfg",
+      "size": 782
+    },
+    {
+      "path": "data/HCInew/additional/medieval2/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/boardgames/parameters.cfg",
+      "size": 783
+    },
+    {
+      "path": "data/HCInew/additional/boardgames/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/greek/parameters.cfg",
+      "size": 809
+    },
+    {
+      "path": "data/HCInew/additional/greek/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/kitchen/parameters.cfg",
+      "size": 811
+    },
+    {
+      "path": "data/HCInew/additional/kitchen/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/town/parameters.cfg",
+      "size": 797
+    },
+    {
+      "path": "data/HCInew/additional/town/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/table/parameters.cfg",
+      "size": 792
+    },
+    {
+      "path": "data/HCInew/additional/table/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/bicycle/parameters.cfg",
+      "size": 766
+    },
+    {
+      "path": "data/HCInew/test/bicycle/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/origami/parameters.cfg",
+      "size": 777
+    },
+    {
+      "path": "data/HCInew/test/origami/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/herbs/parameters.cfg",
+      "size": 779
+    },
+    {
+      "path": "data/HCInew/test/herbs/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/bedroom/parameters.cfg",
+      "size": 762
+    },
+    {
+      "path": "data/HCInew/test/bedroom/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 70%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 50%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 80%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 10%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 30%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/Teddy/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "models/components.py",
+      "size": 4804
+    },
+    {
+      "path": "models/angular_material_classifier.py",
+      "size": 1738
+    },
+    {
+      "path": "models/epinet_4dir.py",
+      "size": 4026
+    },
+    {
+      "path": "models/geometric_pseudo_labels.py",
+      "size": 6309
+    },
+    {
+      "path": "models/epinet_defocus.py",
+      "size": 3385
+    },
+    {
+      "path": "models/defocus_only_net.py",
+      "size": 6397
+    },
+    {
+      "path": "models/angular_aware.py",
+      "size": 2724
+    },
+    {
+      "path": "models/material_dualcue_net.py",
+      "size": 6346
+    },
+    {
+      "path": "models/epinet_v4.py",
+      "size": 7803
+    },
+    {
+      "path": "models/angular_freq_depth_net_v2.py",
+      "size": 7051
+    },
+    {
+      "path": "models/epinet_fft_residual.py",
+      "size": 4507
+    },
+    {
+      "path": "models/geometric_dualmask.py",
+      "size": 9079
+    },
+    {
+      "path": "models/svd_routed_pilot.py",
+      "size": 7565
+    },
+    {
+      "path": "models/epinet_4dir_angular_attn.py",
+      "size": 4236
+    },
+    {
+      "path": "models/dual_branch_simple.py",
+      "size": 4560
+    },
+    {
+      "path": "models/__init__.py",
+      "size": 193
+    },
+    {
+      "path": "models/dual_branch_v2.py",
+      "size": 6764
+    },
+    {
+      "path": "models/epinet_multimodal.py",
+      "size": 5554
+    },
+    {
+      "path": "models/aged_net.py",
+      "size": 4140
+    },
+    {
+      "path": "models/angular_freq_net.py",
+      "size": 3430
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_091717_0bd3ef.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_061347_2b3eda.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_045847_77c676.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_191215_514f65.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/directive_20260528_001957_2a75c1.md",
+      "size": 818
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_181203_62078a.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_044442_9351ee.md",
+      "size": 326
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_102413_ba785c.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_050551_e61190.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_072518_91a3a3.md",
+      "size": 3653
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_132357_e4e920.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_050558_f0f919.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/directive_20260528_000422_53e28f.md",
+      "size": 2386
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_085945_d97fcd.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/auto_directive_20260525_173040_a5af60.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_060044_5ba2ff.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_110015_e5bb15.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_130607_79510a.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_180044_f0ca72.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_022202_91d4ac.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_065153_41b91f.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_115501_461e98.md",
+      "size": 465
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_090642_f4edd3.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/directive_20260525_143334_685e8d.md",
+      "size": 1046
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_071206_4c2ba0.md",
+      "size": 474
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_165349_e2b573.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_100236_a4acd4.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_204107_d67c6e.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_065128_02ba8f.md",
+      "size": 474
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_051539_91f72f.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_081015_e7c437.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_142147_ef795c.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_114217_514afa.md",
+      "size": 465
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_084522_a448f3.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_063121_b663a7.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/directive_20260528_001216_ec7bd5.md",
+      "size": 756
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_075130_ccd6b7.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_063819_991ef3.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_112112_d57c68.md",
+      "size": 456
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_053939_fff5c4.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_200657_cc40a2.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_111038_6d2b84.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_095330_a27912.md",
+      "size": 458
+    },
+    {
+      "path": "directive_archive/directive_20260525_145501_d597e8.md",
+      "size": 732
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_080030_0e0e26.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_185104_ca683d.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_074935_62ac2b.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_084053_27c022.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_203333_7e5412.md",
+      "size": 396
+    },
+    {
+      "path": "directive_archive/auto_directive_20260525_170950_52d901.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_120113_7ec1be.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/directive_20260525_151045_990f42.md",
+      "size": 790
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_024115_1b6b3d.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260525_183904_f2ab36.md",
+      "size": 3540
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_131543_dbb605.md",
+      "size": 593
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_023310_2f1db6.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_070447_9b364f.md",
+      "size": 474
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_084902_591925.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260525_183017_3e46d4.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260527_133234_552e8a.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260528_040623_876fde.md",
+      "size": 456
+    },
+    {
+      "path": "workspace/angular_feature_analysis_results.json",
+      "size": 7920
+    },
+    {
+      "path": "workspace/paper_research_2026-05-11.md",
+      "size": 14191
+    },
+    {
+      "path": "workspace/paper_research_2025_lightfield_breakthrough.md",
+      "size": 17383
+    },
+    {
+      "path": "workspace/val_split_fix_recommendations.txt",
+      "size": 1534
+    },
+    {
+      "path": "workspace/CYCLE_130_TERMINATION_FINAL.md",
+      "size": 8888
+    },
+    {
+      "path": "workspace/CYCLE_114_CLOSURE_CONFIRMATION.md",
+      "size": 3084
+    },
+    {
+      "path": "workspace/paper_research_core_idea_verification_v2.md",
+      "size": 12409
+    },
+    {
+      "path": "workspace/NOOP_CYCLE_64.md",
+      "size": 1477
+    },
+    {
+      "path": "workspace/paper_research_2025_06_lambertian_gap.md",
+      "size": 16929
+    },
+    {
+      "path": "workspace/paper_research_2025_05_27.md",
+      "size": 13790
+    },
+    {
+      "path": "workspace/CYCLE_132_FINAL_TERMINATION.md",
+      "size": 4017
+    },
+    {
+      "path": "workspace/CYCLE_129_FINAL_TERMINATION.md",
+      "size": 6820
+    },
+    {
+      "path": "workspace/paper_research_core_idea_verification.md",
+      "size": 15215
+    },
+    {
+      "path": "workspace/ANGULAR_FREQ_REPORT.md",
+      "size": 2622
+    },
+    {
+      "path": "workspace/paper_research_2026-05-28_breakthrough_strategies.md",
+      "size": 15099
+    },
+    {
+      "path": "workspace/STRATEGY_RULES.json",
+      "size": 1965
+    },
+    {
+      "path": "workspace/paper_research_2026-05-27.md",
+      "size": 12021
+    },
+    {
+      "path": "workspace/paper_research_2025_lf_depth.md",
+      "size": 21893
+    },
+    {
+      "path": "workspace/analysis_extended_discriminability.md",
+      "size": 4701
+    },
+    {
+      "path": "workspace/stage2_decomposition_report.md",
+      "size": 1978
+    },
+    {
+      "path": "workspace/paper_research_2025_01_23.md",
+      "size": 16258
+    },
+    {
+      "path": "workspace/CYCLE_112_CLOSURE_CONFIRMATION.md",
+      "size": 1699
+    },
+    {
+      "path": "workspace/paper_research_2026_05_11.md",
+      "size": 13756
+    },
+    {
+      "path": "workspace/paper_research_2026-05-22_comprehensive.md",
+      "size": 15832
+    },
+    {
+      "path": "workspace/TERMINATION_CONFIRMATION_C119.md",
+      "size": 6425
+    },
+    {
+      "path": "workspace/phase1_results.json",
+      "size": 3424
+    },
+    {
+      "path": "workspace/audit_fix_verification.txt",
+      "size": 753
+    },
+    {
+      "path": "workspace/TERMINATION_CONFIRMED_C125.md",
+      "size": 8473
+    },
+    {
+      "path": "workspace/PHASE_STATUS.json",
+      "size": 1743
+    },
+    {
+      "path": "workspace/paper_research_2026-05-21.md",
+      "size": 15863
+    },
+    {
+      "path": "workspace/TERMINATION_CONFIRMATION_C120.md",
+      "size": 2530
+    },
+    {
+      "path": "workspace/angular_analysis_results.md",
+      "size": 3925
+    },
+    {
+      "path": "workspace/FINAL_STATUS.md",
+      "size": 3652
+    },
+    {
+      "path": "workspace/stage2_plan.md",
+      "size": 7706
+    },
+    {
+      "path": "workspace/val_split_audit.json",
+      "size": 17764
+    },
+    {
+      "path": "workspace/paper_research_20250611.md",
+      "size": 5154
+    },
+    {
+      "path": "workspace/phase1_geometric_classification_results.json",
+      "size": 1667
+    },
+    {
+      "path": "workspace/CYCLE_128_ABSOLUTE_TERMINATION.md",
+      "size": 7059
+    },
+    {
+      "path": "workspace/stage2_1_results.json",
+      "size": 151148
+    },
+    {
+      "path": "workspace/paper_research_core_idea_verification_v3.md",
+      "size": 11724
+    },
+    {
+      "path": "workspace/TERMINATION_CYCLE135.md",
+      "size": 3503
+    },
+    {
+      "path": "workspace/angular_freq_analysis_results.json",
+      "size": 5689
+    },
+    {
+      "path": "workspace/angular_feature_analysis_summary.txt",
+      "size": 5168
+    },
+    {
+      "path": "workspace/paper_research_2026-05-28_core_idea_verification.md",
+      "size": 13225
+    },
+    {
+      "path": "workspace/CYCLE_127_CLOSURE_AFFIRMATION.md",
+      "size": 4317
+    },
+    {
+      "path": "workspace/stage2_decomposition_results.json",
+      "size": 19844
+    },
+    {
+      "path": "workspace/FUSION_BALANCE_FIX.md",
+      "size": 2380
+    },
+    {
+      "path": "workspace/CYCLE_131_CLOSURE_REAFFIRMATION.md",
+      "size": 4876
+    },
+    {
+      "path": "workspace/paper_research_20260527.md",
+      "size": 8362
+    },
+    {
+      "path": "workspace/paper_research_2026-05-28_core_idea_FINAL.md",
+      "size": 11452
+    },
+    {
+      "path": "workspace/paper_research_2025-05-27.md",
+      "size": 18990
+    },
+    {
+      "path": "workspace/angular_theory_results/summary_report.txt",
+      "size": 7000
+    },
+    {
+      "path": "workspace/multi_feature_results/analysis_summary.json",
+      "size": 1332
+    },
+    {
+      "path": "configs/val_split_fix.json",
+      "size": 402
+    },
+    {
+      "path": "configs/fixed_lambertian_split.json",
+      "size": 1911
+    },
+    {
+      "path": "ref_paper/INDEX.md",
+      "size": 364
+    },
+    {
+      "path": "tools/final_decoupling_method.py",
+      "size": 6424
+    },
+    {
+      "path": "tools/angular_cone_analysis.py",
+      "size": 14107
+    },
+    {
+      "path": "tools/diag_lambertian_mae.py",
+      "size": 2078
+    },
+    {
+      "path": "tools/_check_manifest.py",
+      "size": 811
+    },
+    {
+      "path": "tools/analyze_illumination_coupling.py",
+      "size": 5481
+    },
+    {
+      "path": "tools/feature_fusion.py",
+      "size": 8906
+    },
+    {
+      "path": "tools/debug_fusion_direction.py",
+      "size": 3528
+    },
+    {
+      "path": "tools/geometric_feature_classification.py",
+      "size": 13594
+    },
+    {
+      "path": "tools/rpca_quick.py",
+      "size": 9892
+    },
+    {
+      "path": "tools/final_summary_visualization.py",
+      "size": 4494
+    },
+    {
+      "path": "tools/entropy_shape_analysis.py",
+      "size": 12368
+    },
+    {
+      "path": "tools/deep_analysis_nonlambertian_types.py",
+      "size": 4609
+    },
+    {
+      "path": "tools/angular_4family_analysis.py",
+      "size": 21411
+    },
+    {
+      "path": "tools/multi_feature_analysis.py",
+      "size": 23801
+    },
+    {
+      "path": "tools/check_gt_ranges.py",
+      "size": 7704
+    },
+    {
+      "path": "tools/statistical_boundary_detection.py",
+      "size": 9424
+    },
+    {
+      "path": "tools/stage2_pixel_features.py",
+      "size": 4487
+    },
+    {
+      "path": "tools/plot_comprehensive.py",
+      "size": 8247
+    },
+    {
+      "path": "tools/compare_aco_vs_decomposition.py",
+      "size": 12752
+    },
+    {
+      "path": "tools/entropy_deep_analysis.py",
+      "size": 18773
+    },
+    {
+      "path": "tools/visualize_all_methods.py",
+      "size": 6744
+    },
+    {
+      "path": "tools/_debug_nonlamb.py",
+      "size": 606
+    },
+    {
+      "path": "tools/adaptive_geo_correction.py",
+      "size": 9406
+    },
+    {
+      "path": "tools/improved_entropy_decoupled.py",
+      "size": 17826
+    },
+    {
+      "path": "tools/pixel_energy_map.py",
+      "size": 13179
+    },
+    {
+      "path": "tools/_check_nl.py",
+      "size": 656
+    },
+    {
+      "path": "tools/orthogonal_removal_experiment.py",
+      "size": 12008
+    },
+    {
+      "path": "tools/verify_fusion_visualization.py",
+      "size": 4258
+    },
+    {
+      "path": "tools/signal_decomposition.py",
+      "size": 12158
+    },
+    {
+      "path": "tools/fix_val_split.py",
+      "size": 6837
+    },
+    {
+      "path": "tools/rpca_decomposition.py",
+      "size": 14443
+    },
+    {
+      "path": "tools/plot_apple_comparison.py",
+      "size": 9023
+    },
+    {
+      "path": "tools/corrected_hybrid_method.py",
+      "size": 9271
+    },
+    {
+      "path": "tools/audit_hcinew_gt.py",
+      "size": 4364
+    },
+    {
+      "path": "tools/verify_aco_epi.py",
+      "size": 12490
+    },
+    {
+      "path": "tools/_debug_processing.py",
+      "size": 2516
+    },
+    {
+      "path": "tools/angular_fft_diagnostic.py",
+      "size": 8528
+    },
+    {
+      "path": "tools/angular_theory_verification.py",
+      "size": 28049
+    },
+    {
+      "path": "tools/final_best_features.py",
+      "size": 6710
+    },
+    {
+      "path": "tools/per_scene_analysis.py",
+      "size": 2978
+    },
+    {
+      "path": "tools/analyze_gt_quality.py",
+      "size": 5684
+    },
+    {
+      "path": "tools/angular_patch_analysis.py",
+      "size": 23247
+    },
+    {
+      "path": "tools/_temp_header.txt",
+      "size": 101
+    },
+    {
+      "path": "tools/angular_cone_residual_analysis.py",
+      "size": 10191
+    },
+    {
+      "path": "tools/pixel_material_map.py",
+      "size": 12824
+    },
+    {
+      "path": "tools/_debug_count.py",
+      "size": 1251
+    },
+    {
+      "path": "tools/sh_decomposition.py",
+      "size": 15999
+    },
+    {
+      "path": "tools/final_comparison.py",
+      "size": 10165
+    },
+    {
+      "path": "tools/compare_david_apple_aco.py",
+      "size": 11911
+    },
+    {
+      "path": "tools/summary_report.py",
+      "size": 5810
+    },
+    {
+      "path": "tools/_extended_discriminability.py",
+      "size": 12023
+    },
+    {
+      "path": "tools/compare_david_apple_aco_v2.py",
+      "size": 11451
+    },
+    {
+      "path": "tools/check_apple_method.py",
+      "size": 4203
+    },
+    {
+      "path": "tools/_debug_scenes.py",
+      "size": 1862
+    },
+    {
+      "path": "tools/audit_val_split.py",
+      "size": 6875
+    },
+    {
+      "path": "tools/analyze_normalization.py",
+      "size": 14427
+    },
+    {
+      "path": "tools/angular_fft_analysis.py",
+      "size": 18458
+    },
+    {
+      "path": "tools/_debug_valid.py",
+      "size": 989
+    },
+    {
+      "path": "tools/angular_freq_analysis.py",
+      "size": 15306
+    },
+    {
+      "path": "tools/adaptive_feature_selection.py",
+      "size": 9586
+    },
+    {
+      "path": "tools/create_fixed_split.py",
+      "size": 3797
+    },
+    {
+      "path": "tools/analyze_why_normalization_works.py",
+      "size": 4774
+    },
+    {
+      "path": "tools/angular_feature_analysis.py",
+      "size": 22051
+    },
+    {
+      "path": "tools/angular_spectral_analysis.py",
+      "size": 28826
+    },
+    {
+      "path": "tools/angular_frequency_analysis.py",
+      "size": 18561
+    },
+    {
+      "path": "tools/visualize_normalization.py",
+      "size": 7859
+    },
+    {
+      "path": "tools/epi_material_analysis.py",
+      "size": 8296
+    },
+    {
+      "path": "tools/generate_all_pixel_maps.py",
+      "size": 6828
+    },
+    {
+      "path": "tools/deep_analysis_decoupling.py",
+      "size": 6989
+    },
+    {
+      "path": "tools/unified_visualization.py",
+      "size": 11320
+    },
+    {
+      "path": "_closure_archive/CYCLE_67_NOOP_ACKNOWLEDGMENT.md",
+      "size": 3228
+    },
+    {
+      "path": "_closure_archive/CYCLE_60_NOOP_ACKNOWLEDGMENT.md",
+      "size": 1527
+    },
+    {
+      "path": "_closure_archive/FINAL_PROJECT_STATUS_REPORT.md",
+      "size": 4644
+    },
+    {
+      "path": "_closure_archive/PROJECT_CLOSURE.md",
+      "size": 4340
+    },
+    {
+      "path": "_closure_archive/CYCLE_71_TERMINATION_REPORT.md",
+      "size": 7336
+    },
+    {
+      "path": "_closure_archive/CYCLE_62_NOOP_ACKNOWLEDGMENT.md",
+      "size": 564
+    },
+    {
+      "path": "_closure_archive/CYCLE_72_NOOP_ACKNOWLEDGMENT.md",
+      "size": 2243
+    },
+    {
+      "path": "_closure_archive/CYCLE_68_STATUS_CONFIRMATION.md",
+      "size": 2922
+    },
+    {
+      "path": "_closure_archive/FINAL_STATUS.md",
+      "size": 14337
+    },
+    {
+      "path": "_closure_archive/PROJECT_CLOSURE_FINAL.md",
+      "size": 9050
+    },
+    {
+      "path": "_closure_archive/CLOSURE_ACKNOWLEDGMENT.md",
+      "size": 446
+    }
+  ]
+}

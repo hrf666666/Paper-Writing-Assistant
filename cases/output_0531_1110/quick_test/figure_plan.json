@@ -1,0 +1,423 @@
+{
+  "figures": [
+    {
+      "fig_id": "fig1",
+      "fig_type": "teaser",
+      "fig_role": "main",
+      "title": "Overall Framework of Unified Dual-Mask Physical Model",
+      "caption": "The overall framework of our proposed method. The light field signal is first decoupled via Three-Layer Angular Signal Decomposition to extract physical priors. These priors guide the GeometricDualMask architecture to adaptively route Lambertian and non-Lambertian regions through specialized branches, followed by a pixel-wise dual-mask fusion for robust depth estimation.",
+      "size_type": "teaser",
+      "layout_direction": "left_to_right",
+      "modules": [
+        {
+          "id": "m1",
+          "label": "Light Field Input",
+          "group": "input",
+          "is_innovation": false
+        },
+        {
+          "id": "m2",
+          "label": "Signal Decomposition",
+          "group": "decomposition",
+          "is_innovation": true
+        },
+        {
+          "id": "m3",
+          "label": "Dual-Branch Routing",
+          "group": "routing",
+          "is_innovation": true
+        },
+        {
+          "id": "m4",
+          "label": "Dual-Mask Fusion",
+          "group": "fusion",
+          "is_innovation": true
+        },
+        {
+          "id": "m5",
+          "label": "Depth Output",
+          "group": "output",
+          "is_innovation": false
+        }
+      ],
+      "connections": [
+        {
+          "from": "m1",
+          "to": "m2",
+          "label": "Raw EPIs"
+        },
+        {
+          "from": "m2",
+          "to": "m3",
+          "label": "Physical Priors"
+        },
+        {
+          "from": "m3",
+          "to": "m4",
+          "label": "Branch Features"
+        },
+        {
+          "from": "m4",
+          "to": "m5",
+          "label": "Fused Depth"
+        }
+      ],
+      "groups": [
+        {
+          "id": "g1",
+          "label": "Physical Prior Extraction",
+          "module_ids": [
+            "m2"
+          ],
+          "style": "dashed_box"
+        },
+        {
+          "id": "g2",
+          "label": "Adaptive Routing & Fusion",
+          "module_ids": [
+            "m3",
+            "m4"
+          ],
+          "style": "solid_box"
+        }
+      ],
+      "annotations": [
+        "Key insight: Three-layer decomposition replaces traditional frequency-domain analysis.",
+        "Dual-branch design explicitly handles X-shaped EPI patterns in non-Lambertian regions."
+      ],
+      "layout_template": "pipeline"
+    },
+    {
+      "fig_id": "fig2",
+      "fig_type": "module_detail",
+      "fig_role": "supporting",
+      "title": "Three-Layer Angular Signal Decomposition",
+      "caption": "Detailed design of the physical signal decomposition module. The input EPI signal is decoupled into ambient illumination, parallax-induced depth, and material-specific residual components. The material residual is utilized to compute angular gradient pseudo-labels for robust material classification.",
+      "size_type": "single",
+      "layout_direction": "top_to_bottom",
+      "modules": [
+        {
+          "id": "m1",
+          "label": "EPI Input",
+          "group": "input",
+          "is_innovation": false
+        },
+        {
+          "id": "m2",
+          "label": "Ambient Layer",
+          "group": "layers",
+          "is_innovation": true
+        },
+        {
+          "id": "m3",
+          "label": "Parallax Layer",
+          "group": "layers",
+          "is_innovation": true
+        },
+        {
+          "id": "m4",
+          "label": "Material Layer",
+          "group": "layers",
+          "is_innovation": true
+        },
+        {
+          "id": "m5",
+          "label": "Angular Gradient",
+          "group": "output",
+          "is_innovation": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "m1",
+          "to": "m2",
+          "label": ""
+        },
+        {
+          "from": "m1",
+          "to": "m3",
+          "label": ""
+        },
+        {
+          "from": "m1",
+          "to": "m4",
+          "label": ""
+        },
+        {
+          "from": "m4",
+          "to": "m5",
+          "label": "Pseudo-labels"
+        }
+      ],
+      "groups": [
+        {
+          "id": "g1",
+          "label": "Decoupled Physical Layers",
+          "module_ids": [
+            "m2",
+            "m3",
+            "m4"
+          ],
+          "style": "dashed_box"
+        }
+      ],
+      "annotations": [
+        "Avoids frequency-domain limitations of low angular resolution commercial cameras."
+      ],
+      "layout_template": "parallel"
+    },
+    {
+      "fig_id": "fig3",
+      "fig_type": "module_detail",
+      "fig_role": "supporting",
+      "title": "GeometricDualMask Architecture",
+      "caption": "The dual-branch adaptive routing architecture. The EPI branch with Plane Regularized Sampling Operator (PRSO) processes diffuse Lambertian surfaces, while the Geometric Convolution branch leverages X-shaped patterns for reflective non-Lambertian surfaces. A pixel-wise mask seamlessly integrates the outputs.",
+      "size_type": "double",
+      "layout_direction": "left_to_right",
+      "modules": [
+        {
+          "id": "m1",
+          "label": "Feature Input",
+          "group": "input",
+          "is_innovation": false
+        },
+        {
+          "id": "m2",
+          "label": "PRSO Operator",
+          "group": "lambertian",
+          "is_innovation": true
+        },
+        {
+          "id": "m3",
+          "label": "EPI Branch",
+          "group": "lambertian",
+          "is_innovation": false
+        },
+        {
+          "id": "m4",
+          "label": "Geometric Conv",
+          "group": "non_lambertian",
+          "is_innovation": true
+        },
+        {
+          "id": "m5",
+          "label": "Pixel-wise Mask",
+          "group": "fusion",
+          "is_innovation": true
+        },
+        {
+          "id": "m6",
+          "label": "Fused Output",
+          "group": "output",
+          "is_innovation": false
+        }
+      ],
+      "connections": [
+        {
+          "from": "m1",
+          "to": "m2",
+          "label": ""
+        },
+        {
+          "from": "m2",
+          "to": "m3",
+          "label": ""
+        },
+        {
+          "from": "m1",
+          "to": "m4",
+          "label": ""
+        },
+        {
+          "from": "m3",
+          "to": "m6",
+          "label": ""
+        },
+        {
+          "from": "m4",
+          "to": "m6",
+          "label": ""
+        },
+        {
+          "from": "m5",
+          "to": "m6",
+          "label": "Mask Weights"
+        }
+      ],
+      "groups": [
+        {
+          "id": "g1",
+          "label": "Lambertian Stream",
+          "module_ids": [
+            "m2",
+            "m3"
+          ],
+          "style": "dashed_box"
+        },
+        {
+          "id": "g2",
+          "label": "Non-Lambertian Stream",
+          "module_ids": [
+            "m4"
+          ],
+          "style": "dashed_box"
+        }
+      ],
+      "annotations": [
+        "PRSO enforces plane regularization for diffuse regions.",
+        "Geometric Conv captures bimodal distributions of X-shaped EPI patterns."
+      ],
+      "layout_template": "dual_branch"
+    },
+    {
+      "fig_id": "fig4",
+      "fig_type": "qualitative",
+      "fig_role": "supporting",
+      "title": "Qualitative Comparison on Mixed Scenes",
+      "caption": "Visual comparison of depth estimation results on mixed scenes containing both Lambertian and non-Lambertian materials. Our method successfully recovers depth in specular and glossy regions where baseline EPI methods suffer from severe structural discontinuities.",
+      "size_type": "double",
+      "layout_direction": "grid",
+      "modules": [
+        {
+          "id": "m1",
+          "label": "Input RGB",
+          "group": "input",
+          "is_innovation": false
+        },
+        {
+          "id": "m2",
+          "label": "EPI Patterns",
+          "group": "input",
+          "is_innovation": false
+        },
+        {
+          "id": "m3",
+          "label": "Baseline Depth",
+          "group": "comparison",
+          "is_innovation": false
+        },
+        {
+          "id": "m4",
+          "label": "Ours Depth",
+          "group": "comparison",
+          "is_innovation": false
+        },
+        {
+          "id": "m5",
+          "label": "Ground Truth",
+          "group": "gt",
+          "is_innovation": false
+        }
+      ],
+      "connections": [
+        {
+          "from": "m1",
+          "to": "m2",
+          "label": ""
+        },
+        {
+          "from": "m2",
+          "to": "m3",
+          "label": ""
+        },
+        {
+          "from": "m2",
+          "to": "m4",
+          "label": ""
+        },
+        {
+          "from": "m2",
+          "to": "m5",
+          "label": ""
+        }
+      ],
+      "groups": [],
+      "annotations": [
+        "Red boxes highlight non-Lambertian regions with X-shaped EPI patterns.",
+        "Our method significantly reduces depth ambiguity in reflective surfaces."
+      ],
+      "layout_template": "parallel"
+    },
+    {
+      "fig_id": "fig5",
+      "fig_type": "ablation",
+      "fig_role": "supporting",
+      "title": "Ablation Study of Core Components",
+      "caption": "Ablation study demonstrating the contribution of each proposed module. The unified multi-domain balanced training framework and the dual-branch architecture provide the most significant performance gains, especially in non-Lambertian regions.",
+      "size_type": "single",
+      "layout_direction": "top_to_bottom",
+      "modules": [
+        {
+          "id": "m1",
+          "label": "Baseline Model",
+          "group": "ablation",
+          "is_innovation": false
+        },
+        {
+          "id": "m2",
+          "label": "With Decomposition",
+          "group": "ablation",
+          "is_innovation": true
+        },
+        {
+          "id": "m3",
+          "label": "With Dual-Branch",
+          "group": "ablation",
+          "is_innovation": true
+        },
+        {
+          "id": "m4",
+          "label": "With Balanced Training",
+          "group": "ablation",
+          "is_innovation": true
+        },
+        {
+          "id": "m5",
+          "label": "Full Model",
+          "group": "ablation",
+          "is_innovation": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "m1",
+          "to": "m2",
+          "label": ""
+        },
+        {
+          "from": "m2",
+          "to": "m3",
+          "label": ""
+        },
+        {
+          "from": "m3",
+          "to": "m4",
+          "label": ""
+        },
+        {
+          "from": "m4",
+          "to": "m5",
+          "label": ""
+        }
+      ],
+      "groups": [
+        {
+          "id": "g1",
+          "label": "Progressive Additions",
+          "module_ids": [
+            "m1",
+            "m2",
+            "m3",
+            "m4",
+            "m5"
+          ],
+          "style": "solid_box"
+        }
+      ],
+      "annotations": [
+        "Balanced training mitigates the severe data scarcity bottleneck of non-Lambertian scenes."
+      ],
+      "layout_template": "pipeline"
+    }
+  ]
+}

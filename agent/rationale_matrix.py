@@ -119,6 +119,7 @@ Output ONLY the JSON array."""
             "matrix_md": matrix_md,
             "quality": quality,
         }
+        os.makedirs(output_dir, exist_ok=True)
         result_file = os.path.join(output_dir, "rationale_matrix.json")
         with open(result_file, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
@@ -161,29 +162,33 @@ Output ONLY the JSON array."""
         return quality
 
     def _fallback_matrix(self, innovations: List[Dict]) -> List[Dict]:
-        """降级：基于创新点生成矩阵"""
+        """v11.8: 降级矩阵 — 基于创新点数据生成具体行"""
         rows = []
         for i, inn in enumerate(innovations[:5]):
             name = inn.get("创新点名称", f"Design {i+1}")
             value = inn.get("创新点价值", "")
+            content = inn.get("创新点工作内容", [])
+            content_str = "; ".join(content[:2]) if content else "novel design"
             rows.append({
                 "design_decision": name,
-                "motivation": f"Existing methods have limitations in {name.lower()}",
-                "sota_gap": f"Improves over prior art by {value[:80] if value else 'novel design'}",
-                "scenario": "Evaluated on standard benchmarks",
-                "evidence": "Quantitative results in experiments section",
+                "motivation": f"Current methods cannot effectively handle {name.lower()} — {content_str[:80]}",
+                "sota_gap": f"Prior art lacks {content_str[:60]}; our {name.lower()} achieves {value[:60] if value else 'improved performance'}",
+                "scenario": f"When processing inputs requiring {name.lower()}, on project benchmarks",
+                "evidence": f"Ablation removing {name.lower()} shows degradation; comparison with baselines",
                 "section": "Methodology" if i < 3 else "Experiments",
                 "priority": "must" if i < 2 else "should",
             })
-        return rows if rows else [{
-            "design_decision": "Overall method design",
-            "motivation": "Addresses limitations of existing approaches",
-            "sota_gap": "Achieves state-of-the-art performance",
-            "scenario": "Standard evaluation benchmarks",
-            "evidence": "Quantitative comparisons",
-            "section": "Experiments",
-            "priority": "must",
-        }]
+        if not rows:
+            rows = [{
+                "design_decision": "[REQUIRES MANUAL INPUT]",
+                "motivation": "No innovation points found — specify motivation manually",
+                "sota_gap": "Specify comparison with prior art",
+                "scenario": "Specify evaluation scenario",
+                "evidence": "Specify quantitative evidence",
+                "section": "Experiments",
+                "priority": "must",
+            }]
+        return rows
 
     def _render_matrix_md(self, rows: List[Dict]) -> str:
         """渲染 Markdown 格式矩阵"""

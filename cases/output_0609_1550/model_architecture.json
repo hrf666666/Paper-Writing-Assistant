@@ -1,0 +1,49 @@
+{
+  "总体架构": "本模型提出了一种用于非朗伯体光场深度估计的统一双掩码物理模型（Unified Dual-Mask Physical Model）。输入为多视角光场图像序列（Light Field），首先经过通道级Min-Max归一化。随后进入核心网络，网络基于“三层角度信号分解”理论，将光场角度信号解耦为环境光（DC）、视差/深度（线性项）和材质/反射（残差项）。接着通过双路径架构（Lambertian EPI分支与Non-Lambertian几何分支）分别提取漫反射区域的EPI斜率特征和非漫反射区域的几何角度特征（如X型模式），并利用基于角度梯度（angular_gradient）的像素级双掩码（Dual-Mask）进行加权融合。最终，融合特征输入物理一致性预测头，同时输出深度图（Depth）、反射率/材质图（Reflectance）和二维向量场/位移场（Vector Field），并在训练时辅以相位正则化和物理一致性约束进行联合优化。",
+  "模块详情": [
+    {
+      "模块名": "输入归一化模块 (Input Normalization)",
+      "输入": "原始光场张量，维度为 (B, C, H, W)，其中 C=15（如5个视角×3通道或15个灰度视角）",
+      "核心操作": "对每个样本在通道维度上进行独立的 Min-Max 归一化，消除光照绝对强度的影响，并将数据映射到 [-1, 1] 区间，以稳定网络训练。",
+      "输出": "归一化后的光场张量，维度为 (B, C, H, W)",
+      "关键公式": "x_norm = (x - x_min) / (x_max - x_min + 1e-8) * 2.0 - 1.0"
+    },
+    {
+      "模块名": "三层角度信号分解模块 (Three-Layer Angular Signal Decomposition)",
+      "输入": "归一化后的光场张量 (B, C, H, W)",
+      "核心操作": "基于物理先验，将角度信号分解为三个独立成分：直流分量（环境光）、线性分量（视差/深度引起的EPI斜率）和残差分量（材质/非朗伯体反射）。提取几何特征（如角度梯度 angular_gradient）作为后续掩码生成的伪标签依据。",
+      "输出": "分解特征图（DC图、视差斜率图、残差特征图）及几何伪标签特征",
+      "关键公式": "I(u,v) = DC + a·u + b·v + ε(u,v)"
+    },
+    {
+      "模块名": "双掩码双路径特征提取模块 (Dual-Mask Dual-Path Feature Extraction)",
+      "输入": "分解特征图、几何伪标签特征及原始光场特征",
+      "核心操作": "包含两个分支：1) Lambertian分支利用EPI斜率和连续深度先验（如PRSO）处理漫反射区域；2) Non-Lambertian分支利用几何角度特征（如X-shape patterns）处理高光/散射区域。通过角度梯度生成像素级双掩码（Dual-Mask），对两分支特征进行自适应加权融合，解决场景级BCE监督带来的像素级标签噪声问题。",
+      "输出": "融合后的高维特征图，维度为 (B, hidden_dim, H, W)，以及双掩码权重图",
+      "关键公式": "Mask = σ(angular_gradient); F_fused = Mask * F_Lambertian + (1 - Mask) * F_NonLambertian"
+    },
+    {
+      "模块名": "物理一致性预测与正则化头 (Physical Consistency Prediction Head)",
+      "输入": "融合后的高维特征图 (B, hidden_dim, H, W)",
+      "核心操作": "通过卷积层回归三个物理量：深度、反射率和二维向量场。在训练阶段，计算深度和反射率的MSE损失，并引入相位正则化（利用反射率抑制向量场在平滑区域的梯度）和物理一致性损失，确保预测结果符合光场物理成像规律。",
+      "输出": "深度图 depth_pred (B, 1, H, W)，反射率图 r_pred (B, 1, H, W)，向量场 V_pred (B, 2, H, W)",
+      "关键公式": "PhaseReg = mean( (∇V_x^2 + ∇V_y^2) * (1 - σ(r)) ); TotalLoss = L_depth + 0.5*L_r + 0.1*PhaseReg"
+    }
+  ],
+  "模块连接": "原始光场数据 (B, 15, H, W) 首先进入【输入归一化模块】进行数值标准化；随后输入【三层角度信号分解模块】解耦出DC、视差和残差特征；这些特征连同原始光场特征共同输入【双掩码双路径特征提取模块】，该模块内部通过Lambertian和Non-Lambertian双分支提取特征，并生成像素级掩码进行特征融合；融合后的高维特征输入【物理一致性预测与正则化头】，最终输出深度、反射率和向量场三个预测结果。在训练阶段，预测结果与Ground Truth计算MSE损失，同时向量场和反射率输入相位正则化函数计算正则项，所有损失加权求和后反向传播更新网络参数。",
+  "关键超参数": {
+    "lf_channels": 15,
+    "hidden_dim": 32,
+    "network_depth": 1,
+    "optimizer": "AdamW",
+    "learning_rate": 0.0005,
+    "weight_decay": 0.0001,
+    "batch_size": 8,
+    "max_grad_norm": 1.0,
+    "loss_weight_depth": 1.0,
+    "loss_weight_r": 0.5,
+    "loss_weight_phase_reg": 0.1,
+    "target_mask_gap": 0.08,
+    "gradient_accumulation_steps": 8
+  }
+}

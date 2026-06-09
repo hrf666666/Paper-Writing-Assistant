@@ -1,0 +1,152 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "Real-world light field depth estimation challenges due to non-Lambertian surfaces",
+      "Limitations of frequency-domain and single-branch EPI methods",
+      "Proposed physical decomposition and dual-mask architecture"
+    ],
+    "depth_map": {
+      "Background and Motivation": "moderate",
+      "Limitations of Existing Methods": "deep",
+      "Contributions": "deep",
+      "Paper Structure": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "motivation_hook: Explicitly state that light field depth estimation fundamentally struggles in real-world scenarios due to non-Lambertian reflections",
+      "contribution_claim: Exactly 3 numbered contributions with quantitative hints (e.g., percentage improvements)",
+      "Explicit paper organization/structure paragraph at the very end of the section",
+      "At least one concrete example or data point illustrating EPI linearity breakdown on specular/scattering surfaces",
+      "[动机锚点] The introduction must establish: Light field depth estimation fundamentally struggles in real-world ",
+      "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+    ],
+    "should_avoid": [
+      "Detailed mathematical derivations of the 3-layer decomposition",
+      "Extensive literature review (defer to Related Work)",
+      "Informal, conversational, or first-person singular language"
+    ],
+    "target_emphasis": "Establish the critical gap in handling non-Lambertian surfaces in real-world light field depth estimation and clearly outline the proposed physical and architectural solutions."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "Light field depth estimation methods",
+      "Non-Lambertian and specular handling in 3D vision",
+      "Material classification and segmentation techniques"
+    ],
+    "depth_map": {
+      "Light Field Depth Estimation": "moderate",
+      "Handling Non-Lambertian Surfaces": "deep",
+      "Material Classification in Light Fields": "moderate",
+      "Gap Bridge Summary": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "gap_bridge: Show existing approaches do not address the fundamental physical breakdown of EPI linearity in mixed scenes",
+      "Categorization by approach rather than a chronological list",
+      "End-of-group critique highlighting the lack of unified architectures for mixed reflection scenes",
+      "High citation density focusing on state-of-the-art methods from the last 2-3 years",
+      "[动机锚点] Transition to method by showing existing approaches do not address: Light field depth estimation fun"
+    ],
+    "should_avoid": [
+      "Chronological listing of papers",
+      "Overly detailed descriptions of unrelated 2D image segmentation methods",
+      "Failing to critically analyze why frequency-domain methods fail at low angular resolutions (e.g., 9x9)"
+    ],
+    "target_emphasis": "Categorize existing literature by approach and critically demonstrate that current methods lack a physically grounded, unified solution for mixed Lambertian and non-Lambertian scenes."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "Three-layer angular signal decomposition and geometric feature extraction",
+      "GeometricDualMask network architecture and routing mechanism",
+      "Domain-balanced sampling and training strategy"
+    ],
+    "depth_map": {
+      "Overview of GeometricDualMask": "brief",
+      "Three-layer Angular Signal Decomposition and Material Classification": "deep",
+      "Dual-Mask Depth Estimation Architecture": "deep",
+      "Domain-Balanced Training Strategy": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary"
+    },
+    "must_include": [
+      "contribution_claim: Justify each module by connecting back to the core motivation of EPI linearity breakdown",
+      "Key mathematical formulas for the 3-layer decomposition (DC, linear, residual) and geometric angular features",
+      "Description of a horizontal flow architecture figure with detailed boxes and colorful scheme",
+      "Clear explanation of the dual-mask routing mechanism and 4-direction EPI integration",
+      "[动机锚点] Each module should be justified by connecting back to the core motivation"
+    ],
+    "should_avoid": [
+      "Excessive derivation of standard Random Forest or basic CNN layers",
+      "Using algorithm boxes (strictly avoided per journal style)",
+      "Omitting mathematical formulations for the proposed decomposition and mask routing"
+    ],
+    "target_emphasis": "Provide a rigorous, physically motivated, and mathematically sound description of the three-layer decomposition and the dual-mask routing architecture across exactly four subsections."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "Quantitative comparison with recent SOTA on mixed and real-world datasets",
+      "Ablation studies validating the 3-layer decomposition and dual-mask routing",
+      "Qualitative visualization of material masks and depth maps in complex scenes"
+    ],
+    "depth_map": {
+      "Datasets and Implementation Details": "brief",
+      "Comparison with State-of-the-Art": "deep",
+      "Ablation Studies": "deep",
+      "Qualitative and Visual Analysis": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "evidence_support: Experiments that directly validate each contribution claim (e.g., mask accuracy, depth accuracy on non-Lambertian regions)",
+      "Comprehensive ablation table proving the necessity of 3-layer decomposition, geometric features, and dual-mask routing",
+      "Quantitative metrics (MSE, BadPix, etc.) on both synthetic and real-world standard benchmarks",
+      "Comparison with SOTA methods published in the last 2-3 years",
+      "[动机锚点] Design experiments that directly validate each contribution claim"
+    ],
+    "should_avoid": [
+      "Relying solely on qualitative visual comparisons without quantitative metrics",
+      "Evaluating only on synthetic datasets without real-world validation",
+      "Including a failure analysis section (strictly avoided per journal style)",
+      "Over-claiming results without statistical or comprehensive metric backing"
+    ],
+    "target_emphasis": "Comprehensively validate the proposed method's superiority and the necessity of each component through rigorous quantitative benchmarks and ablation studies on real-world and mixed datasets."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "Summary of the physical decomposition and dual-mask architecture",
+      "Reiteration of quantitative achievements",
+      "Future research directions"
+    ],
+    "depth_map": {
+      "Summary of Contributions": "moderate",
+      "Impact and Significance": "brief",
+      "Future Work": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "contribution_claim: Echo the core narrative that light field depth estimation fundamentally struggles in real-world scenarios and how this paper resolves it",
+      "Brief recap of the most significant quantitative improvements achieved",
+      "Forward-looking statement on extending the physical model to more complex BRDFs or dynamic scenes",
+      "[动机锚点] Echo the core narrative: Light field depth estimation fundamentally struggles in real-world scenario"
+    ],
+    "should_avoid": [
+      "Introducing new methods, datasets, or references",
+      "Repeating the exact text from the abstract or introduction",
+      "Overly long paragraphs or introducing new technical details"
+    ],
+    "target_emphasis": "Concisely reinforce the paper's core narrative and contributions, highlighting the successful resolution of non-Lambertian challenges in real-world light field depth estimation."
+  }
+}

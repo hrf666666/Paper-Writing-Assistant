@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Skill: 参考PDF分析器
-读取 ref_pdf 目录下的参考论文，学习写作风格、内容组织方法、句式结构
+Skill: 参考论文分析器 (v11.0)
+
+v11.0: 集成 paper-fetch Markdown 优先
+- 优先从 ref_md/ 目录加载 paper-fetch 获取的 Markdown 全文
+- 降级到 ref_pdf/ 目录的 PDF 解析（PyMuPDF/pdfplumber/PyPDF2）
+- 支持通过 paper-fetch 在线获取（DOI/标题 → Markdown 全文）
 """
 
 import os
@@ -57,17 +61,78 @@ def extract_text_from_pdf(pdf_path):
                 return ""
 
 
-def load_ref_pdfs(ref_pdf_path):
-    """加载参考PDF目录下的所有论文"""
+def _get_ref_md_path() -> str:
+    """获取 ref_md/ 目录路径（与 ref_pdf/ 同级）"""
+    ref_pdf = Path(REF_PDF_PATH)
+    return str(ref_pdf.parent / "ref_md")
+
+
+def load_ref_papers(ref_pdf_path, prefer_markdown=True):
+    """
+    加载参考论文，优先 Markdown，降级 PDF。
+
+    v11.0 策略：
+    1. 检查 ref_md/ 目录下的 .md 文件（paper-fetch 获取的）
+    2. 降级到 ref_pdf/ 目录下的 .pdf 文件（PDF 解析）
+
+    Args:
+        ref_pdf_path: PDF 目录路径
+        prefer_markdown: 是否优先加载 Markdown
+
+    Returns:
+        [{"filename": str, "text": str, "size": int, "source": str, ...}, ...]
+    """
+    papers = []
+
+    # ── 1. 优先加载 Markdown ──
+    if prefer_markdown:
+        md_dir = _get_ref_md_path()
+        md_path = Path(md_dir)
+        if md_path.exists():
+            md_files = list(md_path.glob("*.md"))
+            if md_files:
+                logger.info(f"[ref_pdf_analyzer] 发现 {len(md_files)} 篇 Markdown 参考论文")
+                for md_file in tqdm(md_files, desc="读取 Markdown"):
+                    try:
+                        text = md_file.read_text(encoding="utf-8")
+                        if not text.strip():
+                            continue
+                        paper = {
+                            "filename": md_file.name,
+                            "text": text,
+                            "size": len(text),
+                            "source": "paper_fetch_markdown",
+                        }
+                        # 尝试加载 .meta.json
+                        meta_file = md_file.with_suffix(".meta.json")
+                        if meta_file.exists():
+                            try:
+                                meta = json.loads(meta_file.read_text(encoding="utf-8"))
+                                paper["title"] = meta.get("title", "")
+                                paper["doi"] = meta.get("doi", "")
+                                paper["journal"] = meta.get("journal", "")
+                            except Exception as e:
+                                logger.debug(f"操作失败: {e}")
+                        papers.append(paper)
+                    except Exception as e:
+                        logger.warning(f"[ref_pdf_analyzer] 读取 {md_file.name} 失败: {e}")
+
+                if papers:
+                    logger.info(
+                        f"[ref_pdf_analyzer] 加载 {len(papers)} 篇 Markdown 论文 "
+                        f"(总计 {sum(p['size'] for p in papers)} 字符)"
+                    )
+                    return papers
+
+    # ── 2. 降级加载 PDF ──
     ref_path = Path(ref_pdf_path)
     if not ref_path.exists():
         logger.warning(f"[ref_pdf_analyzer] 参考PDF目录不存在: {ref_pdf_path}")
         return []
-    
+
     pdf_files = list(ref_path.glob("*.pdf"))
     logger.info(f"[ref_pdf_analyzer] 发现 {len(pdf_files)} 篇参考PDF")
-    
-    papers = []
+
     for pdf_file in tqdm(pdf_files, desc="读取参考PDF"):
         text = extract_text_from_pdf(str(pdf_file))
         if text.strip():
@@ -75,8 +140,9 @@ def load_ref_pdfs(ref_pdf_path):
                 "filename": pdf_file.name,
                 "text": text,
                 "size": len(text),
+                "source": "pdf_extraction",
             })
-    
+
     return papers
 
 
@@ -221,25 +287,46 @@ def extract_figure_style(papers):
     )
 
 
-def run_ref_pdf_analyzer(target_chapters=None):
-    """主入口：运行参考PDF分析器"""
+def run_ref_pdf_analyzer(target_chapters=None, ref_dois=None):
+    """
+    主入口：运行参考论文分析器
+
+    v11.0: 支持 paper-fetch 在线获取
+    - 如果 ref_md/ 目录已有 Markdown，直接使用
+    - 如果 ref_dois 提供了 DOI 列表，先通过 paper-fetch 获取全文
+    - 最后降级到 ref_pdf/ 的 PDF 解析
+
+    Args:
+        target_chapters: 目标章节列表
+        ref_dois: 额外的 DOI 列表（通过 paper-fetch 获取全文）
+    """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     if target_chapters is None:
         target_chapters = ["Introduction", "Related Work", "Methodology", "Experiments", "Conclusion"]
-    
-    logger.info("[ref_pdf_analyzer] 步骤1: 加载参考PDF...")
+
+    # Step 0: 如果提供了 DOI 列表，通过 paper-fetch 获取 Markdown
+    if ref_dois:
+        _fetch_dois_to_markdown(ref_dois)
+
+    # Step 1: 加载论文（Markdown 优先，PDF 降级）
+    logger.info("[ref_pdf_analyzer] 步骤1: 加载参考论文...")
     try:
-        papers = load_ref_pdfs(REF_PDF_PATH)
+        papers = load_ref_papers(REF_PDF_PATH, prefer_markdown=True)
     except Exception as e:
         logger.error(f"[ref_pdf_analyzer] 步骤1 加载失败: {e}")
         papers = []
-    
+
     if not papers:
-        logger.warning("[ref_pdf_analyzer] 未找到参考PDF，将使用默认写作风格")
+        logger.warning("[ref_pdf_analyzer] 未找到参考论文，将使用默认写作风格")
         return _get_default_style_guide()
-    
-    logger.info(f"[ref_pdf_analyzer] 成功加载 {len(papers)} 篇参考论文")
+
+    md_count = sum(1 for p in papers if p.get("source") == "paper_fetch_markdown")
+    pdf_count = len(papers) - md_count
+    logger.info(
+        f"[ref_pdf_analyzer] 成功加载 {len(papers)} 篇参考论文 "
+        f"(Markdown: {md_count}, PDF: {pdf_count})"
+    )
     
     logger.info("[ref_pdf_analyzer] 步骤2: 分析整体写作风格...")
     try:
@@ -321,3 +408,35 @@ def _get_default_style_guide():
 if __name__ == "__main__":
     results = run_ref_pdf_analyzer()
     logger.info(f"写作风格分析完成，包含 {len(results['papers'])} 篇参考论文的分析结果")
+
+
+def _fetch_dois_to_markdown(dois: list, max_papers: int = 15):
+    """
+    通过 paper-fetch 批量获取 DOI 列表对应的 Markdown 全文。
+
+    Args:
+        dois: DOI 列表
+        max_papers: 最大获取数
+    """
+    try:
+        from tools.paper_fetch_tool import is_available, fetch_and_save
+    except ImportError:
+        logger.info("[ref_pdf_analyzer] paper_fetch_tool 不可用，跳过在线获取")
+        return
+
+    if not is_available():
+        logger.info("[ref_pdf_analyzer] paper-fetch 不可用，跳过在线获取")
+        return
+
+    md_dir = _get_ref_md_path()
+    fetched = 0
+    for doi in dois[:max_papers]:
+        content, md_path = fetch_and_save(doi, md_dir)
+        if md_path:
+            fetched += 1
+            kind = "全文" if content.has_fulltext else "元数据"
+            logger.info(f"[ref_pdf_analyzer] paper-fetch {kind}: {content.title[:50]}")
+        if fetched >= max_papers:
+            break
+
+    logger.info(f"[ref_pdf_analyzer] paper-fetch 获取完成: {fetched}/{min(len(dois), max_papers)}")

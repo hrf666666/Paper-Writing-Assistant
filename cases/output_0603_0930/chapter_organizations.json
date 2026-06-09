@@ -1,0 +1,234 @@
+{
+  "Introduction": {
+    "章节结构": [
+      {
+        "子节名称": "研究背景与意义 (Background & Significance)",
+        "核心任务": "介绍研究领域的宏观背景，定义具体任务，并强调该任务在实际应用或理论发展中的重要性和价值。"
+      },
+      {
+        "子节名称": "现有工作及局限性 (Existing Works & Limitations)",
+        "核心任务": "梳理当前主流的技术路线或代表性工作，深入剖析它们在解决当前任务时存在的固有缺陷、瓶颈或未解决的痛点。"
+      },
+      {
+        "子节名称": "本文方法与核心思想 (Proposed Method & Core Idea)",
+        "核心任务": "针对上述局限性，提出本文的创新解决方案，概述核心架构、关键模块或理论机制，解释其为何能克服现有缺陷。"
+      },
+      {
+        "子节名称": "主要贡献总结 (Summary of Contributions)",
+        "核心任务": "以条理清晰的列表或总结性陈述，明确列出本文在模型设计、理论分析或实验结果等方面的核心贡献和性能突破。"
+      }
+    ],
+    "内容逻辑": "整体采用“漏斗型（Funnel）”递进逻辑，从宏观领域背景逐步收敛至微观技术痛点，最后引出本文方案。过渡方式上：1）从“背景”到“局限性”通常使用转折词（如However, But）或对比手法，指出理想与现实的差距；2）从“局限性”到“本文方法”常使用因果、目的或启发式过渡（如To address this, Inspired by, In this paper），强调本文方案的针对性和必然性；3）从“方法”到“贡献”则是从理论设计向实际成果的落地过渡，通过实验结果验证方法的有效性。",
+    "论证手法": [
+      "文献引用与归纳：通过大量引用前人工作（如GNN、Transformer、CNN经典论文）来支撑背景描述和方法分类，确立研究基石。",
+      "对比分析：将不同技术路线进行横向对比（如CNN与Transformer、GNN与Transformer），突出各自优劣，从而论证本文方法的优越性。",
+      "归因分析：深入剖析现有方法失败或受限的根本原因（如GNN的oversmoothing问题、纯Attention在硬件上的扩展性差），使提出的改进方案更具说服力。",
+      "事实与数据支撑：引用权威榜单（如ImageNet、COCO）、模型参数量级（如100B parameters）或具体应用领域的实际需求，增强背景和挑战的真实性和紧迫性。"
+    ],
+    "关键句式模板": {
+      "研究背景与意义": [
+        "模板：[Task] aims to [objective] based on [input]. / [Task] is a fundamental challenge in [field].",
+        "原文示例：Multi-person motion prediction aims to predict the future positions of skeleton joints... / Recognizing objects at vastly different scales is a fundamental challenge in computer vision."
+      ],
+      "现有工作及局限性": [
+        "模板：Previous works generally adopt [methods], however, it suffers from [limitation]. / In [field], however, [traditional method] remain dominant due to [reason].",
+        "原文示例：The former one... suffers from the inherent oversoomthing problem in GNNs... / In computer vision, however, convolutional architectures remain dominant."
+      ],
+      "本文方法与核心思想": [
+        "模板：In this paper, we propose [Method], which utilizes [mechanism] to [objective]. / Inspired by [success in other field], we experiment with applying [method] to [task].",
+        "原文示例：In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling... / Inspired by the Transformer scaling successes in NLP, we experiment with applying a standard Transformer directly to sequences of image patches..."
+      ],
+      "主要贡献总结": [
+        "模板：Experiments show that our method achieves [metric] improvement on [dataset]. / Using a basic [system], our method achieves state-of-the-art results on [benchmark].",
+        "原文示例：Experiments show that our method achieves a 13.4% improvement of 900ms VIM on 3DPW-SoMoF/RC... / Using a basic Faster R-CNN system, our method achieves state-of-the-art single-model results on the COCO detection benchmark..."
+      ]
+    },
+    "内容比例": {
+      "研究背景与意义": "20% - 30%",
+      "现有工作及局限性": "30% - 40%",
+      "本文方法与核心思想": "20% - 30%",
+      "主要贡献总结": "10% - 20%"
+    }
+  },
+  "Related Work": {
+    "章节结构": [
+      {
+        "子节名称": "任务背景与基础方法 (Task Background & Fundamental Methods)",
+        "核心任务": "回顾研究任务（如多人运动预测、多尺度目标检测、图像分类）的发展历程，介绍传统或早期的基线方法，确立研究背景与基础范式。"
+      },
+      {
+        "子节名称": "核心相关技术/架构 (Core Related Techniques/Architectures)",
+        "核心任务": "详细探讨与本文所用核心技术（如Transformer、GNN、特征金字塔）相关的近期进展，分析不同技术流派的优势与局限性。"
+      },
+      {
+        "子节名称": "最相关工作与本文定位 (Closest Related Work & Our Positioning)",
+        "核心任务": "聚焦与本文最相似的SOTA工作，明确指出它们的不足（Research Gap），并强调本文方法的独特性、创新点以及如何解决上述Gap。"
+      }
+    ],
+    "内容逻辑": "采用“漏斗式”逻辑（Funnel Approach）：从宽泛的研究领域和传统方法入手，逐步聚焦到特定的核心技术（如Transformer在视觉中的应用、多尺度特征表达），最后收敛到与本文最直接的竞品工作。各子节之间通过“技术演进”或“问题驱动”进行过渡。例如，在介绍完基础方法后，用“为了解决基础方法的XX缺陷，近期研究引入了YY技术”作为过渡；在介绍核心技术后，通过“然而，现有YY技术仍存在ZZ问题（如GNN的过平滑、CNN的尺度不变性缺失）”自然引出本文的动机与定位。",
+    "论证手法": [
+      "分类归纳 (Categorization)：将海量文献按技术流派或解决思路进行分类（如将运动预测分为GNN-based和Transformer-based），避免文献堆砌，使脉络清晰。",
+      "对比分析 (Comparative Analysis)：对比不同流派的优缺点（如CNN的局部性与计算效率 vs Transformer的全局感受野与计算开销），突出特定技术的适用场景与瓶颈。",
+      "指出局限 (Gap Identification)：在肯定前人贡献（如“取得了显著性能”）后，使用转折词（However, Despite, but）精准指出其在特定场景下的失效、计算瓶颈或缺失的显式表征。",
+      "本文映射 (Method Mapping)：在指出Gap后，立即用一两句话说明本文是如何通过特定设计（如引入相对距离约束、自顶向下横向连接、纯Transformer架构）来弥补这一缺陷的，形成逻辑闭环。"
+    ],
+    "关键句式模板": {
+      "引入领域与分类": "模板：Existing approaches for [Task] can be broadly categorized into [Category A] and [Category B]. | 原文示例：Previous works on multi-person motion prediction generally adopt two types of architectures, including graph neural networks (GNNs) and Transformer.",
+      "肯定前人贡献": "模板：Recent advances in [Technique] have achieved remarkable success in [Field]. | 原文示例：Transformer-based methods have shown promising results on this task. / ...classic ResNet-like architectures are still state of the art.",
+      "指出局限与Gap": "模板：Despite their success, these methods suffer from [Limitation] / fail to capture [Missing Feature]. | 原文示例：...however, it suffers from the inherent oversmoothing problem in GNNs... / ...but they miss the explicit relation representation between joints... / ...have not yet been scaled effectively on modern hardware accelerators.",
+      "引出本文方法/对比": "模板：In contrast to [Previous Method], our approach explicitly models [Key Feature] by [Proposed Mechanism]. | 原文示例：In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling... / In this paper, we exploit the inherent multi-scale, pyramidal hierarchy..."
+    },
+    "内容比例": {
+      "任务背景与基础方法": "20%",
+      "核心相关技术/架构": "40%",
+      "最相关工作与本文定位": "40%"
+    }
+  },
+  "Methodology": {
+    "章节结构": [
+      {
+        "子节名称": "Architecture Overview (整体架构概述)",
+        "核心任务": "提供模型的全局视角，展示整体Pipeline、核心组件的拓扑结构以及数据的前向流向，帮助读者建立宏观认知。"
+      },
+      {
+        "子节名称": "Preliminaries / Feature Representation (基础特征表示/预处理)",
+        "核心任务": "定义输入数据的数学表达形式（如图像Patch化、骨骼图构建、序列嵌入），为后续的核心模块提供标准化的张量输入。"
+      },
+      {
+        "子节名称": "Core Proposed Modules (核心创新模块)",
+        "核心任务": "详细阐述本文提出的关键机制（如特征融合、注意力机制、金字塔构建），包含设计动机、网络结构细节以及严谨的数学公式推导。"
+      },
+      {
+        "子节名称": "Loss Functions and Training Objectives (损失函数与训练目标)",
+        "核心任务": "定义模型优化的目标函数，说明各项子损失（如分类、回归、对比损失）的物理意义及其加权组合方式。"
+      }
+    ],
+    "内容逻辑": "采用“总-分-总”与“数据流向”相结合的逻辑。首先通过Overview提供全局“总”览；随后按照数据前向传播的顺序（输入预处理 -> 骨干网络 -> 核心创新模块）进行“分”步拆解，每个子模块内部遵循“指出痛点(Motivation) -> 提出结构(Structure) -> 数学表达(Formulation)”的微观逻辑；最后通过损失函数将各模块输出与Ground Truth连接，形成优化的“总”闭环。各子节之间多采用“Given the output of...”或“To further exploit...”等基于数据流和目的导向的过渡方式。",
+    "论证手法": [
+      "数学形式化推导：使用严谨的公式定义张量维度、权重计算和特征变换，确保方法的严密性与可复现性。",
+      "图表交叉引用：频繁引用架构图（如As shown in Fig. X）和特征可视化图，将抽象的数学公式和网络结构具象化。",
+      "动机与对比论证：在引入新模块前，先指出Baseline或现有方法的局限性（如Unlike standard CNNs...），从而论证当前设计的必要性。",
+      "物理/直观意义映射：为复杂的数学操作赋予直观解释（如This operation effectively captures the pairwise distance...），增强方法的可解释性。"
+    ],
+    "关键句式模板": {
+      "Architecture Overview": {
+        "核心句式": "The overall architecture of our proposed [Method Name] is illustrated in Figure [X].",
+        "原文示例": "The overall architecture of our proposed Joint-Relation Transformer is illustrated in Figure 2, which consists of..."
+      },
+      "Preliminaries": {
+        "核心句式": "Given an input [Data Type], we first represent it as [Mathematical Form] by [Operation].",
+        "原文示例": "Given an input image, we first represent it as a sequence of flattened 2D patches by a linear projection."
+      },
+      "Core Proposed Modules": {
+        "核心句式1": "To address the limitation of [Existing Method/Problem], we propose [Module Name], which explicitly models [Specific Feature].",
+        "原文示例1": "To address the missing explicit relation representation, we design a novel joint-relation fusion layer with relation-aware attention.",
+        "核心句式2": "Formally, let [Variable] denote [Concept], the operation can be formulated as: [Equation].",
+        "原文示例2": "Formally, let X denote the joint features, the relation-aware attention can be formulated as..."
+      },
+      "Loss Functions": {
+        "核心句式": "To optimize the proposed network, we employ [Loss Name] to supervise [Target]. The total loss is defined as...",
+        "原文示例": "Additionally, we supervise the relation information by forecasting future distance. The total loss is defined as a weighted sum of..."
+      }
+    },
+    "内容比例": {
+      "Architecture Overview": "10%",
+      "Preliminaries / Feature Representation": "15%",
+      "Core Proposed Modules": "55%",
+      "Loss Functions and Training Objectives": "20%"
+    }
+  },
+  "Experiments": {
+    "章节结构": [
+      {
+        "子节名称": "Experimental Setup (实验设置)",
+        "核心任务": "详细说明实验环境、数据集、评估指标、基线模型选择以及训练超参数，确保实验的可重复性和对比的公平性。"
+      },
+      {
+        "子节名称": "Main Results / Comparison with SOTA (主要结果与SOTA对比)",
+        "核心任务": "在标准基准数据集上展示定量结果，与现有最先进方法进行全面对比，证明提出方法的整体优越性。"
+      },
+      {
+        "子节名称": "Ablation Studies (消融实验)",
+        "核心任务": "通过控制变量法验证模型中各个核心创新组件（如FPN的自顶向下结构、ViT的Patch划分、JRTransformer的关系感知注意力）的有效性，并分析关键超参数的影响。"
+      },
+      {
+        "子节名称": "Qualitative Analysis & Visualization (定性分析与可视化)",
+        "核心任务": "通过具体案例、特征图、注意力热力图或预测轨迹的可视化，直观展示模型的优势、可解释性以及对复杂场景的处理能力。"
+      }
+    ],
+    "内容逻辑": "整体遵循“宏观验证到微观剖析，再到直观印证”的递进逻辑。首先通过“实验设置”确立评估基准；接着通过“主要结果”从宏观层面回答“方法整体表现如何”，确立SOTA地位；随后通过“消融实验”深入微观层面回答“为什么有效”，剖析各模块的具体贡献；最后通过“定性分析”提供视觉证据和深入洞察。各子节间通常使用“In this section, we first evaluate... Next, we conduct ablation studies to... Finally, we visualize...”等过渡性语句进行自然衔接。",
+    "论证手法": [
+      "定量表格对比：使用标准表格列出各项指标（如mAP, MPJPE, Top-1 Acc），加粗最优结果，并计算相对提升百分比以凸显优势。",
+      "控制变量消融：在消融实验中设置'w/'和'w/o'（with/without）条件，逐一添加或移除核心模块，量化单一组件的边际收益。",
+      "复杂度与效率分析：对比FLOPs、参数量、推理速度（FPS）或训练成本，论证方法不仅在精度上领先，且具备计算高效性（如FPN的marginal extra cost，ViT的fewer resources）。",
+      "可视化佐证：展示检测边界框、多尺度特征图、注意力权重分布或运动预测轨迹，辅以文字解读，增强结论的直观性和说服力。",
+      "细粒度/多尺度分析：针对不同难度、不同尺度（如FPN的小目标检测）或不同时间跨度（如JRTransformer的长序列预测）进行细分评估，证明模型的鲁棒性。"
+    ],
+    "关键句式模板": {
+      "Experimental Setup": [
+        "We evaluate our method on [Dataset Name] using [Metric] as the primary evaluation metric.",
+        "The model is trained for [Number] epochs using [Optimizer] with an initial learning rate of [Value] and a batch size of [Size].",
+        "For fair comparison, we adopt the same data augmentation and preprocessing strategies as [Baseline Method]."
+      ],
+      "Main Results": [
+        "Table [X] compares our proposed [Method Name] with state-of-the-art approaches on the [Dataset] benchmark.",
+        "Our method achieves [Value] [Metric], outperforming the previous best method ([Baseline]) by a significant margin of [Percentage]%.",
+        "Notably, our approach demonstrates substantial improvements in detecting small objects / long-term motion prediction, validating the effectiveness of [Core Module]."
+      ],
+      "Ablation Studies": [
+        "To verify the effectiveness of the proposed [Component Name], we conduct extensive ablation studies as summarized in Table [Y].",
+        "Removing the [Component Name] leads to a performance drop of [Value], which demonstrates its crucial role in [Specific Task/Function].",
+        "We further investigate the impact of [Hyperparameter], and the results indicate that the optimal performance is achieved when [Hyperparameter] is set to [Value]."
+      ],
+      "Qualitative Analysis": [
+        "Figure [Z] visualizes the [Attention Maps / Detection Results / Predicted Trajectories], showing that our model can accurately focus on [Target/Interaction].",
+        "As illustrated in the qualitative examples, our method successfully handles challenging scenarios such as [Occlusion / Scale Variation], whereas baseline methods tend to fail."
+      ]
+    },
+    "内容比例": {
+      "Experimental Setup": "15%",
+      "Main Results": "35%",
+      "Ablation Studies": "35%",
+      "Qualitative Analysis": "15%"
+    }
+  },
+  "Conclusion": {
+    "章节结构": [
+      {
+        "子节名称": "核心贡献总结 (Summary of Contributions)",
+        "核心任务": "高度概括本文提出的核心方法、模型架构或理论创新，重申研究动机和主要解决的科学问题，与Introduction形成首尾呼应。"
+      },
+      {
+        "子节名称": "关键结果回顾 (Recap of Key Findings/Results)",
+        "核心任务": "总结实验验证的核心结论，强调方法在基准数据集上的优越性、鲁棒性或效率提升，进行定性归纳而非重复具体数值。"
+      },
+      {
+        "子节名称": "局限性分析 (Limitations)",
+        "核心任务": "客观剖析当前方法在特定场景、计算资源、数据依赖或理论假设条件下的不足与边界，展现学术严谨性。"
+      },
+      {
+        "子节名称": "未来工作展望 (Future Work & Broader Impact)",
+        "核心任务": "基于局限性或研究的延伸价值，提出具体的后续研究方向，或探讨该工作对更广泛领域（如其他视觉任务、跨模态等）的潜在影响。"
+      }
+    ],
+    "内容逻辑": "整体遵循“回顾过去（本文工作）-> 审视现在（结果与局限）-> 展望未来（后续研究）”的收敛再发散逻辑。首先通过总结贡献和结果形成逻辑闭环，呼应Introduction中提出的痛点；随后通过转折（如Despite, However）引入局限性分析，使论证更加客观立体；最后通过递进或展望（Looking forward, Future work）将研究价值延伸至更广阔的领域，完成从具体技术到宏观科学问题的升华。各子节间通常通过逻辑连接词自然过渡，避免生硬拼接。",
+    "论证手法": [
+      "高度归纳法：对前文详尽的实验数据进行定性总结，提炼出‘state-of-the-art’、‘significant improvement’等宏观结论，避免陷入琐碎的数字罗列。",
+      "对比强调法：在总结贡献时，再次隐性或显性地与Baseline或Previous works进行本质特征上的对比，凸显本文方法的独特优势（如计算效率、特征表达能力）。",
+      "辩证分析法：在局限性部分，采用‘虽然取得了X效果，但在Y条件下仍存在Z问题’的辩证视角，增强论文的客观性和可信度。",
+      "逻辑推演法：在未来工作部分，基于当前局限性或模型的可扩展性，顺理成章地推导出下一步的研究计划，确保未来工作具有高度的可行性和连贯性。"
+    ],
+    "关键句式模板": {
+      "核心贡献总结": "In this paper, we propose/present [Method Name], a novel [Architecture/Framework] for [Task]... / We have introduced a new approach that addresses the long-standing issue of [Problem] by...",
+      "关键结果回顾": "Extensive experiments on [Datasets] demonstrate that our method significantly outperforms state-of-the-art approaches... / Empirical results validate the effectiveness and efficiency of...",
+      "局限性分析": "Despite the promising results, our method still has limitations in [Specific Scenario/Condition]... / One limitation of the current work is that it relies on the assumption of...",
+      "未来工作展望": "In the future, we plan to extend our framework to [New Domain/Task]... / Future work will focus on alleviating the issue of [Limitation] by incorporating..."
+    },
+    "内容比例": {
+      "核心贡献总结": "25%",
+      "关键结果回顾": "30%",
+      "局限性分析": "20%",
+      "未来工作展望": "25%"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "citation_tags": [
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"light field imaging\", \"3D perception\", \"multi-view video\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"epipolar plane image\", \"disparity estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"traditional LF depth\", \"photo-consistency\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"early DL LF\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention LF\", \"dual branch LF\", \"defocus LF\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"epipolar plane image\", \"structure tensor\", \"global optimization\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"defocus cues\", \"correspondence cues\", \"light field depth\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"sub-pixel phase shift\", \"multi-view stereo\", \"low angular resolution\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "semantic_scholar",
+      "keywords": "[\"non-Lambertian surfaces\", \"specular reflections\", \"EPI failure\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"epinet\", \"epipolar plane image\", \"cnn\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"light field depth\", \"cnn\", \"macro-pixel\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 1,
+      "method": "semantic_scholar",
+      "keywords": "[\"light field transformer\", \"epipolar plane image\", \"attention\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention mechanism\", \"light field depth\", \"feature fusion\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"confidence map\", \"light field depth\", \"occlusion\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"DistgDisp\", \"dual-branch\", \"light field depth\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"specular-aware\", \"dual-branch\", \"non-Lambertian\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"defocus cue\", \"specular mask\", \"physical prior\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"LF-NeRF\", \"neural radiance field\", \"view-dependent\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Plenoxels\", \"sparse voxel\", \"light field\"]"
+    }
+  ],
+  "bibliography_entries": []
+}

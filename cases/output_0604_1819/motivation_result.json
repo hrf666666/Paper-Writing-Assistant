@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Current light field depth estimation collapses in complex scenes because its reliance on frequency-domain analysis fails under low angular resolution and non-Lambertian reflections. By shifting to a physics-based geometric signal decomposition, we decouple illumination, parallax, and material residuals to replace fragile frequency features with robust geometric metrics, enabling material-aware dual-mask routing that overcomes the physical limits of discrete angular sampling.\n\nINTRO_HOOK: Open with the visual failure of current light field systems when non-Lambertian surfaces break the Epipolar Plane Image (EPI) linearity assumption, explicitly highlighting how frequency-domain analysis catastrophically fails under discrete, low-resolution angular sampling (e.g., 9x9).\n\nGAP_BRIDGE: Conclude the related work by exposing the fundamental flaw of existing methods: blindly applying frequency-domain or end-to-end deep features without addressing the physical breakdown of EPI linearity. Pivot to our method by arguing that overcoming this requires a paradigm shift from frequency analysis to physics-based geometric signal decomposition.\n\nMETHOD_JUSTIFY: Justify the three-layer angular signal decomposition and geometric features (e.g., angular gradients) as the direct mathematical remedy to the resolution limits of frequency-domain analysis. Explain that the GeometricDualMask routing architecture is physically motivated to isolate and process non-Lambertian regions where the EPI assumption inherently fails.\n\nEXPERIMENT_VALIDATE: Design experiments to explicitly prove that geometric features (e.g., achieving a Cohen's d of 0.983) remain highly discriminative for material classification under low angular resolution, unlike frequency features. Validate the motivation by demonstrating that the dual-mask routing and domain-balanced training significantly reduce depth errors specifically in non-Lambertian regions.\n\nCONCLUSION_ECHO: Reiterate that replacing failing frequency-domain features with physics-based geometric signal decomposition is the definitive solution to the angular resolution and material reflection bottlenecks in light field depth estimation. Close by emphasizing how this material-aware routing paradigm unlocks reliable 3D perception and reconstruction for complex, real-world scenes.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Current light field depth estimation collapses in complex scenes because its reliance on frequency-d",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Current light field depth estimation collapses in complex scenes because its rel",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Current light field depth estimation collapses in complex scenes because its rel",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Physics-Based Geometric Feature Extraction\n**Problem**: Current light field depth estimation heavily relies on frequency-domain analysis, which fails under discrete, low-resolution angular sampling (e.g., 9x9) and is severely disrupted when non-Lambertian surfaces break the Epipolar Plane Image (EPI) linearity assumption.\n**Significance**: Without robust feature extraction under limited angular resolution, material-induced reflections cause massive depth estimation errors, making ",
+  "candidates": [
+    {
+      "direction": "Physics-Based Geometric Feature Extraction",
+      "problem": "Current light field depth estimation heavily relies on frequency-domain analysis, which fails under discrete, low-resolution angular sampling (e.g., 9x9) and is severely disrupted when non-Lambertian surfaces break the Epipolar Plane Image (EPI) linearity assumption.",
+      "significance": "Without robust feature extraction under limited angular resolution, material-induced reflections cause massive depth estimation errors, making it impossible to reliably perceive and reconstruct complex real-world scenes.",
+      "approach": "The project proposes a three-layer angular signal decomposition model that decouples illumination, parallax, and material residuals, replacing failing frequency-domain features with robust geometric and statistical features (like angular gradients) to accurately classify Lambertian and non-Lambertian pixels.",
+      "key_claim": "Overcoming the resolution limits of frequency-domain analysis requires shifting to physics-based geometric signal decomposition for reliable material-aware depth estimation."
+    },
+    {
+      "direction": "Domain-Balanced Training for Data Scarcity",
+      "problem": "There is an extreme scarcity of non-Lambertian light field data and significant domain shifts between synthetic and mixed datasets, which severely hinders the training and generalization of deep depth estimation models.",
+      "significance": "Data imbalance and domain gaps cause models to overfit to ideal Lambertian synthetic data, resulting in catastrophic performance drops when deployed in complex, mixed urban environments with diverse reflective materials.",
+      "approach": "The project introduces a domain-balanced mixed training strategy utilizing a WeightedRandomSampler and a unified dataset interface to maximize the utilization of limited synthetic data while maintaining exposure and feature balance across different domains.",
+      "key_claim": "Strategic domain-balanced sampling and unified mixed training are essential to bridge the data scarcity gap and ensure robust generalization in material-diverse environments."
+    },
+    {
+      "direction": "Dual-Mask Routing for Assumption Decoupling",
+      "problem": "Unified depth estimation networks struggle to simultaneously process Lambertian and non-Lambertian regions because the fundamental physical assumptions (EPI linearity vs. complex reflection geometry) inherently conflict within a single processing pathway.",
+      "significance": "Forcing a single network branch to learn conflicting physical priors leads to compromised feature representations and severe depth artifacts at material boundaries and highly reflective surfaces.",
+      "approach": "The project designs a GeometricDualMask architecture that uses material classification masks to route decoupled regions into specialized branches (Lambertian EPI branch and non-Lambertian geometric branch), followed by mask-weighted fusion to output a unified depth map.",
+      "key_claim": "Resolving inherent physical assumption conflicts in light field depth estimation necessitates a dual-mask routing architecture that explicitly decouples and specializes processing for distinct material properties."
+    }
+  ]
+}

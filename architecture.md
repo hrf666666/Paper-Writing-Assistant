@@ -1,0 +1,582 @@
+# Paper Writing Assistant — 架构设计文档
+
+> 版本: v12.0 | 更新: 2026-06-09
+
+---
+
+## 1. 系统总览
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        pipeline.py (入口)                        │
+│                          ↓ --no-resume                          │
+│                    ResearchLoop.run()                            │
+│              THINK → EXECUTE → VERIFY → REFLECT                 │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │
+       ┌───────────────┼───────────────┐
+       ↓               ↓               ↓
+  ┌─────────┐   ┌─────────────┐  ┌──────────┐
+  │ Phase 0 │→→→│ Phase 1~5   │→→│ Phase 6~9│
+  │ 分析阶段│   │ 章节生成阶段│  │ 后处理   │
+  └─────────┘   └─────────────┘  └──────────┘
+```
+
+**核心设计原则**：
+- LLM 直出 LaTeX（不走 Markdown 中间格式）
+- 代码 = 裁判，LLM = 运动员
+- 零信任验证：每一步都校验，不信任 LLM 输出
+- 全链路降级：每个外部依赖都有 fallback
+
+---
+
+## 2. 目录结构
+
+```
+paper-writing-assistant/
+├── pipeline.py                  # 主入口
+├── run_with_log.py              # 日志 Tee 包装器
+│
+├── config/                      # 配置层
+│   ├── project_config.py        # 项目配置（标题、模型列表、阈值）
+│   ├── api_config.py            # API 密钥 + Provider 配置 + 模型别名
+│   ├── venue_profiles/          # 11 个期刊/会议场景配置
+│   │   ├── ieee_tcsvt.py        # IEEE TCSVT（默认）
+│   │   ├── ieee_tip.py          # IEEE TIP
+│   │   └── ...
+│   └── ieee_trans_style_profile.py  # IEEE Trans 写作风格硬规则
+│
+├── api/                         # API 客户端层
+│   ├── openai_compatible.py     # 统一 OpenAI 兼容客户端（12+ Provider）
+│   └── paper_search.py          # 论文检索（S2 语义搜索）
+│
+├── agent/                       # Agent 核心层
+│   ├── loop.py                  # 自主循环引擎（系统心脏, 含 PaperContext + Phase 7.35）
+│   ├── api_client.py            # 统一 API 客户端（降级链管理）
+│   ├── dispatcher.py            # Leader-Worker 分层调度
+│   ├── base_orchestrator.py     # LLM 调用基类 + 公共工具函数
+│   │
+│   ├── skill_orchestrators/     # 章节编排器（每章一个文件）
+│   │   ├── project_analyzer.py  # Phase 0.1: 工程代码分析
+│   │   ├── ref_pdf_analyzer.py  # Phase 0.2: 参考论文分析
+│   │   ├── structure_planner.py # Phase 0.5: 全局大纲规划
+│   │   ├── ch1_introduction.py  # Phase 1: Introduction
+│   │   ├── ch2_related_work.py  # Phase 2: Related Work
+│   │   ├── ch3_methodology.py   # Phase 3: Methodology
+│   │   ├── ch4_experiments.py   # Phase 4: Experiments
+│   │   ├── ch5_conclusion.py    # Phase 5: Conclusion
+│   │   └── ...                  # 审查、引用池、范例学习等
+│   │
+│   ├── venue_adapter.py         # 期刊适配器（统一风格中心）
+│   ├── style_manager.py         # 统一风格管理 (v12.0: P0 通用写作纪律层)
+│   ├── quality_gate.py          # 质量门控 + 反馈循环
+│   ├── auditor.py               # 反幻觉审计引擎
+│   ├── citation_manager.py      # 引用去重、编号 (v12.0: chapters dict 接口)
+│   ├── cross_chapter_checker.py # 跨章节一致性检查 (v12.0: PaperContext 自动修复)
+│   ├── hierarchical_planner.py  # 分层任务规划 (v12.0: phase0_98 PaperContext)
+│   ├── memory.py                # 双层记忆系统
+│   ├── checkpoint.py            # 断点恢复
+│   └── ...                      # 20+ 辅助模块
+│
+├── skills/
+│   └── academic_writing_style/
+│       ├── writing_discipline.md # 🆕 P0 跨期刊通用写作纪律 (10条规则)
+│       └── style_guide.md        # P3 IEEE 特有写作规范
+│
+├── tools/                       # 工具层
+│   ├── latex_converter.py       # LaTeX 组装 + LLM 审查修复 + 中文字符过滤 (v12.0)
+│   ├── bibtex_builder.py        # BibTeX 生成（模板组装）
+│   ├── output_evaluator.py      # L1/L2/L3 三层评价
+│   ├── pdf_compiler.py          # XeLaTeX 编译
+│   ├── pdf_validator.py         # PDF 验证 + 溢出修复
+│   ├── tikz_generator.py        # TikZ 架构图生成
+│   └── ...
+│
+└── data/                        # 离线数据
+    └── reference_packs/         # 光场+CV 基础 32 篇离线论文
+```
+
+---
+
+## 3. 核心循环：THINK → EXECUTE → VERIFY → REFLECT
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│  THINK   │────→│ EXECUTE  │────→│  VERIFY  │────→│ REFLECT  │
+│ 规划任务 │     │ 执行任务 │     │ 纯代码验证│     │ LLM评估  │
+└──────────┘     └──────────┘     └──────────┘     └──────────┘
+      ↑                                                  │
+      └──────────── 质量不达标则重试 ─────────────────────┘
+```
+
+| 阶段 | 职责 | LLM 参与 |
+|------|------|---------|
+| THINK | 分析当前状态，规划下一步任务 | 否（规则引擎） |
+| EXECUTE | 调度器分发任务给 Worker | 是（章节生成等） |
+| VERIFY | 8 项纯代码检查（引用/数据/公式/去重/标记/结构/符号） | 否 |
+| REFLECT | LLM 评估结果质量，更新记忆，决定下一步 | 是 |
+
+---
+
+## 4. Phase 流水线
+
+### 4.1 Phase 0 — 分析阶段
+
+| Phase | 名称 | 模块 | 功能 |
+|-------|------|------|------|
+| 0.1 | 工程代码分析 | `project_analyzer.py` | 扫描 PROJECT_CODE_PATH，提炼创新点/模型架构/实验设计 |
+| 0.2 | 参考论文分析 | `ref_pdf_analyzer.py` | 加载 ref_md/（Markdown 优先）或 ref_pdf/（PDF 解析），提取写作风格/章节组织 |
+| 0.3 | 领域信息提取 | `ref_pdf_analyzer.py` | 从参考论文中提取领域知识（术语、数据集、指标） |
+| 0.5 | 全局大纲规划 | `structure_planner.py` | 生成 outline.json（子节划分 + 内容清单 + 篇幅预算） |
+| 0.6 | 范例学习 | `exemplar_learner.py` | 6 层阅读协议，从参考论文深度学习写作决策 |
+| 0.65 | 内容策略规划 | `content_strategist.py` | 为每章规划 must_include / focus_areas / should_avoid |
+| 0.7 | 写作理由矩阵 | `rationale_matrix.py` | 事前规划型矩阵（Motivation / SOTA Gap / Scenario / Evidence） |
+| 0.8 | 期刊风格学习 | `journal_style_learner.py` | 10 层协议，学习期刊特有写作模式 |
+| 0.9 | 动机引擎 | `motivation_engine.py` | 强制确认论文动机后才允许写作 |
+| 0.95 | 参考论文搜索 | `ref_search_strategist.py` | 精准收束逐层放宽搜索参考论文 |
+
+### 4.2 Phase 1~5 — 章节生成
+
+| Phase | 章节 | 编排器 | LLM 调用次数 |
+|-------|------|--------|------------|
+| 1 | Introduction | `ch1_introduction.py` | 3（1.1 背景 + 1.2 局限 + 1.3 贡献） |
+| 2 | Related Work | `ch2_related_work.py` | 4~5（3 子节 + 总结过渡） |
+| 3 | Methodology | `ch3_methodology.py` | 4~6（3.1 总览 + N 模块 + 损失函数） |
+| 4 | Experiments | `ch4_experiments.py` | 4（数据集 + 实现 + SOTA + 消融） |
+| 5 | Conclusion | `ch5_conclusion.py` | 1 |
+
+**每章生成后自动执行**：
+1. `_quick_audit()` — 快速审计（格式/引用/公式检查）
+2. `_quality_ensure()` — 质量门控（不达标则自动修订，最多 3 轮）
+3. 章节级状态机：`outline → draft → review → revision → final`
+
+### 4.3 Phase 6~9 — 后处理
+
+| Phase | 名称 | 模块 | 功能 |
+|-------|------|------|------|
+| 6 | 参考文献审查 | `reference_checker.py` | 验证引用可检索性和出处真实性 |
+| 6.5 | 反幻觉审计 | `auditor.py` | 逐步验证 + 参考文献反向检索 + 内容真实性校验 |
+| 7.0 | 全局打磨 | `loop.py` | 修正常见表述问题 |
+| 7.1 | 引用解析 | `citation_manager.py` | 🆕 按 chapters dict 独立处理 `<citation>` → `[N]`（无 join-then-split） |
+| 7.15 | 有序门控 | `ordered_gate.py` | P0 格式 → P1 一致性 → P2 写作质量 |
+| 7.2 | 跨章节检查 | `cross_chapter_checker.py` | 🆕 基于 PaperContext 数值矛盾自动修复，返回 (issues, fixed_chapters) |
+| 7.3 | LaTeX 组装 | `latex_converter.py` | 章节合并 → LLM 审查 → 模板填充 → 中文字符过滤 |
+| 7.35 | citation 清理 | `loop.py` | 🆕 tex 后 `<citation>` 残留正则清理（Phase 7.3 LLM review 兜底） |
+| 7.8 | BibTeX 生成 | `bibtex_builder.py` | `[N]` → `\cite{key}` 替换 + BibTeX 条目生成 |
+| 7.9 | 约束预检 | `latex_constraint_checker.py` | 编译前结构合规审计 |
+| 8 | PDF 编译 | `pdf_compiler.py` | XeLaTeX 编译 |
+| 8.5 | PDF 验证 | `pdf_validator.py` | Overfull 检测 + 自动修复 + 重编译 |
+| 9 | 输出评价 | `output_evaluator.py` | L1 格式 + L2 完整度 + L3 学术质量 |
+
+---
+
+## 5. 核心模块设计
+
+### 5.1 API 客户端（降级链）
+
+```
+调用请求
+   │
+   ↓
+┌──────────────────────────────────────────────┐
+│          api_client.py (UnifiedAPIClient)     │
+│                                               │
+│  GENERATION_MODELS 降级链:                     │
+│  tp_qwen3_7_max → glm_5_1 → glm_4_7 →        │
+│  tp_deepseek_v4_pro → tp_qwen3_6_plus → ...   │
+│                                               │
+│  每个 Provider 最多重试 2 次                    │
+│  失败后自动切换到下一个模型                      │
+│  全部失败则抛出 AllModelsExhausted              │
+└──────────────────────────────────────────────┘
+```
+
+**三级模型分层**：
+
+| 用途 | 模型列表 | 调用方法 |
+|------|---------|---------|
+| 生成（主力） | tp_qwen3_7_max, glm_5_1, ... | `call_generation()` |
+| 推理/决策 | tp_qwen3_7_max, glm_5_1(thinking), ... | `call_reasoning()` |
+| 轻量任务 | tp_qwen3_6_flash, tp_deepseek_v4_flash | `call_light()` |
+
+**评价模型隔离**：评价模型必须与执行模型来自不同 Provider（避免"自我审查"盲区），由 `resolve_eval_models()` 动态解析。
+
+**Provider 体系**：
+
+| Provider | SDK | 模型 |
+|----------|-----|------|
+| zhipu (智谱) | zai SDK (ZhipuAI) | glm_5_1, glm_5, glm_4_7 (thinking), glm_4.6v, glm_4.5v |
+| aliyun_token_plan | OpenAI 兼容 | tp_qwen3_7_max, tp_qwen3_6_plus, tp_deepseek_v4_pro/flash |
+| aliyun_bailian | OpenAI 兼容 | qwen3_7_max, qwen3_6_plus |
+| openai | OpenAI SDK | gpt_5_5, gpt_5_4, gpt_5_3 |
+
+### 5.2 LLM 调用基类
+
+```
+base_orchestrator.py (BaseOrchestrator)
+├── call_generation(prompt)    → 生成模型
+├── call_reasoning(prompt)     → 推理模型（带 thinking）
+├── call_light(prompt)         → 轻量模型
+├── call_evaluation(prompt)    → 评价模型（跨 Provider）
+├── parse_json_with_retry()    → JSON 解析（3 次重试）
+├── save_output()              → 保存到 output/
+└── build_style_instruction()  → 统一风格指导构建
+```
+
+### 5.3 LaTeX 组装（v12.0 架构）
+
+```
+Chapter Prompt (原生 LaTeX)
+       │
+       ↓
+┌─────────────────────────┐
+│ _minimal_cleanup()      │  清理 [?]、空 section、Markdown 残余
+│ [不删 <citation> 标记]  │  ← 关键：留给 Phase 7.8 替换
+└──────────┬──────────────┘
+           │
+           ↓
+┌─────────────────────────┐
+│ _review_latex()         │  LLM 审查 1 轮（花括号/环境配对/表格格式）
+└──────────┬──────────────┘
+           │
+           ↓
+┌─────────────────────────┐
+│ assemble_latex_paper()  │  模板填充 + TikZ 注入 + 后处理修复链
+└──────────┬──────────────┘
+           │
+           ↓
+   output/latex/main.tex
+```
+
+**后处理修复链**（来自 `latex_direct_generator.py`）：
+1. `_fix_textwidth_confusion()` — 修复 `\textwidth` / `\columnwidth` 混用
+2. `_ensure_table_resizebox()` — 确保表格有 `\resizebox` 包裹
+3. `_ensure_tikz_fits()` — TikZ 图片尺寸适配
+4. `_validate_float_sizing()` — 浮动体尺寸验证
+5. `_fix_long_equations()` — 长公式换行修复
+
+### 5.4 引用处理流水线
+
+```
+LLM 输出 <citation>["keyword"]</citation>
+       │
+       ↓ Phase 7.1 (v12.0: chapters dict 接口)
+citation_manager.py: run_citation_manager_for_chapters()
+  ├─ 按 chapter key 独立 collect <citation> 标记
+  ├─ 汇总统一 verify + dedup（全局唯一连续编号）
+  └─ 按 chapter key 独立 resolve → 更新 chapters dict
+       │
+       ↓ Phase 7.2 (v12.0: PaperContext 自动修复)
+cross_chapter_checker.py: check_all() → (issues, fixed_chapters)
+       │
+       ↓ Phase 7.3
+latex_converter.py: 组装 + _minimal_cleanup() (含中文字符过滤)
+       │
+       ↓ Phase 7.35 (v12.0: 兜底清理)
+loop.py: <citation> 残留正则清理
+       │
+       ↓ Phase 7.8
+bibtex_builder.py: [N] → \cite{ref_N} 替换 + 生成 references.bib
+```
+
+### 5.5 PaperContext 共享事实源 (v12.0)
+
+```
+Phase 0.98: _build_paper_context()
+       │
+       ↓ 从 project_data + experiment_design 提取
+paper_context = {
+    "hardware": "1x RTX 3090",
+    "training_params": {"epochs": 100, "batch_size": 8},
+    "loss_terms": ["L_photo", "L_smooth", "L_depth"],
+    "datasets": ["HCI 4D", "Stanford Lytro"],
+    "metrics": {"MAE": 0.133, "MSE": 0.081},
+    "model_name": "GeoDualMask-Net",
+    "innovation_names": ["Dual-Branch", "Geometry-Aware Attention"],
+}
+       │
+       ├─→ 注入 self._project_data["paper_context"]
+       │     └→ 各 chapter generator 通过 citation_context 自动获得
+       │
+       └─→ 注入 CrossChapterChecker
+             └→ 数值矛盾自动修复 (0.145 → 0.133)
+```
+
+### 5.6 风格系统层级 (v12.0)
+
+```
+StyleManager._get_academic_rules(chapter):
+  │
+  ├─ P0: writing_discipline.md
+  │     跨期刊通用写作纪律（10条规则）
+  │     信息密度 / 逻辑衔接 / tone / 禁用词 / Oxford 引用
+  │
+  ├─ P3: style_guide.md (IEEE 特有)
+  │     词汇规则 / 禁用词表
+  │
+  ├─ P5: style_guide.md
+  │     清理规则
+  │
+  ├─ 章节特定规则 (hardcoded fallback)
+  │
+  └─ IEEE Trans 规则 (从 venue_profile)
+```
+
+### 5.5 评价体系（L1/L2/L3）
+
+| 层级 | 名称 | 分数权重 | 检查方式 | 通过标准 |
+|------|------|---------|---------|---------|
+| L1 | 格式有效性 | 10% | 正则匹配 | IEEEtran 模板、abstract/keywords、表格/图片/公式数量 |
+| L2 | 内容完整度 | 35% | 正则匹配 | 5 章齐全、词数 ≥ 3000、引用 ≥ 20、公式 ≥ 5、消融 ≥ 3 |
+| L3 | 学术质量 | 55% | LLM 分段审稿 | 分段摘要 → 全局审稿（创新性/严谨度/写作风格等 8 维度） |
+
+**评级公式**：`avg = L1×0.1 + L2×0.35 + L3×0.55`
+- A ≥ 80, B ≥ 65, C ≥ 50, D < 50
+
+---
+
+## 6. 降级链设计
+
+### 6.1 API 降级
+
+```
+请求 → Provider A 模型 1
+              ↓ 失败/超时
+        Provider A 模型 2
+              ↓ 失败/超时
+        Provider B 模型 1
+              ↓ 失败/超时
+        ...
+              ↓ 全部失败
+        AllModelsExhausted 异常
+```
+
+### 6.2 学术搜索降级
+
+```
+搜索请求 → 离线数据包 (data/reference_packs/*.json)
+              ↓ 无结果
+          academic_search API (ustc-ai4science)
+              ↓ 超时（境内不可用）
+          paper_search.py (S2 语义搜索)
+              ↓ 超时
+          返回空结果，LLM 基于领域知识自行补充
+```
+
+### 6.3 参考论文加载降级
+
+```
+load_ref_papers() → ref_md/*.md (Markdown 全文)
+                       ↓ 无文件
+                   ref_pdf/*.pdf (PyMuPDF/pdfplumber/PyPDF2)
+                       ↓ 无文件
+                   paper-fetch 在线获取 (DOI → Markdown)
+                       ↓ 超时
+                   返回空列表
+```
+
+### 6.4 风格指导构建降级
+
+```
+build_style_instruction() → VenueAdapter (StyleManager)
+  │                              │
+  │  P0: writing_discipline.md (跨期刊通用写作纪律)
+  │  P3: style_guide.md (IEEE 特有词汇规则)
+  │  P5: style_guide.md (清理规则)
+  │  章节特定规则 (hardcoded fallback)
+  │  IEEE Trans 规则 (从 venue_profile)
+  │
+  └─→ 失败时降级链:
+      IEEE Trans Style Profile (硬规则)
+          ↓ 失败
+      skills/academic_writing_style/style_guide.md
+          ↓ 失败
+      最小化默认规则
+```
+
+### 6.5 BibTeX 生成降级
+
+```
+BibTeX 请求 → Phase 7.1 citation_map 映射
+                 ↓ 不足 5 条
+             独立构建（从 citation_bank 遍历）
+                 ↓ 查询失败
+             Python 模板兜底组装（100% 成功率）
+```
+
+### 6.6 LLM 评价降级
+
+```
+L3 评价请求 → call_evaluation() (跨 Provider 评价模型)
+                 ↓ 失败
+             call_generation() (同 Provider 生成模型兜底)
+```
+
+---
+
+## 7. 关键设计决策
+
+### 7.1 v12.0 架构变更：LLM 直出 LaTeX
+
+**旧架构**（v11.x）：
+```
+LLM → Markdown → 500 行正则转换 → LaTeX  [bug 工厂]
+```
+
+**新架构**（v12.0）：
+```
+LLM → 原生 LaTeX → LLM 审查 → 编译 → 反馈修复 (最多 2 轮)
+```
+
+**变更原因**：正则转换是级联 bug 的根源——Markdown 的模糊语法（列表/嵌套/表格）无法被正则可靠处理。
+
+### 7.2 代码 = 裁判，LLM = 运动员
+
+- `ordered_gate.py`：纯代码的门控流水线，不依赖 LLM 判断
+- `auditor.py`：正则 + 规则引擎的反幻觉审计
+- `output_evaluator.py`：L1/L2 纯正则，只有 L3 用 LLM
+
+### 7.3 章节级状态机
+
+```
+outline ──→ draft ──→ review ──→ revision ──→ final
+   │          │         │          │            │
+   └── 跳过 ──┘         │          │            │
+                        └── 不通过 ─┘            │
+                                    └── 最多 3 轮 │
+                                                 │
+                                           质量达标 ✓
+```
+
+### 7.4 恒定大小上下文
+
+`bounded_context.py` 管理 3 层记忆，总预算 5000 字符：
+- **工作记忆**：当前正在处理的信息
+- **短期记忆**：最近 N 个 Phase 的摘要
+- **长期记忆**：持久化的关键结论（磁盘存储）
+
+---
+
+## 8. 配置体系
+
+### 8.1 期刊 Profile 系统
+
+```
+config/venue_profiles/
+├── base_profile.py       # 基类 + dataclass 定义
+├── __init__.py            # Profile 注册表 + get_profile()
+├── journal_csvt.py        # IEEE TCSVT
+├── journal_tip.py         # IEEE TIP
+├── journal_tpami.py       # IEEE TPAMI
+├── journal_ijcv.py        # IJCV
+├── journal_pr.py          # Pattern Recognition
+├── journal_displays.py    # Displays
+├── conf_cvpr.py           # CVPR
+├── conf_iccv.py           # ICCV
+├── conf_eccv.py           # ECCV
+├── conf_aaai.py           # AAAI
+└── conf_neurips.py        # NeurIPS
+```
+
+每个 Profile 定义：引用数阈值、公式/表格/图片最低数量、消融实验要求、篇幅预算、禁用术语等。
+
+> **⚠️ 技术债**：当前 Profile 用 Python class 实现（~1650 行纯数据声明）。
+> 本质是指引+约束，应迁移为 **Markdown 文件**（阈值用表格，指引用正文）。
+> 原因：Profile 一半给代码读（阈值），一半给 LLM 读（指引），
+> Markdown 天然就是 LLM 的食物，无需 `to_prompt_block()` 转换。
+> YAML 是多余的中介 — 多一层序列化，没解决"LLM 直接消费"的核心需求。
+
+### 8.2 关键阈值（TCSVT 默认值）
+
+| 参数 | 值 | 用途 |
+|------|---|------|
+| `min_references` | 25 | L2 引用最低数量 |
+| `min_formulas` | 5 | L2 公式最低数量 |
+| `min_tables` | 3 | L2 表格最低数量 |
+| `min_figures` | 3 | L2 图片最低数量 |
+| `min_ablations` | 3 | L2 消融提及最低次数 |
+| `quality_threshold` | 72.0 | 质量门控阈值 |
+| `max_review_rounds` | 3 | 章节最大修订轮次 |
+
+---
+
+## 9. 数据流图
+
+```
+PROJECT_CODE_PATH/          ref_md/ + ref_pdf/
+  ├── *.py (模型代码)         ├── paper1.md
+  ├── *.md (报告/README)      ├── paper2.pdf
+  ├── config.yaml             └── ...
+  └── IDEA_REPORT.md
+         │                          │
+         ↓                          ↓
+  ┌──────────┐              ┌──────────────┐
+  │ Phase 0.1│              │  Phase 0.2   │
+  │ 代码扫描 │              │ 参考论文分析 │
+  └────┬─────┘              └──────┬───────┘
+       │                           │
+       ↓                           ↓
+  innovation_points.json     style_guide.json
+  model_architecture.json   chapter_organizations.json
+  experiment_design.json    domain_info.json
+       │                           │
+       └───────────┬───────────────┘
+                   ↓
+           Phase 0.5~0.95 (规划)
+                   ↓
+            outline.json + 各策略
+                   │
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+  Phase 1~5   (章节 LLM 生成)
+       │           │           │
+       ↓           ↓           ↓
+  output/chapter1~5/*.md  (原生 LaTeX 内容)
+                   │
+                   ↓
+         Phase 7 (后处理组装)
+                   │
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+  main.tex    references.bib   full_paper.pdf
+                   │
+                   ↓
+         Phase 9 (L1/L2/L3 评价)
+                   │
+                   ↓
+          evaluation_report.json
+```
+
+---
+
+## 10. 运维
+
+### 启动
+
+```bash
+# 标准启动（从头开始）
+python run_with_log.py --no-resume
+
+# 从断点恢复
+python run_with_log.py
+
+# 覆盖配置
+python run_with_log.py --title "My Paper Title" --code-path /path/to/code
+```
+
+### 运行中干预
+
+编辑 `output/HUMAN_DIRECTIVE.md` 文件即可在运行中干预 Agent 方向。
+
+### 输出
+
+```
+output/
+├── latex/main.tex          # 最终 LaTeX 源码
+├── latex/references.bib    # BibTeX 引用
+├── full_paper.pdf          # 编译后的 PDF
+├── evaluation_report.json  # L1/L2/L3 评价结果
+├── audit_detail.json       # 审计详情
+├── chapter1~5/             # 各章中间文件
+└── memory_state.json       # 记忆状态（断点恢复用）
+```

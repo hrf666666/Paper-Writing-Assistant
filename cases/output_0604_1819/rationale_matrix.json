@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "采用三层物理分解模型（DC、线性、残差）解耦角信号",
+      "motivation": "非朗伯体表面的复杂反射破坏了传统EPI线性假设，导致深度估计在材质交界处产生严重伪影，必须从物理层面分离环境光照和视差。",
+      "sota_gap": "传统方法将光照、深度和材质耦合处理，本方法显式分离DC分量（光照）和线性项（视差），将材质特性隔离至残差项，避免了物理假设失效区域的误差传播。",
+      "scenario": "包含高光、半透明或散射表面的复杂混合场景（如UrbanLF-Syn中的玻璃和金属表面）。",
+      "evidence": "理论验证引用Wang 2017角锥约束和Cui 2024双峰分布；实验证明残差分量有效保留了材质特性，支撑后续分类。",
+      "section": "Methodology - Three-Layer Angular Signal Decomposition",
+      "priority": "must"
+    },
+    {
+      "design_decision": "提取角梯度、角相关性和变异系数等几何与统计特征，摒弃频域特征",
+      "motivation": "离散光场采样（如9x9）的角分辨率极低，导致频域分析（如FFT）失效，无法准确捕获高频材质信息，必须寻找低分辨率下鲁棒的替代特征。",
+      "sota_gap": "现有基于频域的方法要求极高的角分辨率（如17x17以上），本设计的几何特征在9x9低分辨率下依然保持高区分度，克服了离散采样的物理限制。",
+      "scenario": "低角分辨率（9x9）的离散光场输入数据，特别是频域特征完全失效的欠采样条件。",
+      "evidence": "角梯度（angular_gradient）特征的Cohen's d达到0.983，证明其在低分辨率下具有强大的材质区分能力。",
+      "section": "Methodology - Geometric Feature Extraction",
+      "priority": "must"
+    },
+    {
+      "design_decision": "构建基于几何特征的随机森林（RF）分类器进行像素级/区域级材质分类",
+      "motivation": "需要为后续的双分支深度估计提供高精度的材质先验掩码，避免在物理假设失效的非朗伯区域盲目应用朗伯深度估计算法。",
+      "sota_gap": "相比于端到端黑盒分类网络，RF基于显式物理几何特征，可解释性强且对极小样本（非朗伯数据仅4个场景）具有更好的泛化和抗过拟合能力。",
+      "scenario": "非朗伯体训练数据极度匮乏（仅4个场景）的冷启动材质分类任务。",
+      "evidence": "Phase 1 RF分类器准确率达到89.6%（>0.85阈值），AUC达到0.962（>0.90阈值），满足高精度掩码生成需求。",
+      "section": "Methodology - Material Classification & Mask Generation",
+      "priority": "must"
+    },
+    {
+      "design_decision": "设计GeometricDualMask双分支掩码路由架构，解耦朗伯与非朗伯区域处理",
+      "motivation": "单一网络无法同时拟合朗伯体的EPI线结构和非朗伯体的X型/角梯度几何模式，强行统一会导致特征冲突和深度模糊。",
+      "sota_gap": "现有统一架构（如EPINet）在所有区域应用相同的EPI卷积，本架构通过掩码在通道层面隔离物理假设冲突，实现定制化特征提取与通道平衡投影。",
+      "scenario": "包含大面积朗伯背景与局部非朗伯前景（如反光车辆、玻璃幕墙）的UrbanLF混合场景。",
+      "evidence": "GeometricDualMask模型实现，mask gap=0.041（优于0.08的目标阈值），Mixed (Urban) MAE降至0.081（达成<0.22目标）。",
+      "section": "Methodology - GeometricDualMask Architecture",
+      "priority": "must"
+    },
+    {
+      "design_decision": "结合WeightedRandomSampler实施域平衡采样与混合训练策略",
+      "motivation": "非朗伯体真实/合成数据极度稀缺（仅4个场景），直接联合训练会导致模型被大量朗伯体数据主导，忽略非朗伯特征。",
+      "sota_gap": "传统混合训练按场景数量均匀采样，本策略在包含170个场景的UrbanLF-Syn和极少非朗伯场景间实现域级别的曝光平衡，防止长尾域被淹没。",
+      "scenario": "大规模混合数据集（如170个UrbanLF-Syn场景 + 4个Non-Lambertian场景）的联合训练。",
+      "evidence": "整体Overall MAE达到0.133（达成<0.20目标），证明在严重数据不平衡下维持了全局深度估计精度。",
+      "section": "Experiments - Training Strategy and Implementation",
+      "priority": "should"
+    },
+    {
+      "design_decision": "开发统一多域数据集接口并采用4方向EPI特征提取网络（EPINet4Dir V3）",
+      "motivation": "不同数据集（HCInew, UrbanLF-Syn）存在格式、曝光和视角定义差异，且全角度EPI提取计算冗余度高，需要统一接口并精简特征维度。",
+      "sota_gap": "现有方法通常为每个数据集定制loader且使用全角度（如8方向或更多），本设计统一了多域数据加载并精简为4个正交/对角方向，维持特征平衡并降低计算开销。",
+      "scenario": "跨数据集（HCInew朗伯体与UrbanLF-Syn混合体）的联合训练与评估，以及计算资源受限的部署环境。",
+      "evidence": "代码库中config.yaml配置及FINAL_REPORT.md中归档的datasets/unified_lf_dataset实现，支撑了多域无缝切换与特征平衡。",
+      "section": "Implementation Details / Experimental Setup",
+      "priority": "nice"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| 采用三层物理分解模型（DC、线性、残差）解耦角信号 | 非朗伯体表面的复杂反射破坏了传统EPI线性假设，导致深度估计在材质交界处产生严重伪影，必须从物理层面 | 传统方法将光照、深度和材质耦合处理，本方法显式分离DC分量（光照）和线性项（视差），将材质特性隔离至 | 包含高光、半透明或散射表面的复杂混合场景（如UrbanLF-Syn中的玻璃和金属 | 理论验证引用Wang 2017角锥约束和Cui 2024双峰分布；实验证明残差分 | Methodology - Three-Layer Angular Signal Decomposition | must |\n| 提取角梯度、角相关性和变异系数等几何与统计特征，摒弃频域特征 | 离散光场采样（如9x9）的角分辨率极低，导致频域分析（如FFT）失效，无法准确捕获高频材质信息，必须 | 现有基于频域的方法要求极高的角分辨率（如17x17以上），本设计的几何特征在9x9低分辨率下依然保持 | 低角分辨率（9x9）的离散光场输入数据，特别是频域特征完全失效的欠采样条件。 | 角梯度（angular_gradient）特征的Cohen's d达到0.983 | Methodology - Geometric Feature Extraction | must |\n| 构建基于几何特征的随机森林（RF）分类器进行像素级/区域级材质分类 | 需要为后续的双分支深度估计提供高精度的材质先验掩码，避免在物理假设失效的非朗伯区域盲目应用朗伯深度估 | 相比于端到端黑盒分类网络，RF基于显式物理几何特征，可解释性强且对极小样本（非朗伯数据仅4个场景）具 | 非朗伯体训练数据极度匮乏（仅4个场景）的冷启动材质分类任务。 | Phase 1 RF分类器准确率达到89.6%（>0.85阈值），AUC达到0. | Methodology - Material Classification & Mask Generation | must |\n| 设计GeometricDualMask双分支掩码路由架构，解耦朗伯与非朗伯区域处 | 单一网络无法同时拟合朗伯体的EPI线结构和非朗伯体的X型/角梯度几何模式，强行统一会导致特征冲突和深 | 现有统一架构（如EPINet）在所有区域应用相同的EPI卷积，本架构通过掩码在通道层面隔离物理假设冲 | 包含大面积朗伯背景与局部非朗伯前景（如反光车辆、玻璃幕墙）的UrbanLF混合场 | GeometricDualMask模型实现，mask gap=0.041（优于0 | Methodology - GeometricDualMask Architecture | must |\n| 结合WeightedRandomSampler实施域平衡采样与混合训练策略 | 非朗伯体真实/合成数据极度稀缺（仅4个场景），直接联合训练会导致模型被大量朗伯体数据主导，忽略非朗伯 | 传统混合训练按场景数量均匀采样，本策略在包含170个场景的UrbanLF-Syn和极少非朗伯场景间实 | 大规模混合数据集（如170个UrbanLF-Syn场景 + 4个Non-Lamb | 整体Overall MAE达到0.133（达成<0.20目标），证明在严重数据不 | Experiments - Training Strategy and Implementation | should |\n| 开发统一多域数据集接口并采用4方向EPI特征提取网络（EPINet4Dir V3 | 不同数据集（HCInew, UrbanLF-Syn）存在格式、曝光和视角定义差异，且全角度EPI提取 | 现有方法通常为每个数据集定制loader且使用全角度（如8方向或更多），本设计统一了多域数据加载并精 | 跨数据集（HCInew朗伯体与UrbanLF-Syn混合体）的联合训练与评估，以 | 代码库中config.yaml配置及FINAL_REPORT.md中归档的dat | Implementation Details / Experimental Setup | nice |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

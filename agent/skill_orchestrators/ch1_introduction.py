@@ -6,12 +6,11 @@ Skill: 第一章 - Introduction / 前言
 
 import os
 import json
-from tqdm import tqdm
 
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
 
 import logging
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 _orch = BaseOrchestrator(output_dir=OUTPUT_DIR)
 
 
-def generate_introduction(project_data, ref_data):
+def generate_introduction(project_data, ref_data, citation_context=""):
     """
     生成第一章 Introduction
     
@@ -48,7 +47,7 @@ def generate_introduction(project_data, ref_data):
         innovation_summary += f"  价值: {ip.get('创新点价值', 'N/A')}\n"
     
     # 构建写作风格指导
-    style_instruction = _build_style_instruction(style_guide, chapter_org)
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Introduction")
     
     # ==================== 子节1.1: 研究背景与问题重要性 ====================
     prompt_1_1 = f"""
@@ -75,9 +74,17 @@ def generate_introduction(project_data, ref_data):
 
 {style_instruction}
 
+{citation_context}
+
+**引用要求**（关键）：
+- 本节至少引用8-10篇不同的参考文献
+- 引用使用<citation>["keyword1", "keyword2"]</citation>标记
+- 引用应覆盖：领域背景、现有方法、关键数据集等
+- 不要堆砌引用，每处引用都要有明确的论述目的
+
 请使用学术英语撰写，文风严谨但不失流畅。对于潜在可以添加引用的部分，使用<citation>["keyword1", "keyword2"]</citation>标记。
-对于行内公式，使用 `$...$` 格式；对于行间公式，使用 `$$...$$` 格式。使用Markdown格式。
-**重要**：不要输出章节顶级标题（如 "# 1. Introduction"），该标题已由系统自动添加。直接从正文内容开始。请直接给出内容，无需解释：
+请直接输出IEEE Transactions格式的LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}} 或 \begin{{align}}...\end{{align}}。加粗用 \textbf{{...}}。列表用 \begin{{itemize}}\item ...\end{{itemize}}。
+**重要**：不要输出 \section 或 \subsection 标题，标题由系统自动添加。不要输出 \documentclass 或 \begin{{document}}。直接从正文内容开始，只输出LaTeX代码：
 """
     
     logger.info("[chapter1] 生成 1.1 研究背景与问题重要性...")
@@ -113,8 +120,13 @@ def generate_introduction(project_data, ref_data):
 
 {style_instruction}
 
-请使用学术英语撰写。引用使用<citation>标记。行内公式用 `$...$`，行间公式用 `$$...$$`。Markdown格式。
-**重要**：不要输出子节标题（如 "## 1.1 ..."），直接从正文开始。直接给出内容：
+**引用要求**：
+- 本节至少引用5-8篇不同的参考文献（不同于1.1节已引用的）
+- 引用使用<citation>标记
+- 每类方法至少引用1-2篇代表性文献
+
+请使用学术英语撰写。引用使用<citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
+**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     
     logger.info("[chapter1] 生成 1.2 现有方法的局限性...")
@@ -154,8 +166,8 @@ def generate_introduction(project_data, ref_data):
 
 {style_instruction}
 
-请使用学术英语撰写。贡献列表使用Markdown格式（- **Contribution 1**: ...）。行内公式用 `$...$`，行间公式用 `$$...$$`。全程使用Markdown格式，不要混用LaTeX。
-**重要**：不要输出子节标题，直接从正文开始。直接给出内容：
+请使用学术英语撰写。贡献列表使用 \\begin{{enumerate}} \\item \\textbf{{Contribution 1}}: ... \\end{{enumerate}} 格式。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
+**重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     
     logger.info("[chapter1] 生成 1.3 本文方法与贡献...")
@@ -166,7 +178,7 @@ def generate_introduction(project_data, ref_data):
         section_1_3 = ""
     
     # ==================== 组装完整章节 ====================
-    full_chapter = f"""# 1. Introduction
+    full_chapter = f"""\section{{Introduction}}
 
 {section_1_1}
 
@@ -178,113 +190,19 @@ def generate_introduction(project_data, ref_data):
     return full_chapter
 
 
-def _build_style_instruction(style_guide, chapter_org):
-    """构建写作风格指导文本（v9.3: 集成 IEEE Trans 期刊风格配置）"""
-    instruction = "**写作风格指导**：\n"
-    
-    # v9.3: 加载 IEEE Trans 期刊风格配置（P2 优先级规则）
-    try:
-        import os
-        from config.ieee_trans_style_profile import (
-            get_ieee_trans_style_profile,
-            get_section_requirements,
-            get_red_flags,
-        )
-        
-        profile = get_ieee_trans_style_profile()
-        intro_req = get_section_requirements("Introduction")
-        red_flags = get_red_flags()
-        
-        instruction += f"\n**IEEE Transactions 期刊特定规则**（P2 优先级，必须遵守）：\n"
-        instruction += f"\n### Introduction 结构要求\n"
-        instruction += f"- 结构序列：{intro_req.get('structure', 'N/A')}\n"
-        instruction += f"- 贡献列表：最多 {intro_req.get('contributions', {}).get('max_items', 3)} 项，陈述为事实而非意图\n"
-        instruction += f"- 贡献格式：{intro_req.get('contributions', {}).get('format', 'N/A')}\n"
-        
-        instruction += f"\n### 禁止模式 (Red Flags)\n"
-        for flag in red_flags[:5]:  # 只显示前 5 个
-            instruction += f"- {flag}\n"
-        
-        instruction += f"\n### 语言风格\n"
-        lang = profile.get('language_style_profile', {})
-        instruction += f"- 语态：{lang.get('voice', 'N/A')}\n"
-        instruction += f"- 句长：{lang.get('sentence_length', 'N/A')}\n"
-        instruction += f"- 模糊程度：{lang.get('hedging_level', 'N/A')}\n"
-        instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[IEEE Trans 风格配置] 加载失败: {e}")
-    
-    # v9.2: 加载学术写作风格指南（P4 优先级规则）
-    try:
-        import os
-        style_guide_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-            "skills", "academic_writing_style", "style_guide.md"
-        )
-        if os.path.exists(style_guide_path):
-            with open(style_guide_path, 'r', encoding='utf-8') as f:
-                style_guide_content = f.read()
-            instruction += f"\n**学术写作基础规范**（P4 优先级）：\n"
-            instruction += style_guide_content[:1500]  # 截取关键部分
-            instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[风格指南] 加载失败: {e}")
-    
-    if style_guide:
-        if isinstance(style_guide, dict):
-            sentence_patterns = style_guide.get("句式特征", {})
-            if sentence_patterns:
-                instruction += "- 常用句式模式：\n"
-                for pattern_type, examples in sentence_patterns.items():
-                    if isinstance(examples, (list, dict)):
-                        instruction += f"  {pattern_type}: {examples}\n"
-            
-            vocabulary = style_guide.get("用词特征", [])
-            if vocabulary:
-                instruction += f"- 学术用词：{vocabulary[:20]}\n"
-            
-            citation_style = style_guide.get("引用风格", {})
-            if citation_style:
-                instruction += f"- 引用风格：{citation_style}\n"
-    
-    if chapter_org:
-        if isinstance(chapter_org, dict):
-            structure = chapter_org.get("章节结构", [])
-            if structure:
-                instruction += f"- 参考组织结构：{structure}\n"
-            
-            patterns = chapter_org.get("关键句式模板", {})
-            if patterns:
-                instruction += f"- 关键句式模板：\n"
-                for k, v in patterns.items():
-                    instruction += f"  {k}: {v}\n"
-    
-    instruction += """
-- 重要要求：
-  1. 文风必须学术化，禁止口语化表达
-  2. 每句话都要有明确的论述目的，避免空洞的过渡句
-  3. 论述要有逻辑层次：从宏观到微观，从问题到方案
-  4. 引用要自然融入句式，不能生硬堆砌
-  5. **严格避免 AI 风格词汇**（如 revolutionize, groundbreaking, unprecedented 等）
-  6. **括号内容不超过 20 词**，超长内容应拆分为独立句子
-  7. **句子长度控制在 20-30 词**，避免超过 40 词的长句
-"""
-    
-    return instruction
-
-
-def run_chapter1(project_data, ref_data):
+def run_chapter1(project_data, ref_data, citation_context=""):
     """主入口：生成第一章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter1", exist_ok=True)
     
     logger.info("[chapter1] 开始生成第一章 Introduction...")
     try:
-        chapter_content = generate_introduction(project_data, ref_data)
+        chapter_content = generate_introduction(project_data, ref_data,
+                                                  citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter1] 第一章生成失败: {e}")
-        chapter_content = "# 1. Introduction\n\n(生成失败，请重新运行)\n"
+        chapter_content = "\\section{Introduction}\n\n(生成失败，请重新运行)\n"
     
-    # 保存Markdown版本
+    # 保存章节文件
     try:
         _orch.save_output("chapter1_introduction.md", chapter_content, subdir="chapter1")
     except Exception as e:

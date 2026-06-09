@@ -17,6 +17,9 @@ from dataclasses import dataclass, field
 from agent.api_client import get_api_client, UnifiedAPIClient
 from agent.memory import MemoryManager
 from agent.quality_gate import QualityGate, QualityReport
+from agent.hierarchical_planner import (
+    HierarchicalPlan, AbstractGoal, AtomicStep, build_default_plan,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +61,7 @@ class AgentDispatcher:
             raise
         self._task_queue: List[Task] = []
         self._completed_tasks: Dict[str, Task] = {}
+        self._plan: Optional[HierarchicalPlan] = None  # v12.0: 分层规划
         self._max_global_retries = 3  # 全局最大重试次数
 
     def plan_tasks(self, project_data: Dict, ref_data: Dict,
@@ -65,8 +69,10 @@ class AgentDispatcher:
         """
         Leader: 根据项目数据和参考资料规划任务队列
 
-        v7.0: 新增 Phase 0.1~0.5 子流程（动机→范例→引用→写作矩阵→消融）
-              根据 venue_adapter 动态决定是否启用各子流程。
+        v12.0: 使用 HierarchicalPlan 分层规划
+        - 构建抽象层 Goals (G1~G5) + 执行层 AtomicSteps
+        - 降级为扁平 Task 列表返回，保持 loop.py 兼容
+        - 每个 Task 通过 task_id 关联到 AtomicStep
 
         Args:
             project_data: 项目分析数据
@@ -74,146 +80,52 @@ class AgentDispatcher:
             venue_adapter: VenueAdapter 实例（可选）
 
         Returns:
-            List[Task]: 任务队列
+            List[Task]: 任务队列（从 HierarchicalPlan 扁平展开）
         """
         self._task_queue.clear()
 
-        # 读取 v7.0 功能开关
+        # 构建分层规划
+        self._plan = build_default_plan(venue_adapter=venue_adapter)
+
+        # 从分层规划展开为扁平 Task 列表
+        for goal in self._plan.goals:
+            for step in goal.steps:
+                self._task_queue.append(Task(
+                    task_id=step.task_id or step.step_id,
+                    task_type="generate",  # 统一为 generate，loop.py 按 phase 分发
+                    phase_name=step.phase_name,
+                    target=step.description,
+                ))
+
+        # 保存分层规划到文件（便于调试和 Phase 8.8 验收）
         try:
-            from config.project_config import (
-                ENABLE_MOTIVATION_ENGINE, ENABLE_EXEMPLAR_LEARNING,
-                ENABLE_RATIONALE_MATRIX, RUN_ABLATION,
-            )
-        except ImportError as e:
-            logger.warning(f"加载 v7.0 功能开关失败，使用默认值: {e}")
-            ENABLE_MOTIVATION_ENGINE = False
-            ENABLE_EXEMPLAR_LEARNING = False
-            ENABLE_RATIONALE_MATRIX = False
-            RUN_ABLATION = False
+            import os
+            from config.project_config import OUTPUT_DIR
+            plan_path = os.path.join(OUTPUT_DIR, "hierarchical_plan.json")
+            os.makedirs(OUTPUT_DIR, exist_ok=True)
+            with open(plan_path, "w", encoding="utf-8") as f:
+                json.dump(self._plan.to_dict(), f, ensure_ascii=False, indent=2)
+            logger.info(f"分层规划已保存: {plan_path}")
+        except Exception as e:
+            logger.debug(f"分层规划保存失败（不影响执行）: {e}")
 
-        # Phase 0: 分析
-        self._task_queue.append(Task(
-            task_id="analyze_project",
-            task_type="generate",
-            phase_name="phase0",
-            target="分析工程代码与参考PDF",
-        ))
-
-        # Phase 0.5: 参考文献池 + 大纲（在 loop._initialize_project_data 中执行）
-        self._task_queue.append(Task(
-            task_id="plan_outline",
-            task_type="generate",
-            phase_name="phase0_5",
-            target="参考文献池构建+全局大纲规划",
-        ))
-
-        # ---- v7.0 子流程阶段（可配置开关） ----
-
-        # Phase 0.6: 动机确认
-        if ENABLE_MOTIVATION_ENGINE:
-            self._task_queue.append(Task(
-                task_id="motivation_confirm",
-                task_type="generate",
-                phase_name="phase0_6",
-                target="动机确认与动机线程构建",
-            ))
-
-        # Phase 0.7: 范例学习
-        if ENABLE_EXEMPLAR_LEARNING:
-            self._task_queue.append(Task(
-                task_id="exemplar_analysis",
-                task_type="generate",
-                phase_name="phase0_7",
-                target="深度范例学习（6层阅读协议）",
-            ))
-
-        # Phase 0.8: 引用支撑库
-        self._task_queue.append(Task(
-            task_id="citation_bank",
-            task_type="generate",
-            phase_name="phase0_8",
-            target="引用支撑库构建（claim级引用管理）",
-        ))
-
-        # Phase 0.9: 写作理由矩阵
-        if ENABLE_RATIONALE_MATRIX:
-            self._task_queue.append(Task(
-                task_id="rationale_matrix",
-                task_type="generate",
-                phase_name="phase0_9",
-                target="写作理由矩阵（事前规划型）",
-            ))
-
-        # Phase 0.95: 消融实验自动化
-        if RUN_ABLATION:
-            self._task_queue.append(Task(
-                task_id="ablation_experiment",
-                task_type="generate",
-                phase_name="phase0_95",
-                target="消融实验自动化（调用auto_research_agent）",
-            ))
-
-        # ---- 核心章节生成（动态适配 venue） ----
-        sections = [
-            ("phase1", "Introduction", "chapter1"),
-            ("phase2", "Related Work", "chapter2"),
-            ("phase3", "Methodology", "chapter3"),
-            ("phase4", "Experiments", "chapter4"),
-            ("phase5", "Conclusion", "chapter5"),
-        ]
-
-        # 如果 venue 有额外章节（如 Discussion），动态追加
-        extra_section_map = {
-            "Discussion": ("phase5_1", "Discussion", "chapter5_1"),
-            "Limitations and Future Work": ("phase5_2", "Limitations and Future Work", "chapter5_2"),
-        }
-        if venue_adapter:
-            for extra_sec in venue_adapter.get_extra_sections():
-                if extra_sec in extra_section_map:
-                    sections.append(extra_section_map[extra_sec])
-
-        for phase_name, chapter_name, task_id in sections:
-            self._task_queue.append(Task(
-                task_id=f"generate_{task_id}",
-                task_type="generate",
-                phase_name=phase_name,
-                target=chapter_name,
-            ))
-
-        # Phase 5.5: 生成摘要和关键词
-        self._task_queue.append(Task(
-            task_id="generate_abstract",
-            task_type="generate",
-            phase_name="phase5_5",
-            target="Abstract & Keywords",
-        ))
-
-        # Phase 6: 审查
-        self._task_queue.append(Task(
-            task_id="review_content",
-            task_type="review",
-            phase_name="phase6",
-            target="内容审查与参考文献审查",
-        ))
-
-        # Phase 6.5: 反幻觉审计
-        self._task_queue.append(Task(
-            task_id="audit_content",
-            task_type="review",
-            phase_name="phase6_5",
-            target="反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
-        ))
-
-        # Phase 7: 输出
-        self._task_queue.append(Task(
-            task_id="generate_output",
-            task_type="generate",
-            phase_name="phase7",
-            target="生成LaTeX/Word输出",
-        ))
-
-        logger.info(f"任务规划完成，共 {len(self._task_queue)} 个任务")
+        logger.info(f"任务规划完成，共 {len(self._task_queue)} 个任务 "
+                     f"({len(self._plan.goals)} 个 Goals)")
         return self._task_queue
+
+    def get_plan(self) -> Optional[HierarchicalPlan]:
+        """获取当前分层规划"""
+        return self._plan
+
+    def update_step_status(self, phase_name: str, status: str, actual_value=None):
+        """更新 AtomicStep 的状态（loop.py 每个 phase 完成后调用）"""
+        if not self._plan:
+            return
+        step = self._plan.get_step_by_phase(phase_name)
+        if step:
+            step.status = status
+            if actual_value is not None:
+                step.actual_value = actual_value
 
     def get_next_task(self) -> Optional[Task]:
         """获取下一个待执行的任务"""
@@ -321,18 +233,21 @@ class AgentDispatcher:
         return list(self._task_queue)
 
     def skip_task_by_name(self, target: str):
-        """根据名称跳过任务（将匹配任务标记为 completed）"""
-        target_lower = target.lower()
+        """v11.8: 根据名称跳过任务 — 精确匹配 task_id 或 phase_name，避免子串误杀"""
+        target_lower = target.lower().strip()
         for task in self._task_queue:
-            if target_lower in task.phase_name.lower() or target_lower in task.target.lower():
+            # 精确匹配 task_id（如 "generate_chapter1"）或 phase_name（如 "phase1"）
+            if (task.task_id.lower() == target_lower
+                    or task.phase_name.lower() == target_lower):
                 task.status = "completed"
                 logger.info(f"[directive] 跳过阶段: {task.target}")
 
     def redo_task_by_name(self, target: str):
-        """根据名称重做任务（将匹配任务重置为 pending）"""
-        target_lower = target.lower()
+        """v11.8: 根据名称重做任务 — 精确匹配 task_id 或 phase_name"""
+        target_lower = target.lower().strip()
         for task in self._task_queue:
-            if target_lower in task.phase_name.lower() or target_lower in task.target.lower():
+            if (task.task_id.lower() == target_lower
+                    or task.phase_name.lower() == target_lower):
                 task.status = "pending"
                 task.retry_count = 0
                 logger.info(f"[directive] 重做阶段: {task.target}")

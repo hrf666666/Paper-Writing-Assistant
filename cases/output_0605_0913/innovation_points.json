@@ -1,0 +1,40 @@
+[
+  {
+    "创新点名称": "基于物理先验的三层角信号分解与几何材质分类机制",
+    "创新点工作内容": [
+      "提出光场角信号的三层物理分解模型：将角信号分解为直流分量（DC，环境光照）、线性项（视差/深度EPI斜率）和残差项（材质/反射类型）。",
+      "摒弃对高分辨率角频谱（如2D-DFT/MRI类比）的依赖，转而提取几何角特征（如角梯度、角相关性、变异系数）来表征材质属性。",
+      "构建基于几何特征的随机森林（RF）分类器，实现对朗伯体（Lambertian）和非朗伯体（Non-Lambertian）表面的高精度分类，为网络提供物理先验。"
+    ],
+    "创新点价值": "从物理和几何层面揭示了非朗伯体表面破坏EPI线性假设的根本原因。在低角分辨率（如9x9）下，通过几何特征替代频谱特征，实现了高效、鲁棒的材质分类，为后续深度估计网络中的特征路由和掩码生成提供了可靠的理论和技术基础。",
+    "支撑证据": "Phase 1 实验结果显示，RF分类器准确率达到89.6%，AUC达到0.962；角梯度特征的Cohen's d达到0.983，证明具有极强的区分度。同时，该机制得到了Wang 2017 (TPAMI) 的角锥约束理论和Cui 2024 (TCSVT) 的EPI双峰分布理论的交叉验证。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于物理先验的三层角信号分解与几何材质分类机制",
+      "contribution_statement": "We propose a physics-prior-based three-layer angular signal decomposition mechanism that effectively disentangles light field features into distinct geometric and material classifications."
+    }
+  },
+  {
+    "创新点名称": "面向多域光场的几何双掩码统一深度估计架构",
+    "创新点工作内容": [
+      "设计GeometricDualMask模型架构，利用材质分类先验生成双掩码（Dual-Mask），在特征提取阶段对朗伯体和非朗伯体/复杂纹理区域进行特征分离与自适应路由处理。",
+      "引入域平衡采样（Domain-balanced sampling）与加权随机采样器（WeightedRandomSampler），在统一训练框架下动态调整不同域（如Urban/Mixed、Lambertian等）的样本权重，缓解数据分布不均导致的过拟合问题。",
+      "结合4方向EPI（EPINet4Dir V3）作为基础特征提取器，融合多域混合训练策略，构建端到端的统一光场深度估计网络。"
+    ],
+    "创新点价值": "有效解决了传统单一EPI模型在面对多域混合场景时性能急剧下降的问题。双掩码机制使得网络能够针对不同反射特性的区域采用差异化处理策略，而域平衡采样显著提升了模型在复杂城市/混合场景下的泛化能力，实现了单一模型在多域光场数据上的统一与高效推理。",
+    "支撑证据": "最终评估指标显示，Overall MAE达到0.133（优于<0.20的目标阈值），Mixed (Urban) MAE达到0.081（优于<0.22的目标阈值）。模型验证报告中记录GeometricDualMask的mask gap=0.041（优于<0.08的目标），证实了双掩码机制和域平衡采样策略的有效性。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "面向多域光场的几何双掩码统一深度估计架构",
+      "contribution_statement": "We design a geometry dual-mask unified architecture that capitalizes on these decomposed physical features to achieve robust depth estimation across multi-domain light fields."
+    }
+  }
+]

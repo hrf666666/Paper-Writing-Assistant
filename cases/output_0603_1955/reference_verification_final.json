@@ -1,0 +1,130 @@
+{
+  "citation_tags": [
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"light field imaging\", \"depth estimation\", \"3D reconstruction\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"non-Lambertian surfaces\", \"specular reflection\", \"angular cone constraint\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"performance degradation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"traditional light field\", \"focus stack\", \"EPI slope\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"angular cone constraint\", \"specular reflection\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"deep learning light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention mechanism\", \"composite loss\", \"multi-scale fusion\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPI structure tensor\", \"light field depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"variational optimization\", \"global depth consistency\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"defocus cue\", \"correspondence cue\", \"depth from light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"multi-view stereo\", \"sub-pixel disparity\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"frequency domain analysis\", \"material recognition\", \"angular spectrum\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"epipolar plane image\", \"CNN\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"multi-scale EPI\", \"pseudo-4D input\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"LFNet\", \"4D convolution\", \"light field depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"DistgNet\", \"disentangled feature\", \"angular correlation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"angular attention\", \"transformer\", \"light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"multi-task learning\", \"surface normal\", \"depth estimation\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"angular variance\", \"specular detection\", \"high-frequency analysis\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"intrinsic decomposition\", \"material-aware depth\", \"physics-informed\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"dual-branch network\", \"attention routing\", \"adaptive feature fusion\"]"
+    },
+    {
+      "verified": false,
+      "reason": "关键词解析或搜索失败: invalid syntax. Perhaps you forgot a comma? (<unknown>, line 1)",
+      "keywords": "[Honauer et al., 2016]"
+    },
+    {
+      "verified": false,
+      "reason": "关键词解析或搜索失败: invalid syntax. Perhaps you forgot a comma? (<unknown>, line 1)",
+      "keywords": "[Blender Foundation, 2020]"
+    },
+    {
+      "verified": false,
+      "reason": "关键词解析或搜索失败: invalid syntax. Perhaps you forgot a comma? (<unknown>, line 1)",
+      "keywords": "[Sheng et al., 2019]"
+    },
+    {
+      "verified": false,
+      "reason": "关键词解析或搜索失败: invalid syntax. Perhaps you forgot a comma? (<unknown>, line 1)",
+      "keywords": "[Wanner et al., 2013]"
+    }
+  ],
+  "bibliography_entries": []
+}

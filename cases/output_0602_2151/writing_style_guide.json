@@ -1,0 +1,57 @@
+{
+  "句式特征": {
+    "问题导向/挑战陈述句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "Inferring the depth of transparent or mirror (ToM) surfaces represents a hard challenge for either sensors, algorithms, or deep networks.",
+      "However, real-world LF images often encounter reflective and transparent surfaces and the related regions contain depth information from the reflection and background layers, which can be modeled as dual-layer scenes."
+    ],
+    "贡献/方案提出句式": [
+      "In this paper, we derive a spatially-varying (SV)BRDF-invariant theory for recovering 3D shape and reflectance from light-field cameras.",
+      "We propose a simple pipeline for learning to estimate depth properly for such surfaces with neural networks, without requiring any ground-truth annotation.",
+      "In this paper, we propose a novel decoupling-and-aggregating strategy and develop a dual-layer depth estimation network for LF images with complex reflections."
+    ],
+    "对比/转折句式": [
+      "In contrast, our model can work on general 1-lobe BRDFs, and can also recover reflectance in addition to shape, which has not been achieved by previous light-field shape acquisition approaches.",
+      "On the one hand, the definition of depth itself might appear ambiguous in such cases... On the other hand, as humans can deal with this through experience, depth sensing techniques based on deep learning hold the potential to address this challenge.",
+      "However, most of them rely on the Lambertian assumption and work poorly on glossy surfaces."
+    ]
+  },
+  "段落组织": {
+    "段落开头常用的引入方式": [
+      "背景引入/现象陈述：从宏观背景或日常现象切入，如'Light-fields implicitly capture the 3D geometry...'或'In our daily lives, we often interact with...'",
+      "转折/问题引入：在简述背景后直接使用转折词引出当前痛点，如'However, most current depth estimation methods...'或'Unfortunately, light reflection and refraction...'"
+    ],
+    "段内论证逻辑": [
+      "现象描述 -> 指出缺陷/挑战 -> 提出本文动机/方法：先说明特定表面（如ToM或反光表面）对深度估计的挑战，分析现有方法的局限性，最后引出本文的解决方案。",
+      "现有方法回顾 -> 分析其局限性 -> 强调本文方法的优势：在Related Work中常见，先客观陈述前人工作，随后指出其在特定场景下的失效原因，进而凸显本文方法的优越性。"
+    ],
+    "段落结尾常用的收束方式": [
+      "总结贡献/引出下文：在Introduction末尾使用列表形式明确列出核心贡献，如'Our main contributions are: 1)... 2)...'",
+      "强调本文方法的有效性/独特性：在段落末尾总结本段提出的方法所能达到的独特效果，如'which has not been achieved by previous...'或'It successfully separates... and achieves accurate...'"
+    ]
+  },
+  "用词特征": [
+    "过渡词：However, Therefore, Moreover, In contrast, Specifically, Unfortunately, In short, Nonetheless, First, Second",
+    "强调词：explicitly, dramatically, remarkably, sufficiently, successfully, extensively, purely, accurately, properly",
+    "限定词：primarily, mostly, often, generally, potentially, virtually, relatively, up to",
+    "学术动词/短语：derive, propose, demonstrate, validate, address, leverage, fine-tune, decouple, aggregate, hallucinate, distill, unveil, tackle"
+  ],
+  "论证模式": [
+    "提出问题→分析原因→给出方案：先提出特定表面（如透明/反光）深度估计困难的问题，深入分析其物理或数据层面的原因（如缺乏GT、传感器失效），最后给出针对性的算法或数据生成方案。",
+    "现状回顾→指出缺陷→提出改进：在引言和相关工作中，先回顾光场深度估计的现状，指出其在非朗伯体或双层场景下的缺陷（如cost volume aliasing），然后提出解耦或理论不变性的改进框架。",
+    "理论推导→算法设计→实验验证：先从数学或物理层面推导核心理论（如SVBRDF-invariant方程），基于理论设计具体的网络模块或优化算法，最后在合成和真实数据集上进行广泛的实验验证。",
+    "总述贡献→分点详述：在Introduction结尾，先用一段话高度概括本文提出的核心框架，随后使用编号列表（1, 2, 3...）或项目符号详细拆解具体的理论、算法和数据集贡献。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": [
+      "句末引用（作为事实或观点的支撑）：将引用放在句末或分句末，如'...remains a challenging problem for both computer vision algorithms and deep networks [64].'",
+      "句中/主语引用（将作者或方法作为主语）：直接以作者或前作主语展开论述，如'Tao et al. [27] proposed a clustering method...'或'A follow-up work [26] adopts...'",
+      "括号内补充引用（在举例或补充说明时）：在列举具体实例时附带引用，如'commercial LF cameras like Lytro [2] and Raytrix [3]'或'(e.g. Lytro [1] and Raytrix [22])'"
+    ],
+    "引用与论述的衔接方式": [
+      "归纳总结式衔接：将多篇文献归纳为一个普遍现象或趋势，如'Many depth estimation methods... have been proposed. However, most of them rely on... [9, 13, 15, 25, 29, 30, 31].'",
+      "对比转折式衔接：先引用前人工作，紧接着用However/In contrast指出其不足，从而引出本文工作，如'Tao et al. [27] proposed... However, they attempt... In contrast, our model...'",
+      "顺承递进式衔接：引用前人工作作为基础，说明本文是如何在其上扩展或差异化的，如'Our theoretical contributions are most closely related to... [5, 6, 7]. Our work has three major differences.'"
+    ]
+  }
+}

@@ -1,0 +1,269 @@
+{
+  "total_phases_audited": 13,
+  "total_issues": 78,
+  "critical_issues": 32,
+  "warning_issues": 38,
+  "info_issues": 8,
+  "overall_passed": false,
+  "phase_results": {
+    "phase1": {
+      "passed": false,
+      "issue_count": 7
+    },
+    "phase2": {
+      "passed": false,
+      "issue_count": 11
+    },
+    "phase3": {
+      "passed": true,
+      "issue_count": 11
+    },
+    "phase4": {
+      "passed": false,
+      "issue_count": 7
+    },
+    "phase5": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_1": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_2": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_5": {
+      "passed": false,
+      "issue_count": 5
+    }
+  },
+  "verified_references": 15,
+  "all_critical": [
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#1无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"light field imaging\", \"depth estimation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"autonomous driving\", \"robotic manipulation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#8无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"X-shaped patterns\", \"geometric constraints\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#11无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"loss function tuning\", \"physical assumptions\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#2无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Wanner\", \"Goldluecke\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#3无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Kim\", \"EPI\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#4无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Tao\", \"defocus and correspondence\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Jeon\", \"MVS\", \"lenslet\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#7无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Williem\", \"occlusion-noise\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#9无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"X-shaped patterns\", \"geometric constraints\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#11无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"deep learning\", \"light field depth estimation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#12无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Shin\", \"EPINET\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#13无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Wang\", \"DistgDepth\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#14无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"macropixel\", \"light field depth estimation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#15无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Liang\", \"Light Field Transformer\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase4",
+      "category": "factuality",
+      "description": "Experiments 表格中 'Ours' 行包含 9 个数值（如 ['0.62', '5.4', '1.93']），但项目数据中无任何实验结果",
+      "location": "Experiments tables",
+      "suggestion": "如果实验未运行，所有表格数值应使用占位符 'X.XX'"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"autonomous driving\", \"robotic manipulation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#8无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"X-shaped patterns\", \"geometric constraints\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#11无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"loss function tuning\", \"physical assumptions\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#2无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Wanner\", \"Goldluecke\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#3无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Kim\", \"EPI\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#4无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Tao\", \"defocus and correspondence\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Jeon\", \"MVS\", \"lenslet\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#7无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Williem\", \"occlusion-noise\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#9无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"X-shaped patterns\", \"geometric constraints\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#11无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"deep learning\", \"light field depth estimation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#12无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Shin\", \"EPINET\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#13无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Wang\", \"DistgDepth\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#14无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"macropixel\", \"light field depth estimation\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase2",
+      "category": "reference",
+      "description": "引用#15无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>[\"Liang\", \"Light Field Transformer\"]</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase4",
+      "category": "factuality",
+      "description": "Experiments 表格中 'Ours' 行包含 9 个数值（如 ['0.62', '5.4', '1.93']），但项目数据中无任何实验结果",
+      "location": "Experiments tables",
+      "suggestion": "如果实验未运行，所有表格数值应使用占位符 'X.XX'"
+    },
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: 摘要中提到的“三层角度信号分解”",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    }
+  ]
+}

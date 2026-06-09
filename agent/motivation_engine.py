@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import logging
+import re
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
@@ -295,22 +296,25 @@ Be specific and actionable. Each item should be 1-2 sentences."""
 
     def _derive_anchor_text(self, chapter: str, anchor_type: str,
                              key_claim: str, project_data: Dict) -> str:
-        """推导锚点文本"""
+        """v11.8: 基于项目具体数据生成锚点文本（非泛泛模板）"""
+        innovations = project_data.get("innovation_points", [])
+        inn_names = [ip.get("创新点名称", "") for ip in innovations[:3]]
+        inn_str = ", ".join(n for n in inn_names if n) or "the proposed approach"
         templates = {
             ("Introduction", "motivation_hook"):
-                f"The introduction must establish: {key_claim[:100]}",
+                f"Establish the problem of {key_claim[:80]}, motivating the need for {inn_str}",
             ("Introduction", "contribution_claim"):
-                "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+                f"Enumerate contributions: {inn_str}, with quantitative evidence",
             ("Related Work", "gap_bridge"):
-                f"Transition to method by showing existing approaches do not address: {key_claim[:80]}",
+                f"Show existing methods lack {key_claim[:60]}, bridging to our {inn_str}",
             ("Methodology", "contribution_claim"):
-                "Each module should be justified by connecting back to the core motivation",
+                f"Justify each module ({inn_str}) by connecting to: {key_claim[:60]}",
             ("Experiments", "evidence_support"):
-                "Design experiments that directly validate each contribution claim",
+                f"Design experiments validating {inn_str} via ablation and SOTA comparison",
             ("Conclusion", "contribution_claim"):
-                f"Echo the core narrative: {key_claim[:80]}",
+                f"Echo how {inn_str} successfully addresses {key_claim[:60]}",
         }
-        return templates.get((chapter, anchor_type), "Maintain consistency with core motivation")
+        return templates.get((chapter, anchor_type), f"Address {key_claim[:80]}")
 
     def _save_candidates(self, candidates: List[Dict], filepath: str):
         """保存候选动机到文件"""
@@ -324,3 +328,86 @@ Be specific and actionable. Each item should be 1-2 sentences."""
 
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(content)
+
+
+# ═══════════════════════════════════════════════════════════════
+# v10.1: 动机锚点验证（代码做裁判）
+# ═══════════════════════════════════════════════════════════════
+
+def verify_anchors_in_content(
+    chapter_name: str,
+    chapter_content: str,
+    motivation_result: Dict,
+) -> Dict[str, Any]:
+    """
+    验证章节内容是否覆盖了动机锚点（轻量级关键词匹配，不调用 LLM）。
+
+    Args:
+        chapter_name: 章节名
+        chapter_content: 章节内容文本
+        motivation_result: MotivationEngine.run() 的输出
+
+    Returns:
+        {
+            "covered_anchors": [已覆盖的锚点文本],
+            "missing_anchors": [未覆盖的锚点文本],
+            "coverage_ratio": 0.0-1.0,
+        }
+    """
+    anchors = motivation_result.get("anchors", [])
+    content_lower = chapter_content.lower()
+
+    covered = []
+    missing = []
+
+    for anchor in anchors:
+        if anchor.get("chapter_name", "") != chapter_name:
+            continue
+
+        anchor_text = anchor.get("anchor_text", "")
+        if not anchor_text:
+            continue
+
+        # 提取锚点中的关键词（取前3个有意义的词）
+        keywords = _extract_anchor_keywords(anchor_text)
+        if not keywords:
+            continue
+
+        # 检查是否有至少一半的关键词出现在内容中
+        matched = sum(1 for kw in keywords if kw.lower() in content_lower)
+        if matched >= max(1, len(keywords) // 2):
+            covered.append(anchor_text[:80])
+        else:
+            missing.append(anchor_text[:80])
+
+    total = len(covered) + len(missing)
+    ratio = len(covered) / total if total > 0 else 1.0
+
+    return {
+        "covered_anchors": covered,
+        "missing_anchors": missing,
+        "coverage_ratio": round(ratio, 2),
+    }
+
+
+def _extract_anchor_keywords(text: str) -> List[str]:
+    """从锚点文本中提取有意义的关键词"""
+    # 停用词
+    stopwords = {
+        "the", "a", "an", "is", "are", "was", "were", "be", "been",
+        "have", "has", "had", "do", "does", "did", "will", "would",
+        "could", "should", "may", "might", "shall", "can", "to",
+        "of", "in", "for", "on", "with", "at", "by", "from", "as",
+        "into", "through", "during", "before", "after", "above",
+        "below", "between", "out", "off", "over", "under", "again",
+        "further", "then", "once", "and", "but", "or", "nor", "not",
+        "only", "own", "same", "so", "than", "too", "very",
+        "must", "each", "show", "how", "what", "which", "who",
+        "this", "that", "these", "those", "it", "its",
+    }
+
+    # 简单分词（英文）
+    words = re.findall(r'[a-zA-Z]{3,}', text)
+    keywords = [w for w in words if w.lower() not in stopwords]
+
+    return keywords[:6]  # 最多取6个关键词

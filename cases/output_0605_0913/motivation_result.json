@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Traditional light field depth estimation fails in real-world scenarios because non-Lambertian reflections break the fundamental linear assumption of Epipolar Plane Images (EPIs). To resolve this, we physically decouple angular signals into ambient, parallax, and material components, using a dual-mask mechanism to adaptively route features based on surface reflectance. This paradigm shift from ignoring to explicitly modeling complex reflections enables robust, unified depth estimation across diverse multi-domain scenes.\n\nINTRO_HOOK: Open with a stark contrast between the idealized linear EPI assumption in current literature and the chaotic, reflection-rich reality of practical robotics and 3D reconstruction tasks. Highlight that failing to handle non-Lambertian surfaces is not a minor edge case, but a fundamental roadblock that renders current depth estimation unreliable for real-world deployment.\n\nGAP_BRIDGE: Transition by pointing out that existing methods either treat non-Lambertian regions as noise to be filtered or rely on computationally heavy high-resolution angular spectra that fail at practical low angular resolutions (e.g., 9x9). Conclude that a physically grounded, low-resolution geometric decomposition is strictly necessary to separate material residuals from true parallax before depth estimation begins.\n\nMETHOD_JUSTIFY: Justify the three-layer physical decomposition and Random Forest classifier as the exact mechanisms needed to extract geometric angular features (like angular gradients) that isolate material residuals without relying on high-res spectra. Explain that the GeometricDualMask architecture and domain-balanced sampling directly operationalize this physical prior, ensuring the network applies tailored feature routing rather than a flawed, one-size-fits-all linear assumption.\n\nEXPERIMENT_VALIDATE: Structure the experiments to first prove the physical decoupling works (showcasing the 89.6% RF classification accuracy and 0.983 Cohen's d for angular gradients), and then demonstrate that the dual-mask routing eliminates depth artifacts on specular surfaces. Finally, validate the multi-domain generalization by showing that domain-balanced sampling prevents performance collapse in complex, mixed urban scenes compared to single-domain baselines.\n\nCONCLUSION_ECHO: Reiterate that explicitly modeling and routing non-Lambertian reflections, rather than treating them as EPI anomalies, is the key to unlocking reliable light field depth estimation for real-world applications. End by framing the physical signal decoupling and dual-mask paradigm as a foundational step toward truly robust 3D perception in reflection-rich environments.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "Establish the problem of Traditional light field depth estimation fails in real-world scenarios because n, motivating the need for 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Enumerate contributions: 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构, with quantitative evidence",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Show existing methods lack Traditional light field depth estimation fails in real-world, bridging to our 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Justify each module (基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构) by connecting to: Traditional light field depth estimation fails in real-world",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments validating 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构 via ablation and SOTA comparison",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo how 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构 successfully addresses Traditional light field depth estimation fails in real-world",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Physical Signal Decoupling for Non-Lambertian Surfaces\n**Problem**: Traditional light field depth estimation heavily relies on the linear assumption of Epipolar Plane Images (EPI), which is fundamentally broken by non-Lambertian surfaces (e.g., specular reflections), causing severe depth artifacts.\n**Significance**: Real-world scenes are filled with complex reflective materials; failing to handle non-Lambertian regions renders depth estimation unreliable for practical applications",
+  "candidates": [
+    {
+      "direction": "Physical Signal Decoupling for Non-Lambertian Surfaces",
+      "problem": "Traditional light field depth estimation heavily relies on the linear assumption of Epipolar Plane Images (EPI), which is fundamentally broken by non-Lambertian surfaces (e.g., specular reflections), causing severe depth artifacts.",
+      "significance": "Real-world scenes are filled with complex reflective materials; failing to handle non-Lambertian regions renders depth estimation unreliable for practical applications like robotics and 3D reconstruction.",
+      "approach": "The project introduces a three-layer physical angular signal decomposition model to decouple signals into ambient light, parallax, and material residuals, utilizing a dual-mask mechanism to adaptively route features for Lambertian and non-Lambertian regions.",
+      "key_claim": "By physically decoupling angular signals and applying dual-mask routing, the project fundamentally resolves the EPI linearity breakdown caused by complex material reflections."
+    },
+    {
+      "direction": "Geometric Feature Extraction under Low Angular Resolution",
+      "problem": "Existing material classification methods rely on high-resolution angular frequency spectrums, which become blurred and ineffective when applied to practical, low angular resolution light field data (e.g., 9x9).",
+      "significance": "Hardware constraints and bandwidth limitations make high angular resolution data rare; algorithms dependent on such ideal data are impractical for real-world deployment and edge computing.",
+      "approach": "Instead of frequency spectrum features, the project extracts geometric angular features (e.g., angular gradients, correlation, coefficient of variation) and employs a Random Forest classifier to achieve robust material classification under low angular resolution.",
+      "key_claim": "Replacing frequency spectrum analysis with geometric angular features enables highly accurate material classification and physical prior extraction even under strict low-resolution hardware constraints."
+    },
+    {
+      "direction": "Domain-Balanced Unified Architecture for Mixed Scenes",
+      "problem": "Single-model depth estimation architectures suffer from drastic performance degradation and overfitting when trained on multi-domain mixed scenes due to severe data distribution imbalances and feature conflicts.",
+      "significance": "Deploying models in dynamic, heterogeneous environments requires strong cross-domain generalization; domain-specific overfitting severely limits the scalability and robustness of unified depth estimation systems.",
+      "approach": "The project designs a unified dual-mask architecture incorporating domain-balanced sampling and weighted random samplers to dynamically adjust sample weights, combined with a multi-domain mixed training strategy.",
+      "key_claim": "Through domain-balanced sampling and a unified dual-path architecture, the project overcomes multi-domain data imbalance to achieve robust, generalized depth estimation across heterogeneous scenes."
+    }
+  ]
+}

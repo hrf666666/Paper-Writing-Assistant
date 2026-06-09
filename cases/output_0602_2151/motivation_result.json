@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Light field depth estimation in real-world scenes is fundamentally limited by **non-Lambertian materials** disrupting EPI slopes, a problem traditional frequency-domain methods fail to solve in **low angular resolution light fields**. By **decoupling physical light transport** via a **three-layer angular signal decomposition**, we extract robust geometric features for precise non-Lambertian masking, enabling adaptive depth regression through a **GeometricDualMask network**.\n\nINTRO_HOOK: Open by highlighting that real-world scenes are dominated by **non-Lambertian materials** that break the fundamental **angular cone constraint**, severely corrupting Epipolar Plane Image slope calculations. Emphasize that traditional methods like **2D-DFT** completely fail to detect these regions in practical, **low angular resolution light fields** (e.g., 9x9).\n\nGAP_BRIDGE: Transition by arguing that existing methods rely on unattainable high angular resolutions or invalid frequency assumptions, creating a critical gap that necessitates a shift from **frequency-domain analysis** to **physical geometric decomposition**. Bridge to the method by proposing this paradigm shift to explicitly **decouple illumination, disparity, and material residuals** without relying on high-resolution frequency priors.\n\nMETHOD_JUSTIFY: Justify the **three-layer angular signal decomposition** model as the direct mathematical realization of **decoupling physical light transport** into illumination, disparity, and **material residuals**. Explain that the **GeometricDualMask network** leverages these decoupled masks to **adaptively route features**, preventing the feature confusion caused by heterogeneous materials during depth regression.\n\nEXPERIMENT_VALIDATE: Validate the motivation by demonstrating that the **Random Forest classifier** achieves a 0.962 AUC using **geometric angular features** (with **angular gradient** yielding a Cohen's d of 0.983), proving robust detection where frequency methods fail. Further corroborate the **dual-mask routing**'s effectiveness through **domain-balanced training** across heterogeneous datasets, showing significant depth accuracy improvements in complex mixed-material scenes.\n\nCONCLUSION_ECHO: Echo the core claim by reiterating that **decoupling physical light transport** via geometric decomposition successfully overcomes the **non-Lambertian detection bottleneck** in **low angular resolution light fields**. Conclude that this **physics-driven masking mechanism** provides a reliable prior for robust depth estimation, fundamentally advancing the handling of **real-world heterogeneous materials**.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Light field depth estimation in real-world scenes is fundamentally limited by **non-Lambertian mater",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Light field depth estimation in real-world scenes is fundamentally limited by **",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Light field depth estimation in real-world scenes is fundamentally limited by **",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Non-Lambertian Detection in Low-Resolution Light Fields\n**Problem**: Traditional frequency-domain EPI methods (e.g., 2D-DFT) fail in low angular resolution light fields (e.g., 9x9), and non-Lambertian surfaces break the angular cone constraint, severely interfering with disparity calculation.\n**Significance**: Real-world scenes are full of non-Lambertian materials; failing to accurately detect and decouple these regions fundamentally limits the robustness and accuracy of light fie",
+  "candidates": [
+    {
+      "direction": "Non-Lambertian Detection in Low-Resolution Light Fields",
+      "problem": "Traditional frequency-domain EPI methods (e.g., 2D-DFT) fail in low angular resolution light fields (e.g., 9x9), and non-Lambertian surfaces break the angular cone constraint, severely interfering with disparity calculation.",
+      "significance": "Real-world scenes are full of non-Lambertian materials; failing to accurately detect and decouple these regions fundamentally limits the robustness and accuracy of light field depth estimation.",
+      "approach": "Proposes a three-layer angular signal decomposition physical model to decouple illumination, disparity, and material residuals, extracting geometric angular features to train a Random Forest classifier for precise pixel-level non-Lambertian masking.",
+      "key_claim": "Decoupling physical light transport via three-layer angular signal decomposition enables robust non-Lambertian detection in low-resolution light fields where traditional frequency methods fail."
+    },
+    {
+      "direction": "Feature Disentanglement for Mixed-Material Scenes",
+      "problem": "Single-branch depth estimation models suffer from feature confusion when processing heterogeneous scenes containing both Lambertian and non-Lambertian regions, leading to suboptimal depth regression.",
+      "significance": "Complex real-world environments consist of mixed materials; feature confusion causes severe depth artifacts and errors in specific reflective or texture-rich areas, degrading overall scene understanding.",
+      "approach": "Constructs a GeometricDualMask dual-branch architecture that uses physical masks to adaptively route Lambertian EPI features and non-Lambertian geometric features, integrating them via mask-weighted fusion to isolate material-specific processing.",
+      "key_claim": "A dual-mask guided routing mechanism within a unified architecture prevents feature confusion by adaptively isolating and processing heterogeneous material regions for accurate depth regression."
+    },
+    {
+      "direction": "Cross-Domain Generalization via Balanced Training",
+      "problem": "Multi-source light field datasets suffer from severe domain imbalance and scarcity of specific non-Lambertian data, causing gradient instability and poor cross-domain generalization during training.",
+      "significance": "Without addressing data distribution disparities, models overfit to dominant domains and degrade significantly when deployed in real-world complex scenarios, limiting their practical applicability.",
+      "approach": "Implements a domain-balanced sampling and mixed training strategy using WeightedRandomSampler to maintain exposure and gradient balance across diverse datasets, ensuring stable convergence and improved performance in mixed urban scenes.",
+      "key_claim": "Domain-balanced sampling and mixed training strategies overcome multi-source data scarcity and distribution imbalance, significantly boosting the model's generalization to complex real-world environments."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "句式特征": {
+    "对比与转折句式": [
+      "Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group and interacting with each other.",
+      "While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited.",
+      "But even with this robustness, pyramids are still needed to get the most accurate results."
+    ],
+    "问题导向与方案提出句式": [
+      "To address this issue, we propose Joint-Relation Transformer, a two-stream Transformer architecture for multi-person motion prediction.",
+      "To effectively fuse and update features of joints and relation branches, we design a novel relation-aware attention to update joints’ features with the incorporation of relation features.",
+      "To do so, we split an image into patches and provide the sequence of linear embeddings of these patches as an input to a Transformer."
+    ],
+    "因果与解释句式": [
+      "These pyramids are scale-invariant in the sense that an object's scale change is offset by shifting its level in the pyramid.",
+      "Thanks to Transformers’ computational efficiency and scalability, it has become possible to train models of unprecedented size, with over 100B parameters.",
+      "Therefore, in large-scale image recognition, classic ResNetlike architectures are still state of the art."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": [
+      "背景与定义引入：直接点明研究任务的核心目标或基本概念（如 'Multi-person motion prediction aims to predict...' / 'Recognizing objects at vastly different scales is a fundamental challenge...'）。",
+      "现状与范式引入：陈述当前领域的主流方法或跨领域的成功经验（如 'Self-attention-based architectures... have become the model of choice...' / 'Previous works on... generally adopt...'）。",
+      "转折与痛点引入：通过转折词直接指出前人工作的局限性（如 'Nevertheless, featurizing each level... has obvious limitations.' / 'While encouraging results are shown..., those previous works only implicitly learn...'）。"
+    ],
+    "段内论证逻辑": "现状描述 -> 缺陷剖析 -> 动机阐述 -> 本文方案。通常先肯定前人贡献，随后通过转折词（However/But/Nevertheless）指出其在特定场景下的不足（如计算开销大、缺乏显式关系建模等），最后顺理成章地引出本文的改进模块或全新架构。",
+    "段落结尾收束方式": [
+      "总结优势与贡献：高度概括本文方法的核心优势或研究目标（如 'This approach enhances the model’s ability to distinguish...' / 'The goal of this paper is to naturally leverage...'）。",
+      "引出实验与结果：通过定性与定量结果的预告来收尾，增强说服力（如 'The quantitative results show we outperform...' / 'Vision Transformer (ViT) attains excellent results...'）。",
+      "现象解释与悬念设置：对初步实验现象进行理论解释，为后文深入分析做铺垫（如 'This seemingly discouraging outcome may be expected: Transformers lack some of the inductive biases...'）。"
+    ]
+  },
+  "用词特征": [
+    "过渡词：Compared to, However, While, Nevertheless, Moreover, Additionally, Therefore, Instead of, For these reasons, Ideally.",
+    "强调词：crucial, explicit, novel, state-of-the-art, significant, fundamental, critical, unprecedented, dominant, de-facto standard, excellent.",
+    "限定词：inherent, practical, sophisticated, marginal extra, obvious, impractical, vastly different, pure, fewest possible, mid-sized, seemingly.",
+    "学术动词/短语：aim to, exploit, leverage, forego, adhere to, outperform, pave a path to, suffer from, opt to, treat... as..."
+  ],
+  "论证模式": [
+    "标准CV论文模式：背景引入 -> 现有方法分类及缺陷分析 -> 提出本文方法及核心模块 -> 实验验证（如Paper 1）。",
+    "演进式论证模式：提出核心问题 -> 回顾传统方法及其优缺点 -> 分析深度学习时代的方法及其局限 -> 提出本文的动机和目标（如Paper 2）。",
+    "跨领域启发式论证：跨领域借鉴（NLP成功经验） -> 本领域（CV）现状与瓶颈 -> 提出直接迁移的极简方案 -> 分析初步结果及原因（如Paper 3）。",
+    "先总后分模式：Abstract/Introduction中先总述核心贡献与SOTA结果，随后在方法部分分模块详细阐述具体设计（如双流架构、FPN结构、Patch划分）。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": [
+      "句末引用（上标或括号形式）：将引用放在句子末尾，作为整个观点或事实的支撑。例如：'...single-person motion prediction<sup>11, 7, 4, 24, 48, 47, 27</sup>' 或 '...natural language processing (NLP) (Vaswani et al., 2017).'。",
+      "句中/主语引用：将引用与具体的方法、模型或作者绑定，作为句子成分的一部分。例如：'The former one, such as TRiPOD<sup>3</sup>, models...' 或 '...object detectors like DPM<sup>7</sup> required...'。"
+    ],
+    "引用与论述的衔接方式": [
+      "举例说明式衔接：使用 'such as' 或 'like' 将引用文献作为具体案例嵌入论述中，增强具体性（如 '...such as MRT<sup>46</sup> and SoMoFormer<sup>40</sup>, treat...'）。",
+      "补充支撑式衔接：在陈述一个普遍共识或既定事实后，直接在句末附加多个引用，形成证据链（如 '...surveillance systems<sup>13, 42, 52</sup> and healthcare monitoring<sup>43</sup>.'）。",
+      "对比/演进式衔接：在描述技术发展脉络时，通过引用区分不同阶段或不同流派的工作（如 'Featurized image pyramids were heavily used in the era of hand-engineered features<sup>5, 25</sup>... replaced with features computed by deep convolutional networks<sup>19, 20</sup>.'）。"
+    ]
+  }
+}

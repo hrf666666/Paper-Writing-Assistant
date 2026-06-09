@@ -1,0 +1,81 @@
+{
+  "数据集": [
+    {
+      "名称": "HCInew",
+      "规模": "包含多个场景 (如 boxes, cotton, dino, sideboard, backgammon, dots 等)，81个视角，512x512分辨率",
+      "场景类型": "Lambertian (朗伯体)",
+      "划分方式": "train/val (包含 training 和 stratified 子集)"
+    },
+    {
+      "名称": "UrbanLF-Syn",
+      "规模": "170个场景",
+      "场景类型": "Mixed / Urban (混合/城市场景)",
+      "划分方式": "train/val"
+    },
+    {
+      "名称": "Non-Lambertian Dataset",
+      "规模": "仅4个训练场景 (极度数据稀缺)",
+      "场景类型": "Non-Lambertian (非朗伯体，如高光、半透明、散射表面)",
+      "划分方式": "train/val"
+    },
+    {
+      "名称": "HCI-Old",
+      "规模": "未知",
+      "场景类型": "Lambertian (朗伯体)",
+      "划分方式": "被排除 (因.h5格式无法被PIL/numpy标准方法加载)"
+    }
+  ],
+  "评估指标": [
+    {
+      "指标名称": "Overall MAE (Mean Absolute Error)",
+      "目标值": "< 0.20"
+    },
+    {
+      "指标名称": "Mixed (Urban) MAE",
+      "目标值": "< 0.22"
+    },
+    {
+      "指标名称": "Lambertian MAE",
+      "目标值": "< 0.16"
+    },
+    {
+      "指标名称": "Non-Lambertian MAE",
+      "目标值": "< 0.25"
+    }
+  ],
+  "训练策略": {
+    "优化器": "AdamW (weight_decay=1e-4)",
+    "学习率": "5e-4 (进行了 LR sweeps)",
+    "batch_size": "8 (dry-run代码中) / 进行了 batch size sweeps",
+    "epoch": "未明确具体数值，累计进行了132次实验",
+    "损失函数": "MSE Loss (depth, r) + Phase Regularization + Physical Consistency Loss (探索过 Focal loss, Dice/Lovász losses, Composite multi-term losses)",
+    "采样策略": "WeightedRandomSampler (Domain-balanced sampling + Mixed training)",
+    "其他策略": "梯度裁剪 (max_norm=1.0), 数据增强, EMA training, Curriculum learning, 少数域过采样 (Oversampling minority domains)"
+  },
+  "对比方法": [
+    "EPINet baseline variants (包括最终采用的 EPINet4Dir V3 4-direction EPI)",
+    "Dual-branch architectures (双分支架构)",
+    "Attention mechanisms (注意力机制模型)",
+    "Defocus-based auxiliary heads (基于散焦的辅助头模型)",
+    "Separate per-domain models (每个域单独的模型)",
+    "Feature matching alternatives (特征匹配替代方法)"
+  ],
+  "消融实验设计": {
+    "消融模块与方向": [
+      "网络架构：单分支 vs 双分支架构 (Dual-branch)、是否引入注意力机制 (Attention mechanisms)",
+      "物理与辅助模块：是否使用散焦辅助头 (Defocus-based auxiliary heads)、域特定掩码学习 (Domain-specific mask learning)",
+      "损失函数变体：基础 MSE vs Focal loss variants、Dice/Lovász losses、Composite multi-term losses",
+      "训练策略消融：EMA training、Curriculum learning (域排序)、Oversampling minority domains、Data augmentation strategies",
+      "物理一致性约束：Phase regularization 和 Physical consistency loss 的权重与有效性 (代码中体现为 r_loss, phase_reg, phys_loss 的组合)"
+    ],
+    "对比方式": "在统一的评估指标(MAE)下，跨越16个主要研究方向进行了132次对比实验，记录各模块/策略对 Overall、Mixed、Lambertian、Non-Lambertian 四个域的性能影响，并记录了181个死胡同(dead ends)"
+  },
+  "关键实验结果": {
+    "Overall_MAE": "0.133 (目标 < 0.20，✅ 达成)",
+    "Mixed_Urban_MAE": "0.081 (目标 < 0.22，✅ 达成)",
+    "Lambertian_MAE": "0.387 (目标 < 0.16，❌ 未达成)",
+    "Non_Lambertian_MAE": "0.411 (目标 < 0.25，❌ 未达成)",
+    "最佳方法": "EPINet4Dir V3 (4-direction EPI) 结合 Domain-balanced sampling",
+    "核心结论": "EPI (极平面图像) 假设在 Non-Lambertian (高光/散射) 表面和复杂纹理的 Lambertian 场景中失效；Non-Lambertian 域仅有4个训练场景导致严重的数据稀缺，无法通过架构或损失函数的调整来弥补物理假设的违背和数据不足。项目因触及基础物理假设限制和数据硬墙而终止。"
+  }
+}

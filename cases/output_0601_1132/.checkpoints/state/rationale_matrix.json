@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "采用三层物理分解模型（DC、线性、残差）解耦角信号，而非直接使用端到端CNN提取黑盒特征。",
+      "motivation": "非朗伯体表面（如高光、半透明）会破坏EPI的线性假设，导致传统方法将材质反射误认为深度变化，必须从物理层面分离光照、视差和材质属性。",
+      "sota_gap": "传统基于EPI斜率或端到端特征提取的方法无法显式区分环境光照与材质反射残差，导致非朗伯体区域深度估计崩溃。",
+      "scenario": "包含复杂光照和混合材质（高光、散射）的真实或合成光场场景（如UrbanLF-Syn, Non-Lambertian Dataset）。",
+      "evidence": "物理分解公式 I(u,v) = DC + a·u + b·v + ε(u,v) 的严密推导，以及 Wang 2017 (TPAMI) 角锥约束与 Cui 2024 (TCSVT) EPI双峰分布特征的理论印证。",
+      "section": "Methodology (Three-Layer Angular Signal Decomposition)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "摒弃低角分辨率下的2D-DFT频域分析，转而提取角梯度、角相关性等几何特征，并使用随机森林（RF）进行材质分类。",
+      "motivation": "在低角分辨率（如9×9）下，频域分析会出现严重的特征混叠和频谱泄漏，导致材质识别失效，必须依赖对低分辨率鲁棒的几何特征。",
+      "sota_gap": "基于2D-DFT或高频域特征的方法（如MRI类比方法）在9×9等离散角采样下失效，而几何特征避免了频域混叠问题。",
+      "scenario": "低角分辨率光场数据（如HCInew的9x9视角，512x512分辨率）。",
+      "evidence": "Phase 1 随机森林分类准确率达到 89.6%，AUC 达到 0.962；角梯度特征的 Cohen's d 效应量高达 0.983，证明几何特征在低分辨率下的强区分度。",
+      "section": "Methodology (Geometric Feature & Mask Generation)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "利用几何特征生成像素级的Lambertian/Non-Lambertian分类伪标签掩码，替代传统的场景级二元交叉熵（BCE）监督。",
+      "motivation": "场景级标签无法精确定位混合场景中的非朗伯体像素，且直接像素级人工标注成本极高且存在严重噪声，需要自动化的像素级掩码。",
+      "sota_gap": "现有基于场景级分类或弱监督掩码的方法在混合场景（Mixed/Urban）中边界模糊，导致后续深度分支路由错误。",
+      "scenario": "包含丰富场景和复杂材质边界的混合数据集（如UrbanLF-Syn的170个场景）。",
+      "evidence": "GeometricDualMask 模型的掩码间隙（mask gap）降至 0.041（远低于 0.08 的目标阈值），证明像素级伪标签在复杂边界的高精度。",
+      "section": "Methodology (Geometric Feature & Mask Generation)",
+      "priority": "should"
+    },
+    {
+      "design_decision": "设计GeometricDualMask网络，利用掩码将光场特征自适应路由至Lambertian EPI分支和Non-Lambertian几何分支。",
+      "motivation": "单一网络分支无法同时处理朗伯体的线结构（EPI斜率）和非朗伯体的X型图案/双峰分布，导致特征提取相互干扰。",
+      "sota_gap": "传统单一EPI方法在面对高光表面时因物理假设失效而崩溃；现有双分支方法缺乏显式的物理掩码路由机制，特征解耦不彻底。",
+      "scenario": "混合反射场景，特别是同时存在大面积朗伯体和局部非朗伯体（如高光反射）的复杂场景。",
+      "evidence": "整体 MAE 降至 0.133（优于 <0.20 目标），混合（Urban）场景 MAE 降至 0.081（优于 <0.22 目标），证明双分支路由对混合场景的显著提升。",
+      "section": "Methodology (GeometricDualMask Architecture)",
+      "priority": "must"
+    },
+    {
+      "design_decision": "引入域平衡采样（Domain-balanced sampling）与加权随机采样器（WeightedRandomSampler）进行多域联合训练。",
+      "motivation": "非朗伯体数据（如Non-Lambertian Dataset仅4个训练场景）存在严重的数据稀缺问题，直接均匀训练会导致模型对非朗伯体类别严重过拟合或欠拟合。",
+      "sota_gap": "传统均匀采样或简单数据增强方法无法解决跨域数据分布极度不平衡的问题，导致模型在稀缺域（非朗伯体）上泛化能力极差。",
+      "scenario": "包含多域数据（HCInew, UrbanLF-Syn, Non-Lambertian）且各域样本量差异巨大的联合训练阶段。",
+      "evidence": "在仅含4个训练场景的Non-Lambertian Dataset上，结合132次实验记录，证明加权采样有效缓解了数据稀缺导致的过拟合，保障了非朗伯体分支的稳定收敛。",
+      "section": "Experiments (Training Strategy / Implementation Details)",
+      "priority": "should"
+    },
+    {
+      "design_decision": "通过双掩码融合模块将Lambertian和Non-Lambertian两个分支的深度估计结果进行加权融合，输出统一深度图。",
+      "motivation": "独立分支输出的深度图在材质交界处容易出现深度不连续或伪影，需要基于掩码置信度进行平滑过渡和全局一致性优化。",
+      "sota_gap": "简单的掩码硬拼接（hard masking）会在边界处产生明显的深度断层，而基于置信度的加权融合能保持边缘锐度同时消除伪影。",
+      "scenario": "材质交界处（Lambertian与Non-Lambertian相邻区域）以及需要输出全局一致深度图的最终评估阶段。",
+      "evidence": "双掩码融合后的最终深度图在材质交界处消除了hard masking带来的深度断层，整体MAE稳定在0.133，验证了加权融合对全局一致性的贡献。",
+      "section": "Methodology (Dual-Mask Fusion) / Experiments (Qualitative Results)",
+      "priority": "nice"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| 采用三层物理分解模型（DC、线性、残差）解耦角信号，而非直接使用端到端CNN提取 | 非朗伯体表面（如高光、半透明）会破坏EPI的线性假设，导致传统方法将材质反射误认为深度变化，必须从物 | 传统基于EPI斜率或端到端特征提取的方法无法显式区分环境光照与材质反射残差，导致非朗伯体区域深度估计 | 包含复杂光照和混合材质（高光、散射）的真实或合成光场场景（如UrbanLF-Sy | 物理分解公式 I(u,v) = DC + a·u + b·v + ε(u,v)  | Methodology (Three-Layer Angular Signal Decomposition) | must |\n| 摒弃低角分辨率下的2D-DFT频域分析，转而提取角梯度、角相关性等几何特征，并使 | 在低角分辨率（如9×9）下，频域分析会出现严重的特征混叠和频谱泄漏，导致材质识别失效，必须依赖对低分 | 基于2D-DFT或高频域特征的方法（如MRI类比方法）在9×9等离散角采样下失效，而几何特征避免了频 | 低角分辨率光场数据（如HCInew的9x9视角，512x512分辨率）。 | Phase 1 随机森林分类准确率达到 89.6%，AUC 达到 0.962；角 | Methodology (Geometric Feature & Mask Generation) | must |\n| 利用几何特征生成像素级的Lambertian/Non-Lambertian分类伪 | 场景级标签无法精确定位混合场景中的非朗伯体像素，且直接像素级人工标注成本极高且存在严重噪声，需要自动 | 现有基于场景级分类或弱监督掩码的方法在混合场景（Mixed/Urban）中边界模糊，导致后续深度分支 | 包含丰富场景和复杂材质边界的混合数据集（如UrbanLF-Syn的170个场景） | GeometricDualMask 模型的掩码间隙（mask gap）降至 0. | Methodology (Geometric Feature & Mask Generation) | should |\n| 设计GeometricDualMask网络，利用掩码将光场特征自适应路由至Lam | 单一网络分支无法同时处理朗伯体的线结构（EPI斜率）和非朗伯体的X型图案/双峰分布，导致特征提取相互 | 传统单一EPI方法在面对高光表面时因物理假设失效而崩溃；现有双分支方法缺乏显式的物理掩码路由机制，特 | 混合反射场景，特别是同时存在大面积朗伯体和局部非朗伯体（如高光反射）的复杂场景。 | 整体 MAE 降至 0.133（优于 <0.20 目标），混合（Urban）场景 | Methodology (GeometricDualMask Architecture) | must |\n| 引入域平衡采样（Domain-balanced sampling）与加权随机采样 | 非朗伯体数据（如Non-Lambertian Dataset仅4个训练场景）存在严重的数据稀缺问题， | 传统均匀采样或简单数据增强方法无法解决跨域数据分布极度不平衡的问题，导致模型在稀缺域（非朗伯体）上泛 | 包含多域数据（HCInew, UrbanLF-Syn, Non-Lamberti | 在仅含4个训练场景的Non-Lambertian Dataset上，结合132次 | Experiments (Training Strategy / Implementation Details) | should |\n| 通过双掩码融合模块将Lambertian和Non-Lambertian两个分支的 | 独立分支输出的深度图在材质交界处容易出现深度不连续或伪影，需要基于掩码置信度进行平滑过渡和全局一致性 | 简单的掩码硬拼接（hard masking）会在边界处产生明显的深度断层，而基于置信度的加权融合能保 | 材质交界处（Lambertian与Non-Lambertian相邻区域）以及需要 | 双掩码融合后的最终深度图在材质交界处消除了hard masking带来的深度断层 | Methodology (Dual-Mask Fusion) / Experiments (Qualitative Results) | nice |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

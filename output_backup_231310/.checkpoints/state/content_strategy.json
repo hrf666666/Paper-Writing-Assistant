@@ -1,0 +1,154 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "光场深度估计的物理瓶颈（非朗伯体/复杂纹理导致EPI失效）",
+      "现有方法在低角分辨率下的局限性",
+      "本文的核心贡献与物理/几何视角的引入"
+    ],
+    "depth_map": {
+      "background_and_motivation": "moderate",
+      "limitations_of_existing_work": "deep",
+      "proposed_contributions": "deep",
+      "paper_structure": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "motivation_hook锚点：明确光场深度估计受限于物理反射假设与EPI斜率模糊",
+      "3个编号的贡献列表（包含预期定量提升或明确的技术突破点）",
+      "论文结构段落（The remainder of this paper is organized as follows...）",
+      "至少1个具体现象或数据说明非朗伯体导致的EPI失效严重性",
+      "[动机锚点] The introduction must establish: Light field depth estimation is fundamentally bottlenecked by the p",
+      "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+    ],
+    "should_avoid": [
+      "详细的方法公式推导与网络架构细节",
+      "过多的参考文献堆砌（每段避免>10篇）",
+      "过度主观、宣传性或非学术的语言"
+    ],
+    "target_emphasis": "确立非朗伯体表面物理反射特性是光场深度估计的根本瓶颈，并清晰概述本文如何通过材质感知与双掩码路由解决此问题。"
+  },
+  "Related Work": {
+    "focus_areas": [
+      "光场深度估计技术的演进与EPI假设的局限",
+      "材质/反射感知在计算机视觉中的应用",
+      "多领域与不平衡数据训练策略"
+    ],
+    "depth_map": {
+      "lf_depth_estimation": "moderate",
+      "material_aware_methods": "moderate",
+      "multi_domain_training": "brief",
+      "gap_analysis": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "gap_bridge锚点：指出现有方法未解决物理反射假设与离散角采样（如9x9）之间的矛盾",
+      "按技术分类的组织结构（by_technique）",
+      "每组文献末尾的批判性总结（end_of_group critique）",
+      "高引用密度以展示对领域的全面掌握",
+      "[动机锚点] Transition to method by showing existing approaches do not address: Light field depth estimation is "
+    ],
+    "should_avoid": [
+      "简单罗列文献而无批判性分析与对比",
+      "深入探讨与光场深度估计无关的通用材质识别方法",
+      "提前剧透本文的具体数学公式或网络细节"
+    ],
+    "target_emphasis": "梳理现有光场深度估计与材质感知方法，明确指出它们在低角分辨率和非朗伯体物理建模上的空白，为本文方法铺平道路。"
+  },
+  "Methodology": {
+    "focus_areas": [
+      "三层角信号分解与材质感知物理模型",
+      "GeometricDualMask双掩码路由架构设计",
+      "领域平衡采样与联合训练策略"
+    ],
+    "depth_map": {
+      "problem_formulation": "moderate",
+      "three_layer_material_perception": "deep",
+      "geometric_dual_mask_framework": "deep",
+      "domain_balanced_training_strategy": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary"
+    },
+    "must_include": [
+      "问题定义与核心数学公式（key_formulas_only，避免过度密集证明）",
+      "创新点1的三层分解物理模型与几何特征（角梯度、变异系数等）提取逻辑",
+      "创新点2的GeometricDualMask架构图（detailed_boxes, horizontal_flow, colorful）",
+      "包含算法伪代码的Algorithm Box",
+      "各模块与核心动机（解决EPI失效）的明确连接",
+      "计算复杂度、延迟或硬件资源分析",
+      "[动机锚点] Each module should be justified by connecting back to the core motivation"
+    ],
+    "should_avoid": [
+      "过于冗长且缺乏直观物理/几何解释的数学证明",
+      "基础特征提取器（如EPINet4Dir V3）的过度细节描述",
+      "缺失模块间数据流与张量维度说明"
+    ],
+    "target_emphasis": "详细阐述基于物理分解的材质感知机制与双掩码路由框架的数学原理与架构设计，证明其如何从根源上缓解EPI假设冲突。"
+  },
+  "Experiments": {
+    "focus_areas": [
+      "多数据集（特别是UrbanLF-Syn）上的SOTA定量对比",
+      "验证各模块有效性的严格消融实验",
+      "定性可视化与物理可解释性分析"
+    ],
+    "depth_map": {
+      "datasets_and_setup": "brief",
+      "sota_comparison": "deep",
+      "ablation_study": "deep",
+      "visualization_and_complexity": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "evidence_support锚点：实验设计直接验证材质感知和双掩码路由的贡献",
+      "完整的消融实验表格（验证RF分类器、双掩码、领域平衡采样）",
+      "与最新SOTA在标准大规模基准上的定量对比表（包含BadPix等指标）",
+      "高分辨率、色彩丰富的EPI与深度图可视化对比（高figure_density）",
+      "计算复杂度、参数量与推理延迟的对比分析",
+      "[动机锚点] Design experiments that directly validate each contribution claim"
+    ],
+    "should_avoid": [
+      "失败案例分析（failure_analysis，根据journal style要求避免）",
+      "过度吹嘘结果或使用非学术语言",
+      "缺乏直接SOTA对比或回避非朗伯体场景的特定指标"
+    ],
+    "target_emphasis": "通过全面的定量对比、严格的消融实验和直观的可视化，提供坚实的实证证据，证明所提框架在混合/非朗伯体场景下的优越性。"
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "核心贡献与技术突破总结",
+      "物理动机呼应与更广泛影响",
+      "客观局限性与未来研究方向"
+    ],
+    "depth_map": {
+      "summary_of_contributions": "moderate",
+      "broader_impact_and_motivation_echo": "deep",
+      "future_work": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "contribution_claim锚点：呼应核心叙事，重申光场深度估计的物理瓶颈及本文的突破",
+      "对两个创新点核心价值的精炼总结（材质先验与双掩码路由）",
+      "客观的局限性探讨与未来工作展望（如向真实世界无监督场景扩展）",
+      "[动机锚点] Echo the core narrative: Light field depth estimation is fundamentally bottlenecked by the physical "
+    ],
+    "should_avoid": [
+      "引入新的方法细节、公式或实验数据",
+      "过度宣传、主观性语言或简单复制摘要内容",
+      "提出与本文核心贡献无关的宽泛未来工作"
+    ],
+    "target_emphasis": "凝练本文在光场物理建模与深度估计框架上的核心突破，呼应引言动机，并为后续研究指明方向。"
+  }
+}

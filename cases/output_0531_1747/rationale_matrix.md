@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 采用三层角信号分解物理模型 I(u,v) = DC + a·u + b·v +  | 现有方法在低角分辨率（如9x9）下过度依赖高分辨率2D-DFT角频谱，导致频谱特征失效，无法有效分离 | 摒弃了传统依赖高频角频谱（如MRI类比方法）的做法，通过空间域线性拟合实现物理级解耦，避免了低分辨率 | 低角分辨率（9x9）光场图像，特别是存在复杂环境光照和混合材质的场景（如Urba | 成功解耦出DC（光照）、线性项（深度）和残差（材质），为后续分类器提供了高区分度 | Methodology (Three-Layer Angular Signal Decomposition) | must |
+| 提取角梯度等几何特征并训练随机森林（RF）进行朗伯体/非朗伯体二分类 | 非朗伯体表面（镜面、散射）会破坏EPI的角锥几何约束（产生X型图案），需要高精度的材质先验来识别这些 | 相比依赖端到端CNN隐式学习材质特征，基于物理残差项的显式几何特征具有更强的可解释性和区分度，且不依 | 包含高光、镜面反射和复杂散射材质的混合场景（Mixed/Urban）及Non-L | Phase 1实验中，基于5个几何特征的RF分类器达到89.6%准确率和0.96 | Methodology (Geometric Material Classification) | must |
+| 设计GeometricDualMask模型，利用材质先验生成双掩码进行像素级自适 | 单一EPI网络无法同时兼顾朗伯体（符合直线约束）和非朗伯体（X型模式）表面，强行统一处理会导致严重的 | 突破了传统单一EPI回归网络的瓶颈，通过物理掩码路由实现了对复杂反射特性的自适应处理，避免了非朗伯体 | 同时包含大面积朗伯体背景和局部非朗伯体高光的复杂混合场景（如UrbanLF-Sy | 掩码差距（mask gap=0.041）优于0.08的目标阈值；整体（Overa | Methodology (Dual-Mask Routing Architecture) / Experiments | must |
+| 系统性量化EPI假设在非朗伯体和复杂纹理表面失效的物理机制与性能边界 | 社区长期在改进网络结构或调参上消耗算力，却忽视了EPI假设本身的物理局限性，导致在Non-Lambe | 首次通过132次实验和16个研究方向穷尽探索，从理论层面证明了性能瓶颈源于物理假设违背和数据稀缺，而 | 评估现有基于EPI的光场深度估计方法在Non-Lambertian Datase | 实验数据量化了性能退化：Non-Lambertian MAE为0.411（远高于 | Introduction / Analysis of EPI Assumption Failure | must |
+| 构建Non-Lambertian几何分支，专门处理违反EPI角锥约束的X型模式区 | 非朗伯体表面在EPI中产生X型图案而非直线，传统的基于EPI斜率或3D卷积的提取算子在此类区域会完全 | 填补了传统EPI分支无法处理非朗伯体反射的空白，通过专门的几何特征分支接管X型模式区域，避免了强行拟 | 具有强烈镜面反射、高光或各向异性散射材质的Non-Lambertian Data | 双分支融合后，混合/城市场景（Mixed/Urban）MAE达到0.081（优于 | Methodology (Non-Lambertian Geometric Branch) | should |
+| 结合领域平衡采样（WeightedRandomSampler）和混合训练策略优化 | Non-Lambertian数据集极度稀缺（仅4个训练场景），直接混合训练会导致模型严重偏向数据量大 | 解决了多域光场数据集（HCInew, UrbanLF-Syn, Non-Lambertian）联合训 | 多域异构光场数据集的联合训练，特别是当Non-Lambertian数据与Lamb | 训练脚本和数据集加载器成功支持多域平衡训练，使得模型在稀缺的Non-Lamber | Implementation Details / Training Strategy | should |

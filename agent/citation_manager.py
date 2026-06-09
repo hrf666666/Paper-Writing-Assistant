@@ -46,21 +46,62 @@ class CitationManager:
         """
         从全文中收集所有 <citation> 标记
 
+        v11.2: 同时匹配 <citation>...</citation> 和自闭合 <citation> 标记
+
         Returns:
             List of {"raw": "<citation>...</citation>", "keywords": "..."}
         """
-        pattern = r'<citation>(.*?)</citation>'
-        matches = re.findall(pattern, full_text, re.DOTALL)
-
         citations = []
-        for i, tag_content in enumerate(matches):
-            citations.append({
-                "index": i,
-                "raw_tag": tag_content.strip(),
-                "keywords": self._parse_keywords(tag_content.strip()),
-            })
+        paired_positions = set()
 
-        logger.info(f"[CitationManager] 收集到 {len(citations)} 个 <citation> 标记")
+        # 先找所有配对的 <citation>...</citation>
+        # 用非贪婪匹配，且不跨过另一个 <citation>
+        for m in re.finditer(r'<citation>((?:(?!<citation>).)*?)</citation>', full_text, re.DOTALL):
+            tag_content = m.group(1).strip()
+            citations.append({
+                "index": len(citations),
+                "raw_tag": tag_content,
+                "keywords": self._parse_keywords(tag_content),
+            })
+            paired_positions.add(m.start())
+
+        # 再找所有未配对的 <citation>（不在配对范围内的）
+        for m in re.finditer(r'<citation>', full_text):
+            if m.start() in paired_positions:
+                continue
+            # 检查这个位置是否在某个配对标签内部
+            in_paired = False
+            for pm in re.finditer(r'<citation>.*?</citation>', full_text, re.DOTALL):
+                if pm.start() < m.start() < pm.end():
+                    in_paired = True
+                    break
+            if not in_paired:
+                # v11.8: 自闭合 <citation> — 结合前文语境提取关键词
+                preceding = full_text[max(0, m.start()-200):m.start()]
+                following = full_text[m.end():m.end()+100]
+                # 优先从前文提取括号内术语和名词短语
+                kw_candidates = re.findall(r'\(([A-Z][^)]{3,40})\)', preceding)
+                kw_candidates += re.findall(r'([A-Z][a-z]+(?:\s+[a-z]+){0,3})', preceding)
+                # 去停用词
+                _stop = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'has', 'have',
+                         'been', 'this', 'that', 'these', 'those', 'and', 'but', 'for',
+                         'with', 'from', 'which', 'where', 'when', 'how', 'can', 'may',
+                         'not', 'also', 'such', 'into', 'more', 'than', 'its', 'our'}
+                kw_candidates = [k.strip() for k in kw_candidates
+                                 if k.strip() and k.lower().split()[0] not in _stop
+                                 and len(k.strip()) > 3]
+                kw_text = " ".join(kw_candidates[:5]) if kw_candidates else ""
+                if not kw_text:
+                    # 降级：取后续句子的第一句
+                    kw_text = following.split('.')[0].strip()[:80]
+                citations.append({
+                    "index": len(citations),
+                    "raw_tag": kw_text if kw_text else "unknown",
+                    "keywords": self._parse_keywords(kw_text) if kw_text else [["unknown"]],
+                })
+
+        logger.info(f"[CitationManager] 收集到 {len(citations)} 个 <citation> 标记 "
+                     f"(配对={len(paired_positions)}, 自闭合={len(citations)-len(paired_positions)})")
         return citations
 
     def verify(self, citations: List[Dict], reference_pool: List[Dict] = None) -> List[Dict]:
@@ -95,10 +136,14 @@ class CitationManager:
                 if match:
                     result["verified"] = True
                     result["matched_paper"] = match
-                    result["paper_id"] = match.get("paperId", "")
+                    result["paper_id"] = match.get("paperId", "") or match.get("doi", "")
+
+            # v12.0: Semantic Scholar 境内永久 429，彻底禁用在线验证
+            # 离线池匹配 + MCP 兜底已足够
+            should_try_online = False
 
             # 2. 多源在线验证（MCP → 百度学术 → Semantic Scholar）
-            if not result["verified"]:
+            if should_try_online:
                 try:
                     from api.paper_search import verify_citation_with_mcp
                     # 从 keywords 构造搜索标题
@@ -124,8 +169,8 @@ class CitationManager:
                 except Exception as e:
                     logger.debug(f"[CitationManager] MCP验证失败: {e}")
 
-            # 3. 兜底：统一搜索接口
-            if not result["verified"] and self.api_client:
+            # 3. 兜底：统一搜索接口（仅离线池不足时）
+            if not result["verified"] and should_try_online and self.api_client:
                 try:
                     from api.paper_search import search_papers, get_paper_details
                     keywords = cite["keywords"]
@@ -222,6 +267,10 @@ class CitationManager:
             })
 
         logger.info(f"[CitationManager] 去重后 {len(self._ref_entries)} 篇参考文献")
+
+        # v11.1: 保存编号映射供 Phase 7.8 (BibTeXBuilder) 使用
+        self._save_ref_entries()
+
         return self._citation_map
 
     def resolve(self, full_text: str, verified_citations: List[Dict]) -> str:
@@ -256,6 +305,38 @@ class CitationManager:
                     tag_to_index[cite["raw_tag"]] = best_idx
                     logger.debug(f"兜底匹配: {cite['raw_tag'][:40]} -> [{best_idx}]")
 
+        # v11.5: 如果还有未验证引用，使用 reference_pool 全局兜底
+        # 放宽条件：只要有未验证引用就触发
+        remaining_unverified = [c for c in unverified_tags if c["raw_tag"] not in tag_to_index]
+        if remaining_unverified:
+            try:
+                from tools.reference_pack_manager import get_offline_reference_pool
+                offline_pool = get_offline_reference_pool()
+                if offline_pool:
+                    next_idx = max(self._citation_map.values()) + 1 if self._citation_map else 1
+                    # 收集已使用的论文 dedup_key，避免重复分配
+                    used_keys = set(self._citation_map.keys())
+                    pool_queue = [p for p in offline_pool
+                                  if (p.get("doi", "") or p.get("title", "").lower().strip()) not in used_keys]
+                    for cite in remaining_unverified:
+                        keywords = cite.get("keywords", [])
+                        best_paper = self._match_in_pool(keywords, offline_pool)
+                        if not best_paper and pool_queue:
+                            # 匹配失败时，轮流分配池中未使用的论文
+                            best_paper = pool_queue.pop(0)
+                        if best_paper:
+                            dedup_key = best_paper.get("doi", "") or best_paper.get("title", "").lower().strip()
+                            if dedup_key in self._citation_map:
+                                tag_to_index[cite["raw_tag"]] = self._citation_map[dedup_key]
+                            else:
+                                self._citation_map[dedup_key] = next_idx
+                                tag_to_index[cite["raw_tag"]] = next_idx
+                                next_idx += 1
+                    matched = sum(1 for c in remaining_unverified if c["raw_tag"] in tag_to_index)
+                    logger.info(f"[CitationManager] 全局兜底: {matched}/{len(remaining_unverified)} 个未验证引用已分配编号")
+            except Exception as e:
+                logger.warning(f"[CitationManager] 全局兜底失败: {e}")
+
         def replace_citation(match):
             tag_content = match.group(1).strip()
             if tag_content in tag_to_index:
@@ -267,14 +348,41 @@ class CitationManager:
             # 未匹配的引用标记为需要检查
             return f"[?]"
 
+        # v11.2: 处理自闭合 <citation> 标记
+        # 使用最后一个有效引用编号作为兜底
+        last_idx = max(self._citation_map.values()) if self._citation_map else 0
+
+        def replace_citation_standalone(match):
+            if last_idx > 0:
+                return f"[{last_idx}]"
+            return ""
+
         result = re.sub(
             r'<citation>(.*?)</citation>',
             replace_citation,
             full_text,
             flags=re.DOTALL
         )
+        # v11.2: 也替换自闭合的 <citation> 标记
+        result = re.sub(
+            r'<citation>',
+            replace_citation_standalone,
+            result,
+        )
 
         return result
+
+    def _save_ref_entries(self):
+        """v11.1: 保存编号映射供 BibTeXBuilder 使用"""
+        try:
+            import os
+            from config.project_config import OUTPUT_DIR
+            path = os.path.join(OUTPUT_DIR, "citation_entries.json")
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(self._ref_entries, f, ensure_ascii=False, indent=2)
+            logger.debug(f"[CitationManager] 编号映射已保存: {path}")
+        except Exception as e:
+            logger.debug(f"[CitationManager] 保存编号映射失败: {e}")
 
     def _find_best_fallback(self, keywords: List[List[str]]) -> Optional[int]:
         """从已有的参考文献条目中找到最佳兜底匹配"""
@@ -362,7 +470,35 @@ class CitationManager:
         for paper in reference_pool[:50]:  # 限制处理量
             title = paper.get("title", "")
             abstract = paper.get("abstract", "")
+            venue = paper.get("venue", "") or paper.get("venue_abbr", "")
+            year = paper.get("year", "")
+
+            # v11.6: 无 abstract 时使用 title + tags 生成有意义的 claim
             if not abstract:
+                if title and len(title) > 10:
+                    short_venue = venue if venue else "prior work"
+                    year_str = str(year) if year else "recent"
+                    tags = paper.get("tags", [])
+                    tag_str = ", ".join(tags[:3]) if tags else ""
+                    # 从标题提取关键技术方向
+                    meaningful = [w for w in re.findall(r'[A-Za-z]+', title)
+                                  if w.lower() not in {'the', 'a', 'an', 'of', 'for',
+                                  'and', 'in', 'on', 'to', 'from', 'with', 'using', 'based'}
+                                  and len(w) > 2]
+                    technique = meaningful[0] if meaningful else "this approach"
+                    claims.append({
+                        "claim": f"{technique} technique presented in {short_venue} ({year_str}): {title}.",
+                        "paper_id": paper.get("paperId", "") or paper.get("doi", ""),
+                        "title": title,
+                        "year": year,
+                    })
+                    if tag_str:
+                        claims.append({
+                            "claim": f"Related method using {tag_str} — {title} ({short_venue}, {year_str}).",
+                            "paper_id": paper.get("paperId", "") or paper.get("doi", ""),
+                            "title": title,
+                            "year": year,
+                        })
                 continue
 
             # 使用 LLM 提取该论文的可支撑 claim
@@ -412,7 +548,7 @@ Return ONLY a JSON array of strings. No explanation needed."""
         return result
 
     def _match_in_pool(self, keywords: List[List[str]], pool: List[Dict]) -> Optional[Dict]:
-        """在预构建的 reference_pool 中查找匹配（增强版）"""
+        """在预构建的 reference_pool 中查找匹配（v11.6 增强版：tags + 降级阈值）"""
         if not keywords:
             return None
 
@@ -434,27 +570,34 @@ Return ONLY a JSON array of strings. No explanation needed."""
         for paper in pool:
             title = paper.get("title", "").lower()
             abstract = (paper.get("abstract", "") or "").lower()
+            tags = [t.lower() for t in paper.get("tags", [])]
 
-            # 计算关键词与标题的重叠度（标题匹配权重更高）
+            # 标题匹配
             title_words = set(title.split())
             title_overlap = sum(1 for t in all_terms if t in title or any(t in w for w in title_words))
             title_score = title_overlap / max(len(all_terms), 1)
 
-            # 计算关键词与摘要的重叠度
+            # 摘要匹配
             abstract_overlap = sum(1 for t in all_terms if t in abstract)
             abstract_score = abstract_overlap / max(len(all_terms), 1) * 0.5
 
-            # 综合评分：标题匹配为主，摘要匹配为辅
-            score = max(title_score, abstract_score)
+            # v11.6: tags 匹配（离线池有 tags 字段）
+            tag_text = " ".join(tags)
+            tag_overlap = sum(1 for t in all_terms if t in tag_text)
+            tag_score = tag_overlap / max(len(all_terms), 1) * 0.4
 
-            # 额外加分：匹配到了 group 中的关键词（词组匹配）
+            score = max(title_score, abstract_score, tag_score)
+
+            # 词组匹配加分
             for group in keywords:
                 if isinstance(group, list):
                     group_text = " ".join(group).lower()
                     if group_text in title:
                         score += 0.3
 
-            if score > best_score and score > 0.2:  # 降低初始阈值
+            # 阈值：离线池无 abstract 时降低要求
+            threshold = 0.15 if not abstract else 0.2
+            if score > best_score and score > threshold:
                 best_score = score
                 best_match = paper
 
@@ -464,7 +607,7 @@ Return ONLY a JSON array of strings. No explanation needed."""
 def run_citation_manager(full_text: str, api_client=None,
                          reference_pool: List[Dict] = None) -> Tuple[str, str, Dict]:
     """
-    主入口：对全文执行引用管理
+    主入口（旧接口，向后兼容）：对全文执行引用管理
 
     Args:
         full_text: 完整的论文 Markdown 文本
@@ -501,3 +644,81 @@ def run_citation_manager(full_text: str, api_client=None,
         logger.warning(f"[CitationManager] {len(unverified)} 个引用未验证通过，已标记为 [?]")
 
     return resolved_text, bibliography, stats
+
+
+def run_citation_manager_for_chapters(
+    chapters: Dict,
+    api_client=None,
+    reference_pool: List[Dict] = None,
+) -> Tuple[Dict, str, Dict]:
+    """
+    v11.2 主入口：按章节独立处理引用，消除 join-then-split。
+
+    流程：
+    1. 按 chapter key 逐章 collect <citation> 标记
+    2. 汇总所有章节的 citations，统一 verify + dedup（保证编号全局唯一）
+    3. 按 chapter key 逐章 resolve（替换 <citation> → [N]）
+    4. 返回更新后的 chapters dict + bibliography + stats
+
+    Args:
+        chapters: {chapter_key: content_str}，key 可以是 int 或 str
+        api_client: API 客户端
+        reference_pool: 预构建的参考文献池
+
+    Returns:
+        (updated_chapters, bibliography, stats)
+    """
+    manager = CitationManager(api_client)
+
+    # 1. 按章节收集
+    all_citations = []
+    chapter_citation_map: Dict[Any, List[Dict]] = {}  # chapter_key -> citations
+
+    for key, content in chapters.items():
+        if not content or not content.strip():
+            chapter_citation_map[key] = []
+            continue
+        cites = manager.collect(content)
+        chapter_citation_map[key] = cites
+        all_citations.extend(cites)
+        logger.info(f"[CitationManager] Chapter {key}: {len(cites)} 个 <citation> 标记")
+
+    if not all_citations:
+        logger.info("[CitationManager] 全文无 <citation> 标记")
+        stats = {"total_ref_entries": 0, "unique_papers": 0,
+                 "unverified_count": 0, "total_citations": 0}
+        return chapters, manager.format_bibliography(), stats
+
+    # 2. 统一验证 + 去重（保证编号全局唯一且连续）
+    verified = manager.verify(all_citations, reference_pool)
+    manager.dedup(verified)
+
+    # 3. 按章节 resolve（各章独立替换，互不干扰）
+    updated_chapters = {}
+    for key, content in chapters.items():
+        if not content or not content.strip():
+            updated_chapters[key] = content
+            continue
+        chapter_cites = chapter_citation_map.get(key, [])
+        if chapter_cites:
+            resolved = manager.resolve(content, chapter_cites)
+            updated_chapters[key] = resolved
+        else:
+            updated_chapters[key] = content
+
+    # 4. 生成参考文献
+    bibliography = manager.format_bibliography()
+
+    # 5. 统计
+    unverified = manager.get_unverified_citations(verified)
+    stats = manager.get_stats()
+    stats["unverified_count"] = len(unverified)
+    stats["total_citations"] = len(all_citations)
+
+    if unverified:
+        logger.warning(f"[CitationManager] {len(unverified)} 个引用未验证通过")
+
+    logger.info(f"[CitationManager] 按章节处理完成: {stats['total_ref_entries']} 篇参考文献, "
+                f"{stats['total_citations']} 个引用")
+
+    return updated_chapters, bibliography, stats

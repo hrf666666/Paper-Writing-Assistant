@@ -82,6 +82,74 @@ class IEEE_TCSVT_Profile(VenueProfile):
         "methodology_depth": "detailed — derivations + system overview",
     }
 
+    # ---- v10.1: 内容编排软约束（TCSVT 特有，从已发表论文学习）----
+    content_patterns = {
+        "Introduction": {
+            "opening": "problem_motivation",
+            "contributions": "bulleted_3items",
+            "has_paper_structure": True,
+        },
+        "Related Work": {
+            "organization": "by_approach",
+            "critique_style": "end_of_group",
+            "comparison_depth": "moderate",
+        },
+        "Methodology": {
+            "starts_with": "overview",
+            "derivation_style": "full",
+            "has_algorithm_box": False,
+        },
+        "Experiments": {
+            "dataset_description": "brief_text",
+            "ablation_style": "table",
+            "comparison_style": "table",
+            "has_failure_analysis": True,
+        },
+    }
+
+    argument_rhythm = {
+        "Methodology": {
+            "theory_first": True,
+            "derivation_depth": "full_for_innovation_brief_for_baseline",
+        },
+        "Experiments": {
+            "data_placement": "after_each_claim",
+            "figure_density": "moderate",
+        },
+    }
+
+    depth_gradients = {
+        "Methodology": "full_derivation",
+        "Experiments": "comprehensive",
+        "Related Work": "moderate",
+    }
+
+    figure_preferences = {
+        "architecture": {"style": "clean_flowchart", "detail_level": "moderate"},
+        "comparison": {"style": "table_heavy", "color_scheme": "muted"},
+        "ablation": {"style": "three_line_table", "color_scheme": "blue_dominant"},
+    }
+
+    content_emphasis = {
+        "methodology": "system_implementation",
+        "experiments": "cross_dataset",
+    }
+
+    reviewer_preferences = [
+        "Always include cross-dataset evaluation",
+        "Computational complexity analysis expected",
+        "Video/systems perspective valued",
+        "Comparison with recent (last 2 years) methods expected",
+    ]
+
+    journal_red_flags = [
+        "Pure image processing without video/system context",
+        "No cross-dataset evaluation",
+        "Missing ablation study",
+        "Only synthetic data experiments",
+        "No computational cost analysis",
+    ]
+
     quality_pass_threshold = 72.0
     num_reviewers = 3
     needs_seven_anchor_test = True

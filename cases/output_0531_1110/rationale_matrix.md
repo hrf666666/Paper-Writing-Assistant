@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 采用物理先验的三层角信号分解模型 I(u,v) = DC + a·u + b·v | 9x9低分辨率角度采样导致环境光照、视差深度和材质反射信号严重混叠，传统黑盒网络无法在物理层面解耦这 | 传统方法将角信号视为整体进行卷积或滤波，本方法在物理层面显式解耦DC项、线性项和残差项，避免了深度估 | 包含复杂光照和混合材质的9x9低角度分辨率光场场景（如HCInew和UrbanL | Phase 1实验中，从残差项提取的角梯度(angular_gradient)特 | Methodology (Three-Layer Angular Signal Decomposition) | must |
+| 摒弃2D-DFT频谱分析，转而提取角梯度(angular_gradient)和角 | 在9x9的离散角度采样下，频谱分析因角度分辨率严重不足而产生混叠失效，无法准确捕捉高频材质反射信息。 | 相比依赖高频频谱特征的传统方法（如Wang 2017的角锥约束在低分辨率下的退化），几何特征直接在空 | 低角度分辨率（9x9）的光场图像，特别是需要精准识别高光与散射的非朗伯体表面区域 | 基于5个几何特征构建的随机森林(RF)分类器在材质二分类中达到89.6%准确率和 | Methodology (Geometric Feature Extraction) / Introduction | must |
+| 设计基于双掩码的双分支架构（GeometricDualMask），利用几何伪标签 | 单一网络架构无法同时处理朗伯体的线性EPI结构和非朗伯体的X型散射结构，强行统一处理会导致特征提取冲 | 传统单一EPI网络在非朗伯体区域MAE飙升（如从0.081退化至0.411），双分支机制通过物理分流 | 包含朗伯体与非朗伯体混合的复杂场景（如Mixed/Urban数据集及UrbanL | 132次穷尽式实验证明“假设违反而非参数缺陷”，双分支路由使Mixed场景MAE | Methodology (Dual-branch Routing Mechanism) / Architecture | must |
+| 深入剖析并证明EPI方法在非朗伯体表面失效的物理根因（X型图案破坏角锥约束），而 | 现有研究盲目通过调整损失函数、学习率或网络深度来修复非朗伯体区域的深度估计退化，缺乏对物理假设失效的 | 相比SOTA方法在参数层面的无效试错，本研究明确了EPI方法的物理局限性边界，指导了网络架构从单一E | 具有镜面反射和次表面散射的非朗伯体表面（Non-Lambertian Datas | 实验证实Non-Lambertian场景MAE飙升至0.411（相比Mixed的 | Introduction / Motivation / Root Cause Analysis | must |
+| 构建统一光场数据集加载器并结合WeightedRandomSampler实现多域 | 非朗伯体光场数据极度稀缺（如Non-Lambertian仅4个训练场景），直接混合训练会导致模型对朗 | 传统训练采用均匀采样或简单数据增强，本框架通过Domain-balanced sampling策略， | 跨域联合训练，特别是包含稀缺非朗伯体数据和丰富朗伯体数据（HCInew/Urba | 全局统计验证显示视差幅度P(x,y)和材质比例M(x,y)在5大跨域数据集上具备 | Experimental Setup / Training Strategy | should |
+| 使用随机森林（RF）分类器基于几何特征生成逐像素材质伪标签，用于监督双掩码路由机 | 双分支网络需要精确的逐像素掩码来分流特征，但现有光场数据集（如HCInew, UrbanLF）缺乏像 | 相比使用启发式阈值或无监督聚类生成伪标签，基于物理分解和RF的分类器提供了具有严格物理意义和高判别力 | 训练阶段，为9x9光场图像的每个空间像素（256x256分辨率）生成Lamber | RF分类器准确率达89.6%，AUC为0.962，生成的高置信度伪标签有效指导了 | Methodology (Pseudo-label Generation) | should |

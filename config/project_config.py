@@ -107,11 +107,12 @@ API_CALL_INTERVAL = 3.0
 # 生成模型优先级（Token Plan 优先，跨 provider 降级）
 GENERATION_MODELS = [
     "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主力）
-    "glm_5_1",           # 智谱 GLM-5.1（Coding Plan key）
+    "glm_5_1",           # 智谱 GLM-5.1（Coding Plan key, zai SDK）
+    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, 支持 thinking）
     "tp_deepseek_v4_pro",# 阿里 Token Plan DeepSeek-V4-Pro
     "tp_qwen3_6_plus",   # 阿里 Token Plan Qwen3.6-Plus
     "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max（备选）
-    "glm_5",             # 智谱 GLM-5
+    "glm_5",             # 智谱 GLM-5（zai SDK）
     "tp_deepseek_v4_flash",# 阿里 Token Plan DeepSeek-V4-Flash
     "tp_qwen3_6_flash",  # 阿里 Token Plan Qwen3.6-Flash
     "qwen3_6_plus",      # 阿里百炼 Qwen3.6-Plus（备选）
@@ -125,7 +126,8 @@ GENERATION_MODELS = [
 # 推理/决策模型（Token Plan 优先）
 REASONING_MODELS = [
     "tp_qwen3_7_max",    # Token Plan Qwen3.7-Max
-    "glm_5_1",           # 智谱 GLM-5.1
+    "glm_5_1",           # 智谱 GLM-5.1（zai SDK, thinking）
+    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking）
     "tp_deepseek_v4_pro",# DeepSeek-V4-Pro（推理强）
     "gpt_5_5",           # GPT-5.5（需代理）
 ]
@@ -341,10 +343,9 @@ def get_article_type_info():
 def get_tier_prompt_block():
     """获取论文等级约束的prompt注入块（用于所有章节生成）"""
     try:
-        from config.venue_profiles import get_profile
-        from agent.venue_adapter import VenueAdapter
-        adapter = VenueAdapter()
-        venue_block = adapter.build_venue_context_block()
+        from agent.venue_adapter import get_active_profile
+        profile = get_active_profile()  # 使用 resolve_article_type，TARGET_VENUE 优先
+        venue_block = f"目标期刊: {profile.venue_name}\n类型: {profile.venue_type}"
         return f"\n{venue_block}\n\n3. **术语规范**：\n   - 使用本领域标准术语\n   - 训练策略描述：使用 progressive training / staged training\n   - 知识迁移：使用 knowledge distillation / guided training\n"
     except Exception:
         pass

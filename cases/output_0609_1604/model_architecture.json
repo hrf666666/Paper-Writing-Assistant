@@ -1,0 +1,46 @@
+{
+  "总体架构": "模型采用统一的双掩码物理架构（Dual-Mask Physical Model），旨在解决非朗伯体（Non-Lambertian）光场深度估计问题。输入为多视角光场图像（Light Field），首先经过Min-Max归一化映射至[-1, 1]区间。随后输入至双掩码深度估计主干网络（DualMaskDepthModel），该网络基于三层角信号分解理论（将信号分解为环境光DC、视差线性项和材质残差项），通过双分支结构（朗伯体EPI分支与非朗伯体几何分支）提取特征。最终网络输出三个核心预测：深度图（depth_pred）、材质/反射率掩码（r_pred）以及物理向量场/位移场（V_pred）。在训练阶段，结合深度MSE损失、掩码MSE损失、相位正则化以及物理一致性损失进行联合优化。",
+  "模块详情": [
+    {
+      "模块名": "输入归一化模块 (Input Normalization)",
+      "输入": "原始光场张量 (Batch, Channels=15, Height, Width)",
+      "核心操作": "对每个样本在通道和空间维度上进行Min-Max归一化，消除光照绝对强度影响，并将数值范围线性映射到[-1, 1]区间。",
+      "输出": "归一化后的光场张量 (Batch, 15, Height, Width)",
+      "关键公式": "x_{norm} = \\frac{x - x_{min}}{x_{max} - x_{min} + \\epsilon} \\times 2.0 - 1.0"
+    },
+    {
+      "模块名": "双掩码深度估计主干网络 (DualMaskDepthModel)",
+      "输入": "归一化后的光场张量 (Batch, 15, Height, Width)",
+      "核心操作": "基于三层角信号分解理论，利用双分支架构分别处理朗伯体（EPI斜率）和非朗伯体（几何角特征）信号，提取视差和材质特征，解耦输出深度、反射率掩码和向量场。",
+      "输出": "depth_pred (B, 1, H, W), r_pred (B, 1, H, W), V_pred (B, 2, H, W)",
+      "关键公式": "I(u,v) = DC + a\\cdot u + b\\cdot v + \\epsilon(u,v)"
+    },
+    {
+      "模块名": "相位正则化模块 (Phase Regularization)",
+      "输入": "V_pred (B, 2, H, W), r_pred (B, 1, H, W)",
+      "核心操作": "计算向量场V在x和y方向的空间梯度平方和，利用反射率掩码r的Sigmoid反转值作为权重，从而在朗伯体区域施加平滑约束，在非朗伯体区域减弱惩罚。",
+      "输出": "相位正则化标量损失值",
+      "关键公式": "L_{phase} = \\text{mean}((\\nabla V_x^2 + \\nabla V_y^2) \\cdot (1 - \\sigma(r)))"
+    },
+    {
+      "模块名": "物理一致性损失模块 (Physical Consistency Loss)",
+      "输入": "V_pred (B, 2, H, W), r_pred (B, 1, H, W)",
+      "核心操作": "计算预测的向量场与物理反射模型之间的一致性约束，确保非朗伯体区域的几何特征符合物理散射或反射规律。",
+      "输出": "物理一致性标量损失值",
+      "关键公式": "L_{phys} = \\text{physical\\_consistency\\_loss}(V, r)"
+    }
+  ],
+  "模块连接": "原始光场数据首先经过输入归一化模块处理，输出标准化张量送入双掩码深度估计主干网络。主干网络并行输出深度图、反射率掩码和向量场。深度图和反射率掩码分别与Ground Truth计算MSE损失（depth_loss和r_loss）。向量场和反射率掩码共同输入到相位正则化模块和物理一致性损失模块计算正则化项。最终总损失通过加权求和（total_loss = depth_loss + 0.5*r_loss + 0.1*phase_reg）进行反向传播，并通过梯度裁剪（max_norm=1.0）更新网络参数。",
+  "关键超参数": {
+    "lf_channels": 15,
+    "hidden_dim": 32,
+    "network_depth": 1,
+    "learning_rate": 0.0005,
+    "weight_decay": 0.0001,
+    "batch_size": 8,
+    "r_loss_weight": 0.5,
+    "phase_reg_weight": 0.1,
+    "max_grad_norm": 1.0,
+    "optimizer": "AdamW"
+  }
+}

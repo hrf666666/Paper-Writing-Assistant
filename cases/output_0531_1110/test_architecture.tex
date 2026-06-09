@@ -1,0 +1,76 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    node distance=0.8cm and 1.2cm,
+    every node/.style={font=\normalsize},
+    module/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, thick},
+    data/.style={trapezium, trapezium left angle=70, trapezium right angle=110, draw, minimum width=2.5cm, minimum height=1cm, align=center, thick},
+    lossstyle/.style={draw, rounded corners, fill=red!20, minimum width=2.5cm, minimum height=1cm, align=center, thick}
+]
+
+% Input Data
+\node[data, fill=gray!20] (input) at (0, 12) {
+  \textbf{Light Field Images}\\
+  \footnotesize 9 $\times$ 9 Views (81)
+};
+
+% Three-Layer Angular Signal Decomposition
+\node[module, fill=orange!30, minimum width=3.5cm] (decomp) at (0, 9.5) {
+  \textbf{Three-Layer Angular}\\
+  \textbf{Signal Decomposition}\\
+  \footnotesize DC, Linear, Residual
+};
+
+% Lambertian EPI Branch
+\node[module, fill=blue!20] (lamb) at (-3.5, 7) {
+  \textbf{Lambertian EPI}\\
+  \textbf{Branch}\\
+  \footnotesize EPI Slopes, PRSO
+};
+
+% Non-Lambertian Geometric Branch
+\node[module, fill=blue!20] (nlamb) at (3.5, 7) {
+  \textbf{Non-Lambertian}\\
+  \textbf{Geometric Branch}\\
+  \footnotesize X-shaped, GeoConv
+};
+
+% Dual-Mask Generation and Fusion
+\node[module, fill=orange!30, minimum width=3.5cm] (fusion) at (0, 4.5) {
+  \textbf{Dual-Mask Generation}\\
+  \textbf{and Fusion}\\
+  \footnotesize FUSE\_DIM=96, Routing
+};
+
+% Output Data
+\node[data, fill=green!20] (output) at (0, 2) {
+  \textbf{Final Depth Map}\\
+  \footnotesize 1 $\times$ 256 $\times$ 256
+};
+
+% Loss / Constraint
+\node[lossstyle] (loss) at (6.5, 4.5) {
+  \textbf{Mask BCE Loss}\\
+  \footnotesize Pseudo-label Supervision
+};
+
+% Connections: Input to Decomposition
+\draw[-{Stealth[length=2mm]}, thick] (input.south) -- node[right, font=\small] {$I(u,v)$} (decomp.north);
+
+% Connections: Decomposition to Branches
+\draw[-{Stealth[length=2mm]}, thick] (decomp.south) -- ++(0,-0.6) -| node[pos=0.25, above, font=\small] {Features} (lamb.north);
+\draw[-{Stealth[length=2mm]}, thick] (decomp.south) -- ++(0,-0.6) -| node[pos=0.25, above, font=\small] {Features} (nlamb.north);
+
+% Connections: Branches to Fusion
+\draw[-{Stealth[length=2mm]}, thick] (lamb.south) -- ++(0,-0.6) -| node[pos=0.25, above, font=\small] {$D_L$} (fusion.north);
+\draw[-{Stealth[length=2mm]}, thick] (nlamb.south) -- ++(0,-0.6) -| node[pos=0.25, above, font=\small] {$D_{NL}$} (fusion.north);
+
+% Connections: Fusion to Output
+\draw[-{Stealth[length=2mm]}, thick] (fusion.south) -- node[right, font=\small] {$D_{final}$} (output.north);
+
+% Connections: Fusion to Loss (Masks)
+\draw[-{Stealth[length=2mm]}, thick, dashed, red!70!black] (fusion.east) -- node[above, font=\small] {Masks ($M_L, M_{NL}$)} (loss.west);
+
+% Connections: Decomposition to Loss (Pseudo-labels)
+\draw[-{Stealth[length=2mm]}, thick, dashed, red!70!black] (decomp.east) -- ++(4.5,0) |- node[pos=0.25, above, font=\small, align=center] {Pseudo-labels\\(Angular Gradient)} (loss.north);
+
+\end{tikzpicture}

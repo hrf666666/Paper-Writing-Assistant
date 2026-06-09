@@ -1,0 +1,57 @@
+{
+  "content_patterns": {
+    "Introduction": {
+      "opening_style": "problem_motivation",
+      "contribution_format": "numbered_list",
+      "contribution_count": 3,
+      "has_paper_structure_paragraph": true
+    },
+    "Related Work": {
+      "organization": "by_technique",
+      "critique_style": "end_of_group",
+      "comparison_depth": "moderate"
+    },
+    "Methodology": {
+      "starts_with": "problem_formulation",
+      "derivation_style": "moderate",
+      "has_algorithm_box": true,
+      "subsection_count": 4
+    },
+    "Experiments": {
+      "dataset_description": "mixed",
+      "ablation_style": "table",
+      "comparison_style": "table",
+      "has_failure_analysis": false
+    }
+  },
+  "argument_rhythm": {
+    "data_placement": "after_each_claim",
+    "figure_density": "high",
+    "citation_density": "high",
+    "paragraph_length": "medium(5-7)"
+  },
+  "depth_gradients": {
+    "Methodology": "key_formulas_only",
+    "Experiments": "comprehensive"
+  },
+  "figure_preferences": {
+    "architecture_style": "detailed_boxes",
+    "color_scheme": "colorful",
+    "annotation_level": "moderate",
+    "preferred_layout": "horizontal_flow"
+  },
+  "content_emphasis": {
+    "primary_focus": "experimental_validation",
+    "novelty_presentation": "explicit_claims"
+  },
+  "journal_red_flags": [
+    "Omitting ablation studies or component-wise analysis to justify individual proposed modules",
+    "Lacking direct comparisons with recent state-of-the-art baselines on standard large-scale benchmarks",
+    "Presenting purely theoretical models without extensive empirical validation or system implementation details",
+    "Using low-resolution, poorly annotated, or overly simplified architecture diagrams that obscure the hierarchical design",
+    "Missing mathematical formulation or problem definition for the proposed method",
+    "Omitting computational complexity, latency, or hardware resource analysis",
+    "Overly promotional, subjective, or non-academic language in the abstract and conclusion",
+    "Using overly dense mathematical proofs without intuitive physical or geometric explanations"
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "低角分辨率下EPI假设失效的严重性与物理机制",
+      "现有光场深度估计方法在处理非朗伯体时的局限性",
+      "本文提出的物理模型解耦与双掩码路由架构的核心贡献"
+    ],
+    "depth_map": {
+      "background_and_motivation": "moderate",
+      "problem_statement_and_limitations": "deep",
+      "contributions": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "mention"
+    },
+    "must_include": [
+      "motivation_hook: 明确指出当前光场深度估计在实用低角分辨率(如9×9)下因EPI假设失效而性能骤降的问题",
+      "contribution_claim: 以编号列表(numbered_list)形式清晰列出3个贡献，并附带初步的定量提升证据",
+      "清晰的gap statement，说明现有方法为何无法同时兼顾朗伯体和非朗伯体表面",
+      "长段落(8+ sentences)的论述风格，确保逻辑连贯且论证充分",
+      "[动机锚点] The introduction must establish: Current light field depth estimation fails in practical, **low angu",
+      "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+    ],
+    "should_avoid": [
+      "论文结构段落(如'The rest of this paper is organized as...')，严格遵循TCSVT风格",
+      "详细的网络架构或数学公式推导",
+      "单段内堆砌超过10篇参考文献",
+      "使用非正式或过度宣传的语言"
+    ],
+    "target_emphasis": "Establish the critical failure of current light field depth estimation in low angular resolution scenarios and clearly articulate how the proposed physical decoupling and dual-mask routing resolve this fundamental gap."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "光场深度估计方法的发展与分类",
+      "非朗伯体与复杂材质表面的处理机制",
+      "EPI假设的物理局限性及其在现有文献中的盲区"
+    ],
+    "depth_map": {
+      "light_field_depth_estimation": "moderate",
+      "non_lambertian_and_material_handling": "moderate",
+      "epi_assumption_and_its_limitations": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "gap_bridge: 在每组文献(by_approach)末尾进行批判性总结，明确指出现有方法未解决低角分辨率下的EPI失效问题",
+      "高引用密度，全面覆盖光场深度估计、材质解耦和EPI几何分析的相关文献",
+      "对非朗伯体处理相关工作的深入探讨，为创新点1和2提供理论铺垫",
+      "长段落结构，确保对 prior approaches 的 critical analysis 具有足够的深度和说服力",
+      "[动机锚点] Transition to method by showing existing approaches do not address: Current light field depth estima"
+    ],
+    "should_avoid": [
+      "仅仅按时间顺序罗列文献而缺乏按方法分类(by_approach)的组织",
+      "将本文的具体方法细节或实验结果提前泄露",
+      "忽略对基于EPI假设的方法在物理边界上的批判性分析"
+    ],
+    "target_emphasis": "Critically analyze prior approaches to demonstrate that existing methods fail to address the physical breakdown of EPI assumptions under low angular resolution and complex material reflections, bridging the gap to our proposed methodology."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "三层角信号分解物理模型与几何特征提取",
+      "基于几何双掩码路由的统一深度估计架构",
+      "领域平衡采样与混合训练策略"
+    ],
+    "depth_map": {
+      "overview": "brief",
+      "three_layer_angular_signal_decomposition": "deep",
+      "geometric_dual_mask_routing_architecture": "deep",
+      "training_strategy_and_optimization": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary",
+      "创新点3": "supporting"
+    },
+    "must_include": [
+      "核心物理模型公式 I(u,v) = DC + a·u + b·v + ε(u,v) 及所有变量的严格数学定义，确保数学严谨性",
+      "GeometricDualMask模块间的数据流说明，结合物理与几何可解释性解释掩码路由机制",
+      "详细的水平流程图(horizontal_flow)和彩色详细框图(colorful detailed boxes)的设计规划",
+      "严格遵循4个子章节(subsection_count: 4)的结构安排",
+      "[动机锚点] Each module should be justified by connecting back to the core motivation"
+    ],
+    "should_avoid": [
+      "黑盒式的深度学习描述，必须避免缺乏理论或物理解释的网络结构堆砌",
+      "算法伪代码框(has_algorithm_box: false)，改用文字和流程图清晰描述",
+      "冗长且非核心的基础数学推导，仅保留关键公式(key_formulas_only)",
+      "过度描述已有的基础模块(如标准的ResNet或Transformer block)"
+    ],
+    "target_emphasis": "Detail the physically interpretable three-layer decomposition and the dual-mask routing mechanism, ensuring every module is mathematically rigorous and justified by the core motivation of overcoming EPI assumption failures."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "多域数据集上的SOTA定量对比与定性可视化",
+      "验证各创新模块有效性的详细消融实验",
+      "EPI假设失效的物理边界量化与失败分析",
+      "计算复杂度、内存占用与运行时间分析"
+    ],
+    "depth_map": {
+      "datasets_and_setup": "brief",
+      "quantitative_comparison": "deep",
+      "ablation_study": "deep",
+      "failure_analysis_and_physical_boundaries": "deep",
+      "complexity_and_runtime": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "evidence_support: 设计直接验证三大贡献的实验，包括132次实验总结出的物理边界量化分析(failure analysis)",
+      "混合数据集(mixed dataset description)评估，必须包含真实场景数据，避免仅依赖合成数据",
+      "完整的消融实验表格(table ablation)和与SOTA方法的混合对比(mixed comparison)",
+      "计算复杂度、内存足迹和运行时间的专门分析，消除TCSVT red flag",
+      "高分辨率、标注清晰的定性视觉对比图， alongside quantitative tables",
+      "[动机锚点] Design experiments that directly validate each contribution claim"
+    ],
+    "should_avoid": [
+      "回避负面结果、失败案例或方法局限性的讨论",
+      "仅使用合成数据集而缺乏真实世界光场数据的验证",
+      "使用非正式、对话式或过度吹嘘的语言描述实验结果",
+      "缺乏定性视觉对比的纯表格数据展示"
+    ],
+    "target_emphasis": "Comprehensively validate the proposed method through rigorous quantitative comparisons, detailed ablations, and a profound failure analysis that quantifies the physical boundaries of EPI assumptions, while providing full computational complexity metrics."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "核心贡献与物理模型解耦的深远影响",
+      "EPI物理边界量化对未来研究的指导意义",
+      "方法的局限性与未来非EPI方向的展望"
+    ],
+    "depth_map": {
+      "summary_of_contributions": "moderate",
+      "impact_of_physical_boundaries": "deep",
+      "future_work_and_limitations": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "contribution_claim: 呼应核心叙事，重申在低角分辨率下解决EPI失效问题的突破性进展",
+      "强调创新点3(物理边界与根因分析)对未来非EPI方法(如NeRF、学习特征匹配)及非朗伯体数据集构建的理论指导价值",
+      "对当前方法在极端场景下局限性的客观反思与讨论",
+      "[动机锚点] Echo the core narrative: Current light field depth estimation fails in practical, **low angular reso"
+    ],
+    "should_avoid": [
+      "引入新的实验数据、图表或未曾提及的方法细节",
+      "过度冗长地重复Introduction中的背景信息",
+      "缺乏前瞻性和具体指导意义的泛泛而谈"
+    ],
+    "target_emphasis": "Echo the core narrative of overcoming low angular resolution limitations, summarizing the methodological breakthroughs and highlighting the profound impact of the quantified EPI physical boundaries on future light field research directions."
+  }
+}

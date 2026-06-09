@@ -1,0 +1,65 @@
+\begin{tikzpicture}[
+  module/.style={
+    draw, thick, rounded corners=4pt, 
+    minimum height=2.4cm, text width=2.5cm, 
+    align=center, font=\small\bfseries, outer sep=3pt, inner sep=4pt
+  },
+  data/.style={
+    draw, thick, shape=trapezium, 
+    trapezium left angle=65, trapezium right angle=115,
+    minimum height=1.6cm, text width=2.2cm, 
+    align=center, font=\footnotesize\bfseries, outer sep=3pt, inner sep=4pt
+  },
+  innov/.style={ fill=orange!30 },
+  encode/.style={ fill=blue!20 },
+  loss/.style={ fill=red!20 },
+  arrow/.style={ -{Stealth[length=2mm]}, thick, >=stealth, color=black!80 },
+  dasharrow/.style={ -{Stealth[length=2mm]}, thick, dashed, >=stealth, color=red!70!black }
+]
+
+% Nodes Definition
+\node[data, fill=gray!10] (input) at (0,0) {Light Field Data\\{\normalfont\scriptsize 9$\times$9 Angular +\\Center View}};
+
+\node[module, innov] (decomp) at (3.6,0) {Three-Layer Angular\\Signal Decomposition};
+
+\node[module, encode] (lamb) at (8.2, 2.0) {Lambertian EPI Branch\\{\normalfont\scriptsize Out: $H \times W \times C_{epi}$}};
+
+\node[module, encode] (nlamb) at (8.2, -2.0) {Non-Lambertian\\Geometric Branch\\{\normalfont\scriptsize Out: $H \times W \times C_{geo}$}};
+
+\node[module, innov] (fusion) at (12.6, 0) {Dual-Mask Generation\\and Fusion\\{\normalfont\scriptsize FUSE\_DIM=96}};
+
+\node[data, fill=gray!10] (output) at (16.2, 0) {Unified Depth Map\\ \& Domain Mask};
+
+\node[module, loss, minimum height=1.4cm] (loss) at (12.6, -3.4) {Loss Functions\\{\normalfont\scriptsize depth\_loss, domain\_loss}};
+
+% Connections and Data Flow
+\draw[arrow] (input.east) -- node[above, font=\scriptsize, align=center] {I(u,v)} (decomp.west);
+
+\coordinate (split) at ($(decomp.east) + (0.6,0)$);
+\draw[arrow] (decomp.east) -- (split);
+
+\draw[arrow] (split) |- (lamb.west);
+\node[font=\scriptsize, align=center] at ($(split)!0.5!(lamb.west)$) [above=2pt] {EPI, Linear Coeff,\\Center View};
+
+\draw[arrow] (split) |- (nlamb.west);
+\node[font=\scriptsize, align=center] at ($(split)!0.5!(nlamb.west)$) [below=2pt] {Residual, Angular\\Gradient, Center};
+
+\coordinate (merge) at ($(fusion.west) - (0.6,0)$);
+\draw[arrow] (lamb.east) -| (merge);
+\node[font=\scriptsize, align=center] at ($(lamb.east)!0.5!(merge)$) [above=2pt] {Depth Feat\\(Proj 96)};
+
+\draw[arrow] (nlamb.east) -| (merge);
+\node[font=\scriptsize, align=center] at ($(nlamb.east)!0.5!(merge)$) [below=2pt] {Depth Feat\\(Proj 96)};
+
+\draw[arrow] (merge) -- (fusion.west);
+
+\draw[arrow] (fusion.east) -- node[above, font=\scriptsize, align=center] {M \& D\_final} (output.west);
+
+\draw[dasharrow] (fusion.south) -- node[right, font=\scriptsize, align=center] {Supervision} (loss.north);
+
+% Innovation Highlights Annotations
+\node[font=\scriptsize\itshape, text width=2.6cm, align=center, text=red!70!black] at (decomp.south) [below=0.2cm] {Innovation 1 \& 3:\\Physical Decoupling \& EPI Boundary Analysis};
+
+\node[font=\scriptsize\itshape, text width=2.6cm, align=center, text=red!70!black] at (fusion.south) [below=0.2cm] {Innovation 2:\\Dual-Mask \& Geometric Routing};
+
+\end{tikzpicture}

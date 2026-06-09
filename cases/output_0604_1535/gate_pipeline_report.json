@@ -1,0 +1,42 @@
+{
+  "passed": false,
+  "weighted_score": 45.0,
+  "total_time": 0.1,
+  "blocked_by": "gate0_format",
+  "gates": [
+    {
+      "name": "gate0_format",
+      "priority": "P0_CRITICAL",
+      "passed": false,
+      "score": 45.0,
+      "details": "V1_citation_integrity: 12 个 [?] 未解析引用; V3_formula_syntax: 10 个残留 <citation> 标记; V5_residual_markers: 发现残留标记: 未解析引用 [?]: 12 处; 残留 <citation> 标记: 10 处; 残留 </citati",
+      "fix_hints": [
+        "运行 CitationManager 解析引用，确保每个 [N] 都有对应参考文献条目",
+        "运行 formula_processor 和 citation_manager 清理残留标记",
+        "运行后处理清理所有残留标记"
+      ],
+      "skipped": false,
+      "execution_time": 0.1
+    },
+    {
+      "name": "gate1_consistency",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "跳过（前序 Gate 未通过）",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate2_quality",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "跳过（前序 Gate 未通过）",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    }
+  ]
+}

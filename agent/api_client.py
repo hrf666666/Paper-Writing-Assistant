@@ -178,6 +178,7 @@ class UnifiedAPIClient:
         根据模型名称分发调用
 
         v2.0: 基于 PROVIDERS 配置动态分发，而非硬编码 if-else
+        v2.1: GLM 系列走 zai SDK（支持 thinking + reasoning_content）
         """
         config = self._available_models.get(model_name)
         if not config:
@@ -186,6 +187,10 @@ class UnifiedAPIClient:
         # Anthropic原生API走特殊路径
         if config.get("non_openai"):
             return self._call_anthropic(prompt, config)
+
+        # GLM 系列走 zai SDK
+        if config.get("use_zai"):
+            return self._call_zhipuai(prompt, config)
 
         # 所有OpenAI兼容API走统一路径
         return self._call_openai_compatible(prompt, config)
@@ -213,6 +218,20 @@ class UnifiedAPIClient:
             model=config["model_id"],
             max_tokens=config.get("max_tokens", 23333),
             temperature=config.get("temperature", 1.0),
+        )
+        return client.query(prompt)
+
+    def _call_zhipuai(self, prompt: str, config: Dict) -> str:
+        """智谱 GLM 调用（使用 zai SDK，原生支持 thinking）"""
+        from api.openai_compatible import ZhipuAIClient
+
+        client = ZhipuAIClient(
+            api_key=config["api_key"],
+            base_url=config.get("base_url"),
+            model=config["model_id"],
+            max_tokens=config.get("max_tokens", 8192),
+            temperature=config.get("temperature", 0.7),
+            stream=config.get("stream", False),
         )
         return client.query(prompt)
 

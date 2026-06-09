@@ -1,0 +1,12 @@
+\section{Conclusion}
+
+In this work, we present the Unified Dual-Mask Physical Model, a new light field depth estimation framework based on physical prior-driven angular signal decomposition and geometry-based material classification. The proposed architecture addresses the challenge of Epipolar Plane Image linearity assumption breakdown caused by non-Lambertian surfaces, and demonstrates robust performance across multi-domain light field datasets. By integrating physical reflectance models with deep feature routing, the model effectively separates specular and diffuse components, enabling accurate depth inference in complex mixed scenes.
+
+The specific contributions of this work are summarized as follows:
+\begin{itemize}
+    \item \textbf{Physical Prior-Driven Angular Signal Decomposition:} We reveal the physical and geometric root causes of Epipolar Plane Image linearity degradation on non-Lambertian surfaces. By decomposing the angular signal into three distinct layers based on physical reflectance priors, the model establishes a solid theoretical basis for separating mixed reflection components, which improves the interpretability and reliability of subsequent feature extraction.
+    \item \textbf{Geometry-Based Material Classification Mechanism:} To overcome the limitations of frequency-domain features under low angular resolutions (e.g., $9 \times 9$), we utilize geometric features to achieve efficient and robust material classification. This mechanism provides accurate feature routing and mask generation for the depth estimation network, ensuring that specular and diffuse regions are processed with appropriate strategies.
+    \item \textbf{Unified Dual-Mask Architecture with Domain-Balanced Sampling:} We design a dual-mask unified depth estimation architecture that applies differentiated processing strategies to regions with distinct reflectance properties. Coupled with a domain-balanced sampling strategy, this approach significantly enhances the generalization capability in complex urban and mixed scenes, achieving unified and efficient inference across multi-domain light field data with a single model.
+\end{itemize}
+
+We hope that the Unified Dual-Mask Physical Model will facilitate further research in physics-informed light field vision and inspire the design of novel multi-domain unified architectures. By bridging physical reflectance properties with deep representation learning, this work provides a scalable paradigm for robust 3D scene understanding in diverse real-world environments.

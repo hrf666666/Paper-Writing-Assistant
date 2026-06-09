@@ -1,0 +1,49 @@
+{
+  "总体架构": "模型采用统一的双掩码物理架构（GeometricDualMask），输入为9x9（81个视角）的光场图像。整体架构基于双分支设计，包含处理漫反射区域的Lambertian EPI分支和处理高光/散射区域的Non-Lambertian几何分支。通过三层角信号分解提取几何伪标签（如角梯度），并利用逐像素双掩码机制对两个分支的深度特征进行路由与加权融合，最终输出单通道的高精度深度图。",
+  "模块详情": [
+    {
+      "模块名": "Three-Layer Angular Signal Decomposition (三层角信号分解)",
+      "输入": "9x9视角的局部角信号像素块 I(u,v)",
+      "核心操作": "将角信号分解为直流分量（环境光）、线性分量（视差/深度）和残差分量（材质/反射）。提取几何特征（如角梯度、相关一致性）作为后续掩码监督的逐像素伪标签。",
+      "输出": "DC分量、线性系数(a,b)、残差ε(u,v)，以及高判别力的几何伪标签（如angular_gradient）",
+      "关键公式": "I(u,v) = DC + a·u + b·v + ε(u,v)"
+    },
+    {
+      "模块名": "Lambertian EPI Branch (朗伯体EPI分支)",
+      "输入": "光场图像（主要由Lambertian Mask路由的像素/特征）",
+      "核心操作": "提取极平面图像（EPI）的线状斜率特征，并引入连续深度先验（如PRSO平面正则采样算子或位移场）进行分段平滑的深度表面回归，解决纹理缺失区域的歧义性。",
+      "输出": "朗伯体区域的深度特征图与初始深度预测 D_L",
+      "关键公式": "D_L = PRSO(EPI_Features) 或 Displacement_Field(EPI_Slopes)"
+    },
+    {
+      "模块名": "Non-Lambertian Geometric Branch (非朗伯体几何分支)",
+      "输入": "光场图像（主要由Non-Lambertian Mask路由的像素/特征），结合Tone-mapping增强数据",
+      "核心操作": "放弃频率域分析，转而利用双模态分布特征和EPI中的X型几何模式（X-shaped patterns）进行特征提取。通过几何卷积处理非朗伯体表面的角梯度异常。",
+      "输出": "非朗伯体区域的深度特征图与初始深度预测 D_NL",
+      "关键公式": "D_NL = GeoConv(X_shape_Features, Bimodal_Distribution)"
+    },
+    {
+      "模块名": "Dual-Mask Generation & Fusion (双掩码生成与融合)",
+      "输入": "两分支的深度特征/预测 (D_L, D_NL)，以及角梯度等几何特征",
+      "核心操作": "生成像素级的双掩码（M_L和M_NL），通过FUSE_DIM进行通道平衡投影。使用逐像素几何伪标签（angular_gradient）计算BCE Loss监督掩码生成，最后进行掩码加权融合得到最终深度。",
+      "输出": "最终融合的单通道深度图 D_final (1, 256, 256)",
+      "关键公式": "D_final = M_L ⊙ D_L + M_NL ⊙ D_NL; Loss_mask = BCE(M, PseudoLabel_angular_gradient)"
+    }
+  ],
+  "模块连接": "输入光场数据首先经过‘三层角信号分解模块’提取几何伪标签（角梯度）和基础物理分量。随后，数据并行输入‘Lambertian EPI分支’和‘Non-Lambertian几何分支’提取各自的深度特征。两个分支的输出特征经过通道平衡投影（FUSE_DIM=96）后，进入‘双掩码生成与融合模块’。该模块利用分解得到的几何特征生成像素级掩码，对两分支的深度预测进行加权融合。训练阶段，掩码由角梯度伪标签进行逐像素BCE监督，确保Mask Gap达到目标阈值。",
+  "关键超参数": {
+    "num_views": 81,
+    "angular_resolution": "9x9",
+    "target_size": [
+      256,
+      256
+    ],
+    "FUSE_DIM": 96,
+    "mask_gap_target": 0.08,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "nl_oversampling_factor": 10,
+    "pseudo_label_feature": "angular_gradient",
+    "pseudo_label_cohens_d": 0.983
+  }
+}

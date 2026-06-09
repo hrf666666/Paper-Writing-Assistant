@@ -663,6 +663,16 @@ def verify_citation_with_mcp(paper_title: str, author_hint: str = "") -> Dict:
             result["method"] = "mcp"
             return result
 
+    # ── 1.5 智谱 Web Search API (独立配额) ──
+    try:
+        from api.web_search_api import verify_citation_web
+        ws_result = verify_citation_web(paper_title, author_hint)
+        if ws_result["verified"]:
+            result.update(ws_result)
+            return result
+    except Exception as e:
+        logger.debug(f"[verify] Web Search API 验证失败: {e}")
+
     # ── 2. 百度学术 ──
     baidu_papers = search_papers_baidu(paper_title, limit=3)
     if baidu_papers:
@@ -934,6 +944,8 @@ def _handle_rate_limit_429(response=None):
 
 def _is_rate_limited() -> bool:
     """检查是否处于 429 退避期"""
+    # v12.0: Semantic Scholar 境内永久 429，直接禁用所有 S2 调用
+    return True
     return time.time() < _backoff_until
 
 
@@ -1123,7 +1135,7 @@ def _build_query_string(query) -> str:
 
 
 def _to_aminer_format(papers: List[Dict]) -> Dict:
-    """将标准论文格式转为 AMiner 兼容格式"""
+    """将标准论文格式转为 AMiner 兼容格式（保留 IEEE BibTeX 所需字段）"""
     return {
         "data": [
             {
@@ -1136,17 +1148,123 @@ def _to_aminer_format(papers: List[Dict]) -> Dict:
                 "abstract": p.get("abstract", ""),
                 "n_citation": p.get("citationCount", 0),
                 "source": p.get("source", ""),
+                "doi": p.get("externalIds", {}).get("DOI", "") or p.get("doi", ""),
+                "pages": p.get("pages", ""),
+                "volume": p.get("volume", ""),
+                "number": p.get("number", ""),
+                "arxiv_id": p.get("externalIds", {}).get("ArXiv", ""),
             }
             for p in papers
         ]
     }
 
 
+# ====== OpenAlex 学术搜索 (v11.6: 境内可用) ======
+
+def search_papers_openalex(query: str, limit: int = 10, sort: str = "cited_by_count:desc") -> List[Dict]:
+    """
+    通过 OpenAlex API 搜索学术论文 (https://openalex.org)
+    
+    优势: 开源免费、境内可达 (~8-15s)、返回结构化数据(标题/DOI/作者/期刊/引用数)
+    
+    Args:
+        query: 搜索查询
+        limit: 返回结果数
+        sort: 排序方式，默认按引用量，用 "relevance_score:desc" 按相关性
+    """
+    if not query or len(query.strip()) < 3:
+        return []
+    
+    try:
+        import httpx
+        r = httpx.get(
+            'https://api.openalex.org/works',
+            params={
+                'search': query.strip()[:200],
+                'per_page': str(min(limit, 25)),
+                'sort': sort,
+            },
+            headers={'User-Agent': 'mailto:research@paper-assistant.com'},
+            timeout=20,
+        )
+        if r.status_code != 200:
+            logger.debug(f"[OpenAlex] HTTP {r.status_code}")
+            return []
+        
+        data = r.json()
+        results = data.get('results', [])
+        papers = []
+        
+        for w in results:
+            doi = (w.get('doi') or '').replace('https://doi.org/', '')
+            title = w.get('title', '')
+            if not title:
+                continue
+            
+            authors = []
+            for a in (w.get('authorships') or [])[:10]:
+                author_obj = a.get('author', {})
+                name = author_obj.get('display_name', '')
+                if name:
+                    authors.append({'name': name})
+            
+            venue = ''
+            loc = w.get('primary_location') or {}
+            src = loc.get('source') or {}
+            venue = src.get('display_name', '')
+            
+            # biblio: volume/issue/pages
+            biblio = w.get('biblio') or {}
+            volume = biblio.get('volume') or ''
+            issue = biblio.get('issue') or ''
+            first_page = biblio.get('first_page') or ''
+            last_page = biblio.get('last_page') or ''
+            pages = f"{first_page}-{last_page}" if first_page and last_page else (first_page or '')
+            
+            papers.append({
+                'paperId': doi or w.get('id', ''),
+                'title': title,
+                'year': w.get('publication_year'),
+                'authors': authors,
+                'venue': {'raw': venue} if venue else {},
+                'abstract': (w.get('abstract_inverted_index') and 
+                             _openalex_abstract_to_text(w.get('abstract_inverted_index'))) or '',
+                'citationCount': w.get('cited_by_count', 0),
+                'externalIds': {'DOI': doi} if doi else {},
+                'volume': volume,
+                'number': issue,
+                'pages': pages,
+                'source': 'openalex',
+            })
+        
+        logger.info(f"[OpenAlex] 搜索成功: {len(papers)} 篇 ({query[:50]})")
+        return papers
+        
+    except Exception as e:
+        logger.debug(f"[OpenAlex] 搜索失败: {e}")
+        return []
+
+
+def _openalex_abstract_to_text(inverted_index: dict) -> str:
+    """将 OpenAlex 的 inverted index abstract 转为纯文本"""
+    if not inverted_index:
+        return ''
+    word_positions = []
+    for word, positions in inverted_index.items():
+        for pos in positions:
+            word_positions.append((pos, word))
+    word_positions.sort(key=lambda x: x[0])
+    return ' '.join(w for _, w in word_positions)
+
+
 def search_papers(query, size):
     """
-    搜索论文 — 统一多源降级链
+    搜索论文 — v11.9: MCP → Web Search API(OpenAlex补全) → OpenAlex 纯搜
 
-    优先级：MCP (web-search-prime) → 百度学术 → Semantic Scholar → AMiner
+    互补策略:
+    - MCP 配额可用时直接用 MCP（质量最好）
+    - Web Search API + LLM 找论文 + OpenAlex 补全结构化信息（互补模式）
+    - 纯 OpenAlex 作为最后兜底（结构化好但相关性差）
 
     Args:
         query: 嵌套关键词列表 [["kw1", "kw2"], ["kw3"]] 或搜索字符串
@@ -1163,38 +1281,41 @@ def search_papers(query, size):
         logger.debug(f"使用缓存结果: {query_str[:50]}")
         return _to_aminer_format(cached)
 
-    # 1. MCP web-search-prime（search_papers_semantic 内部已先尝试 MCP）
+    # 1. MCP web-search-prime (智谱)
     papers = search_papers_semantic(query_str, limit=size)
     if papers:
         _set_cache(query_str, papers)
         return _to_aminer_format(papers)
 
-    # 2. 百度学术
-    papers = search_papers_baidu(query_str, limit=size)
+    # 2. Web Search API + LLM + OpenAlex 补全 (互补模式)
+    try:
+        from api.web_search_api import search_papers_web
+        ws_papers = search_papers_web(query_str, limit=size, enrich=True)
+        if ws_papers:
+            logger.info(f"[search_papers] Web Search API + OpenAlex 返回 {len(ws_papers)} 条")
+            _set_cache(query_str, ws_papers)
+            return _to_aminer_format(ws_papers)
+    except Exception as e:
+        logger.debug(f"[search_papers] Web Search API 失败: {e}")
+
+    # 3. 纯 OpenAlex 兜底 (境内可达，~10s)
+    papers = search_papers_openalex(query_str, limit=size)
     if papers:
         _set_cache(query_str, papers)
         return _to_aminer_format(papers)
 
-    # 3. Semantic Scholar 已在 step 1 中尝试（MCP 不可用时自动回退到 S2）
-    #    此处无需重复
-
-    # 4. AMiner（最终回退）
-    return search_papers_aminer(query, size)
+    # 全部失败
+    logger.debug(f"[search_papers] 所有通道未返回结果: {query_str[:50]}")
+    return {"data": []}
 
 
 def get_paper_details(paper_id):
     """
-    获取论文详情 — 统一多源降级链
+    获取论文详情 — v11.6: 境内网络只走 MCP 通道
 
-    优先级：Semantic Scholar（含 URL 识别 + MCP web-reader 回退）→ AMiner
-
-    Args:
-        paper_id: 论文ID（S2 ID, DOI, ArXiv ID, 或 URL）
-
-    Returns:
-        论文详情（保持AMiner格式兼容）
+    S2 API 直连已禁用。
     """
-    # 1. Semantic Scholar（已增强：URL 识别 + MCP web-reader 回退）
+    # 1. Semantic Scholar（内部已优先走 MCP web-reader）
     details = get_paper_details_semantic(paper_id)
 
     if details and details.get("paperId"):
@@ -1219,8 +1340,8 @@ def get_paper_details(paper_id):
             }]
         }
 
-    # 2. AMiner（最终回退）
-    return get_paper_details_aminer(paper_id)
+    # 不再尝试 AMiner（境内不可用）
+    return {"data": []}
 
 
 if __name__ == "__main__":

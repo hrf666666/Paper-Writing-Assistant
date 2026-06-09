@@ -1,0 +1,108 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 46.9,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 6,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 30,
+      "tex_has_citations": true,
+      "tex_table_count": 0,
+      "tex_has_tables": false,
+      "tex_figure_count": 1,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 48,
+      "bib_min_entries": true,
+      "pdf_exists": true,
+      "pdf_size_kb": 91.5,
+      "pdf_min_size": false,
+      "figures_dir_exists": true,
+      "figure_files_count": 1,
+      "figures_min": false,
+      "compile_log_exists": true,
+      "compile_errors": 19,
+      "compile_success": false
+    },
+    "score": 76,
+    "all_passed": false,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 6919,
+      "word_count_ok": true,
+      "citation_count": 30,
+      "citations_min": true,
+      "formula_count": 6,
+      "formulas_min": true,
+      "table_count": 0,
+      "tables_min": false,
+      "figure_count": 1,
+      "figures_min": false,
+      "ablation_mentions": 4,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 83,
+    "sections_found": 5,
+    "total_words": 6919,
+    "total_citations": 30
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 85,
+      "narrative_progression": 85,
+      "methodological_rigor": 70,
+      "experimental_sufficiency": 50,
+      "citation_quality": 40,
+      "writing_style": 90,
+      "data_consistency": 85,
+      "format_compliance": 95
+    },
+    "overall_score": 75,
+    "strengths": [
+      "s1: The paper presents a well-motivated, theoretically grounded framework that directly addresses the physical limitations of Lambertian assumptions in light field depth estimation.",
+      "s2: The narrative progression is highly logical, clearly detailing the problem-insight-solution chain with three distinct and properly justified contributions.",
+      "s3: The writing style is exceptionally formal, precise, and fully compliant with IEEE standards, making the complex physics-based concepts easy to follow."
+    ],
+    "weaknesses": [
+      "w1: The provided source code contains fewer than 30 distinct references, severely impacting the depth of the related work section and failing to meet the expected citation density.",
+      "w2: There is a lack of proper mathematical formalization using standard equation environments (e.g., \\begin{equation}), relying instead on inline expressions for the core model formulation.",
+      "w3: The reviewed sections lack visual evidence such as figures, result tables, or detailed algorithmic pseudocode, which are critical for substantiating the claimed experimental sufficiency and architectural novelty."
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "gap1: Insufficient citation count falls well below the comprehensive literature review standard expected for a top-tier journal like IEEE TCSVT.",
+      "gap2: Absence of visual and tabular representations for the network architecture, experimental results, and ablation studies in the provided manuscript text.",
+      "gap3: Core mathematical modeling is inadequately formatted, using inline math rather than properly numbered and rigorously defined equation blocks."
+    ]
+  },
+  "overall": {
+    "L1_score": 76,
+    "L2_score": 83,
+    "L3_score": 75,
+    "L1_passed": false,
+    "overall_grade": "B"
+  }
+}

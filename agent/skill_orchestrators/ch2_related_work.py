@@ -9,12 +9,11 @@ Skill: 第二章 - Related Work / 相关工作
 
 import os
 import json
-from tqdm import tqdm
 
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
 from api.paper_search import search_papers, get_paper_details
 
 import logging
@@ -88,7 +87,7 @@ def _determine_subsections(innovation_points, experiment_design, ref_data):
     )
 
 
-def generate_related_work(project_data, ref_data, previous_chapters=None):
+def generate_related_work(project_data, ref_data, previous_chapters=None, citation_context=""):
     """生成第二章 Related Work"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -121,7 +120,7 @@ def generate_related_work(project_data, ref_data, previous_chapters=None):
     except Exception as e:
         logger.error(f"[chapter2] 保存结构失败: {e}")
     
-    style_instruction = _build_style_instruction(style_guide, chapter_org, is_related_work=True)
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Related Work", is_related_work=True)
     
     innovation_summary = ""
     for i, ip in enumerate(innovation_points, 1):
@@ -182,8 +181,10 @@ def generate_related_work(project_data, ref_data, previous_chapters=None):
 
 {prev_summary}
 
-请使用学术英语撰写。引用使用<citation>["keyword1","keyword2"]</citation>标记。行内公式用 `$...$`，行间公式用 `$$...$$`。Markdown格式。
-**重要**：不要输出子节标题（如 "## 2.1 ..."），该标题已由系统自动添加。直接从正文内容开始。直接给出内容：
+{citation_context}
+
+请使用学术英语撰写。引用使用<citation>["keyword1","keyword2"]</citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
+**重要**：不要输出 \section 或 \subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
         
         logger.info(f"[chapter2] 生成 2.{idx+1} {title}...")
@@ -211,7 +212,7 @@ def generate_related_work(project_data, ref_data, previous_chapters=None):
 前序内容摘要：
 {sections[-1][:1000]}
 
-请使用学术英语，2-3句话。Markdown格式。直接给出内容：
+请使用学术英语，2-3句话。直接输出LaTeX代码。不要输出 \section 标题。直接给出内容：
 """
     
     logger.info("[chapter2] 生成总结过渡段...")
@@ -222,87 +223,24 @@ def generate_related_work(project_data, ref_data, previous_chapters=None):
         summary_section = ""
     
     # 组装完整章节
-    full_chapter = "# 2. Related Work\n\n"
+    full_chapter = "\\section{Related Work}\n\n"
     for idx, (subsec, content) in enumerate(zip(subsections, sections)):
-        full_chapter += f"## 2.{idx+1} {subsec['title']}\n\n{content}\n\n"
+        full_chapter += f"\\subsection{{{subsec['title']}}}\n\n{content}\n\n"
     full_chapter += summary_section
     
     return full_chapter
 
-
-def _build_style_instruction(style_guide, chapter_org, is_related_work=False):
-    """构建写作风格指导（v9.3: 集成 IEEE Trans 期刊风格配置）"""
-    instruction = "**写作风格指导**：\n"
-    
-    # v9.3: 加载 IEEE Trans 期刊风格配置（P2 优先级规则）
-    try:
-        import os
-        from config.ieee_trans_style_profile import (
-            get_ieee_trans_style_profile,
-            get_section_requirements,
-        )
-        
-        profile = get_ieee_trans_style_profile()
-        rw_req = get_section_requirements("Related Work")
-        
-        instruction += f"\n**IEEE Transactions 期刊特定规则**（P2 优先级，必须遵守）：\n"
-        instruction += f"\n### Related Work 结构要求\n"
-        instruction += f"- 组织方式：{rw_req.get('organization', 'N/A')}\n"
-        instruction += f"- 每组内容：{rw_req.get('per_group', 'N/A')}\n"
-        instruction += f"- 引用密度：{rw_req.get('citation_density', 'N/A')}\n"
-        instruction += f"- 禁止模式：\n"
-        for anti in rw_req.get('anti_patterns', []):
-            instruction += f"  - {anti}\n"
-        instruction += "\n"
-    except Exception as e:
-        logger.debug(f"[IEEE Trans 风格配置] 加载失败: {e}")
-    
-    if is_related_work:
-        instruction += """
-- Related Work 特殊要求：
-  1. 每篇被讨论的工作用1-2段描述，先说方法核心思路再说结果/局限
-  2. 工作之间的过渡句要体现递进或对比关系（"While X focuses on..., Y extends to..."）
-  3. 每个小节的最后一段集中讨论该类方法的不足
-  4. 不足的论述要具体，不能泛泛说"performance is limited"
-  5. 引用要自然融入句式："Author et al. [1] proposed..." 或 "Recent work [2,3] has shown..."
-"""
-    
-    if style_guide and isinstance(style_guide, dict):
-        vocabulary = style_guide.get("用词特征", [])
-        if vocabulary:
-            instruction += f"- 学术用词：{vocabulary[:15]}\n"
-        
-        citation_style = style_guide.get("引用风格", {})
-        if citation_style:
-            instruction += f"- 引用风格：{citation_style}\n"
-    
-    if chapter_org and isinstance(chapter_org, dict):
-        patterns = chapter_org.get("关键句式模板", {})
-        if patterns:
-            instruction += "- 关键句式模板：\n"
-            for k, v in list(patterns.items())[:5]:
-                instruction += f"  {k}: {v}\n"
-    
-    instruction += """
-- 重要要求：
-  1. 文风学术化，禁止口语化
-  2. 论述有逻辑层次，每句话都有明确目的
-  3. 不足分析要自然指向本研究能解决的问题
-"""
-    
-    return instruction
-
-
-def run_chapter2(project_data, ref_data, previous_chapters=None):
+def run_chapter2(project_data, ref_data, previous_chapters=None, citation_context=""):
     """主入口：生成第二章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter2", exist_ok=True)
     
     logger.info("[chapter2] 开始生成第二章 Related Work...")
     try:
-        chapter_content = generate_related_work(project_data, ref_data, previous_chapters)
+        chapter_content = generate_related_work(project_data, ref_data, previous_chapters,
+                                                   citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter2] 第二章生成失败: {e}")
-        chapter_content = "# 2. Related Work\n\n(生成失败，请重新运行)\n"
+        chapter_content = "\\section{Related Work}\n\n(生成失败，请重新运行)\n"
     
     try:
         _orch.save_output("chapter2_related_work.md", chapter_content, subdir="chapter2")

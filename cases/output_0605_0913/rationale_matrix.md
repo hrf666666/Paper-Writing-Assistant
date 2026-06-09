@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| 将光场角信号物理分解为直流分量(DC)、线性项(视差)和残差项(材质)的三层模型 | 传统EPI方法假设所有表面为朗伯体，非朗伯反射（如高光）会破坏EPI的线性假设，导致深度估计在复杂反 | 相比于直接输入原始EPI或仅使用注意力机制隐式学习特征的方法，显式物理分解将材质反射与几何视差解耦， | 包含镜面反射、半透明或复杂散射材质的Non-Lambertian场景，以及Urb | 残差项成功分离出非朗伯反射特征，得到Wang 2017角锥约束和Cui 2024 | Methodology (Physical Signal Decomposition) | must |
+| 摒弃2D-DFT等高分辨率角频谱分析，转而提取角梯度、角相关性、变异系数等几何角 | 实际应用中光场角分辨率通常较低（如9x9），高分辨率频谱特征在低角分辨率下存在严重的频谱泄漏和混叠， | 传统依赖频域分析的方法在9x9低角分辨率下性能急剧下降，而几何特征在低分辨率下具有更强的鲁棒性且无需 | 低角分辨率（如9x9）的光场输入数据，特别是计算资源受限或硬件采集角度有限的实际 | 角梯度特征的Cohen's d达到0.983，证明在低分辨率下对Lamberti | Methodology (Geometric Feature Extraction) | must |
+| 构建基于几何角特征的随机森林(RF)分类器，而非使用深度神经网络进行端到端的材质 | Non-Lambertian数据集极度稀缺（仅4个训练场景），使用深度网络进行材质分类会导致严重的过 | 相比于全监督的深度语义分割网络，RF分类器利用手工几何特征在小样本下泛化能力更强，避免了深度网络在少 | Non-Lambertian训练数据严重不足（仅4个场景）的长尾分布数据环境 | RF分类器在测试集上准确率达到89.6%，AUC达到0.962，证明了在小样本非 | Methodology (Material Classification Prior) | must |
+| 设计GeometricDualMask双掩码机制，在特征提取阶段对朗伯体和非朗伯 | 单一网络分支无法同时处理符合线性假设的漫反射区域和呈现非线性复杂分布的高光区域，导致特征提取时的相互 | 传统单一EPI模型在多域混合场景下MAE显著上升；双掩码机制通过差异化处理策略，使网络无需在两种截然 | 同时包含大面积漫反射和局部复杂反射（如玻璃、金属）的Mixed/Urban混合场 | 模型验证报告显示GeometricDualMask的mask gap=0.041 | Methodology (Dual-Mask Architecture) | must |
+| 引入域平衡采样（Domain-balanced sampling）与Weight | 训练集中Lambertian数据与Mixed/Urban数据及Non-Lambertian数据存在极 | 常规的统一训练会导致模型在Urban场景下性能崩溃；域平衡采样强制模型在每个batch中均衡学习各域 | 包含HCInew（Lambertian）、UrbanLF-Syn（Mixed）和 | Mixed (Urban)场景下的MAE达到0.081（远优于<0.22的目标阈 | Experimental Setup (Training Strategy) | should |
+| 在训练阶段引入相位正则化和物理一致性损失，约束Non-Lambertian区域的 | 非朗伯表面的反射光线路径偏离标准极线几何，仅依靠L1/L2光度损失无法保证预测的深度和位移场在物理反 | 传统基于纯数据驱动的损失函数在Non-Lambertian区域会产生违反物理规律的深度跳变；物理一致 | Non-Lambertian区域（如镜面、半透明材质）的深度图与二维位移场（Di | 最终评估指标显示Overall MAE达到0.133，且在Non-Lambert | Methodology (Loss Functions) | should |

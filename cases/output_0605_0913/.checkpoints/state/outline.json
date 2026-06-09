@@ -1,0 +1,417 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于物理先验的三层角信号分解与几何材质分类机制 - 从物理和几何层面揭示了非朗伯体表面破坏EPI线性假设的根本原因。在低角分辨率（如9x9）下，通过几何特征替代频谱特征，实现了高效、鲁棒的材质分类，为后续深度估计网络中的特征路由和掩码生成提供了可靠的理论和技术基础。",
+        "Contribution: 面向多域光场的几何双掩码统一深度估计架构 - 有效解决了传统单一EPI模型在面对多域混合场景时性能急剧下降的问题。双掩码机制使得网络能够针对不同反射特性的区域采用差异化处理策略，而域平衡采样显著提升了模型在复杂城市/混合场景下的泛化能力，实现了单一模型在多域光场数据上的统一与高效推理。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景与动机 (Background & Motivation)",
+          "核心任务": "介绍CNN在视觉领域的统治地位以及Transformer在NLP领域的巨大成功，引出将Transformer引入计算机视觉的研究动机。"
+        },
+        {
+          "子节名称": "领域挑战与痛点 (Challenges & Pain Points)",
+          "核心任务": "深入剖析NLP与CV领域的本质差异（如视觉实体尺度变化大、图像像素分辨率高），指出直接迁移Transformer面临的具体困难。"
+        },
+        {
+          "子节名称": "现有工作及其局限性 (Related Work & Limitations)",
+          "核心任务": "分析现有视觉Transformer（如ViT）的技术缺陷，特别是全局自注意力导致的平方级计算复杂度以及缺乏多尺度特征表示的问题。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Real-world light field depth estimation challenges (non-Lambertian, multi-domain)",
+          "Limitations of existing EPI-based and learning-based methods",
+          "Proposed physics-driven dual-mask architecture and contributions"
+        ],
+        "depth_map": {
+          "background_and_motivation": "moderate",
+          "problem_formulation_and_limitations": "deep",
+          "contributions": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "motivation_hook: Traditional light field depth estimation fails in real-world scenarios due to non-Lambertian reflections and domain shifts",
+          "contribution_claim: Bulleted list of 3 contributions (Physics-based 3-layer decomposition, Geometric Dual-Mask architecture, SOTA multi-domain performance with quantitative evidence)",
+          "Clear gap statement highlighting the failure of linear EPI assumptions on complex materials and the overfitting of single-domain models",
+          "[动机锚点] Establish the problem of Traditional light field depth estimation fails in real-world scenarios beca",
+          "[动机锚点] Enumerate contributions: 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构, with quantitative evidence"
+        ],
+        "should_avoid": [
+          "Detailed mathematical derivations of the 3-layer decomposition",
+          "Paper structure paragraph (e.g., 'The rest of this paper is organized as...')",
+          "Excessive citations in a single paragraph (>10)"
+        ],
+        "target_emphasis": "To establish the critical failure of traditional linear EPI assumptions in real-world multi-domain scenarios and introduce the physics-guided dual-mask solution."
+      }
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Self-Attention and Transformers (或 Vision Transformers)",
+          "核心任务": "回顾Transformer在NLP领域的成功及其在计算机视觉（如ViT, DETR）中的初步应用，重点剖析现有视觉Transformer在处理高分辨率图像和密集预测任务时面临的计算复杂度（二次方）及缺乏多尺度特征表示的局限性。"
+        },
+        {
+          "子节名称": "CNNs and Hierarchical Architectures (或 Hierarchical Vision Models)",
+          "核心任务": "梳理卷积神经网络（CNN）在视觉任务中占据主导地位的层次化设计（如ResNet, FPN）及其在密集预测任务中的优势，同时探讨将注意力机制引入CNN的尝试，从而引出本文融合CNN层次化优势与Transformer全局建模能力的动机。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Light field depth estimation (EPI-based and learning-based)",
+          "Non-Lambertian and reflection handling in light fields",
+          "Multi-domain and domain-adaptive depth estimation"
+        ],
+        "depth_map": {
+          "epi_based_methods": "moderate",
+          "learning_based_methods": "moderate",
+          "non_lambertian_handling": "deep",
+          "multi_domain_adaptation": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "gap_bridge: Show existing methods lack robust handling of non-Lambertian surfaces and fail in multi-domain real-world scenarios, bridging to our physics-driven approach",
+          "Categorical subheadings for different approaches (by_approach organization)",
+          "Critique at the end of each group highlighting specific limitations (e.g., reliance on high-res angular spectra, single-domain overfitting)",
+          "[动机锚点] Show existing methods lack Traditional light field depth estimation fails in real-world, bridging to"
+        ],
+        "should_avoid": [
+          "Unstructured chronological list of papers",
+          "Detailed explanations of standard CNN/Transformer architectures not specific to light fields",
+          "First-person singular narrative (use 'we' or passive voice)"
+        ],
+        "target_emphasis": "To systematically categorize prior art and expose the critical gaps in handling non-Lambertian materials and multi-domain shifts, justifying the need for physical priors and dual-mask routing."
+      }
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 输入归一化模块 (Input Normalization)",
+          "description": "按批次和通道维度计算最小值和最大值，进行最小-最大归一化，并线性缩放到 [-1, 1] 区间，以加速网络收敛并稳定梯度"
+        },
+        {
+          "title": "3.3 双掩码特征提取与分解模块 (Dual-Mask Feature Extraction)",
+          "description": "基于三层角度信号分解理论，将光场信号解耦为DC（环境光）、线性项（视差）和残差（材质）。内部并行运行Lambertian EPI分支和Non-Lambertian几何分支，提取多尺度几何与材质特征，并通过平衡投影层（FUSE_DIM）解决早期版本中EPI分支与几何分支的通道不平衡问题"
+        },
+        {
+          "title": "3.4 物理预测头 (Physical Prediction Head)",
+          "description": "通过卷积层将高维特征映射为物理意义明确的输出变量，分别预测每个像素的深度值、反射率/材质掩码（用于区分Lambertian与Non-Lambertian区域）以及二维视差位移场"
+        },
+        {
+          "title": "3.5 相位正则化模块 (Phase Regularization)",
+          "description": "计算位移场V在空间维度上的梯度平方和，并利用反射率r的逆Sigmoid值作为权重。该操作旨在惩罚Non-Lambertian区域（r较大）的位移场梯度，同时保持Lambertian区域（r较小）的位移场平滑性"
+        },
+        {
+          "title": "3.6 物理一致性约束模块 (Physical Consistency Loss)",
+          "description": "计算预测的视差/位移场与反射率之间的物理一致性约束，确保Non-Lambertian区域的深度估计和视差计算符合非朗伯体表面的物理反射和散射模型"
+        },
+        {
+          "title": "3.7 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出光场角信号的三层物理分解模型：将角信号分解为直流分量（DC，环境光照）、线性项（视差/深度EPI斜率）和残差项（材质/反射类型）。; 摒弃对高分辨率角频谱（如2D-DFT/MRI类比）的依赖，转而提取几何角特征（如角梯度、角相关性、变异系数）来表征材质属性。; 构建基于几何特征的随机森林（RF）分类器，实现对朗伯体（Lambertian）和非朗伯体（Non-Lambertian）表面的高精度分类，为网络提供物理先验。",
+        "Module motivation and design: 设计GeometricDualMask模型架构，利用材质分类先验生成双掩码（Dual-Mask），在特征提取阶段对朗伯体和非朗伯体/复杂纹理区域进行特征分离与自适应路由处理。; 引入域平衡采样（Domain-balanced sampling）与加权随机采样器（WeightedRandomSampler），在统一训练框架下动态调整不同域（如Urban/Mixed、Lambertian等）的样本权重，缓解数据分布不均导致的过拟合问题。; 结合4方向EPI（EPINet4Dir V3）作为基础特征提取器，融合多域混合训练策略，构建端到端的统一光场深度估计网络。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Overall Architecture (整体架构)",
+          "核心任务": "阐述Swin Transformer的宏观网络结构，包括Patch Partition、Linear Embedding、Patch Merging以及Swin Transformer Block的堆叠方式，强调其构建层级特征图的能力及作为通用视觉骨干网络的潜力。"
+        },
+        {
+          "子节名称": "Shifted Window based Self-Attention (基于移动窗口的自注意力)",
+          "核心任务": "详细解析核心创新机制。包含局部窗口自注意力（Local Window Attention）、移动窗口划分（Shifted Window Partitioning）、高效的批次计算实现（Efficient Batch Computation）以及相对位置偏置（Relative Position Bias），解决全局自注意力计算复杂度高的问题。"
+        },
+        {
+          "子节名称": "Architecture Variants (架构变体)",
+          "核心任务": "列出基于上述架构构建的不同规模的模型配置（如Swin-T, Swin-S, Swin-B, Swin-L），说明通道数、层数、头数等具体超参数设置，为后续实验提供实例支撑。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Three-layer angular signal decomposition and geometric material classification",
+          "Geometric Dual-Mask unified depth estimation architecture",
+          "Domain-balanced sampling and multi-domain training strategy"
+        ],
+        "depth_map": {
+          "overview": "brief",
+          "physics_prior_material_classification": "deep",
+          "geometric_dual_mask_architecture": "deep",
+          "training_strategy": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "primary",
+          "创新点2": "primary"
+        },
+        "must_include": [
+          "contribution_claim: Justify each module by connecting to the failure of traditional light field depth estimation in real-world scenarios",
+          "Full mathematical derivation of the 3-layer decomposition (DC, linear, residual) and geometric feature extraction",
+          "Detailed data flow and feature routing mechanism of the Dual-Mask module with horizontal flow architecture descriptions",
+          "Computational complexity analysis (FLOPs, Params) to satisfy TCSVT system and video-specific technical insight requirements",
+          "[动机锚点] Justify each module (基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构) by connecting to: Traditional li"
+        ],
+        "should_avoid": [
+          "Algorithm boxes (use text, equations, and detailed figure descriptions instead)",
+          "Over-describing the baseline EPINet4Dir V3 architecture",
+          "Informal or non-mathematical problem formulations"
+        ],
+        "target_emphasis": "To provide a rigorous, full-derivation exposition of the physics-based material classification and the dual-mask feature routing mechanism, proving their theoretical and systemic soundness."
+      }
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: HCInew, UrbanLF-Syn, Non-Lambertian Dataset, HCI-Old"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Image Classification on ImageNet-1K",
+          "核心任务": "评估模型在基础视觉任务上的性能，展示不同规模变体（Tiny/Small/Base/Large）的准确率，并与CNN及早期Vision Transformer基线进行对比。"
+        },
+        {
+          "子节名称": "Object Detection on COCO",
+          "核心任务": "验证模型作为骨干网络在密集预测任务（目标检测和实例分割）上的泛化能力，结合Mask R-CNN/Cascade Mask R-CNN等检测头进行性能评估。"
+        },
+        {
+          "子节名称": "Semantic Segmentation on ADE20K",
+          "核心任务": "评估模型在像素级密集预测任务（语义分割）上的表现，结合UPerNet等分割头验证多尺度特征提取的有效性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Multi-domain SOTA comparison (Urban, Mixed, Lambertian datasets)",
+          "Ablation studies on physical decomposition and dual-mask routing",
+          "Efficiency, complexity, and bitrate-performance trade-off equivalent analysis"
+        ],
+        "depth_map": {
+          "datasets_and_setup": "brief",
+          "sota_comparison": "deep",
+          "ablation_study": "deep",
+          "complexity_and_visualization": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "evidence_support: Validate innovations via comprehensive ablation tables and SOTA comparison tables",
+          "Mixed dataset evaluation (e.g., HCI, Stanford, Urban/Mixed real-world datasets) to prove multi-domain capability",
+          "Quantitative metrics (MSE, BadPix, etc.) with data placed immediately after each claim",
+          "Computational complexity, inference time, parameter count, and memory footprint analysis",
+          "[动机锚点] Design experiments validating 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构 via ablation and SOTA co"
+        ],
+        "should_avoid": [
+          "Failure analysis (as per journal style preference)",
+          "Evaluating only on basic synthetic datasets without real-world/multi-domain validation",
+          "Over-claiming generalization without statistical backing"
+        ],
+        "target_emphasis": "To comprehensively validate the proposed architecture's superiority in multi-domain real-world scenarios through rigorous ablation, SOTA comparisons, and system efficiency metrics."
+      }
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "核心工作总结 (Summary of Proposed Method)",
+          "核心任务": "高度概括本文提出的模型名称、核心创新机制（如层级Transformer、移动窗口）及其作为通用视觉骨干网络的定位。"
+        },
+        {
+          "子节名称": "性能与优势重申 (Reiteration of Performance and Advantages)",
+          "核心任务": "重申模型如何解决特定领域挑战（如从NLP到CV的适配），并总结其在多个下游视觉任务（分类、检测、分割）中的广泛适用性和卓越表现。"
+        },
+        {
+          "子节名称": "愿景与未来展望 (Vision and Future Outlook)",
+          "核心任务": "拔高研究立意，表达对该模型推动视觉社区发展、启发未来新型架构设计的期望与愿景。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Summary of physics-driven and dual-mask contributions",
+          "Impact on real-world multi-domain light field depth estimation",
+          "Future research directions"
+        ],
+        "depth_map": {
+          "summary_of_contributions": "moderate",
+          "impact_and_significance": "brief",
+          "future_work": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "contribution_claim: Echo how the 3-layer decomposition and dual-mask architecture successfully address the failure of traditional light field depth estimation in real-world scenarios",
+          "Final quantitative highlight of the multi-domain performance improvement and system efficiency",
+          "[动机锚点] Echo how 基于物理先验的三层角信号分解与几何材质分类机制, 面向多域光场的几何双掩码统一深度估计架构 successfully addresses Traditional light fiel"
+        ],
+        "should_avoid": [
+          "Introducing new methods, datasets, or experimental results",
+          "Repeating the exact text from the abstract or introduction verbatim"
+        ],
+        "target_emphasis": "To concisely reinforce how the integration of physical priors and dual-mask routing resolves real-world multi-domain depth estimation challenges and sets a new systemic baseline."
+      }
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "LaTeX（IEEE Transactions IEEEtran 格式）"
+  }
+}

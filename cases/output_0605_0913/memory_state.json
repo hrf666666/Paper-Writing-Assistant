@@ -1,0 +1,307 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于物理先验的三层角信号分解与几何材质分类机制: 从物理和几何层面揭示了非朗伯体表面破坏EPI线性假设的根本原因。在低角分辨率（如9x9）下，通过几何特征替代频谱特征，实现了高效、鲁棒的材质分类，为后续深度估计网络中的特征路由和掩码生成提供了可靠的理论和技术基础。\n  2. 面向多域光场的几何双掩码统一深度估计架构: 有效解决了传统单一EPI模型在面对多域混合场景时性能急剧下降的问题。双掩码机制使得网络能够针对不同反射特性的区域采用差异化处理策略，而域平衡采样显著提升了模型在复杂城市/混合场景下的泛化能力，实现了单一模型在多域光场数据上的统一与高效推理。\n\n模型架构: 输入为多视角光场图像（Light Field），经过最小-最大归一化映射到[-1, 1]区间后，进入统一双掩码物理模型（Unified Dual-Mask Physical Model）。模型基于三层角度信号分解理论，采用双路径架构（Lambertian EPI分支处理漫反射区域，Non-Lambertian几何分支处理高光/散射区域）提取特征。通过平衡投影解决通道不平衡问题后，由物理预测头解耦输出深度图（Depth）、反射率/材质掩码（Reflectance/Mask）和二维位移场（Displacement Field）。训练阶段引入相位正则化和物理一致性损失，确保Non-Lambertian区域的深度估计符合物理反射模型，最终实现跨域的高精度深度估计。\n\n数据集: [{\"名称\": \"HCInew\", \"规模\": \"包含多个场景（如boxes, cotton, dino, sideboard, backgammon, dots等），每个场景81个视角，原生分辨率512x512\", \"场景类型\": \"Lambertian（朗伯表面）\", \"划分方式\": \"划分为training和stratified子集，作为train split\"}, {\"名称\": \"UrbanLF-Syn\", \"规模\": \"170个场景\", \"场景类型\": \"Mixed/Urban（混合/城市场景）\", \"划分方式\": \"用于混合训练，提供丰富的训练信号\"}, {\"名称\": \"Non-L",
+  "log_entries": [
+    {
+      "timestamp": 1780589053.2875202,
+      "category": "log",
+      "content": "EXECUTE: Related Work 完成, 耗时 242s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589053.2878435,
+      "category": "quality",
+      "content": "Related Work 最终质量: 94.9/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589053.2878513,
+      "category": "quality",
+      "content": "VERIFY phase2: 66.2/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589053.2878668,
+      "category": "log",
+      "content": "任务完成: generate_chapter2, 质量: 94.89999999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589060.0237134,
+      "category": "log",
+      "content": "THINK: 首次执行: Methodology\nLLM策略建议: Structure your methodology to directly operationalize the spatiotemporal modeling and computational efficiency challenges outlined in the introduction, ensuring every archit",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589060.0237164,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter3 - Methodology",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589313.0063777,
+      "category": "log",
+      "content": "EXECUTE: Methodology 完成, 耗时 253s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589313.0067484,
+      "category": "quality",
+      "content": "Methodology 最终质量: 77.8/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589313.0070794,
+      "category": "quality",
+      "content": "VERIFY phase3: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589313.007105,
+      "category": "log",
+      "content": "任务完成: generate_chapter3, 质量: 77.775",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589323.4709437,
+      "category": "log",
+      "content": "THINK: 首次执行: Experiments\nLLM策略建议: Structure the experiments to directly validate the introduction’s core claims by rigorously benchmarking your model’s spatiotemporal accuracy and computational efficiency ag",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780589323.4709473,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter4 - Experiments",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590776.19217,
+      "category": "log",
+      "content": "EXECUTE: Experiments 完成, 耗时 1453s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590776.1928828,
+      "category": "quality",
+      "content": "Experiments 最终质量: 85.9/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590776.193252,
+      "category": "quality",
+      "content": "VERIFY phase4: 78.8/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590776.1932755,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 85.94999999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590786.6301262,
+      "category": "log",
+      "content": "THINK: 首次执行: Conclusion\nLLM策略建议: Explicitly map each of your methodological contributions back to the spatiotemporal efficiency and modeling challenges introduced in Chapter 1 to maintain narrative continuit",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590786.630133,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590927.7344592,
+      "category": "log",
+      "content": "EXECUTE: Conclusion 完成, 耗时 141s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590927.7347016,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 79.9/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590927.7350013,
+      "category": "quality",
+      "content": "VERIFY phase5: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590927.7350233,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 79.925",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590936.77684,
+      "category": "log",
+      "content": "THINK: 首次执行: Discussion\nLLM策略建议: Restate the study's primary achievements by directly connecting them to the initial problem of capturing complex spatiotemporal dependencies efficiently, thereby reinforcing ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780590936.7768466,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591571.698339,
+      "category": "log",
+      "content": "EXECUTE: Discussion 完成, 耗时 635s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591571.6990778,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 75.0/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591571.6990862,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591581.3895664,
+      "category": "log",
+      "content": "THINK: 首次执行: Limitations and Future Work\nLLM策略建议: Summarize your contributions by demonstrating how the proposed method effectively resolves the critical trade-off between capturing complex spatiotemporal de",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591581.3895729,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591844.9966462,
+      "category": "log",
+      "content": "EXECUTE: Limitations and Future Work 完成, 耗时 264s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591844.997497,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 78.8/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591844.9975061,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591851.4723513,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Synthesize the key findings and methodological contributions from each chapter to reinforce the overarching research narrative without introducing new information. E",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591851.472358,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8640554,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 139s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8642023,
+      "category": "quality",
+      "content": "abstract 最终质量: 88.5/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.864837,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8648677,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: 88.5",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.880673,
+      "category": "log",
+      "content": "THINK: 首次执行: 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8806806,
+      "category": "log",
+      "content": "开始执行任务: review_content - 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8821387,
+      "category": "log",
+      "content": "EXECUTE: 内容审查与参考文献审查 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8821535,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8958414,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780591990.8958461,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780592440.6457915,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验 完成, 耗时 450s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780592440.6458006,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780592440.65954,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780592440.6595442,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780593894.7727022,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/Word输出 完成, 耗时 1454s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780593894.7731183,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

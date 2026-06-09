@@ -1,0 +1,44 @@
+{
+  "总体架构": "输入为9x9角度采样的光场图像（Light Field）。模型首先通过三层角度信号分解模块将光场信号分离为光照（DC）、视差（线性项）和材质（残差）分量。随后，数据流入双分支架构：朗伯体EPI分支利用EPI线结构和连续深度先验处理朗伯体区域；非朗伯体几何分支利用角度梯度和EPI中的X型几何模式处理非朗伯体区域。双掩码路由模块基于像素级几何伪标签生成掩码，最后通过掩码加权融合模块平衡通道并融合双分支特征。最终输出高精度深度图（Depth Map）和材质/域分类掩码（Domain Mask）。",
+  "模块详情": [
+    {
+      "模块名": "三层角度信号分解模块 (Three-Layer Angular Signal Decomposition)",
+      "输入": "9x9 角度光场图像块 I(u,v)",
+      "核心操作": "将角度信号分解为直流分量（环境光照）、线性分量（视差/深度）和残差分量（材质/反射类型），并计算高判别力的几何特征（如角度梯度）。",
+      "输出": "DC分量, 线性系数(a,b), 残差 ε(u,v), 几何特征（angular_gradient等）",
+      "关键公式": "I(u,v) = DC + a·u + b·v + ε(u,v)"
+    },
+    {
+      "模块名": "朗伯体 EPI 分支 (Lambertian EPI Branch)",
+      "输入": "光场 EPI 特征, 线性系数(a,b)",
+      "核心操作": "利用 EPI 线结构提取视差，结合平面规则采样算子 (PRSO) 或位移场 (Displacement Field) 施加 piecewise smooth 连续深度先验，处理符合朗伯体假设的区域。",
+      "输出": "朗伯体区域深度特征图",
+      "关键公式": "Depth_L = EPI_Slope(a,b) + PRSO_Prior"
+    },
+    {
+      "模块名": "非朗伯体几何分支 (Non-Lambertian Geometric Branch)",
+      "输入": "残差 ε(u,v), 几何特征 (angular_gradient, X-shape patterns)",
+      "核心操作": "检测 EPI 中的 X 型模式和双峰分布特征，利用几何结构（而非频谱）提取非朗伯体区域的深度和材质信息，结合随机色调映射增强(RTA)处理数据稀缺。",
+      "输出": "非朗伯体区域深度与材质特征图",
+      "关键公式": "Feature_NL = GeoConv(ε(u,v), ∇_angular I)"
+    },
+    {
+      "模块名": "双掩码路由与融合模块 (Dual-Mask Routing & Fusion)",
+      "输入": "朗伯体分支输出, 非朗伯体分支输出, 像素级几何伪标签 (angular_gradient)",
+      "核心操作": "基于高判别力的几何特征（Cohen's d=0.983）生成像素级掩码以替代场景级BCE；通过 FUSE_DIM 投影平衡双分支通道数，并进行掩码加权融合。",
+      "输出": "融合后的最终深度图, 域分类掩码 (Domain Mask)",
+      "关键公式": "Mask = σ(MLP(angular_gradient)); Depth_final = Mask ⊙ Depth_L + (1-Mask) ⊙ Depth_NL"
+    }
+  ],
+  "模块连接": "输入光场首先经过“三层角度信号分解模块”，分离出基础物理分量。分解得到的线性项和 EPI 结构输入到“朗伯体 EPI 分支”，而残差项和几何特征输入到“非朗伯体几何分支”。同时，高判别力的几何特征（angular_gradient）被直接送入“双掩码路由与融合模块”生成像素级掩码。两个分支的输出特征经过 FUSE_DIM 通道平衡投影后，在融合模块中通过生成的掩码进行加权融合。整体数据流呈现“物理分解 -> 双分支并行特征提取 -> 几何掩码引导融合”的拓扑结构。",
+  "关键超参数": {
+    "FUSE_DIM": 96,
+    "Batch_Size": 2,
+    "Gradient_Accumulation_Steps": 8,
+    "NL_Oversampling_Rate": "10x",
+    "Target_Mask_Gap": 0.08,
+    "Learning_Rate": 0.0001,
+    "Tone_Mapping_Augmentation": true,
+    "Angular_Gradient_Cohens_d": 0.983
+  }
+}

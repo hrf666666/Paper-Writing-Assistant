@@ -95,8 +95,9 @@ class QualityGate:
             if patterns:
                 style_ref += f"参考句式模板: {json.dumps(patterns, ensure_ascii=False)[:500]}\n"
 
-        # 构建论文等级约束
+        # v11.8: 合并论文等级约束 + 禁用术语检测（只调用一次 get_article_type_info）
         tier_constraint_text = ""
+        prohibited_issues = []
         try:
             from config.project_config import get_article_type_info
             article_info = get_article_type_info()
@@ -111,39 +112,36 @@ class QualityGate:
                 for term in prohibited:
                     replacement = preferred.get(term, "使用更准确的CS学术术语")
                     tier_constraint_text += f'  - "{term}" → 应替换为: {replacement}\n'
-            
+
+                # 同时检测禁用术语（无需二次调用 get_article_type_info）
+                for term in prohibited:
+                    if term.lower() in chapter_content.lower():
+                        replacement = preferred.get(term, "更准确的CS术语")
+                        prohibited_issues.append({
+                            "dimension": "academic_rigor",
+                            "description": f'论文中出现了禁用术语"{term}"，该术语不适合{article_info["name"]}级别论文，应替换为"{replacement}"',
+                            "location": term,
+                        })
+
             if writing_style:
                 tier_constraint_text += "\n**写作风格标准**（评估时参照）：\n"
                 for key, desc in writing_style.items():
                     tier_constraint_text += f"  - {key}: {desc}\n"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"写作风格加载失败: {e}")
 
-        # 检测禁用术语
-        prohibited_issues = []
-        try:
-            from config.project_config import get_article_type_info
-            article_info = get_article_type_info()
-            for term in article_info.get("prohibited_terms", []):
-                if term.lower() in chapter_content.lower():
-                    replacement = article_info.get("preferred_terms", {}).get(term, "更准确的CS术语")
-                    prohibited_issues.append({
-                        "dimension": "academic_rigor",
-                        "description": f'论文中出现了禁用术语"{term}"，该术语不适合{article_info["name"]}级别论文，应替换为"{replacement}"',
-                        "location": term,
-                    })
-        except Exception:
-            pass
-
-        # v9.2: 学术风格二次评价（硬约束机制）
+        # v11.8: 学术风格二次评价 — checker 不可用时跳过加权，不给免费分
         style_check_issues = []
-        style_score = 100.0
+        style_available = False
+        style_score = 0.0
+        style_result = {"passed": True, "score": 0.0, "issues": [], "suggestions": []}
         try:
             from agent.academic_style_checker import AcademicStyleChecker
             style_checker = AcademicStyleChecker()
             style_result = style_checker.check_style_compliance(chapter_content, chapter_name)
             style_score = style_result["score"]
-            
+            style_available = True
+
             # 将风格问题转换为质量门控 issues
             for issue in style_result["issues"]:
                 if issue["severity"] in ["critical", "warning"]:
@@ -152,14 +150,14 @@ class QualityGate:
                         "description": f"[风格检查] {issue.get('suggestion', issue['type'])}",
                         "location": issue.get("context", "")[:80],
                     })
-            
+
             # 记录风格检查报告到日志
             if not style_result["passed"]:
                 logger.info(f"[风格检查] {chapter_name} 未通过: score={style_score:.1f}")
                 for suggestion in style_result["suggestions"][:3]:
                     logger.info(f"  建议: {suggestion}")
         except Exception as e:
-            logger.debug(f"[风格检查] 检查失败（不影响主流程）: {e}")
+            logger.debug(f"[风格检查] 检查器不可用，跳过风格加权: {e}")
 
         prompt = f"""
 你是一名顶级学术期刊的审稿专家。请从以下4个维度评估论文章节 "{chapter_name}" 的质量：
@@ -236,10 +234,16 @@ class QualityGate:
                 # 计算综合得分（融合 LLM 评估 + 风格检查）
                 if report.dimensions:
                     llm_score = sum(report.dimensions.values()) / len(report.dimensions)
-                    # 风格评分权重 30%，LLM 评分权重 70%
-                    report.overall_score = llm_score * 0.7 + style_score * 0.3
+                    if style_available:
+                        # 风格评分权重 30%，LLM 评分权重 70%
+                        report.overall_score = llm_score * 0.7 + style_score * 0.3
+                    else:
+                        # checker 不可用时只用 LLM 分数，不给免费分
+                        report.overall_score = llm_score
+                    # v11.8: should_retry 由代码决定，不依赖 LLM 判断
+                    report.should_retry = report.overall_score < self.PASS_THRESHOLD
                     report.passed = (
-                        report.overall_score >= self.PASS_THRESHOLD 
+                        report.overall_score >= self.PASS_THRESHOLD
                         and len(prohibited_issues) == 0
                         and style_result.get("passed", True)
                     )
@@ -341,7 +345,7 @@ class QualityGate:
 4. 修改后必须更加学术化、逻辑更清晰
 5. 保持原有的<citation>和<formula>标记
 
-请直接给出修改后的完整章节内容（Markdown格式），无需解释：
+请直接给出修改后的完整章节LaTeX代码（保持LaTeX格式），无需解释：
 """
 
         return prompt

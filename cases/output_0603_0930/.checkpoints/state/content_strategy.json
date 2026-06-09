@@ -1,0 +1,145 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "Limitations of continuous spectral methods in discrete light fields",
+      "Challenges of non-Lambertian surfaces in depth estimation",
+      "Proposed physical decomposition and dual-mask routing"
+    ],
+    "depth_map": {
+      "background_and_motivation": "moderate",
+      "limitations_of_existing_methods": "deep",
+      "proposed_contributions": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "motivation_hook: Current light field analysis relies on continuous spectral methods that fail on discrete samples",
+      "contribution_claim: 2 explicit contributions with quantitative preview (e.g., accuracy improvements on non-Lambertian surfaces)",
+      "Clear gap statement regarding discrete angular resolution and non-Lambertian failures",
+      "[动机锚点] The introduction must establish: Current light field analysis relies on continuous spectral methods ",
+      "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+    ],
+    "should_avoid": [
+      "Detailed mathematical derivations of the physical model",
+      "Paper structure paragraph (e.g., 'The rest of this paper is organized as...')",
+      "Extensive literature review"
+    ],
+    "target_emphasis": "Establish the failure of continuous spectral methods on discrete non-Lambertian light fields and introduce the physical decomposition and routing solutions."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "Light field depth estimation approaches",
+      "Non-Lambertian surface handling techniques",
+      "Angular signal analysis methods (spectral vs. geometric)"
+    ],
+    "depth_map": {
+      "light_field_depth_estimation": "moderate",
+      "non_lambertian_handling": "deep",
+      "angular_signal_analysis": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "gap_bridge: Show existing approaches fail because current light field analysis relies on continuous spectral methods",
+      "Integrated critiques of prior architectural limitations grouped by approach",
+      "Discussion on discrete vs. continuous angular sampling limitations",
+      "[动机锚点] Transition to method by showing existing approaches do not address: Current light field analysis rel"
+    ],
+    "should_avoid": [
+      "Chronological listing of papers without critical synthesis",
+      "Detailed descriptions of standard CNN/Transformer architectures",
+      "Presenting related work as a mere chronological list without integrating critiques"
+    ],
+    "target_emphasis": "Critically synthesize prior works to highlight the gap in handling discrete angular sampling and non-Lambertian reflections without continuous spectral assumptions."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "Three-layer angular signal decomposition physical model",
+      "Adaptive geometric dual-mask routing architecture",
+      "Domain-balanced training strategy"
+    ],
+    "depth_map": {
+      "overview_and_decomposition": "deep",
+      "dual_mask_routing": "deep",
+      "training_and_optimization": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary"
+    },
+    "must_include": [
+      "contribution_claim: Justify each module by connecting back to the core motivation (discrete geometric vs continuous spectral)",
+      "Key formulas only for the physical decomposition (DC, linear, residual)",
+      "Data flow between decomposition, mask generation, and dual-branch routing",
+      "Description of a horizontal flow architecture diagram with detailed boxes and blue dominant color scheme",
+      "[动机锚点] Each module should be justified by connecting back to the core motivation"
+    ],
+    "should_avoid": [
+      "Extensive mathematical derivations without connecting to practical system implementation",
+      "Algorithm boxes or pseudocode blocks",
+      "Over-describing standard backbone networks"
+    ],
+    "target_emphasis": "Detail the physical decomposition and dual-mask routing mechanisms, emphasizing how geometric features replace spectral methods for discrete light fields."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "Quantitative comparison with SOTA on standard datasets",
+      "Ablation studies on physical decomposition and dual-mask routing",
+      "Runtime and computational efficiency analysis"
+    ],
+    "depth_map": {
+      "dataset_and_setup": "brief",
+      "quantitative_comparison": "deep",
+      "ablation_study": "deep",
+      "efficiency_analysis": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting"
+    },
+    "must_include": [
+      "evidence_support: Experiments directly validating the 3-layer decomposition and dual-mask routing",
+      "Comprehensive ablation study tables for newly proposed architectural components",
+      "Runtime, memory, and computational efficiency analysis",
+      "Rigorous quantitative benchmarking on standard public datasets (e.g., HCI, Stanford)",
+      "[动机锚点] Design experiments that directly validate each contribution claim"
+    ],
+    "should_avoid": [
+      "Over-relying on qualitative visual results without rigorous quantitative benchmarking",
+      "Failure analysis section or explicit failure case subsections",
+      "Excessive visualizations without quantitative backing"
+    ],
+    "target_emphasis": "Comprehensively validate the proposed physical model and routing architecture through rigorous quantitative benchmarks, ablations, and efficiency metrics."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "Summary of physical decomposition and routing achievements",
+      "Impact on discrete light field analysis",
+      "Future research directions"
+    ],
+    "depth_map": {
+      "summary_of_contributions": "moderate",
+      "broader_impact": "brief",
+      "future_work": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention"
+    },
+    "must_include": [
+      "contribution_claim: Echo the core narrative that continuous spectral methods fail and geometric discrete methods succeed",
+      "Final quantitative highlights demonstrating the superiority of the dual-mask routing in mixed scenes",
+      "[动机锚点] Echo the core narrative: Current light field analysis relies on continuous spectral methods that fai"
+    ],
+    "should_avoid": [
+      "Introducing new concepts, methods, or references",
+      "Repeating the abstract verbatim",
+      "Detailed discussion of limitations"
+    ],
+    "target_emphasis": "Reinforce the paradigm shift from continuous spectral to discrete geometric analysis and summarize the practical benefits of the proposed architecture."
+  }
+}

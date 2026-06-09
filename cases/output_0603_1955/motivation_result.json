@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Traditional frequency-domain methods fail to decouple material reflections from depth cues under low angular resolution (e.g., 9x9), causing networks to blindly learn physical noise. By replacing frequency analysis with a three-layer physical decomposition and geometric feature extraction, we overcome this bottleneck to provide robust material priors. These priors drive a dual-mask routing architecture that explicitly handles non-Lambertian regions, achieving high-precision depth estimation in complex scenes.\n\nINTRO_HOOK: Open by highlighting the fatal flaw in light field depth estimation: non-Lambertian reflections violate Epipolar Plane Image (EPI) linearity, and under low angular resolution (e.g., 9x9 sampling), traditional frequency-domain decoupling completely fails. Emphasize that this failure forces networks to blindly learn noise, fundamentally bottlenecking depth accuracy in complex, real-world scenes.\n\nGAP_BRIDGE: Transition by critiquing existing methods that either rely on high angular resolution for frequency analysis or apply global EPI assumptions that amplify errors on reflective surfaces. Pivot to our core premise: when frequency-domain separation breaks down at 9x9 resolution, we must shift to a geometry-driven physical decomposition to explicitly isolate and route material residuals.\n\nMETHOD_JUSTIFY: Justify the three-layer decomposition and geometric features (like angular gradient) as the direct mathematical remedy to the 9x9 frequency-domain bottleneck, ensuring robust pixel-level material classification via Random Forest. Explain that the GeometricDualMask routing and domain-balanced sampling are strictly motivated by the need to explicitly process these classified non-Lambertian pixels without overfitting to scarce reflective training data.\n\nEXPERIMENT_VALIDATE: Design experiments to explicitly prove the motivation by comparing geometric features against failed frequency-domain baselines at 9x9 resolution, highlighting the Random Forest's 89.6% accuracy and the angular gradient's high discriminative power (Cohen's d = 0.983). Validate the architectural motivation by demonstrating that the dual-mask routing and domain-balanced sampling significantly reduce depth errors specifically in non-Lambertian regions compared to global EPI networks.\n\nCONCLUSION_ECHO: Conclude by reiterating that shifting from frequency-domain to geometry-driven physical decomposition fundamentally resolves the low-resolution material decoupling bottleneck in light field imaging. Highlight that explicitly routing material priors via dual-mask architectures establishes a new, physically grounded paradigm for robust depth estimation in complex reflective scenes.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "The introduction must establish: Traditional frequency-domain methods fail to decouple material reflections from depth cues under low",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Clearly enumerate 3-4 contributions with quantitative evidence where possible",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Transition to method by showing existing approaches do not address: Traditional frequency-domain methods fail to decouple material reflections from ",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Each module should be justified by connecting back to the core motivation",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments that directly validate each contribution claim",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo the core narrative: Traditional frequency-domain methods fail to decouple material reflections from ",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Low-Resolution Material Decoupling\n**Problem**: Traditional frequency-domain methods fail to reliably decouple and classify materials under low angular resolution (e.g., 9x9 discrete sampling) in light field imaging.\n**Significance**: Failing to separate material reflections from depth cues causes networks to blindly learn noise that violates physical assumptions, fundamentally limiting depth estimation accuracy in complex scenes.\n**Approach**: Introduces a three-layer physical de",
+  "candidates": [
+    {
+      "direction": "Low-Resolution Material Decoupling",
+      "problem": "Traditional frequency-domain methods fail to reliably decouple and classify materials under low angular resolution (e.g., 9x9 discrete sampling) in light field imaging.",
+      "significance": "Failing to separate material reflections from depth cues causes networks to blindly learn noise that violates physical assumptions, fundamentally limiting depth estimation accuracy in complex scenes.",
+      "approach": "Introduces a three-layer physical decomposition model to isolate residual material signals and extracts robust geometric angular features (like angular gradient) to achieve high-precision pixel-level material classification via a Random Forest classifier.",
+      "key_claim": "Geometric feature extraction overcomes the frequency-domain bottleneck to reliably decouple material and depth in low-resolution light fields."
+    },
+    {
+      "direction": "EPI Assumption Failure on Non-Lambertian Surfaces",
+      "problem": "The core Epipolar Plane Image (EPI) linearity assumption inherently breaks down on non-Lambertian surfaces due to the violation of the Angular Cone Constraint, resulting in fractured or X-shaped EPI structures.",
+      "significance": "Applying a global EPI assumption across mixed-material scenes amplifies errors in reflective regions, making it impossible to achieve robust and accurate depth estimation for real-world objects.",
+      "approach": "Designs a GeometricDualMask network architecture that uses physically derived masks to explicitly route Lambertian and non-Lambertian features into dedicated dual branches, adaptively fusing them to respect local physical constraints.",
+      "key_claim": "Dual-mask routing explicitly isolates non-Lambertian regions to prevent the catastrophic error amplification caused by invalid global EPI assumptions."
+    },
+    {
+      "direction": "Non-Lambertian Data Scarcity and Overfitting",
+      "problem": "Deep learning models suffer from severe overfitting in non-Lambertian light field depth estimation due to the extreme scarcity of real non-Lambertian training data compared to massive synthetic Lambertian datasets.",
+      "significance": "This long-tail data distribution prevents models from generalizing to real-world urban and mixed environments, rendering them impractical for deployment in complex reflective scenes.",
+      "approach": "Implements a domain-balanced sampling strategy combined with a mixed training mechanism to effectively leverage large-scale synthetic data while maintaining multi-domain exposure balance and preventing overfitting.",
+      "key_claim": "Domain-balanced sampling resolves the long-tail data distribution issue to unlock robust generalization in mixed and non-Lambertian light field scenes."
+    }
+  ]
+}

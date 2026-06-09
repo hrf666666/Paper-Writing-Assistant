@@ -1,0 +1,41 @@
+{
+  "句式特征": {
+    "对比与转折句式": [
+      "However, obtaining the shape of glossy objects like metals, plastics or ceramics remains challenging, since standard Lambertian cues like photo-consistency cannot be easily applied.",
+      "In contrast, our model can work on general 1-lobe BRDFs, and can also recover reflectance in addition to shape, which has not been achieved by previous light-field shape acquisition approaches.",
+      "On the one hand, the definition of depth itself might appear ambiguous in such cases... Nonetheless, from a practical point of view, we argue that the actual definition depends on the task itself..."
+    ],
+    "递进与动作序列句式": [
+      "Using this equation, we then propose using a polynomial (quadratic) shape prior to resolve the shape ambiguity. Once shape is estimated, we also recover the reflectance.",
+      "Specifically, we develop an adaptive cost volume decoupling module to separate both the background and reflection features... Additionally, we employ an iterative self-guided aggregating module... to aggregate two branches of cost volumes.",
+      "To this end, we mask ToM objects in images by in-painting them with arbitrary uniform colors. Then, we employ a monocular depth network to generate a virtual depth map out of the modified image."
+    ],
+    "强调与结论句式": [
+      "Our key theoretical insight is a novel analysis of diffuse plus single-lobe SVBRDFs under a light-field setup.",
+      "Our model is the first to introduce dual-layer scenes into the LF depth estimation task using an end-to-end deep neural network.",
+      "Experimental results on the Booster dataset show the dramatic improvements enabled by our remarkably simple proposal."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "背景铺垫与概念定义：从宏观背景、日常现象或核心概念的定义切入，逐步聚焦到具体任务（如'In our daily lives...'或'Light Field (LF) records...'）；现状陈述与转折：先陈述现有技术的普遍应用或假设，随后用转折词引出其在特定场景下的失效（如'Many depth estimation methods... However, most of them rely on...'）。",
+    "段内论证逻辑": "遵循“现象/现状描述 → 揭示挑战/缺陷 → 剖析内在原因 → 提出本文直觉/假设 → 阐述具体方案”的严密逻辑链条。例如先指出特定表面深度估计难，接着分析原因是物理光学特性违反了现有假设，然后提出针对性的直觉，最后给出具体网络模块或数据生成pipeline。",
+    "段落结尾收束方式": "总结贡献与引出下文：在Introduction结尾通常使用列表形式（如1, 2, 3或项目符号）明确列出本文的核心贡献；在Related Work结尾则通过对比强调本文方法的独特性和优越性，自然过渡到方法节（如'...which has not been achieved by previous approaches.'）。"
+  },
+  "用词特征": [
+    "过渡词：However, In contrast, Moreover, Therefore, Specifically, Additionally, Nonetheless, On the one hand / On the other hand, To this end, As a result, In short, Purposely.",
+    "强调词：novel, explicitly, extensive, dramatic, remarkably, effectively, accurate, state-of-the-art, sufficiently, primarily, challenging.",
+    "限定词：spatially-varying (SV), single-lobe, under-constrained, locally polynomial, transparent or mirror (ToM), monocular or stereo, virtual depth, dual-layer, aliasing bimodal distribution, adaptive cost volume, iterative self-guided.",
+    "学术动词与短语：derive a theory, resolve the ambiguity, validate the theory, leverage computer vision, fine-tune existing networks, hallucinate their depths, decouple and aggregate, regularize the distribution."
+  ],
+  "论证模式": [
+    "提出问题→分析原因→给出方案 (Problem-Cause-Solution)：首先指出特定场景（如高光/透明/反射表面）下现有深度估计方法的失效；接着从物理光学原理或数据层面剖析失效的根本原因；最后提出针对性的理论推导、网络模块设计或数据生成策略。",
+    "先总后分与贡献列表 (General-to-Specific & Contribution Listing)：在摘要和引言部分，先高度概括本文的核心思想和整体框架，随后在引言末尾通过编号列表或项目符号清晰、结构化地拆解并列出本文的具体贡献点。",
+    "基线对比与缺陷剖析 (Baseline Comparison & Flaw Analysis)：在相关工作部分，不单纯罗列前人工作，而是采用“肯定其贡献→指出其局限性→对比凸显本文方法的普适性和优越性”的批判性论证模式。"
+  ],
+  "引用风格": {
+    "句末引用": "最为常见，用于支撑前文的客观陈述、背景事实或普遍观点。引用标记放在句号前或从句末尾。例如：'...they have been primarily used in rendering [12, 17].' 或 '...remains a challenging problem for both computer vision algorithms and deep networks [64]...'",
+    "句中引用": "用于在提及特定技术、设备、数据集或概念时，紧跟其后进行补充说明，保持句子连贯性。例如：'...light-field cameras have become popular (e.g. Lytro [1] and Raytrix [22])...' 或 'LFs captured by commercial LF cameras like Lytro [2] and Raytrix [3] process...'",
+    "句首引用/作者主语引用": "在Related Work中频繁使用，将前人研究者作为句子主语，直接描述其具体动作或提出的方法，便于进行针对性的批判和对比。例如：'Tao et al. [27] proposed a clustering method that eliminates specular pixels...'",
+    "引用与论述的衔接方式": "引用不仅是文献的堆砌，而是深度融入论证逻辑。通常采用“[Author] proposed [Method] to solve [Problem]. However, [Limitation]...”的结构，使引用成为引出本文研究动机（Motivation）的垫脚石。"
+  }
+}

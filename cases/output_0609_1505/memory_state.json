@@ -1,0 +1,307 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于三层角信号分解的几何双掩码物理模型: 该创新点为光场深度估计提供了可解释的物理先验，通过双掩码机制有效分离复杂材质区域，从理论和架构双重层面提升了模型在非朗伯体及复杂物理环境下的鲁棒性与深度估计精度。\n  2. 面向多域光场数据的域平衡四方向EPI统一估计框架: 打破了单一数据集训练的局限，通过域平衡策略显著提升了模型在真实世界复杂混合场景（如城市环境）中的泛化能力，为光场深度估计提供了一套标准化、高兼容性的工程与训练范式，最大化了EPI方法在适用域内的性能上限。\n\n模型架构: 该模型为统一双掩码物理模型（Unified Dual-Mask Physical Model），旨在解决非朗伯体（Non-Lambertian）光场深度估计问题。输入为多视角光场图像块（B, C, H, W），首先经过最小-最大归一化映射至[-1, 1]区间。随后，模型通过三层角信号分解提取几何与材质特征，并送入双掩码双分支主干网络（Dual-Mask Depth Backbone）。网络利用掩码自适应路由Lambertian（基于EPI和连续深度先验）和Non-Lambertian（基于几何特征和X形模式）分支。最终输出深度图预测（depth_pred）、材质/非朗伯体掩码（r_pred）以及位移矢量场（V_pred），并通过物理一致性约束和相位正则化进行联合优化。\n\n数据集: [{\"名称\": \"HCInew\", \"规模\": \"包含多个场景 (如 boxes, cotton, dino, sideboard, backgammon, dots 等)，81个视角，512x512分辨率\", \"场景类型\": \"Lambertian (朗伯体)\", \"划分方式\": \"train/val (包含 training 和 stratified 子集)\"}, {\"名称\": \"UrbanLF-Syn\", \"规模\": \"170个场景\", \"场景类型\": \"Mixed / Urban (混合/城市场景)\", \"划分方式\": \"train/val\"}, {\"名称\": \"Non-Lambert",
+  "log_entries": [
+    {
+      "timestamp": 1780626012.0606563,
+      "category": "log",
+      "content": "EXECUTE: Related Work 完成, 耗时 1042s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626012.0623376,
+      "category": "quality",
+      "content": "Related Work 最终质量: 87.4/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626012.0623572,
+      "category": "quality",
+      "content": "VERIFY phase2: 75.0/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626012.0623946,
+      "category": "log",
+      "content": "任务完成: generate_chapter2, 质量: 87.42499999999998",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626019.3636022,
+      "category": "log",
+      "content": "THINK: 首次执行: Methodology\nLLM策略建议: Ground the methodology in the light field imaging framework and EPI disparity constraints established in the introduction, explicitly detailing how your proposed model opera",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626019.3636222,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter3 - Methodology",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626387.8386588,
+      "category": "log",
+      "content": "EXECUTE: Methodology 完成, 耗时 368s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626387.8390121,
+      "category": "quality",
+      "content": "Methodology 最终质量: 86.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626387.8393865,
+      "category": "quality",
+      "content": "VERIFY phase3: 78.8/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626387.839403,
+      "category": "log",
+      "content": "任务完成: generate_chapter3, 质量: 86.02499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626398.2480538,
+      "category": "log",
+      "content": "THINK: 首次执行: Experiments\nLLM策略建议: Structure the experimental section to empirically validate the light field framework’s mitigation of scale ambiguity and occlusion relative to monocular baselines, ensuring ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780626398.2480588,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter4 - Experiments",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627341.9123151,
+      "category": "log",
+      "content": "EXECUTE: Experiments 完成, 耗时 944s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627341.9128768,
+      "category": "quality",
+      "content": "Experiments 最终质量: 87.5/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627341.9132776,
+      "category": "quality",
+      "content": "VERIFY phase4: 75.0/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627341.9133084,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 87.475",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627349.698415,
+      "category": "log",
+      "content": "THINK: 首次执行: Conclusion\nLLM策略建议: Begin by synthesizing the core findings and methodological advances presented throughout your work, explicitly linking them back to the foundational challenges of scale ambig",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627349.6984243,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627472.0265338,
+      "category": "log",
+      "content": "EXECUTE: Conclusion 完成, 耗时 122s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627472.0268283,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 94.5/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627472.0272367,
+      "category": "quality",
+      "content": "VERIFY phase5: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627472.027268,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 94.45",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627484.8663433,
+      "category": "log",
+      "content": "THINK: 首次执行: Discussion\nLLM策略建议: Begin by concisely synthesizing how light field imaging and epipolar plane image analysis resolve the scale ambiguity and occlusion issues inherent to monocular depth estimat",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627484.8663523,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627637.0367494,
+      "category": "log",
+      "content": "EXECUTE: Discussion 完成, 耗时 152s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627637.037498,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627637.037507,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627644.5114949,
+      "category": "log",
+      "content": "THINK: 首次执行: Limitations and Future Work\nLLM策略建议: Begin by concisely synthesizing the core methodologies and empirical findings from each preceding chapter, strictly avoiding new data or conceptual additions",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627644.5114992,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627758.6907258,
+      "category": "log",
+      "content": "EXECUTE: Limitations and Future Work 完成, 耗时 114s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627758.6914258,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627758.6914434,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627766.57517,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Begin by synthesizing the core findings regarding monocular limitations and light field advantages, explicitly reaffirming how epipolar plane image analysis mitigate",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627766.5751758,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8127587,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 184s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8131526,
+      "category": "quality",
+      "content": "abstract 最终质量: 95.1/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8141594,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8141885,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: 95.125",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8298366,
+      "category": "log",
+      "content": "THINK: 首次执行: 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8298402,
+      "category": "log",
+      "content": "开始执行任务: review_content - 内容审查与参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.83111,
+      "category": "log",
+      "content": "EXECUTE: 内容审查与参考文献审查 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.8311176,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.844793,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780627950.844797,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780628980.0484076,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计：逐步验证+参考文献反向检索+内容真实性校验 完成, 耗时 1029s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780628980.0484219,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780628980.0628917,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780628980.0629,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/Word输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780631198.6400054,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/Word输出 完成, 耗时 2219s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1780631198.6404507,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

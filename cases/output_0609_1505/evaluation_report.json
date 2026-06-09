@@ -1,0 +1,108 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 36.6,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 5,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 0,
+      "tex_has_citations": false,
+      "tex_table_count": 3,
+      "tex_has_tables": true,
+      "tex_figure_count": 4,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": false,
+      "tex_chinese_chars": 40,
+      "bib_exists": true,
+      "bib_entries": 25,
+      "bib_min_entries": true,
+      "pdf_exists": true,
+      "pdf_size_kb": 101.6,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 8,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 86,
+      "compile_success": false
+    },
+    "score": 100,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 5563,
+      "word_count_ok": true,
+      "citation_count": 0,
+      "citations_min": false,
+      "formula_count": 5,
+      "formulas_min": true,
+      "table_count": 3,
+      "tables_min": true,
+      "figure_count": 4,
+      "figures_min": true,
+      "ablation_mentions": 5,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 83,
+    "sections_found": 5,
+    "total_words": 5563,
+    "total_citations": 0
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 55,
+      "narrative_progression": 20,
+      "methodological_rigor": 30,
+      "experimental_sufficiency": 20,
+      "citation_quality": 25,
+      "writing_style": 35,
+      "data_consistency": 5,
+      "format_compliance": 40
+    },
+    "overall_score": 28,
+    "strengths": [
+      "Addresses a highly relevant and challenging problem in light field depth estimation by explicitly targeting non-Lambertian and complex mixed urban scenes.",
+      "Proposes a theoretically interesting framework that integrates physical priors (tri-level angular signal decomposition) with domain-balanced sampling to mitigate long-tail data distributions.",
+      "Identifies clear limitations of current state-of-the-art methods in handling specular highlights and cross-domain generalization."
+    ],
+    "weaknesses": [
+      "Critical data inconsistencies throughout the manuscript: the Abstract reports an overall MAE of 0.133 and mixed urban MAE of 0.081, while the Limitations section reports an overall MAE of 0.185 and mixed urban MAE of 0.198.",
+      "Severe methodological contradictions: the Methodology section defines the loss function using photometric and smoothness terms ($\\lambda_{photo}, \\lambda_{smooth}$) trained on 1x RTX 3090 for 100 epochs, while the Experiments section introduces a completely different loss ($\\lambda_{depth}, \\lambda_{r}, \\lambda_{phase}, \\lambda_{phys}$) trained on 4x RTX 3090 for 150 epochs.",
+      "Missing Introduction section and entirely redacted baseline comparisons (marked as `\"--\"` in the tables), making it impossible to validate the paper's claims over existing literature."
+    ],
+    "recommendation": "reject",
+    "key_gaps_vs_tcsvt": [
+      "Lack of quantitative comparative validation: TCSVT requires rigorous benchmarking against SOTA baselines, but all baseline metrics are missing from the results.",
+      "Unacceptable manuscript completeness and consistency: The submission is missing core sections (Introduction) and contains contradictory equations, hardware setups, and numerical results, suggesting a severely flawed or unfinished draft.",
+      "Poor citation formatting: All bibliographic references are replaced with generic placeholders (`[ref]` or `<citation>`), failing to provide the necessary academic context and proper attribution required for IEEE journals."
+    ]
+  },
+  "overall": {
+    "L1_score": 100,
+    "L2_score": 83,
+    "L3_score": 28,
+    "L1_passed": true,
+    "overall_grade": "C"
+  }
+}

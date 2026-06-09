@@ -1,0 +1,57 @@
+{
+  "句式特征": {
+    "对比与转折句式": [
+      "Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group and interacting with each other.",
+      "The former one, such as TRiPOD, models the multi-person interaction via a graph structure, however, it suffers from the inherent oversoomthing problem in GNNs...; while the latter one, such as MRT and SoMoFormer, treat temporal sequence or skeleton joints as a sequence input...",
+      "Compared with GNN-based methods, Transformer has shown strong learning ability, thus becoming a default backbone for multi-person motion prediction."
+    ],
+    "目的与问题导向句式": [
+      "Multi-person motion prediction aims to predict the future positions of skeleton joints for multiple individuals based on their historical movements.",
+      "To address this issue, we propose Joint-Relation Transformer, a two-stream Transformer architecture for multi-person motion prediction.",
+      "To effectively fuse and update features of joints and relation branches, we design a novel relation-aware attention to update joints’ features with the incorporation of relation features."
+    ],
+    "递进与补充句式": [
+      "In addition to inferring joint positions, we also supervise the model by predicting future inter-joint distances, which contains the future relationship between two joints.",
+      "Additionally, we supervise the relation information by forecasting future distance.",
+      "Moreover, this design allows for increased granularity in attention allocation, enabling the concentration on the most pertinent joint features for each person, consequently enhancing prediction performance."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": [
+      "背景定义与目标陈述：直接点明研究领域的核心目标，如'Multi-person motion prediction aims to predict...'",
+      "总结前人工作并分类：高度概括现有研究的主要技术流派，如'Previous works on multi-person motion prediction generally adopt two types of architectures, including...'",
+      "指出当前方法的局限性（转折引入）：先肯定现有成果，随即指出不足，如'While encouraging results are shown in the Transformer-based methods, those previous works only implicitly learn...'"
+    ],
+    "段内论证逻辑": [
+      "总-分结构：先提出整体架构或核心思想，随后分别详述各个子模块或数据流（如先提two-stream，再分别用'one stream...'和'the other one...'展开）。",
+      "问题-方案-效果逻辑：明确指出当前缺陷，提出具体设计的机制（如relation-aware attention），最后阐述该机制如何从理论上提升模型能力（如增强区分度、提高预测精度）。"
+    ],
+    "段落结尾收束方式": [
+      "强调实验结果与SOTA性能：用定量和定性结果收尾，证明方法的有效性，如'The quantitative results show we outperform the previous methods and achieve state-of-the-art performance...'",
+      "总结设计带来的具体益处：在段落末尾点明该模块设计的最终目的和理论优势，如'...consequently enhancing prediction performance.'",
+      "指出实际应用价值或物理验证：在摘要末尾强调方法的落地可行性，如'We also fabricate two of our designs to demonstrate the viability of our approach.'"
+    ]
+  },
+  "用词特征": [
+    "过渡词：However, While, Compared to/with, Instead of, Moreover, Additionally, In specific, Thus, Then, As to evaluate",
+    "强调词：crucial, explicit, novel, state-of-the-art, significant, sophisticated, inherent, promising, accurate, pertinent",
+    "限定词：mostly, generally, only, relatively, inherently, widely",
+    "学术动词与短语：aims to, propose, utilize, enhance, address this issue, outperform, conduct experiments, demonstrate the viability, pave a path to, suffer from, adhere to"
+  ],
+  "论证模式": [
+    "背景-挑战-前人工作-局限性-本文方案（漏斗式论证）：Introduction中从多人运动预测的宏观背景与挑战出发，回顾GNN和Transformer两类前人工作，指出Transformer缺乏显式关系表示的局限，进而顺理成章提出本文的Joint-Relation Transformer。",
+    "问题提出→机制设计→预期效果（微观模块论证）：在介绍具体网络组件时，先说明为了融合特征（目的/问题），设计了基于双重得分的注意力机制（机制设计），最后阐述这能增强模型区分相似特征的能力并提高预测精度（预期效果）。",
+    "总述架构→分述模块→监督/训练策略（系统性论证）：在方法论概述段落，先总体介绍双流架构，接着分别详述关节流和关系流的输入与编码方式，最后补充基于距离预测的监督训练策略，形成完整的闭环。",
+    "阶段划分式论证（算法流程论证）：在摘要中清晰划分算法步骤，如'The motion approximation stage computes... Then, in the layout stage, we solve for...'，使复杂系统的处理流程一目了然。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": [
+      "句末/词末上标引用：主要采用数字上标形式附着在名词短语或句末，不干扰正文阅读流畅度，如'...single-person motion prediction<sup>11, 7, 4, 24, 48, 47, 27</sup>'或'...autonomous driving<sup>15, 38, 10, 51</sup>'。",
+      "句中作为同位语/补充引用：在提及具体代表性模型时，将引用上标紧跟模型名称之后，如'...such as TRiPOD<sup>3</sup>'或'...such as MRT<sup>46</sup> and SoMoFormer<sup>40</sup>'。"
+    ],
+    "引用与论述的衔接方式": [
+      "分类归纳式衔接：将多篇文献归类于某一技术路线或应用场景下进行集中论述，如'The related methods are playing significant roles in a wide range of practical applications, including autonomous driving<sup>15, 38, 10, 51</sup>, surveillance systems<sup>13, 42, 52</sup>...'。",
+      "对比评价式衔接：在引用具体代表性工作后，紧跟对其优缺点的客观评价与对比，如'The former one, such as TRiPOD<sup>3</sup>, models... however, it suffers from...; while the latter one, such as MRT<sup>46</sup>... treat temporal sequence...'。"
+    ]
+  }
+}

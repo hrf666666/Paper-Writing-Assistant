@@ -1,0 +1,16 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "基于物理先验的三层角信号分解模型 (Three-Layer Angular Signal Decomposition Physical Model)",
+    "contribution_statement": "We identify that disentangling angular signals using physical priors is crucial for accurately modeling and understanding complex non-Lambertian light transport."
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "面向非朗伯场景的自适应几何双掩码路由架构 (Adaptive Geometric Dual-Mask Routing Architecture)",
+    "contribution_statement": "We propose a three-layer angular signal decomposition model that analytically isolates fundamental light components to guide the network design."
+  }
+}

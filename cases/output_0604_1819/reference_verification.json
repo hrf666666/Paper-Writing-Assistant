@@ -1,0 +1,85 @@
+{
+  "citation_tags": [
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"light field imaging\", \"3D perception\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPI\", \"Lambertian assumption\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"specular reflection\", \"volumetric scattering\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"frequency domain analysis\", \"attention mechanisms\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"traditional LF depth\", \"photo-consistency\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPI frequency analysis\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"EPINet\", \"early DL LF\"]"
+    },
+    {
+      "verified": true,
+      "found_papers": 3,
+      "keywords": "[\"LF datasets\", \"non-Lambertian scarcity\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"attention LF\", \"dual branch LF\", \"per-domain models\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Wanner\", \"Heidrich\", \"variational light field analysis\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Tao\", \"defocus\", \"correspondence\", \"light-field cameras\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Jeon\", \"MVS\", \"phase shift\", \"sub-pixel depth\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Shin\", \"EPINET\", \"epipolar\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Wang\", \"DistgDisp\", \"disentangled\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Liang\", \"LF-DFN\", \"light field\"]"
+    },
+    {
+      "verified": false,
+      "reason": "未检索到相关论文",
+      "keywords": "[\"Liang\", \"LF-Transformer\", \"self-attention\"]"
+    }
+  ],
+  "bibliography_entries": []
+}

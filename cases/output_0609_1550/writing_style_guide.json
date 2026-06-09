@@ -1,0 +1,39 @@
+{
+  "句式特征": {
+    "问题导向句式": [
+      "Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text.",
+      "Retrieving aerosol properties from satellite remote sensing over a bright surface is a challenging problem in the research of atmospheric and land applications.",
+      "Multi-person motion prediction is a challenging problem due to the dependency of motion on both individual past movements and interactions with other people."
+    ],
+    "对比句式": [
+      "On the other hand, the evolution of network architectures in natural language processing (NLP) has taken a different path, where the prevalent architecture today is instead the Transformer.",
+      "Unlike the word tokens that serve as the basic elements of processing in language Transformers, visual elements can vary substantially in scale, a problem that receives attention in tasks such as object detection.",
+      "Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group and interacting with each other."
+    ],
+    "方案提出句式": [
+      "To address these differences, we propose a hierarchical Transformer whose representation is computed with Shifted windows.",
+      "In this paper we propose a new approach to retrieve aerosol properties over surfaces such as arid, semiarid, and urban areas, where the surface reflectance is usually very bright...",
+      "In this paper, we propose the Joint-Relation Transformer, which utilizes relation information to enhance interaction modeling and improve future motion prediction."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "通常采用宏观背景陈述（如'Modeling in computer vision has long been dominated by...'）、转折对比引入（如'On the other hand, the evolution of...'）或直接点明领域痛点（如'Retrieving aerosol properties... is a challenging problem'）来开篇，迅速确立段落的核心议题。",
+    "段内论证逻辑": "遵循'背景铺垫 -> 揭示局限/挑战 -> 提出本文对策'的递进逻辑。例如先肯定前人工作（CNN或GNN的贡献），随后通过'However'或'Compared to'指出其在特定场景（如高分辨率、多人交互）下的固有缺陷（如计算复杂度呈二次方、过平滑问题），最后自然引出本文设计的模块或机制。",
+    "段落结尾收束方式": "多以总结本文方法的理论优势（如'This hierarchical architecture has the flexibility to model at various scales and has linear computational complexity...'）、强调实际应用价值（如'They also pave a path to better human-robot interaction.'）或引导至图表/下文详细阐述（如'The problem... is illustrated in Fig. 1.'）作为收束。"
+  },
+  "用词特征": [
+    "过渡词：On the other hand, However, Consequently, Therefore, In contrast, Additionally, In essence, Unlike, Compared to",
+    "强调词：significantly, substantially, particularly, highly, inherently, crucial, promising, tremendous, revolutionary, sophisticated",
+    "限定词：general-purpose, broad range, various, specific, linear, quadratic, relative, explicit, global, high spatial resolution",
+    "学术动词/短语：address, propose, demonstrate, investigate, adapt, construct, retrieve, infer, model, leverage, overcome, suffer from, pave a path to"
+  ],
+  "论证模式": [
+    "提出问题→分析原因→给出方案：首先在引言或摘要中明确领域核心挑战（如视觉与语言的模态差异、亮地表反演困难、多人交互建模缺失），接着剖析现有方法失效的原因（如全局自注意力导致计算复杂度爆炸、GNN过平滑），最后提出针对性的架构设计（如Shifted windows、Joint-Relation fusion layer）。",
+    "先总后分模式：摘要和引言首段高度概括本文提出的模型名称及其作为'general-purpose backbone'或解决特定难题的总体贡献，随后分段详细拆解具体挑战（如尺度变化、分辨率、物理约束）及对应的具体网络组件设计。",
+    "对比论证模式：贯穿全文地将本文方法与前人主流方法（如CNN vs Transformer, 全局Attention vs 局部窗口, 单人预测 vs 多人预测）进行多维度对比，突出本文方法在计算效率、表征能力或预测精度上的优越性。"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "以句末引用为主，用于支撑普遍事实或前人工作（如'...through greater scale [27, 69].'）；句中引用常用于指代具体算法或模型作为案例（如'such as TRiPOD [3], models...' 或 'In existing Transformer-based models [58, 19]...'）；句首引用较少，多用于追溯领域开创性工作（如'Beginning with AlexNet [35]...'）。",
+    "引用与论述的衔接方式": "1. 事实支撑衔接：在陈述领域发展脉络或普遍共识后紧跟多个引用，增强论述权威性；2. 案例具象化衔接：在提及特定技术路线（如GNN、热红外技术）时，用'such as + 模型名 + 引用'的方式具象化；3. 批判性转折衔接：在总结前人贡献后，通过'However, these studies indicate that...'或'it suffers from...'引出局限性，此时引用作为被批判或改进的基准靶点。"
+  }
+}

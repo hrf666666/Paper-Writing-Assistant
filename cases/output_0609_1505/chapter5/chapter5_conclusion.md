@@ -1,0 +1,12 @@
+\section{Conclusion}
+
+In this paper, we presented a unified dual-mask physical model to address the inherent limitations of the Lambertian reflectance assumption in light field (LF) depth estimation. By formulating depth inference as a physically grounded signal decomposition problem, our approach effectively mitigates the adverse effects of non-Lambertian surfaces and complex material interactions. The proposed architecture integrates a geometric dual-mask mechanism with a domain-balanced four-directional epipolar plane image (EPI) estimation framework, enabling robust depth extraction across diverse and challenging real-world scenarios.
+
+The specific contributions of this work are detailed as follows:
+\begin{itemize}
+    \item \textbf{Geometric Dual-Mask Physical Model via Tri-Level Angular Signal Decomposition:} We developed an interpretable physical prior that decomposes angular signals into three distinct levels. The dual-mask mechanism explicitly isolates complex material regions, substantially enhancing depth estimation accuracy and model robustness in non-Lambertian and physically complex environments from both theoretical and architectural perspectives.
+    \item \textbf{Four-Directional EPI Unified Estimation Framework:} We designed a unified framework that processes EPIs along four directions to capture complete geometric structures. This architecture overcomes the constraints of single-dataset training and maximizes the performance upper bound of EPI-based methods, providing a standardized and highly compatible engineering paradigm for LF depth estimation.
+    \item \textbf{Domain-Balanced Strategy for Multi-Domain Generalization:} We introduced a domain-balancing mechanism that aligns feature distributions across multiple LF datasets. This strategy significantly improves the generalization capability of the model in real-world complex mixed scenes, such as urban environments, ensuring reliable performance across diverse data domains.
+\end{itemize}
+
+Extensive evaluations on multiple benchmarks confirm that the proposed method yields considerable improvements in both accuracy and cross-domain generalization compared to existing techniques. We anticipate that the physical priors and unified multi-domain paradigms established in this work will serve as a solid foundation for future research in 3D vision systems, facilitating the broader deployment of LF imaging in autonomous navigation and immersive video rendering applications.

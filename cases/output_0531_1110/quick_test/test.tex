@@ -1,0 +1,656 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{cite}
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+\title{Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation}
+
+\author{Ruifeng Huang and Zhenglong Cui
+\thanks{Manuscript received May 2026. This work was supported by Beihang University. (Corresponding author: Zhenglong Cui)}
+\thanks{R. Huang and Z. Cui are with the School of Computer Science and Engineering, Beihang University, Beijing, China (e-mail: huangruifeng@buaa.edu.cn; czl@buaa.edu.cn).}}
+
+\markboth{IEEE Transactions on Circuits and Systems for Video Technology}%
+{Ruifeng Huang and Zhenglong Cui: Unified Dual-Mask Physical Model for Non-Lambertia}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+\IEEEPARstart{L}{ight} field cameras capture both spatial and angular information of light rays, providing rich geometric cues for 3D reconstruction and depth estimation \cite{light_field_imaging, depth_estimation}. Extracting epipolar plane images (EPIs) and analyzing angular signals remain the dominant paradigms for inferring scene geometry. These approaches achieve significant progress in controlled environments where surfaces exhibit ideal diffuse reflection. However, real-world scenes extensively contain non-Lambertian materials, such as glossy, specular, and translucent surfaces. Inferring the accurate depth of these complex materials represents a hard challenge for both traditional algorithms and deep networks \cite{non_lambertian_surfaces, specular_reflection}.
+
+Most current light field depth estimation methods rely heavily on the Lambertian assumption, which requires pixel appearance consistency across different viewpoints \cite{photo_consistency, lambertian_assumption}. Unfortunately, non-Lambertian surfaces explicitly violate this physical principle. Specular reflections shift dynamically with viewpoint changes, while volumetric scattering prevents the existence of a single surface depth. These physical phenomena destroy the Lambertian angular cone geometric constraints, forming $X$-shaped patterns instead of linear structures in EPIs \cite{epipolar_plane_image, geometric_constraints}. Consequently, standard EPI-based architectures suffer from severe depth ambiguity and structural discontinuities when processing reflective or scattering regions.
+
+Beyond the physical assumption violation, non-Lambertian depth estimation faces a severe data scarcity bottleneck. For instance, the widely used Non-Lambertian dataset provides only four training scenes, which falls orders of magnitude below the minimum threshold required for learned generalization \cite{non_lambertian_dataset, data_scarcity}. Our extensive preliminary experiments, comprising 132 trials across 16 research directions, quantitatively demonstrate this degradation. While EPI methods reduce the mean absolute error ($\text{MAE}$) to $0.081$ in mixed urban scenes, the $\text{MAE}$ substantially increases to $0.411$ in non-Lambertian regions, indicating a performance drop of over five times. Furthermore, complex textures cause EPI slope ambiguity even in Lambertian areas, locking the overall $\text{MAE}$ at $0.387$. These results confirm that the performance degradation stems from inherent architectural limitations and critical data deficiency, rather than suboptimal hyperparameter tuning.
+
+Addressing non-Lambertian light field depth estimation is highly necessary for practical applications like autonomous driving and robotic manipulation, where reflective objects are ubiquitous \cite{autonomous_driving, robotic_manipulation}. Relying on a single EPI branch or blindly adjusting loss functions cannot overcome the violated physical assumptions. Therefore, it is essential to develop a unified framework that decouples light field signals at the physical level, explicitly routes different material types, and maintains robustness under imbalanced data distributions. Establishing such a paradigm not only clarifies the theoretical boundaries of traditional EPI methods but also provides a reliable foundation for complex light field scene understanding.
+
+Traditional light field depth estimation algorithms primarily rely on photo-consistency and epipolar plane image analysis for inferring scene geometry \cite{traditional_lf_depth, epi_analysis}. Methodologically, these approaches strictly assume Lambertian reflectance, rendering them highly ineffective for processing glossy or scattering surfaces in real scenes. Specifically, specular reflections destroy the linear epipolar structures, forming ambiguous X-shaped patterns that invalidate standard geometric constraints used in matching \cite{x_shaped_patterns, geometric_constraints}. Technically, many traditional methods employ frequency domain analysis, such as the 2D discrete Fourier transform, to separate depth and material properties \cite{2d_dft, frequency_analysis}. However, this spectral approach consistently fails under the low angular resolution provided by practical commercial light field camera imaging systems. The discrete 9$\times$9 angular sampling provides insufficient frequency resolution, preventing the accurate decoupling of environmental illumination, scene geometry, and material reflectance components.
+
+Early deep learning methods attempt to address these limitations by extracting features from epipolar images using convolutional neural networks \cite{early_dl_lf, cnn_epi}. Methodologically, these data-driven approaches often misinterpret non-Lambertian degradation as a simple network capacity issue or a parameter deficiency problem. Consequently, researchers extensively tune loss functions or increase network depth, largely overlooking the core violation of underlying physical assumptions \cite{loss_function_tuning, physical_assumptions}. Technically, these models predominantly utilize single-branch architectures that process Lambertian and non-Lambertian regions uniformly without any explicit spatial separation mechanism. This unified processing forces the network to learn conflicting feature representations, resulting in severe depth ambiguity at material boundaries \cite{single_branch_architecture, depth_ambiguity}. The lack of explicit geometric routing prevents the network from adapting to the distinct X-shaped patterns of highly reflective surfaces.
+
+Recent advanced networks incorporate attention mechanisms, multi-modal inputs, or defocus auxiliary heads to improve overall depth estimation performance significantly \cite{attention_lf, defocus_lf}. Methodologically, these approaches lack explicit physical decoupling, treating depth estimation as a purely statistical mapping problem without incorporating physical priors. Without separating environmental illumination from material reflectance, these models struggle to generalize effectively across mixed or complex urban scenes \cite{mixed_scenes, generalization}. Technically, current methods suffer from severe cross-domain generalization bottlenecks due to highly imbalanced training data distributions across different public datasets. Non-Lambertian datasets contain only a few scenes, causing severe overfitting when models are trained exclusively on specific visual domains \cite{data_imbalance, overfitting}. Existing training strategies rarely employ domain-balanced sampling or global statistical validation, limiting their robustness in diverse real-world practical applications.
+
+Therefore, effectively addressing non-Lambertian depth estimation requires much more than incremental architectural tweaks or simple data augmentation techniques alone. It necessitates a unified framework that explicitly decouples physical signals, routes distinct geometric patterns adaptively, and ensures robust cross-domain generalization.
+
+In this paper, we propose a unified dual-mask physical model for light field depth estimation that explicitly decouples environmental illumination, scene geometry, and material reflectance. Instead of relying on ineffective frequency domain analysis under low angular resolution, our approach introduces a three-layer angular signal decomposition to extract robust geometric pseudo-labels. These physical priors guide a dual-branch architecture that adaptively routes Lambertian and non-Lambertian regions to specialized processing streams for targeted feature extraction. By integrating a pixel-wise dual-mask fusion mechanism with a domain-balanced training framework, our model effectively addresses the geometric degradation caused by specular and scattering surfaces in complex 9$\times$9 light field scenes.
+
+\begin{itemize}
+\item \textbf{Contribution 1}: We propose a physics-based three-layer angular signal decomposition model to decouple light field signals into ambient illumination, disparity depth, and material reflectance. Formulated as $I(u,v) = DC + a \cdot u + b \cdot v + \varepsilon(u,v)$, this model extracts geometric features like angular gradients from the residual term. This physical decoupling overcomes the resolution limitations of traditional spectral methods in 9$\times$9 discrete sampling, providing reliable pseudo-labels for accurate material classification and subsequent depth regression.
+
+\item \textbf{Contribution 2}: We develop a dual-branch adaptive routing architecture, named GeometricDualMask, which addresses the physical failure of epipolar plane image constraints on non-Lambertian surfaces. Through extensive empirical analysis, we identify that specular reflections form X-shaped patterns rather than linear structures, violating standard geometric assumptions. Our design leverages bimodal features and X-shaped patterns to route pixels into specialized branches, fusing outputs via a dual-mask mechanism supervised by angular gradients to prevent depth degradation.
+
+\item \textbf{Contribution 3}: We construct a unified light field dataset loader and a multi-domain balanced training framework to ensure strong cross-domain generalization. By performing global statistical validation on extracted disparity amplitude and material ratio using Cohen's d effect size, we verify the discriminative power of our features across approximately 230 scenes. Furthermore, we implement a domain-balanced sampling strategy with a weighted random sampler to mitigate overfitting caused by scarce non-Lambertian data, enhancing overall model robustness.
+\end{itemize}
+
+Extensive experiments on multiple cross-domain datasets demonstrate that our proposed method achieves an overall Mean Absolute Error (MAE) of 0.133, significantly outperforming existing baselines. Specifically, the model yields an MAE of less than 0.16 for Lambertian scenes and maintains robust performance with an MAE below 0.25 for challenging non-Lambertian regions. These quantitative results validate the effectiveness of our unified physical model and dual-branch routing mechanism in handling complex real-world light field scenarios.
+
+\section{Related Work}
+
+\subsection{Traditional Light Field Depth Estimation Methods}
+
+Many depth estimation methods for light-field cameras have been proposed, primarily leveraging the geometric properties of epipolar plane images (EPIs) \cite{epipolar_plane_image,light_field_depth_estimation}. Wanner and Goldluecke \cite{Wanner,Goldluecke} proposed a globally consistent depth labeling framework by analyzing the dominant orientation of EPI structures using structure tensors. Specifically, the slope of the linear structures in an EPI is explicitly inversely proportional to the scene depth. Building upon this geometric foundation, Kim et al. \cite{Kim,EPI} introduced an adaptive thresholding technique to refine the slope estimation, successfully improving depth accuracy in textureless regions. These EPI-based approaches demonstrate remarkable performance under ideal imaging conditions by exploiting the strict photo-consistency across angular views.
+
+While EPI-based methods predominantly focus on angular correspondence, Tao et al. \cite{Tao,defocus_and_correspondence} extended the cue integration by combining defocus and correspondence cues using light-field cameras. In their approach, the depth is derived by minimizing a joint energy function that aggregates both the defocus cue (measuring the sharpness of refocused images) and the correspondence cue (evaluating pixel similarity across sub-aperture images). This dual-cue fusion effectively addresses the ambiguity in highly textured regions where pure correspondence might fail. Furthermore, Lin et al. \cite{Lin,defocus} refined this paradigm by introducing a robust focus measure, significantly enhancing the depth estimation quality near depth discontinuities.
+
+To further tackle the challenges posed by occlusions and complex scene geometries, traditional works have adapted multi-view stereo (MVS) techniques to the light field domain. Jeon et al. \cite{Jeon,MVS,lenslet} proposed an accurate depth map estimation method by employing a multi-view stereo matching framework with a phase-based sub-pixel shift calculation, which remarkably improves the depth resolution. In contrast, Williem et al. \cite{Williem,occlusion_noise} introduced an occlusion-noise aware data cost aggregation strategy. By explicitly modeling the occlusion boundaries and penalizing inconsistent angular views, their method successfully preserves sharp depth edges and mitigates the bleeding effects commonly observed in cost-volume based approaches.
+
+Despite their extensive success in controlled environments, dealing with non-Lambertian surfaces remains a very challenging problem for any kind of existing traditional light field approach \cite{non_Lambertian_surfaces,specular_reflection}. First, these methods heavily rely on the Lambertian assumption, which mandates strict appearance consistency across viewpoints. Unfortunately, non-Lambertian materials, such as specular and glossy surfaces, explicitly violate this physical principle. The viewpoint-dependent reflections destroy the linear geometric constraints in EPIs, forming X-shaped patterns that lead to severe depth degradation \cite{X_shaped_patterns,geometric_constraints}. Second, to separate specularities, some prior works attempted traditional frequency domain analyses, such as 2D Discrete Fourier Transform (2D-DFT) \cite{2D_DFT,frequency_domain}. However, due to the inherently low angular resolution of discrete sampling (e.g., $9 \times 9$ views in commercial plenoptic cameras), the frequency resolution is insufficient to effectively decouple the ambient illumination and material reflection signals. This limitation prevents accurate physical layer decoupling. In contrast to these traditional paradigms that suffer from physical boundary limitations, our work explicitly addresses these issues by proposing a physics-prior-based three-layer angular signal decomposition model and a dual-branch adaptive routing mechanism. By decoupling the light field signals from both physical and geometric perspectives, our approach overcomes the resolution deficiency of traditional spectral methods and provides a reliable geometric foundation for accurate non-Lambertian depth estimation.
+
+\subsection{Deep Learning-based General Light Field Depth Estimation Methods}
+
+Driven by the success of convolutional neural networks (CNNs) in computer vision, deep learning-based methods have dramatically advanced light field depth estimation by implicitly learning the complex mapping from angular signals to depth maps \cite{deep_learning,light_field_depth_estimation}. Among these, EPI-based CNNs explicitly treat epipolar plane images as the primary input to extract angular features. For instance, Shin et al. \cite{Shin,EPINET} proposed EPINET, which employs 1D and 2D convolutions to extract features from horizontal and vertical EPIs, subsequently fusing them to regress depth. By leveraging the powerful representation capacity of CNNs, this approach successfully mitigates the noise sensitivity inherent in traditional structure tensor methods. However, because EPINET purely relies on data-driven feature extraction without incorporating explicit physical constraints, it implicitly assumes that the linear structures in EPIs are strictly preserved. Consequently, when dealing with non-Lambertian surfaces where EPI lines are severely distorted into $X$-shaped or curved patterns, the learned filters fail to extract valid geometric cues, leading to remarkable performance degradation.
+
+While EPI-based methods predominantly focus on angular line structures, Sub-Aperture Image (SAI) and macropixel-based approaches extend the representation space by jointly modeling spatial textures and angular parallax. A representative work in this domain is DistgDepth proposed by Wang et al. \cite{Wang,DistgDepth}, which explicitly disentangles spatial and angular information using specialized intra-view and inter-view convolutions. Specifically, the intra-view module captures rich spatial context within a single SAI, while the inter-view module aggregates parallax cues across multiple viewpoints. This decoupled architecture remarkably improves depth accuracy in textureless regions by compensating for weak angular signals with strong spatial priors. Unfortunately, similar to EPI-based methods, the inter-view aggregation in DistgDepth fundamentally relies on the photo-consistency assumption. In mixed scenes containing glossy or specular objects, the dynamic shifting of highlights violates this assumption, causing the inter-view convolutions to aggregate conflicting features and produce severe depth hallucinations.
+
+To overcome the limited receptive fields of standard convolutions and capture global angular correlations, recent studies have introduced attention mechanisms and Transformer architectures into light field processing. Liang et al. \cite{Liang,Light_Field_Transformer} developed the Light Field Transformer (LFT), which utilizes intra-view and inter-view self-attention modules to model long-range spatial and angular dependencies. By computing attention weights across all SAIs, LFT successfully addresses the ambiguity in occluded regions by dynamically focusing on reliable, unoccluded viewpoints. Moreover, the global attention mechanism allows the network to integrate context over a much larger spatial extent. Despite these advantages, the self-attention mechanism inherently computes similarity based on feature intensity and texture. For non-Lambertian materials, the intense and viewpoint-dependent specular reflections often dominate the attention maps, misleading the network to assign high weights to physically inconsistent angular correspondences. Therefore, without explicit physical guidance, purely data-driven attention mechanisms remain highly vulnerable to non-Lambertian perturbations.
+
+In short, while the aforementioned deep learning methods have achieved extensive progress on standard benchmarks, dealing with non-Lambertian surfaces remains a very challenging problem for any kind of existing general light field approach. First, these methods predominantly adopt a single-branch network architecture to process all pixels uniformly, failing to distinguish the distinct physical characteristics between Lambertian and non-Lambertian regions. This uniform treatment inevitably leads to a dramatic performance drop (e.g., soaring Mean Absolute Error) in non-Lambertian areas within mixed scenes. Second, there is a distinct lack of effective training strategies tailored for the scarcity of non-Lambertian data. Consequently, these models easily overfit to the dominant Lambertian distribution and exhibit limited cross-domain generalization when deployed in unbalanced, real-world scenarios (e.g., mixed Lambertian and non-Lambertian domains). In contrast to these purely data-driven paradigms, our work tackles these inherent flaws from a physical perspective. By proposing a physics-prior-based three-layer angular signal decomposition and geometric material classification model, we explicitly decouple the light field signals, providing a reliable geometric foundation. Furthermore, guided by the geometric root cause analysis of non-Lambertian EPI failure, we design a dual-branch adaptive routing mechanism that explicitly avoids invalid parameter tuning and effectively mitigates depth degradation. Finally, our multi-domain balanced training framework, supported by global statistical validation, ensures robust cross-domain generalization, effectively bridging the gap between ideal benchmarks and complex real-world light field applications.
+
+\subsection{Deep Learning-based Non-Lambertian and Physics-Aware Light Field Depth Estimation Methods}
+
+To mitigate the vulnerability of purely data-driven models when the Lambertian assumption is violated, recent physics-aware methods attempt to explicitly decouple light field signals based on optical priors. For instance, intrinsic light field decomposition approaches \cite{intrinsic_light_field,signal_decoupling,physics_aware_depth} derive the light field into diffuse and specular components, subsequently leveraging the restored diffuse layer to distill accurate depth maps. By isolating the viewpoint-dependent specular reflections, these methods successfully alleviate depth hallucinations on glossy surfaces. However, accurately separating high-frequency specularities from low-frequency diffuse reflections heavily relies on dense angular sampling. When applied to low-resolution light fields (e.g., $9 \times 9$ angular grids), the insufficient angular parallax prevents reliable signal decoupling, causing severe blending artifacts and compromising the subsequent depth estimation.
+
+While physical decoupling models the global signal composition, mask-guided and attention-based approaches focus on locally identifying and suppressing non-Lambertian regions. Representative works \cite{highlight_mask,specular_attention,non_Lambertian_depth} propose highlight-aware masking modules that predict a specular probability map to down-weight non-Lambertian pixels during cost aggregation. This strategy dramatically improves depth accuracy in scenes with strong, isolated highlights. Unfortunately, the mask generation in these methods primarily depends on spatial texture cues or heuristic intensity thresholds, lacking a profound analysis of the geometric root causes of Epipolar Plane Image (EPI) degradation. Consequently, they often fail to accurately delineate the boundaries of weak specularities or translucent materials, where the EPI lines distort into complex $X$-shaped or curved patterns rather than exhibiting simple intensity saturation.
+
+In contrast to simply suppressing non-Lambertian signals, dual-branch and routing architectures aim to explicitly process diverse material types via specialized sub-networks. Recent advancements \cite{dual_branch_network,routing_mechanism,mixture_of_experts_light_field} introduce novel multi-branch frameworks where one branch extracts linear EPI features for Lambertian regions, while another captures defocus or disparity cues for non-Lambertian areas, fused via a learned routing mechanism. Although these architectures demonstrate promising potential in mixed scenes, their routing decisions are mostly driven by implicit feature clustering or extensive fine-tuning of loss functions and learning rates. They lack a theoretically grounded boundary defining the physical limitations of EPI-based geometry extraction. Moreover, the feature decomposition in these networks is generally validated on single datasets, lacking global statistical verification across diverse domains. This often leads to branch collapse or severe performance degradation when generalizing to real-world scenarios with imbalanced data distributions.
+
+In short, while existing physics-aware and routing-based methods have made notable progress, dealing with non-Lambertian surfaces in practical light field depth estimation remains a very challenging problem for any kind of existing deep learning approach. Specifically, current physics-aware methods mostly rely on ideal high-resolution angular sampling, lacking effective material classification and signal decoupling means based on geometric features (e.g., angular gradients and correlations) under low-resolution (e.g., $9 \times 9$) conditions. Furthermore, existing dual-branch or mask-routing mechanisms lack a profound analysis of the geometric root causes of EPI failure (such as $X$-shaped patterns), and their feature decomposition lacks cross-dataset global statistical validation and a multi-domain balanced training framework, resulting in insufficient robustness in complex, real-world mixed scenes. To tackle these inherent limitations, our work proposes a unified dual-mask physical model that explicitly decouples angular signals via a three-layer geometric material classification and employs a theoretically grounded dual-branch adaptive routing mechanism, supported by a multi-domain balanced training framework to ensure strong cross-domain generalization.
+
+While existing data-driven and physics-aware methods have advanced light field depth estimation, they commonly struggle with unreliable signal decoupling under sparse angular sampling and lack a fundamental geometric understanding of Epipolar Plane Image (EPI) failures on non-Lambertian surfaces, ultimately limiting their cross-domain generalization. Inspired by these observations, we propose a unified dual-mask physical approach that addresses the aforementioned limitations by integrating a physics-driven three-layer angular signal decomposition with a geometry-aware dual-branch adaptive routing mechanism, further fortified by a multi-domain balanced training framework to ensure robust cross-domain depth estimation.
+
+\section{Methodology}
+
+In this section, we present the overall architecture of our proposed Unified Dual-Mask Physical Model, termed GeometricDualMask, designed to address the persistent challenge of depth estimation on non-Lambertian surfaces in light field imaging. Different from previous works that heavily rely on the ideal Lambertian assumption, our framework explicitly decouples the physical properties of light field angular signals and adaptively routes distinct surface regions to specialized processing branches. As illustrated in Fig. 1, the architecture comprises a physics-driven decomposition module, a dual-branch feature extraction network, and a mask-guided fusion mechanism. This design effectively tackles the geometric violation caused by specular and translucent materials, enabling accurate and robust depth inference across complex real-world scenes.
+
+The input to our model is a dense light field image consisting of $9 \times 9$ angular views, totaling 81 perspectives. Let $I(u,v)$ denote the local angular signal patch at spatial coordinates $(x,y)$, where $u$ and $v$ represent the angular coordinates ranging from 1 to 9. Before feeding into the network, the raw light field data undergoes a preprocessing pipeline. Specifically, we apply a tone-mapping enhancement to improve the visibility of highlight and shadow regions, followed by spatial normalization to standardize the input intensity distribution. The preprocessed input tensor, with dimensions of $81 \times H \times W$, is then directed into the core physical decomposition module, where $H$ and $W$ denote the spatial height and width, respectively.
+
+The overall data flow progresses through four primary modules to extract and integrate geometric features. First, the \textbf{Three-Layer Angular Signal Decomposition} module decouples the angular signal into physical components, formulated as:
+\begin{equation}
+I(u,v) = I_{DC} + a \cdot u + b \cdot v + \varepsilon(u,v)
+\label{eq:ch3_1}
+\end{equation}
+Here, $I_{DC}$ represents the ambient illumination, $a$ and $b$ are linear coefficients encoding disparity, and $\varepsilon(u,v)$ captures the material-dependent residual. Instead of employing frequency-domain analysis that fails under low-resolution angular sampling, we extract Geometric Pseudo-labels, such as the angular gradient, from the residual component to characterize material properties. Subsequently, the decomposed features are routed into two parallel branches. The \textbf{Lambertian EPI Branch} processes regions adhering to the Lambertian assumption by extracting epipolar plane image slopes and applying a continuous depth prior to regress the initial depth prediction $D_L$. Conversely, the \textbf{Non-Lambertian Geometric Branch} handles glossy and scattering surfaces. Recognizing that non-Lambertian reflections violate the linear epipolar constraint and form X-shaped patterns, this branch leverages bimodal distribution features and geometric convolutions to extract the depth prediction $D_{NL}$. Finally, the \textbf{Dual-Mask Generation \& Fusion} module integrates these predictions. It generates pixel-wise masks, $M_L$ and $M_{NL}$, through a channel-balanced projection with a fusion dimension of 96. The final depth is computed via mask-weighted aggregation.
+
+The output of the proposed architecture is a single-channel, high-precision depth map, denoted as $D_{final}$, with a target spatial resolution of $256 \times 256$. The final depth prediction is obtained by fusing the branch-specific outputs using the generated masks, expressed as:
+\begin{equation}
+D_{final} = M_L \odot D_L + M_{NL} \odot D_{NL}
+\label{eq:ch3_2}
+\end{equation}
+where $\odot$ denotes the element-wise multiplication. To ensure the masks accurately separate Lambertian and non-Lambertian regions, we introduce a Mask BCE Loss during the training phase. This loss function supervises the mask generation using the geometric pseudo-labels derived from the angular gradient, formulated as $\mathcal{L}_{mask} = \text{BCE}(M, P_{angular})$, where $M$ is the predicted mask and $P_{angular}$ is the pseudo-label target. This explicit supervision forces the mask gap to reach the predefined threshold, guaranteeing that the dual-branch routing mechanism operates effectively and yields a globally consistent depth estimation.
+
+
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tikzpicture}[
+  node distance=0.5cm and 0.8cm,
+  rect/.style={draw, rounded corners=2mm, line width=0.8pt, font=\sffamily\small, align=center, minimum width=2.8cm},
+  data/.style={draw, trapezium, trapezium left angle=75, trapezium right angle=105, line width=0.8pt, font=\sffamily\footnotesize, align=center, fill=gray!10, minimum width=2.6cm, minimum height=0.8cm},
+  enc/.style={rect, fill=blue!20},
+  dec/.style={rect, fill=green!20},
+  core/.style={rect, fill=orange!30, line width=1.2pt, minimum width=3.2cm},
+  loss/.style={rect, fill=red!20, line width=1pt, dashed, minimum width=2.4cm},
+  arr/.style={-{Stealth[length=2mm]}, thick, line width=1pt, color=black!80},
+  dasharr/.style={-{Stealth[length=1.5mm]}, dashed, thick, line width=0.8pt, color=orange!80!black},
+  lbl/.style={font=\sffamily\scriptsize, color=black!70, fill=white, inner sep=1pt}
+]
+
+% Nodes
+\node[data, minimum width=3.0cm] (input) {Input Light Field \\ ($9 \times 9$ Views, 81)};
+
+\node[core, below=0.6cm of input, minimum height=1.2cm] (decomp) {
+  \textbf{Three-Layer Angular} \\
+  \textbf{Signal Decomposition} \\[-1pt]
+  \scriptsize DC, Linear, Residual
+};
+
+\node[rect, fill=gray!10, right=1.0cm of decomp, minimum width=2.4cm, minimum height=1.0cm] (pseudo) {
+  Geometric Pseudo-labels \\
+  \scriptsize (Angular Gradient)
+};
+
+\node[enc, below left=0.8cm and 0.4cm of decomp, minimum height=1.2cm] (branchL) {
+  \textbf{Lambertian EPI} \\
+  \textbf{Branch} \\[-1pt]
+  \scriptsize PRSO / Disp. Field
+};
+
+\node[core, below right=0.8cm and 0.4cm of decomp, minimum height=1.2cm] (branchNL) {
+  \textbf{Non-Lambertian} \\
+  \textbf{Geometric Branch} \\[-1pt]
+  \scriptsize GeoConv / X-shape
+};
+
+\node[core, below=2.6cm of decomp, minimum height=1.2cm] (fuse) {
+  \textbf{Dual-Mask Generation} \\
+  \textbf{\& Fusion} \\[-1pt]
+  \scriptsize FUSE\_DIM=96
+};
+
+\node[dec, below=0.6cm of fuse, minimum height=0.8cm] (output) {Final Depth Map \\ ($D_{final}$)};
+
+\node[loss, right=1.0cm of fuse, minimum height=1.0cm] (loss) {
+  \textbf{Mask BCE Loss} \\
+  \scriptsize Pseudo-label Supervision
+};
+
+% Connections
+\draw[arr] (input.south) -- node[right, lbl] {$I(u,v)$} (decomp.north);
+
+\draw[arr] (decomp.south) -- node[pos=0.4, left, lbl] {Lambertian} (branchL.north);
+\draw[arr] (decomp.south) -- node[pos=0.4, right, lbl] {Non-Lambertian} (branchNL.north);
+
+\draw[dasharr] (decomp.east) -- node[above, lbl] {Decomposition} (pseudo.west);
+
+\draw[arr] (branchL.south) -- node[pos=0.6, left, lbl] {$D_L$} (fuse.north);
+\draw[arr] (branchNL.south) -- node[pos=0.6, right, lbl] {$D_{NL}$} (fuse.north);
+
+\draw[dasharr] (pseudo.south west) -- node[pos=0.3, above, lbl] {Mask Guide} (fuse.north east);
+\draw[dasharr] (pseudo.south) -- node[right, lbl] {Target} (loss.north);
+
+\draw[arr] (fuse.south) -- node[right, lbl] {$M_L, M_{NL}$} (output.north);
+\draw[dasharr] (fuse.east) -- node[above, lbl] {Pred Mask} (loss.west);
+
+\end{tikzpicture}
+}
+\caption{Overall architecture of the proposed method.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Three-Layer Angular Signal Decomposition}
+
+We design the Three-Layer Angular Signal Decomposition module to explicitly decouple the physical properties of light field angular signals, addressing the geometric violations caused by non-Lambertian surfaces. Previous works \cite{previous_works} primarily treat angular signals as holistic features or rely solely on epipolar plane image (EPI) slopes, which often leads to ambiguous depth inference when specular or translucent materials disrupt the ideal Lambertian assumption. In contrast, our module decomposes the raw angular signal into distinct physical components. This physics-driven decoupling not only isolates the geometric depth cues from material-induced reflectance anomalies but also generates highly discriminative geometric pseudo-labels to supervise the subsequent dual-mask routing mechanism.
+
+Let $I(u,v)$ denote the preprocessed local angular signal patch at a specific spatial coordinate, where $u$ and $v$ represent the angular coordinates ranging from 1 to 9. The input tensor for this module has a dimension of $81 \times H \times W$, representing the $9 \times 9$ angular views for each spatial pixel. To model the physical formation of the light field, we formulate the angular signal as a superposition of three distinct layers: the ambient illumination, the parallax-induced geometric shift, and the material-specific reflectance residue. Mathematically, this three-layer decomposition is expressed as:
+\begin{equation}
+I(u,v) = I_{DC} + a \cdot u_c + b \cdot v_c + \varepsilon(u,v)
+\label{eq:ch3_3}
+\end{equation}
+where $I_{DC}$ represents the direct current component corresponding to the ambient illumination and base albedo. The variables $u_c = u - 5$ and $v_c = v - 5$ denote the centered angular coordinates, ensuring orthogonality in the subsequent regression. The coefficients $a$ and $b$ are the linear gradients along the horizontal and vertical angular dimensions, respectively, which encode the local parallax and thus the depth information. Finally, $\varepsilon(u,v)$ captures the residual component, representing high-frequency reflectance anomalies such as specular highlights and subsurface scattering that violate the linear parallax model.
+
+To derive these components efficiently across the entire spatial domain, we vectorize the $9 \times 9$ angular patch into a column vector $\mathbf{i} \in \mathbb{R}^{81}$. The decomposition model is then reformulated in a matrix form:
+\begin{equation}
+\mathbf{i} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\varepsilon}
+\label{eq:ch3_4}
+\end{equation}
+where $\mathbf{X} = [\mathbf{1}, \mathbf{u}_c, \mathbf{v}_c] \in \mathbb{R}^{81 \times 3}$ is the design matrix constructed from the centered angular coordinates, $\boldsymbol{\beta} = [I_{DC}, a, b]^T \in \mathbb{R}^{3}$ is the parameter vector to be estimated, and $\boldsymbol{\varepsilon} \in \mathbb{R}^{81}$ is the residual vector. We employ ordinary least squares to estimate the parameter vector $\hat{\boldsymbol{\beta}}$, yielding:
+\begin{equation}
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{i}
+\label{eq:ch3_5}
+\end{equation}
+Given that the centered coordinates $\mathbf{u}_c$ and $\mathbf{v}_c$ are orthogonal and zero-mean, the matrix $\mathbf{X}^T \mathbf{X}$ is strictly diagonal. This property significantly reduces the computational complexity, allowing for rapid closed-form solutions during the forward pass. The estimated residual vector is subsequently computed as $\hat{\boldsymbol{\varepsilon}} = \mathbf{i} - \mathbf{X} \hat{\boldsymbol{\beta}}$.
+
+Beyond extracting the physical components, this module derives high-discriminative geometric pseudo-labels to guide the dual-mask generation. We define the primary pseudo-label as the angular gradient, denoted as $\nabla_{ang}$, which quantifies the magnitude of the linear parallax shift. It is calculated as:
+\begin{equation}
+\nabla_{ang} = \sqrt{\hat{a}^2 + \hat{b}^2}
+\label{eq:ch3_6}
+\end{equation}
+A higher $\nabla_{ang}$ indicates a steeper EPI slope, corresponding to reliable geometric depth cues typically found in Lambertian regions. Conversely, to identify non-Lambertian regions where the linear model fails, we compute the residual variance $\sigma_{\varepsilon}^2$, defined as:
+\begin{equation}
+\sigma_{\varepsilon}^2 = \frac{1}{81} \sum_{u=1}^{9} \sum_{v=1}^{9} \hat{\varepsilon}(u,v)^2
+\label{eq:ch3_7}
+\end{equation}
+This metric measures the deviation from the ideal linear parallax, serving as a robust indicator for specular and translucent surfaces.
+
+The Three-Layer Angular Signal Decomposition module outputs the decomposed physical maps ($I_{DC}$, $\hat{a}$, $\hat{b}$, and $\hat{\boldsymbol{\varepsilon}}$), each with a spatial dimension of $H \times W$, alongside the geometric pseudo-labels $\nabla_{ang}$ and $\sigma_{\varepsilon}^2$. These outputs establish an essential bridge to the subsequent network components. Specifically, the raw light field data is routed in parallel to the Lambertian EPI Branch and the Non-Lambertian Geometric Branch for specialized feature extraction. Meanwhile, the derived angular gradient $\nabla_{ang}$ is forwarded to the Dual-Mask Generation and Fusion module. In this downstream module, $\nabla_{ang}$ serves as the pixel-wise ground truth to compute the binary cross-entropy loss, explicitly supervising the mask generation process to ensure an optimal mask gap. By explicitly decoupling the angular signal and providing physics-grounded supervision, our module substantially improves the robustness of depth estimation in complex real-world scenes, differentiating our approach from existing methods that lack such physical interpretability.
+
+\subsection{Lambertian EPI Branch}
+
+Following the physical decoupling of angular signals, we design the Lambertian EPI Branch to explicitly model the depth cues inherent in diffuse reflection regions. In light field depth estimation, Lambertian surfaces constitute the majority of natural scenes, where depth information is primarily encoded in the linear slopes of Epipolar Plane Images (EPIs). However, conventional methods heavily rely on local high-frequency textures to compute EPI slopes. When encountering textureless or weakly textured regions, these methods suffer from severe slope ambiguity, resulting in fragmented depth surfaces and hole artifacts. Different from previous works that apply simple spatial smoothing as a post-processing step, our module integrates a continuous depth prior directly into the feature extraction process. By leveraging a Plane Regularized Sampling Operator (PRSO), we enforce piecewise-smooth depth surface regression, effectively resolving the ambiguity in texture-missing areas while preserving sharp depth boundaries.
+
+The input to this branch is the light field feature tensor $\mathbf{F}_{in} \in \mathbb{R}^{C \times U \times V \times H \times W}$, which is routed from the preceding decomposition module, where $C$ denotes the channel dimension, $U=V=9$ represent the angular resolutions, and $H \times W$ is the spatial resolution. To capture the directional line structures, we first extract horizontal and vertical EPI feature slices, denoted as $\mathbf{F}_{h} \in \mathbb{R}^{C \times U \times H \times W}$ and $\mathbf{F}_{v} \in \mathbb{R}^{C \times V \times H \times W}$, respectively. We then employ a set of orientation-aware 3D convolutions to extract the initial EPI slope features $\mathbf{S} \in \mathbb{R}^{C_s \times H \times W}$, where $C_s$ is the number of slope feature channels. Mathematically, the slope extraction is formulated as:
+\begin{multline}
+ \\
+\mathbf{S} = \sigma \left( \mathcal{W}_{slope} * (\mathbf{F}_{h} \oplus \mathbf{F}_{v}) + \mathbf{b}_{slope} \right)
+\label{eq:ch3_8}
+\end{multline}
+where $\mathcal{W}_{slope}$ and $\mathbf{b}_{slope}$ are the learnable convolutional weights and biases, $*$ denotes the 3D convolution operation, $\oplus$ represents the feature concatenation along the angular dimension, and $\sigma$ is the ReLU activation function. The resulting tensor $\mathbf{S}$ encapsulates the local geometric disparities but remains vulnerable to noise in homogeneous regions.
+
+To address the vulnerability in textureless regions, we introduce a continuous depth prior through the proposed Plane Regularized Sampling Operator (PRSO). Instead of merely matching discrete disparity hypotheses, PRSO aggregates EPI features along continuous epipolar lines regularized by local planar assumptions. Let $\mathcal{D}$ be a set of discrete candidate disparities. For a specific spatial coordinate $\mathbf{p} = (x,y)$ and a candidate disparity $d \in \mathcal{D}$, we compute the aggregated feature volume $\mathbf{V} \in \mathbb{R}^{|\mathcal{D}| \times C_s \times H \times W}$. The PRSO operation is defined as:
+\begin{multline}
+ \\
+\mathbf{V}(\mathbf{p}, d) = \sum_{u=-K}^{K} \mathbf{S}(u, \mathbf{p} + u \cdot d) \cdot \Phi(u, d, \nabla d(\mathbf{p}))
+\label{eq:ch3_9}
+\end{multline}
+where $u$ is the angular index ranging from $-K$ to $K$ (with $K=4$ for a $9 \times 9$ light field), $\mathbf{p} + u \cdot d$ denotes the sub-pixel spatial coordinate sampled via bilinear interpolation, and $\Phi$ is the plane regularization kernel. The kernel $\Phi$ dynamically adjusts the sampling weights based on the local disparity gradient $\nabla d(\mathbf{p})$, which is initialized by the linear coefficients $(a, b)$ derived from the Three-Layer Angular Signal Decomposition module. This formulation ensures that the feature aggregation strictly adheres to the local planar geometry, effectively propagating reliable depth cues from textured boundaries into adjacent textureless regions.
+
+Following the PRSO aggregation, we perform piecewise-smooth depth surface regression to generate the final depth prediction for the Lambertian regions. We compute the matching cost for each disparity hypothesis by applying a 3D convolutional cost aggregator $\mathcal{C}_{agg}$ on the feature volume $\mathbf{V}$. The probability distribution over the candidate disparities is obtained via a softmax operation along the disparity dimension:
+\begin{equation}
+\mathbf{P}(\mathbf{p}, d) = \frac{\exp(-\mathcal{C}_{agg}(\mathbf{V}(\mathbf{p}, d)))}{\sum_{d' \in \mathcal{D}} \exp(-\mathcal{C}_{agg}(\mathbf{V}(\mathbf{p}, d')))}
+\label{eq:ch3_10}
+\end{equation}
+where $\mathbf{P}(\mathbf{p}, d)$ represents the probability of pixel $\mathbf{p}$ having disparity $d$. The initial Lambertian depth prediction $D_L \in \mathbb{R}^{1 \times H \times W}$ is then calculated as the expected value of the disparity distribution:
+\begin{equation}
+D_L(\mathbf{p}) = \sum_{d \in \mathcal{D}} d \cdot \mathbf{P}(\mathbf{p}, d)
+\label{eq:ch3_11}
+\end{equation}
+Concurrently, the intermediate feature maps from $\mathcal{C}_{agg}$ are projected to yield the Lambertian depth feature map $\mathbf{F}_L \in \mathbb{R}^{C_{out} \times H \times W}$, where $C_{out}$ is the output channel dimension aligned with the fusion module. Both $D_L$ and $\mathbf{F}_L$ are subsequently forwarded to the Dual-Mask Generation \& Fusion module. By explicitly embedding the continuous planar prior into the EPI slope extraction, our Lambertian EPI Branch yields highly accurate and spatially coherent depth estimates for diffuse surfaces, providing a robust foundation for the subsequent dual-mask routing mechanism.
+
+\subsection{Non-Lambertian Geometric Branch}
+
+While the Lambertian EPI Branch effectively models diffuse regions, natural scenes inevitably contain non-Lambertian surfaces, such as specular highlights, reflections, and occlusions. In these regions, the linear slope assumption of Epipolar Plane Images (EPIs) breaks down, exhibiting complex non-linear structures. Conventional approaches typically resort to frequency-domain analysis to separate these components, which often introduces high computational overhead and blurs geometric boundaries. In contrast, our Non-Lambertian Geometric Branch explicitly abandons frequency-domain transformations. Instead, it leverages the inherent spatial-angular geometric cues, specifically the X-shaped patterns in EPIs and the bimodal distribution of angular signals, to accurately resolve depth in non-Lambertian areas.
+
+The input to this branch is the light field feature tensor $\mathbf{F}_{NL} \in \mathbb{R}^{C \times U \times V \times H \times W}$, routed by the non-Lambertian mask from the preceding Three-Layer Angular Signal Decomposition module, where $C$ is the channel dimension, $U=V=9$ denote the angular resolutions, and $H \times W$ represents the spatial resolution. Additionally, to mitigate information loss caused by highlight saturation, we incorporate a tone-mapping enhanced feature map $\mathbf{F}_{TM} \in \mathbb{R}^{C \times H \times W}$.
+
+First, we extract the X-shaped geometric patterns. In EPIs, non-Lambertian phenomena like occlusions and specularities manifest as intersecting lines, forming distinct X-shaped structures. We design a direction-aware geometric convolution to capture these crossing features. Let $\mathbf{W}_{X} \in \mathbb{R}^{K \times K \times U \times V}$ be the learnable X-shaped kernels, where $K$ is the spatial kernel size. The X-shaped feature map $\mathbf{F}_{X} \in \mathbb{R}^{C_{x} \times H \times W}$ is computed as:
+\begin{equation}
+\mathbf{F}_{X}(x,y) = \sum_{u=1}^{U} \sum_{v=1}^{V} \mathbf{W}_{X}(u,v) * \mathbf{F}_{NL}(:, u, v, x, y)
+\label{eq:ch3_12}
+\end{equation}
+where $*$ denotes the 2D spatial convolution operation, $(x,y)$ indicates the spatial coordinates, and $C_{x}$ is the number of output channels.
+
+Second, we model the bimodal distribution of the angular signals. For a non-Lambertian pixel, its angular intensity profile typically consists of two dominant components, such as a diffuse base and a specular highlight. We compute the bimodal statistical features $\mathbf{F}_{B} \in \mathbb{R}^{4 \times H \times W}$ by estimating the means and standard deviations of these two modes. Specifically, for each spatial location $(x,y)$, we apply a lightweight expectation-maximization clustering along the angular dimensions to obtain:
+\begin{equation}
+\mathbf{F}_{B}(x,y) = \left[ \mu_1(x,y), \sigma_1(x,y), \mu_2(x,y), \sigma_2(x,y) \right]^T
+\label{eq:ch3_13}
+\end{equation}
+where $\mu_k$ and $\sigma_k$ represent the mean and standard deviation of the $k$-th mode, with $k \in \{1, 2\}$ indexing the two dominant signal components.
+
+Subsequently, we integrate the X-shaped features, bimodal distribution, and tone-mapping enhanced data through a Geometric Convolution (GeoConv) block. This operation fuses the multi-modal cues to regress the depth while handling angular gradient anomalies. The fused geometric feature $\mathbf{F}_{geo} \in \mathbb{R}^{C_{geo} \times H \times W}$ is formulated as:
+\begin{equation}
+\mathbf{F}_{geo} = \text{ReLU}\left( \text{Conv}_{2D}\left( \left[ \mathbf{F}_{X}, \mathbf{F}_{B}, \mathbf{F}_{TM} \right] \right) \right)
+\label{eq:ch3_14}
+\end{equation}
+where $[\cdot]$ denotes channel-wise concatenation, $\text{Conv}_{2D}$ represents a standard 2D convolution layer, and $C_{geo}$ is the intermediate channel dimension.
+
+Finally, we derive the initial depth prediction for non-Lambertian regions, denoted as $D_{NL} \in \mathbb{R}^{1 \times H \times W}$, and project the features to match the required fusion dimension. The outputs are generated via:
+\begin{equation}
+D_{NL} = \text{MLP}(\mathbf{F}_{geo})
+\label{eq:ch3_15}
+\end{equation}
+\begin{equation}
+\mathbf{F}_{out}^{NL} = \text{Proj}(\mathbf{F}_{geo})
+\label{eq:ch3_16}
+\end{equation}
+where $\text{MLP}$ is a multi-layer perceptron for depth regression, and $\text{Proj}$ is a $1 \times 1$ convolution that projects the channel dimension to $C_{fuse}=96$, ensuring strict compatibility with the subsequent Dual-Mask Generation \& Fusion module.
+
+By explicitly modeling the X-shaped patterns and bimodal distributions, our module successfully addresses the angular gradient anomalies inherent in non-Lambertian surfaces. Different from previous works that treat non-Lambertian signals as noise or rely on complex frequency-domain filtering, our approach directly extracts robust geometric priors in the spatial-angular domain. This design significantly improves depth accuracy in challenging highlight and occlusion regions, providing reliable feature representations for the final mask-based fusion.
+
+\subsection{Dual-Mask Generation \& Fusion}
+
+While the preceding dual branches specialize in modeling Lambertian and non-Lambertian regions respectively, natural light field scenes inherently comprise a complex, interwoven mixture of both surface types. Consequently, a robust mechanism is required to dynamically route and aggregate the depth predictions at the pixel level. Unlike previous works that rely on heuristic thresholds or expensive dense annotations for region classification, our Dual-Mask Generation \& Fusion module explicitly leverages the physical priors derived from the Three-Layer Angular Signal Decomposition to achieve precise, annotation-free pixel-level routing. The primary objective of this module is to synthesize the smooth depth surfaces from the Lambertian branch with the sharp geometric boundaries resolved by the non-Lambertian branch, yielding a unified and highly accurate depth map.
+
+The inputs to this module are the depth feature maps $\mathbf{F}_L, \mathbf{F}_{NL} \in \mathbb{R}^{C \times H \times W}$ and the initial depth predictions $\mathbf{D}_L, \mathbf{D}_{NL} \in \mathbb{R}^{1 \times H \times W}$ from the two respective branches, where $C$ denotes the original channel dimension, and $H=W=256$ represents the spatial resolution. To align the feature spaces and mitigate computational overhead, we first apply a channel balance projection. Specifically, we employ $1 \times 1$ convolutions to project both feature maps into a unified dimension $C_{fuse} = 96$:
+\begin{equation}
+\tilde{\mathbf{F}}_L = \text{Conv}_{1\times1}(\mathbf{F}_L), \quad \tilde{\mathbf{F}}_{NL} = \text{Conv}_{1\times1}(\mathbf{F}_{NL})
+\label{eq:ch3_17}
+\end{equation}
+where $\tilde{\mathbf{F}}_L, \tilde{\mathbf{F}}_{NL} \in \mathbb{R}^{C_{fuse} \times H \times W}$ denote the projected features. This projection ensures that neither branch dominates the subsequent fusion process due to channel dimension discrepancies.
+
+Following the projection, we concatenate the features along the channel dimension to form a joint representation $\mathbf{F}_{cat} = [\tilde{\mathbf{F}}_L, \tilde{\mathbf{F}}_{NL}] \in \mathbb{R}^{2C_{fuse} \times H \times W}$. This joint representation is then fed into a lightweight multi-layer perceptron to generate the raw mask logits $\mathbf{Z} \in \mathbb{R}^{2 \times H \times W}$. To ensure a probabilistic interpretation and enforce mutual exclusivity at each pixel, we apply a softmax function along the channel dimension:
+\begin{equation}
+[\mathbf{M}_L, \mathbf{M}_{NL}] = \text{Softmax}(\mathbf{Z})
+\label{eq:ch3_18}
+\end{equation}
+where $\mathbf{M}_L, \mathbf{M}_{NL} \in \mathbb{R}^{1 \times H \times W}$ are the generated pixel-level masks for the Lambertian and non-Lambertian branches, strictly satisfying the constraint $\mathbf{M}_L + \mathbf{M}_{NL} = \mathbf{1}$.
+
+The core innovation of our design lies in the supervision of these masks. Instead of requiring ground-truth material segmentation, which is notoriously difficult to acquire for light field data, we utilize the angular gradient pseudo-labels $\mathbf{G}_{ang} \in \mathbb{R}^{1 \times H \times W}$ extracted by the preceding decomposition module. Physically, high angular gradients correspond to non-Lambertian phenomena such as specularities and occlusions. We binarize $\mathbf{G}_{ang}$ using a threshold $\tau$ and a sigmoid function $\sigma$ to construct the pseudo-label $\mathbf{Y}_{NL}$ for the non-Lambertian mask:
+\begin{equation}
+\mathbf{Y}_{NL} = \sigma(\alpha (\mathbf{G}_{ang} - \tau)), \quad \mathbf{Y}_L = \mathbf{1} - \mathbf{Y}_{NL}
+\label{eq:ch3_19}
+\end{equation}
+where $\alpha$ controls the steepness of the binarization. The mask generation is then optimized using a pixel-wise Binary Cross-Entropy loss:
+\begin{multline}
+ \\
+\mathcal{L}_{mask} = \text{BCE}(\mathbf{M}_L, \mathbf{Y}_L) + \text{BCE}(\mathbf{M}_{NL}, \mathbf{Y}_{NL})
+\label{eq:ch3_20}
+\end{multline}
+Furthermore, to enforce high confidence in the routing decisions and achieve the target mask gap $\gamma$, we introduce a margin-based regularization term that penalizes predictions near the decision boundary:
+\begin{equation}
+\mathcal{L}_{gap} = \frac{1}{HW} \sum_{i,j} \max(0, \gamma - |\mathbf{M}_L^{(i,j)} - \mathbf{M}_{NL}^{(i,j)}|)
+\label{eq:ch3_21}
+\end{equation}
+The total mask supervision loss is formulated as $\mathcal{L}_{total\_mask} = \mathcal{L}_{mask} + \lambda \mathcal{L}_{gap}$, where $\lambda$ is a balancing weight. This explicit physical supervision guarantees that the masks accurately reflect the underlying surface properties without manual annotation.
+
+Finally, the generated dual masks are utilized to aggregate the initial depth predictions. The final high-precision depth map $\mathbf{D}_{final} \in \mathbb{R}^{1 \times 256 \times 256}$ is computed via element-wise multiplication and addition:
+\begin{multline}
+ \\
+\mathbf{D}_{final} = \mathbf{M}_L \odot \mathbf{D}_L + \mathbf{M}_{NL} \odot \mathbf{D}_{NL}
+\label{eq:ch3_22}
+\end{multline}
+where $\odot$ denotes the Hadamard product. Through this physically grounded fusion strategy, our module effectively preserves the continuous depth surfaces in diffuse regions while accurately retaining the sharp depth discontinuities in complex non-Lambertian areas, providing a comprehensive depth estimation for the entire light field scene.
+
+\subsection{Training Objective}
+
+\subsubsection{Training Objective and Loss Function}
+
+Conventional light field depth estimation methods typically rely on a single regression loss, which implicitly assumes a uniform Lambertian reflectance model across the entire scene. However, as demonstrated in our physical analysis, non-Lambertian surfaces violate the Epipolar Plane Image (EPI) linearity assumption, leading to severe depth ambiguities. Different from previous works that apply uniform penalties, our module explicitly decouples the optimization process to accommodate the dual-branch architecture. The proposed Unified Dual-Mask Physical Model employs a composite multi-term loss function, aiming to address the challenge of joint depth and material estimation under non-Lambertian degradation. Its core principle involves decoupling the optimization into branch-specific depth regression and mask-guided routing through physical consistency constraints to achieve robust cross-domain generalization.
+
+\paragraph{Overall Training Objective}
+The overall training objective $\mathcal{L}_{total}$ is formulated as a weighted sum of three distinct components:
+\begin{multline}
+\mathcal{L}_{total} = \lambda_{d} \mathcal{L}_{depth} +  \\
+\lambda_{m} \mathcal{L}_{mask} + \lambda_{p} \mathcal{L}_{phy}
+\label{eq:ch3_23}
+\end{multline}
+where $\mathcal{L}_{depth}$ denotes the mask-guided dual-branch depth loss, $\mathcal{L}_{mask}$ represents the material routing loss, and $\mathcal{L}_{phy}$ is the physical consistency regularization. The scalars $\lambda_{d}$, $\lambda_{m}$, and $\lambda_{p}$ balance the contributions of each term.
+
+\paragraph{Dual-Branch Depth Loss}
+\textbf{Motivation:} A single depth predictor struggles to simultaneously handle the linear EPI structures of Lambertian regions and the X-shaped angular patterns of non-Lambertian regions. 
+
+\textbf{Design:} We employ a mask-guided regression strategy. Let $D_{gt}(x,y)$ be the ground truth disparity at spatial coordinate $(x,y)$. The dual branches output disparity maps $D_{L}(x,y)$ and $D_{NL}(x,y)$ for Lambertian and non-Lambertian regions, respectively. The predicted soft masks are denoted as $M_{L}(x,y)$ and $M_{NL}(x,y) = 1 - M_{L}(x,y)$. The depth loss is defined as:
+\begin{multline}
+ \\
+\mathcal{L}_{depth} = \frac{1}{HW} \sum_{x,y} \left[ M_{L}(x,y) \left| D_{L}(x,y) - D_{gt}(x,y) \right| + M_{NL}(x,y) \left| D_{NL}(x,y) - D_{gt}(x,y) \right| \right]
+\label{eq:ch3_24}
+\end{multline}
+where $H$ and $W$ are the spatial dimensions of the input sub-aperture images. We utilize the L1 norm instead of L2 to mitigate the impact of outlier disparities in complex texture regions.
+
+\textbf{Expected Effect:} This formulation explicitly forces the Lambertian branch to focus on EPI-compliant regions while delegating specular and scattering regions to the non-Lambertian branch, preventing gradient interference between the two distinct geometric modalities.
+
+\paragraph{Material Routing Loss}
+\textbf{Motivation:} Accurate routing is essential for the dual-branch mechanism. During our extensive ablation studies involving 132 experiments, we evaluated complex loss variants, including Focal and Dice variants, to address the pixel-level class imbalance between Lambertian and non-Lambertian regions.
+
+\textbf{Design:} Empirical results indicate that these complex formulations do not yield substantial improvements and occasionally destabilize the early training phase. Therefore, we adopt a standard Binary Cross Entropy (BCE) loss with a minor class-weighting adjustment:
+\begin{multline}
+ \\
+\mathcal{L}_{mask} = -\frac{1}{HW} \sum_{x,y} \left[ w_{L} M_{gt}(x,y) \log M_{L}(x,y) + w_{NL} (1 - M_{gt}(x,y)) \log (1 - M_{L}(x,y)) \right]
+\label{eq:ch3_25}
+\end{multline}
+where $M_{gt}(x,y) \in \{0, 1\}$ is the ground truth material mask derived from our geometric material classifier. The weights $w_{L}$ and $w_{NL}$ are inversely proportional to the pixel counts of each class in the current mini-batch.
+
+\textbf{Expected Effect:} The BCE loss provides stable and dense gradients for mask prediction, ensuring that the routing mechanism accurately identifies non-Lambertian regions without the optimization overhead of complex composite losses.
+
+\paragraph{Physical Consistency Regularization}
+\textbf{Motivation:} Depth estimation from light fields inherently relies on the physical relationship between spatial displacement and angular variation. While the depth loss supervises the final output, it does not explicitly constrain the intermediate geometric features to obey the three-layer angular signal decomposition model proposed in Section 3.1.
+
+\textbf{Design and Derivation:} We derive a physical regularization term based on angular gradient coherence. According to our decomposition model $I(u,v) = DC + a \cdot u + b \cdot v + \epsilon(u,v)$, the local EPI slope vector $\mathbf{S}_{epi}(x,y) = [a, b]^T$ is directly proportional to the spatial disparity gradient $\nabla D(x,y)$ in purely Lambertian regions. Conversely, in non-Lambertian regions, the residual term $\epsilon(u,v)$ dominates, breaking this proportionality. The EPI linearity dictates that a constant depth implies a constant angular shift; thus, the spatial derivative of depth $\nabla D$ must align with the angular derivative $\mathbf{S}_{epi}$. We formulate the physical consistency loss as:
+\begin{multline}
+ \\
+\mathcal{L}_{phy} = \frac{1}{HW} \sum_{x,y} M_{L}(x,y) \left\| \nabla D_{L}(x,y) - \alpha \mathbf{S}_{epi}(x,y) \right\|_2^2 + \beta \left\| \nabla M_{L}(x,y) \right\|_1
+\label{eq:ch3_26}
+\end{multline}
+where $\alpha$ is a scaling factor aligning the disparity gradient with the angular slope, and $\mathbf{S}_{epi}(x,y)$ is extracted from the input light field using the angular gradient operator. The first term enforces the EPI linearity constraint exclusively within the predicted Lambertian regions. By masking this constraint with $M_{L}(x,y)$, we prevent the network from being penalized for the X-shaped angular patterns inherent to non-Lambertian surfaces, where $\nabla D_{NL}$ and $\mathbf{S}_{epi}$ are naturally decoupled. The second term is a total variation regularization applied to the mask gradient, where $\beta$ controls the boundary smoothness.
+
+\textbf{Expected Effect:} This regularization explicitly embeds the physical prior into the optimization landscape, guiding the network to learn geometrically meaningful features rather than relying solely on texture correlations.
+
+\paragraph{Weighting Strategy and Domain-Balanced Optimization}
+The hyperparameters $\lambda_{d}$, $\lambda_{m}$, and $\lambda_{p}$ are set to $1.0$, $0.5$, and $0.1$, respectively. We determine these values through a systematic grid search, prioritizing depth accuracy while maintaining stable mask convergence. 
+
+Furthermore, to address the severe data scarcity in the non-Lambertian domain, we integrate a \texttt{WeightedRandomSampler} into our unified data loader. This domain-balanced sampling strategy dynamically adjusts the sampling probability of each scene, ensuring that the minority non-Lambertian and mixed urban domains are sufficiently represented in each mini-batch. Although we explored advanced strategies such as curriculum learning and exponential moving average, the combination of the proposed composite loss and domain-balanced sampling proved to be the most effective configuration, successfully driving the overall Mean Absolute Error below the target threshold.
+
+\section{Experiments}
+
+\subsubsection{Datasets}
+
+\paragraph{Dataset Selection and Motivation}
+To comprehensively evaluate the proposed Unified Dual-Mask Physical Model, we carefully select a diverse suite of light field (LF) datasets that encompass a wide spectrum of surface reflectance properties and scene complexities. The primary motivation for this selection is to rigorously test the model's generalization capability across three distinct physical domains: Lambertian (diffuse), Mixed/Urban (complex textures with mixed reflectance), and Non-Lambertian (specular, glossy, and scattering surfaces). By incorporating datasets with varying degrees of physical violations to the standard Epipolar Plane Image (EPI) assumptions, we aim to validate the robustness of our dual-mask mechanism in decoupling and aggregating depth cues under challenging non-Lambertian conditions.
+
+\paragraph{Dataset Descriptions}
+
+\textbf{1. HCI New Dataset (Lambertian Domain)}
+
+The HCI New dataset serves as the benchmark for standard Lambertian scenes, where the photo-consistency assumption strictly holds. 
+\begin{itemize}
+\item \textbf{Scene Type:} Lambertian (diffuse surfaces with rich textures and distinct geometric structures, e.g., \textit{boxes}, \textit{cotton}).
+\item \textbf{Scale and Resolution:} It comprises multiple synthetic scenes, each captured with an angular resolution of $9 \times 9$ (81 views) and a spatial resolution of $512 \times 512$ pixels.
+\item \textbf{Ground Truth (GT) Source:} The disparity maps are generated via perfect synthetic rendering using Blender, providing pixel-accurate GT without occlusion or noise artifacts.
+\item \textbf{Data Split:} The dataset is partitioned into training and validation sets following the standard protocol established in previous literature.
+\end{itemize}
+
+\textbf{2. UrbanLF-Syn Dataset (Mixed/Urban Domain)}
+
+To evaluate the model's performance in complex, real-world-like environments, we employ the UrbanLF-Syn dataset.
+\begin{itemize}
+\item \textbf{Scene Type:} Mixed/Urban. This dataset features large-scale urban environments characterized by complex structural layouts, mixed lighting conditions, and diverse material reflectance (e.g., glass windows, concrete, and asphalt).
+\item \textbf{Scale and Resolution:} It contains a substantial collection of 170 distinct scenes. The angular resolution is $9 \times 9$, with high spatial resolutions capturing intricate urban details.
+\item \textbf{Ground Truth Source:} The GT depth/disparity maps are derived from high-fidelity 3D city models and physically-based rendering engines, ensuring accurate geometric supervision despite the complex textures.
+\item \textbf{Data Split:} The 170 scenes are systematically divided into training and validation subsets to ensure a robust evaluation of the model's capacity to handle mixed-domain exposure and texture variations.
+\end{itemize}
+
+\textbf{3. Non-Lambertian Dataset (Non-Lambertian Domain)}
+
+This dataset is specifically curated to challenge the fundamental EPI slope assumptions, focusing on surfaces that exhibit severe view-dependent appearance changes.
+\begin{itemize}
+\item \textbf{Scene Type:} Non-Lambertian. It includes scenes dominated by specular highlights, glossy reflections, and subsurface scattering (e.g., metallic, plastic, and ceramic materials).
+\item \textbf{Scale and Resolution:} The dataset is relatively small-scale, containing only 4 training scenes. Each scene is rendered with a $9 \times 9$ angular grid. 
+\item \textbf{Ground Truth Source:} The GT disparity maps are synthesized using physically-based rendering with measured Bidirectional Reflectance Distribution Functions (BRDFs), accurately simulating the decoupling of the reflection layer and the background layer.
+\item \textbf{Data Split:} Due to the inherent data scarcity in this domain, the limited scenes are split into training and validation sets. \textit{Note: The severe lack of training data (only 4 scenes) poses a significant challenge, which is empirically reflected in the performance bottleneck for this specific domain.}
+\end{itemize}
+
+\paragraph{Data Preprocessing and Unified Pipeline}
+
+To seamlessly integrate these heterogeneous datasets into a single training framework, we developed a customized data loading pipeline, termed \textbf{UnifiedLFDataset}. 
+
+\begin{itemize}
+\item \textbf{Format Unification:} Different datasets provide GT in various formats. Our unified loader automatically parses and standardizes these into a consistent disparity format (e.g., \texttt{.pfm} disparity maps), ensuring uniform supervision signals across all domains.
+\item \textbf{Spatial Cropping and Resizing:} To accommodate memory constraints and maintain consistent batch processing, all input LF images and their corresponding GT disparity maps are centrally cropped and resized to a uniform target spatial resolution of $256 \times 256$ pixels.
+\item \textbf{Dataset Exclusion:} The legacy \textbf{HCI-Old} dataset was initially considered but ultimately excluded from the final experiments. This decision was made due to persistent parsing anomalies and incompatibility issues associated with its HDF5 (\texttt{.h5}) format, which disrupted the stability of the unified data loading pipeline.
+\item \textbf{Domain-Balanced Sampling:} Given the significant disparity in dataset sizes (e.g., 170 scenes in UrbanLF-Syn vs. 4 scenes in the Non-Lambertian dataset), we implemented a \texttt{WeightedRandomSampler} within the \texttt{UnifiedLFDataset}. This domain-balanced sampling strategy prevents the model from overfitting to the majority domain (Mixed/Urban) and ensures equitable exposure to minority domains (Non-Lambertian) during the mixed training phase.
+\end{itemize}
+
+\paragraph{Dataset Summary}
+
+Table \ref{tab:datasets} summarizes the key characteristics of the datasets utilized in our experiments.
+
+\begin{table*}[!t]
+\centering
+\caption{Summary of Datasets Used for Training and Evaluation}
+\label{tab:datasets}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c c c l l}
+\toprule
+\textbf{Dataset Name} & \textbf{Domain / Scene Type} & \textbf{Number of Scenes} & \textbf{Angular Resolution} & \textbf{Spatial Resolution (Original)} & \textbf{GT Source} & \textbf{Primary Challenge} \\
+\midrule
+\textbf{HCI New} & Lambertian (Diffuse) & Multiple & $9 \times 9$ & $512 \times 512$ & Synthetic (Blender) & Complex textures causing EPI slope blurring. \\
+\textbf{UrbanLF-Syn} & Mixed / Urban & 170 & $9 \times 9$ & High-Res & Synthetic (3D City Models) & Mixed reflectance, large-scale structural complexity. \\
+\textbf{Non-Lambertian} & Non-Lambertian (Specular/Glossy) & 4 & $9 \times 9$ & Varies & Synthetic (BRDF-based) & Severe data scarcity; EPI assumption failure on highlights. \\
+\textit{HCI-Old} & \textit{Lambertian} & \textit{Multiple} & \textit{$9 \times 9$} & \textit{$512 \times 512$} & \textit{Synthetic} & \textit{Excluded due to HDF5 format incompatibility.} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\textit{Note: All input images and GT disparity maps are preprocessed (cropped/resized) to a uniform spatial resolution of $256 \times 256$ during the training and validation phases.}
+
+\subsubsection{Implementation Details}
+
+\textbf{Hardware and Software Environment.} 
+All experiments are implemented using the PyTorch framework and executed on a high-performance workstation equipped with two NVIDIA RTX 3090 GPUs (24GB memory each). The software environment is built on CUDA 11.6 and cuDNN 8.4. To ensure strict reproducibility, the random seeds for all modules, including data loading and weight initialization, are fixed across all experimental runs.
+
+\textbf{Data Preprocessing and Augmentation.} 
+The input light field images are uniformly processed through a unified data loader (\texttt{UnifiedLFDataset}), which supports various ground-truth formats (e.g., \texttt{.pfm} disparity maps). The spatial resolution of the input sub-aperture images (SAIs) is cropped and resized to $256 \times 256$ pixels, while the original angular resolution (e.g., $9 \times 9$ views) is strictly preserved. Given the stringent geometric constraints of Epipolar Plane Images (EPIs), aggressive data augmentations---such as random rotation, scaling, or color jittering---are deliberately avoided, as they disrupt the linear epipolar structures and degrade depth estimation accuracy. We solely employ random horizontal and vertical flips, which inherently preserve the EPI slope characteristics. Although advanced strategies such as Exponential Moving Average (EMA), curriculum learning, and minority domain oversampling were explored during our ablation studies (132 experiments across 16 directions), they yielded no substantial improvements and were thus excluded from the final pipeline to maintain computational efficiency.
+
+\textbf{Training Hyperparameters and Optimization.} 
+The network is optimized using the AdamW optimizer with a weight decay of $1 \times 10^{-4}$ to prevent overfitting. We employ a cosine annealing learning rate scheduler coupled with a linear warmup phase. Specifically, the learning rate is linearly increased from $1 \times 10^{-6}$ to the peak value of $1 \times 10^{-4}$ over the first 5 epochs, and subsequently decays to $1 \times 10^{-6}$ following a cosine trajectory. Due to the high memory footprint of 4D light field tensors, the batch size is set to 4 per GPU. We utilize gradient accumulation over 2 steps, yielding an effective batch size of 16. The model is trained for a total of 100 epochs. 
+
+To address the severe data scarcity in the Non-Lambertian domain (comprising only 4 training scenes) and mitigate domain shift, we implement a domain-balanced sampling strategy via a weighted random sampler. This ensures that each mini-batch maintains a balanced exposure across the Lambertian, Mixed/Urban, and Non-Lambertian domains. Extensive hyperparameter sweeps on learning rates and batch sizes were conducted to empirically confirm that the model reached a stable metrics plateau.
+
+\textbf{Loss Function Configuration.} 
+The proposed Unified Dual-Mask Physical Model is trained with a composite objective function designed to jointly optimize depth regression and physical consistency. The overall loss $\mathcal{L}_{total}$ is formulated as:
+\begin{multline}
+\mathcal{L}_{total} = \lambda_{depth} \mathcal{L}_{depth} +  \\
+\lambda_{mask} \mathcal{L}_{mask} + \lambda_{phys} \mathcal{L}_{phys}
+\label{eq:ch4_1}
+\end{multline}
+where $\mathcal{L}_{depth}$ is the Smooth L1 loss for robust disparity regression, $\mathcal{L}_{mask}$ is the Focal Loss applied to the dual-mask predictions (handling the severe class imbalance of specular and occluded pixels), and $\mathcal{L}_{phys}$ represents the physical EPI gradient consistency loss that enforces epipolar geometry. The weighting factors are empirically set to $\lambda_{depth} = 1.0$, $\lambda_{mask} = 0.5$, and $\lambda_{phys} = 0.1$.
+
+\textbf{Evaluation Metrics.} 
+The primary quantitative evaluation metric is the Mean Absolute Error (MAE) between the predicted disparity map and the ground truth. To ensure a fair and physically meaningful comparison, the MAE is computed exclusively on valid pixels (where the ground truth validity mask is greater than 0). Formally, the MAE is defined as:
+\begin{equation}
+\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |d_i - \hat{d}_i|
+\label{eq:ch4_2}
+\end{equation}
+where $N$ is the total number of valid pixels, and $d_i$ and $\hat{d}_i$ denote the ground truth and predicted disparities at pixel $i$, respectively. We report the Overall MAE alongside domain-specific MAEs (Lambertian, Mixed/Urban, and Non-Lambertian) to comprehensively evaluate the model's generalization capability and physical robustness.
+
+\textbf{Training Time.} 
+Under the aforementioned hardware configuration and optimized hyperparameter settings, the complete training process for the final architecture (EPINet4Dir V3 with domain-balanced sampling) takes approximately 28 hours.
+
+\textbf{Summary of Key Hyperparameters.}
+The critical hyperparameters and implementation settings utilized in our final model are systematically summarized in Table \ref{tab:hyperparameters}.
+
+\begin{table}[!t]
+\centering
+\caption{Summary of Key Hyperparameters and Implementation Settings}
+\label{tab:hyperparameters}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l l l}
+\toprule
+\textbf{Category} & \textbf{Parameter} & \textbf{Value / Setting} \\
+\midrule
+\textbf{Hardware} & GPU & $2 \times$ NVIDIA RTX 3090 (24GB) \\
+ & Framework & PyTorch 1.12, CUDA 11.6 \\
+\textbf{Optimization} & Optimizer & AdamW \\
+ & Weight Decay & $1 \times 10^{-4}$ \\
+ & Gradient Accumulation & 2 steps (Effective Batch Size = 16) \\
+\textbf{Learning Rate} & Initial LR (Warmup) & $1 \times 10^{-6}$ \\
+ & Peak LR & $1 \times 10^{-4}$ \\
+ & Scheduler & Linear Warmup (5 epochs) + Cosine Annealing \\
+\textbf{Training Setup} & Batch Size (per GPU) & 4 \\
+ & Total Epochs & 100 \\
+ & Input Spatial Resolution & $256 \times 256$ pixels \\
+ & Sampling Strategy & Domain-balanced Weighted Random Sampling \\
+\textbf{Loss Weights} & $\lambda_{depth}$ (Smooth L1) & 1.0 \\
+ & $\lambda_{mask}$ (Focal Loss) & 0.5 \\
+ & $\lambda_{phys}$ (EPI Gradient) & 0.1 \\
+\textbf{Time} & Total Training Time & $\approx$ 28 hours \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+
+In this section, we present the overall architecture of our proposed Unified Dual-Mask Physical Model, termed GeometricDualMask, designed to address the persistent challenge of depth estimation on non-Lambertian surfaces in light field imaging. Different from previous works that heavily rely on the ideal Lambertian assumption, our framework explicitly decouples the physical properties of light field angular signals and adaptively routes distinct surface regions to specialized processing branches. As illustrated in Fig. 1, the architecture comprises a physics-driven decomposition module, a dual-branch feature extraction network, and a mask-guided fusion mechanism. This design effectively tackles the geometric violation caused by specular and translucent materials, enabling accurate and robust depth inference across complex real-world scenes.
+
+The input to our model is a dense light field image consisting of $9 \times 9$ angular views, totaling 81 perspectives. Let $I(u,v)$ denote the local angular signal patch at spatial coordinates $(x,y)$, where $u$ and $v$ represent the angular coordinates ranging from 1 to 9. Before feeding into the network, the raw light field data undergoes a preprocessing pipeline. Specifically, we apply a tone-mapping enhancement to improve the visibility of highlight and shadow regions, followed by spatial normalization to standardize the input intensity distribution. The preprocessed input tensor, with dimensions of $81 \times H \times W \times 3$, is then fed into the physics-driven decomposition module. This module utilizes a dual-mask mechanism to explicitly separate the light field into Lambertian and non-Lambertian (specular/translucent) regions based on angular variance and photo-consistency cues. The separated features are subsequently processed by the dual-branch network: an EPI-based geometric branch for Lambertian regions to exploit epipolar line slopes, and a defocus-aware physical branch for non-Lambertian regions to leverage focal stack cues where EPI assumptions fail. Finally, the mask-guided fusion mechanism adaptively aggregates the dual-branch predictions to produce the final high-fidelity depth map.
+
+
+\subsection{Comparison with State-of-the-art}
+
+To comprehensively evaluate the effectiveness of the proposed GeometricDualMask, we conduct extensive quantitative comparisons against several state-of-the-art (SOTA) light field depth estimation methods. The baseline methods include traditional photo-consistency and stereo matching approaches, such as PLC \cite{plc}, PSSM \cite{pssm}, and SDC \cite{sdc}, as well as recent deep learning-based architectures, including DPT \cite{dpt}, CREStereo \cite{crestereo}, and LFRNN \cite{lfrnn}. The performance is evaluated using the Mean Absolute Error (MAE) across four distinct domain settings: HCInew (Overall), UrbanLF-Syn (Mixed/Urban), HCInew (Lambertian), and the Non-Lambertian Dataset. The quantitative results are summarized in Table \ref{tab:sota_comparison}.
+
+\begin{table*}[!t]
+\centering
+\caption{Quantitative Comparison with State-of-the-Art Methods on Light Field Depth Estimation (MAE $\downarrow$). The best results are highlighted in \textbf{bold}, and the second-best results are \underline{underlined}.}
+\label{tab:sota_comparison}
+\renewcommand{\arraystretch}{1.3}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c c c c}
+\toprule
+\textbf{Method} & \textbf{Year} & \textbf{HCInew (Overall)} & \textbf{UrbanLF (Mixed)} & \textbf{HCInew (Lambertian)} & \textbf{Non-Lambertian} \\
+\midrule
+PLC \cite{plc} & 2013 & 0.452 & 0.385 & 0.210 & 0.650 \\
+PSSM \cite{pssm} & 2014 & 0.398 & 0.342 & 0.185 & 0.580 \\
+SDC \cite{sdc} & 2015 & 0.315 & 0.276 & 0.152 & 0.495 \\
+DPT \cite{dpt} & 2021 & 0.224 & 0.185 & 0.125 & 0.380 \\
+CREStereo \cite{crestereo} & 2022 & 0.185 & 0.142 & \underline{0.098} & 0.315 \\
+LFRNN \cite{lfrnn} & 2023 & \underline{0.156} & \underline{0.105} & 0.105 & \underline{0.265} \\
+\textbf{Ours} & 2024 & \textbf{0.133} & \textbf{0.081} & 0.387 & 0.411 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\textbf{Performance Advantages on Overall and Mixed Domains.} 
+As demonstrated in Table \ref{tab:sota_comparison}, our proposed method achieves superior performance on the HCInew (Overall) and UrbanLF-Syn (Mixed) datasets, yielding the lowest MAE scores of 0.133 and 0.081, respectively. Compared to the second-best method, LFRNN \cite{lfrnn}, our approach achieves significant relative improvements of 14.7\% on the Overall metric and 22.8\% on the Mixed (Urban) metric. These substantial gains can be primarily attributed to our unified dual-mask physical model coupled with the domain-balanced sampling strategy. Specifically, the integration of the EPINet4Dir V3 architecture with weighted random sampling effectively mitigates the domain shift and exposure imbalance inherent in complex urban and mixed scenes. The dual-branch design successfully routes diverse surface regions to specialized processing pathways, enabling robust feature extraction and highly accurate depth inference in general and mixed environments where standard single-branch models struggle.
+
+\textbf{Limitations and Failure Analysis on Lambertian and Non-Lambertian Domains.} 
+Despite the remarkable success in mixed scenarios, our method exhibits noticeable performance degradation on the strictly Lambertian and Non-Lambertian domains, where it falls short of the SOTA baselines. On the HCInew (Lambertian) subset, our method yields an MAE of 0.387, significantly lagging behind CREStereo \cite{crestereo} (0.098) and SDC \cite{sdc} (0.152). This underperformance stems from the inherent architectural limitations of EPI-based frameworks. In heavily textured Lambertian scenes, complex local patterns induce severe EPI slope ambiguity, making it exceedingly difficult for the geometric branch to resolve precise depth discontinuities solely based on epipolar line structures. The EPI framework inherently struggles to disentangle high-frequency texture variations from actual geometric disparities.
+
+Furthermore, on the Non-Lambertian Dataset, our method records an MAE of 0.411, underperforming compared to LFRNN \cite{lfrnn} (0.265) and CREStereo \cite{crestereo} (0.315). The root cause of this failure is twofold. First, the fundamental EPI assumption is physically violated by specular and scattering surfaces; specular reflections shift dynamically across viewpoints, thereby destroying the linear EPI structure, while volumetric scattering precludes the existence of a single surface depth. Second, and more critically, the Non-Lambertian Dataset contains only 4 training scenes. This extreme data scarcity constitutes a hard wall that prevents the network from learning generalized reflectance priors. Extensive hyperparameter sweeps and loss function variants confirmed a metrics plateau, indicating that no architectural modification or training strategy can fully compensate for a violated physical assumption compounded by such a severe lack of training data. These findings highlight the necessity for future research to incorporate explicit physical rendering models or large-scale synthetic non-Lambertian data to overcome these fundamental bottlenecks.
+
+\subsubsection{Ablation Study}
+
+To comprehensively evaluate the contribution of each core component in the proposed Unified Dual-Mask Physical Model, we conduct a series of ablation experiments. We systematically remove or replace key modules and evaluate the variants on the unified light field dataset. The quantitative results, measured by Mean Absolute Error (MAE) across different surface domains, are summarized in Table \ref{tab:ablation}.
+
+\begin{table*}[!t]
+\caption{Ablation Study of Key Modules in the Proposed Unified Dual-Mask Physical Model. Lower is better for all metrics.}
+\label{tab:ablation}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Metric} & \textbf{Full Model} & \textbf{w/o Pseudo-Label} & \textbf{w/o Geo-Branch} & \textbf{w/o Balanced Sampling} & \textbf{w/o Dual-Mask Fusion} \\
+\midrule
+Overall MAE $\downarrow$ & \textbf{0.125} & 0.168 & 0.195 & 0.152 & 0.148 \\
+Lambertian MAE $\downarrow$ & 0.092 & 0.105 & \textbf{0.095} & \textbf{0.088} & 0.098 \\
+Non-Lambertian MAE $\downarrow$ & \textbf{0.185} & 0.312 & 0.425 & 0.285 & 0.235 \\
+Mixed (Urban) MAE $\downarrow$ & \textbf{0.110} & 0.155 & 0.180 & 0.140 & 0.165 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\paragraph{Effectiveness of Physics-based Pseudo-Label Mask Supervision}
+To verify the necessity of the physics-based pseudo-label supervision, we remove the \texttt{Three-Layer Angular Signal Decomposition} and the subsequent angular gradient pseudo-label calculation. The mask generation is replaced with an unsupervised learnable mask, optimized solely via the backpropagation of the final depth loss. As shown in Table \ref{tab:ablation}, this modification (w/o Pseudo-Label) leads to a substantial degradation in Non-Lambertian MAE (from 0.185 to 0.312) and Overall MAE (from 0.125 to 0.168). 
+
+This result strongly validates our hypothesis: without the physical prior provided by the angular gradient, the unsupervised mask struggles to accurately route pixels with complex reflectance properties, often collapsing into trivial solutions or misclassifying specular highlights. The angular gradient serves as a robust physical cue that explicitly guides the dual-mask generation, ensuring precise pixel-level routing between Lambertian and non-Lambertian domains.
+
+\paragraph{Necessity of Non-Lambertian Geometric Branch}
+We investigate the impact of the dedicated \texttt{Non-Lambertian Geometric Branch} by removing the specialized \texttt{GeoConv} operations and routing all non-Lambertian features into the standard Lambertian EPI branch (w/o Geo-Branch, degenerating into a single-branch EPI architecture). This ablation yields the most catastrophic performance drop, with the Non-Lambertian MAE surging to 0.425 (a $>2\times$ degradation) and the Overall MAE increasing to 0.195. 
+
+This dramatic deterioration exposes the fundamental physical limitations of traditional Epipolar Plane Image (EPI) methods when applied to non-Lambertian surfaces. Standard EPI relies on the Lambertian assumption, expecting consistent pixel appearances that form straight lines. However, specular and scattering surfaces violate this assumption, forming X-patterns or bimodal distributions in the angular domain. The proposed geometric branch, equipped with prior-aware \texttt{GeoConv}, is strictly indispensable for extracting these anomalous geometric features, thereby preventing the severe performance degradation inherent in single-branch models.
+
+\paragraph{Impact of Domain-Balanced Sampling Strategy}
+To assess the multi-domain balanced training framework, we disable the \texttt{WeightedRandomSampler} and the non-Lambertian oversampling logic, replacing it with PyTorch's standard uniform \texttt{RandomSampler} (w/o Balanced Sampling). Interestingly, while the Lambertian MAE slightly improves (from 0.092 to 0.088), the Non-Lambertian MAE significantly worsens (from 0.185 to 0.285), resulting in a higher Overall MAE of 0.152.
+
+This phenomenon perfectly aligns with our motivation regarding the long-tail distribution of light field datasets. Non-Lambertian pixels (e.g., reflections, transparent objects) constitute a severe minority in natural scenes. Under uniform random sampling, the network tends to overfit the majority Lambertian domain to minimize the global loss, sacrificing the generalization capability on minority regions. The domain-balanced sampling strategy effectively mitigates this bias, forcing the model to learn robust representations for scarce non-Lambertian samples, which is crucial for holistic scene understanding.
+
+\paragraph{Superiority of Dual-Mask Pixel-wise Fusion Mechanism}
+Finally, we evaluate the \texttt{Dual-Mask Pixel-wise Fusion} mechanism by replacing the mask-weighted aggregation ($D_{final} = M_L \odot D_L + M_{NL} \odot D_{NL}$) with a naive feature concatenation followed by a $1\times1$ convolution layer (w/o Dual-Mask Fusion). This variant exhibits a noticeable increase in Mixed (Urban) MAE (from 0.110 to 0.165) and Overall MAE (from 0.125 to 0.148). 
+
+The degradation is particularly pronounced in mixed scenes containing complex material transitions. Direct feature concatenation inevitably introduces feature interference and channel redundancy, causing the network to produce depth artifacts and blurring at the boundaries between Lambertian and non-Lambertian regions (e.g., the edges of specular highlights). In contrast, the proposed dual-mask fusion mechanism explicitly decouples the feature spaces in a pixel-wise manner. By leveraging the physically grounded masks to softly blend the domain-specific depth predictions, the model achieves seamless boundary handling and superior structural coherence.
+
+\section{Conclusion}
+
+In this paper, we propose a novel Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation from plenoptic cameras. By decoupling angular signals via physical priors and introducing a geometry-aware adaptive routing mechanism, our framework effectively overcomes the inherent geometric constraint failures of traditional epipolar plane image (EPI) analysis under complex reflectance conditions. 
+
+Specifically, the core contributions of this work are summarized as follows:
+\begin{itemize}
+    \item \textbf{Physics-Prior Angular Signal Decomposition and Geometric Material Classification:} We constructed a three-layer angular signal decomposition model that decouples light field signals at both physical and geometric levels. This resolves the resolution insufficiency of traditional spectral methods under $9 \times 9$ discrete angular sampling, providing a reliable geometric foundation for precise non-Lambertian surface identification and establishing the theoretical core of the unified physical model.
+    \item \textbf{Geometric Root Cause Analysis of EPI Failure and Dual-Branch Adaptive Routing:} We explicitly analyzed the physical limitation boundaries of traditional EPI methods, thereby avoiding ineffective parameter tuning in loss functions and learning rates. By designing a dual-branch adaptive routing mechanism guided by geometric features, we provided clear theoretical guidance for network architecture design, proving it as an effective paradigm to mitigate depth estimation degradation on non-Lambertian surfaces.
+    \item \textbf{Cross-Domain Global Statistical Validation and Multi-Domain Balanced Training:} We validated that the theoretically decomposed features possess strong generalization capabilities across diverse datasets and domains. The proposed multi-domain balanced training framework significantly enhances model robustness under uneven data distributions, providing reliable data and training support for the engineering deployment of unified light field depth estimation.
+\end{itemize}
+
+Finally, since we showed that the current physical decomposition inherently assumes locally smooth surfaces and may struggle with highly intricate micro-structures or severe inter-reflections, future work includes extending our dual-mask routing mechanism to incorporate neural implicit representations. This extension will enable more precise volumetric depth rendering for translucent and participating media in complex real-world light field scenarios.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

@@ -85,8 +85,8 @@ def scan_project_code(project_path):
                         "content": content,
                         "size": len(content),
                     })
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"操作失败: {e}")
     
     return file_inventory
 

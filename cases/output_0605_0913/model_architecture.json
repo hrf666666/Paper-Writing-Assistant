@@ -1,0 +1,55 @@
+{
+  "总体架构": "输入为多视角光场图像（Light Field），经过最小-最大归一化映射到[-1, 1]区间后，进入统一双掩码物理模型（Unified Dual-Mask Physical Model）。模型基于三层角度信号分解理论，采用双路径架构（Lambertian EPI分支处理漫反射区域，Non-Lambertian几何分支处理高光/散射区域）提取特征。通过平衡投影解决通道不平衡问题后，由物理预测头解耦输出深度图（Depth）、反射率/材质掩码（Reflectance/Mask）和二维位移场（Displacement Field）。训练阶段引入相位正则化和物理一致性损失，确保Non-Lambertian区域的深度估计符合物理反射模型，最终实现跨域的高精度深度估计。",
+  "模块详情": [
+    {
+      "模块名": "输入归一化模块 (Input Normalization)",
+      "输入": "原始光场张量 lf_input，维度为 [B, C, H, W]，其中C为视角通道数",
+      "核心操作": "按批次和通道维度计算最小值和最大值，进行最小-最大归一化，并线性缩放到 [-1, 1] 区间，以加速网络收敛并稳定梯度",
+      "输出": "归一化后的光场张量 x_norm，维度为 [B, C, H, W]",
+      "关键公式": "x_norm = (lf_input - x_min) / (x_max - x_min + 1e-8) * 2.0 - 1.0"
+    },
+    {
+      "模块名": "双掩码特征提取与分解模块 (Dual-Mask Feature Extraction)",
+      "输入": "归一化后的光场张量 x_norm，维度为 [B, C, H, W]",
+      "核心操作": "基于三层角度信号分解理论，将光场信号解耦为DC（环境光）、线性项（视差）和残差（材质）。内部并行运行Lambertian EPI分支和Non-Lambertian几何分支，提取多尺度几何与材质特征，并通过平衡投影层（FUSE_DIM）解决早期版本中EPI分支与几何分支的通道不平衡问题",
+      "输出": "融合后的深度特征、反射率特征和位移场特征",
+      "关键公式": "I(u,v) = DC + a·u + b·v + ε(u,v)"
+    },
+    {
+      "模块名": "物理预测头 (Physical Prediction Head)",
+      "输入": "融合后的深度、反射率和位移场特征",
+      "核心操作": "通过卷积层将高维特征映射为物理意义明确的输出变量，分别预测每个像素的深度值、反射率/材质掩码（用于区分Lambertian与Non-Lambertian区域）以及二维视差位移场",
+      "输出": "depth_pred [B, 1, H, W], r_pred [B, 1, H, W], V_pred [B, 2, H, W] (包含Vx, Vy)",
+      "关键公式": "V_pred = [Vx, Vy], r_pred = σ(feature_r)"
+    },
+    {
+      "模块名": "相位正则化模块 (Phase Regularization)",
+      "输入": "位移场预测 V_pred [B, 2, H, W] 和 反射率预测 r_pred [B, 1, H, W]",
+      "核心操作": "计算位移场V在空间维度上的梯度平方和，并利用反射率r的逆Sigmoid值作为权重。该操作旨在惩罚Non-Lambertian区域（r较大）的位移场梯度，同时保持Lambertian区域（r较小）的位移场平滑性",
+      "输出": "标量正则化损失 phase_reg",
+      "关键公式": "phase_reg = mean( ((dVx/dx)^2 + (dVy/dy)^2) * (1 - sigmoid(r_pred)) )"
+    },
+    {
+      "模块名": "物理一致性约束模块 (Physical Consistency Loss)",
+      "输入": "位移场预测 V_pred [B, 2, H, W] 和 反射率预测 r_pred [B, 1, H, W]",
+      "核心操作": "计算预测的视差/位移场与反射率之间的物理一致性约束，确保Non-Lambertian区域的深度估计和视差计算符合非朗伯体表面的物理反射和散射模型",
+      "输出": "标量物理损失 phys_loss",
+      "关键公式": "phys_loss = physical_consistency_loss(V_pred, r_pred)"
+    }
+  ],
+  "模块连接": "原始光场输入首先经过【输入归一化模块】映射到[-1, 1]区间。归一化后的光场数据输入至【双掩码特征提取与分解模块】，该模块内部并行运行双路径分支提取特征并进行通道平衡投影。提取的特征随后送入【物理预测头】，解耦输出深度图(depth_pred)、反射率掩码(r_pred)和位移场(V_pred)。在训练阶段，V_pred和r_pred同时输入至【相位正则化模块】和【物理一致性约束模块】，计算正则化项和物理约束损失。最终总损失由 depth_loss(MSE) + 0.5*r_loss(MSE) + 0.1*phase_reg 构成，进行反向传播更新网络参数。推理阶段仅输出 depth_pred。",
+  "关键超参数": {
+    "lf_channels": 15,
+    "hidden_dim": 32,
+    "network_depth": 1,
+    "FUSE_DIM": 96,
+    "batch_size": 8,
+    "optimizer": "AdamW",
+    "learning_rate": 0.0005,
+    "weight_decay": 0.0001,
+    "gradient_clip_max_norm": 1.0,
+    "loss_weight_depth": 1.0,
+    "loss_weight_reflectance": 0.5,
+    "loss_weight_phase_reg": 0.1
+  }
+}

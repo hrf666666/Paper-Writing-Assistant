@@ -1,0 +1,108 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 69.8,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 10,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 27,
+      "tex_has_citations": true,
+      "tex_table_count": 1,
+      "tex_has_tables": false,
+      "tex_figure_count": 0,
+      "tex_has_figures": false,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 44,
+      "bib_min_entries": true,
+      "pdf_exists": true,
+      "pdf_size_kb": 144.3,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 6,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 25,
+      "compile_success": false
+    },
+    "score": 92,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 10089,
+      "word_count_ok": true,
+      "citation_count": 27,
+      "citations_min": true,
+      "formula_count": 10,
+      "formulas_min": true,
+      "table_count": 1,
+      "tables_min": false,
+      "figure_count": 0,
+      "figures_min": false,
+      "ablation_mentions": 9,
+      "ablations_min": true,
+      "has_badpix": false,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 83,
+    "sections_found": 5,
+    "total_words": 10089,
+    "total_citations": 27
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 58,
+      "narrative_progression": 40,
+      "methodological_rigor": 52,
+      "experimental_sufficiency": 38,
+      "citation_quality": 30,
+      "writing_style": 50,
+      "data_consistency": 25,
+      "format_compliance": 70
+    },
+    "overall_score": 45,
+    "strengths": [
+      "The three-layer angular signal decomposition (DC + linear + residual) provides a physically motivated framework that is clearly formulated in a proper equation environment.",
+      "The dual-mask routing concept addressing Lambertian vs. non-Lambertian regions is a reasonable architectural response to the identified physical limitations of EPI methods.",
+      "IEEEtran class with lettersize, markboth headers, and \\begin{equation} environments indicate baseline format compliance."
+    ],
+    "weaknesses": [
+      "CRITICAL DATA INCONSISTENCY: Abstract claims MAE of 0.133 overall and 0.081 for mixed/urban scenes, but later in the introduction the same paper states 'overall MAE of less than 0.20', '<0.22 for mixed urban scenes' — these are irreconcilably contradictory numbers for the same claimed experiments.",
+      "SEVERE CITATION DEFICIENCY: Only 2 visible citations (\\cite{he2016}, \\cite{vaswani2017}) in the entire truncated source. EPINet, HCInew, UrbanLF-Syn, Cohen's d, structure tensor methods, and numerous other referenced works lack any \\cite{} command. Far below the 30+ expected for TCSVT.",
+      "EXTREME REDUNDANCY: Contributions are stated at least THREE separate times in the introduction (once via \\IEEEPARstart misplaced line, once in itemize, once in bold itemize), making the narrative circular and poorly structured. The \\IEEEPARstart line bizarrely reads 'The main contributions...' instead of opening with substantive context."
+    ],
+    "recommendation": "reject",
+    "key_gaps_vs_tcsvt": [
+      "No experimental evidence visible: no \\begin{figure}, \\begin{table}, or result environments appear in the source. A TCSVT paper must present comprehensive quantitative tables (BadPix, MSE, MAE across datasets) and qualitative figure comparisons — none are present.",
+      "The mathematical contribution is superficial: the decomposition I(u,v) = DC + a·u + b·v + ε(u,v) is a trivially linear model with no derivation, no proof of identifiability, and no connection to established light field theory (e.g., light field disparity spectrum). Cohen's d = 0.983 is claimed without any experimental validation.",
+      "The paper source is literally truncated mid-sentence ('<0.25'), indicating an incomplete manuscript. The self-claimed receipt date of 'May 2026' is chronologically impossible, raising concerns about manuscript preparation rigor."
+    ]
+  },
+  "overall": {
+    "L1_score": 92,
+    "L2_score": 83,
+    "L3_score": 45,
+    "L1_passed": true,
+    "overall_grade": "C"
+  }
+}

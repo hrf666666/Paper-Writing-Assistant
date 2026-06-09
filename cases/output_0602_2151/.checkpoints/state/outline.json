@@ -1,0 +1,417 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于几何特征的三层角信号分解与非朗伯体检测机制 - N/A",
+        "Contribution: 统一双掩码物理模型与多领域平衡训练策略 - N/A"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景与动机 (Background & Motivation)",
+          "核心任务": "确立研究领域（Establishing a Territory），介绍宏观背景，强调研究问题在现实应用或理论发展中的重要性与紧迫性。"
+        },
+        {
+          "子节名称": "现有挑战与研究缺口 (Challenges & Research Gap)",
+          "核心任务": "确立研究利基（Establishing a Niche），回顾现有方法或技术，通过分类和对比指出其固有局限性，明确当前尚未解决的核心问题或研究空白。"
+        },
+        {
+          "子节名称": "本文方法与核心贡献 (Proposed Method & Contributions)",
+          "核心任务": "占据研究利基（Occupying the Niche），提出本文的创新解决方案或策略，概述方法的核心机制，并以列表形式明确列出本文的主要贡献。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "真实场景光场深度估计的根本限制",
+          "现有频域与空域方法的局限性",
+          "本文物理驱动与双掩码架构的核心贡献"
+        ],
+        "depth_map": {
+          "背景与动机": "brief",
+          "挑战与局限分析": "moderate",
+          "核心贡献列举": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "motivation_hook: 确立真实场景中非朗伯体反射和复杂光照是光场深度估计的根本瓶颈",
+          "contribution_claim: 清晰列举3-4个贡献并附带预期定量提升",
+          "至少1个具体数据或现象支撑低分辨率下2D-DFT失效的严重性",
+          "[动机锚点] The introduction must establish: Light field depth estimation in real-world scenes is fundamentally ",
+          "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+        ],
+        "should_avoid": [
+          "详细的网络结构图与公式推导",
+          "冗长的参考文献堆砌（单段大于10篇）",
+          "过度展开实验结果细节"
+        ],
+        "target_emphasis": "确立真实场景中非朗伯体反射和复杂光照是光场深度估计的根本瓶颈，并引出本文基于物理分解和双掩码的解决方案。"
+      }
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "核心任务的主流方法 (如 Depth from Light-Field Cameras / Monocular Depth Estimation / Stereo Matching)",
+          "核心任务": "梳理解决本文核心问题（如深度估计）的主流技术演进，指出其在特定场景（如非朗伯体、透明/镜面表面）下的局限性，确立研究起点。"
+        },
+        {
+          "子节名称": "密切相关的理论基础或对比方法 (如 Differential Motion Theory)",
+          "核心任务": "深入对比本文所依赖或改进的特定理论/算法，明确本文在假设、公式推导或适用性上的具体差异，凸显理论创新。"
+        },
+        {
+          "子节名称": "相关子领域或联合任务方法 (如 BRDF Estimation / Shape from Shading)",
+          "核心任务": "回顾与本文次要目标或辅助任务相关的领域，说明现有方法为何不能直接迁移或应用于本文的特定硬件设定（如光场相机）。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "光场深度估计的发展脉络",
+          "非朗伯体与复杂材质处理机制",
+          "光场物理模型与角信号分析"
+        ],
+        "depth_map": {
+          "传统与深度学习基线": "brief",
+          "非朗伯体与复杂材质处理": "moderate",
+          "物理模型与频域几何分析": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "gap_bridge: 论证现有方法未解决真实场景光场深度估计的限制，特别是低分辨率下频域分析失效和单一模型特征混淆",
+          "对EPINet等EPI基线方法的回顾与不足分析",
+          "明确本文几何角特征与传统2D-DFT的本质区别",
+          "[动机锚点] Transition to method by showing existing approaches do not address: Light field depth estimation in "
+        ],
+        "should_avoid": [
+          "与光场深度估计无关的通用深度学习综述",
+          "对本文方法细节的提前剧透",
+          "缺乏批判性的文献罗列"
+        ],
+        "target_emphasis": "揭示现有方法在处理低分辨率光场非朗伯体区域时的理论缺陷，为引入几何角特征和双掩码机制铺平道路。"
+      }
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 三层角度信号分解与掩码生成模块",
+          "description": "将角度信号分解为DC（环境光）、线性项（视差/深度）和残差（材质）。计算几何角度特征（如angular_gradient），基于特征阈值或分类器生成像素级Lambertian/Non-Lambertian双掩码，提供伪标签监督。"
+        },
+        {
+          "title": "3.3 Lambertian EPI 分支",
+          "description": "利用EPI斜率结构提取深度特征，结合平面正则采样算子（PRSO）或位移场（Displacement Field）引入连续分段平滑深度先验，增强Lambertian区域的深度一致性和表面平滑度。"
+        },
+        {
+          "title": "3.4 Non-Lambertian 几何分支",
+          "description": "针对非朗伯体表面的X型EPI模式和双峰分布，利用几何特征（如角度梯度、相关一致性、变异系数）提取材质和反射特征，避免依赖被破坏的EPI线性假设。"
+        },
+        {
+          "title": "3.5 平衡投影与掩码加权融合模块",
+          "description": "使用1x1卷积将双分支特征投影到统一的平衡维度（FUSE_DIM=96），解决原架构中严重的通道不平衡问题。然后利用双掩码进行像素级加权融合，得到最终深度特征并回归深度值。"
+        },
+        {
+          "title": "3.6 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出三层角信号分解物理模型 I(u,v) = DC + a·u + b·v + ε(u,v)，将环境光照(DC)、视差/深度(线性项)与材质/反射类型(残差项ε)进行有效解耦。; 摒弃了在离散低分辨率(如9×9)光场下失效的2D-DFT频域分析(MRI类比)方法，转而提取角梯度(angular gradient)、相关性一致性(correlation coherence)等几何角特征。; 利用随机森林(RF)分类器结合5个核心几何特征，实现对朗伯体与非朗伯体(镜面反射、散射等)区域的高精度像素级分类与掩码生成。",
+        "Module motivation and design: 构建GeometricDualMask(几何双掩码)网络架构，利用三层分解得到的视差幅度P(x,y)和材质比例M(x,y)生成双掩码，在统一模型内对不同反射特性的区域进行自适应特征路由与深度回归。; 设计并实施领域平衡采样(Domain-balanced sampling)与混合训练(Mixed training)策略，利用WeightedRandomSampler在多领域数据集(如包含170个场景的UrbanLF-Syn)中维持各领域的曝光与梯度平衡。; 采用4方向EPI输入(EPINet4Dir V3)作为基础特征提取器，结合双掩码机制优化复杂纹理和混合材质场景下的深度图生成，避免单一模型在处理异质材质时的特征混淆。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Framework Overview (框架概述)",
+          "核心任务": "介绍整体模型架构（两阶段跨域迁移学习框架），明确要解决的核心挑战（红外数据稀缺/小样本条件下的检测），并高度概括核心原理。"
+        },
+        {
+          "子节名称": "Stage 1: Source Domain Pre-training (第一阶段：源域预训练)",
+          "核心任务": "详细阐述在大规模可见光数据集上预训练特征提取和检测架构的具体网络设计、数据流及训练过程。"
+        },
+        {
+          "子节名称": "Stage 2: Cross-domain Transfer and Adaptation (第二阶段：跨域迁移与自适应)",
+          "核心任务": "详细说明将视觉信息迁移到红外域的独特迁移学习策略，包括冻结CNN主干网络、Transformer编解码器参数共享以及仅微调前馈神经网络（FFNs）的具体实现机制。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "三层角信号分解物理模型与几何特征提取",
+          "GeometricDualMask网络架构与特征路由",
+          "多领域平衡训练策略"
+        ],
+        "depth_map": {
+          "整体架构概述": "brief",
+          "三层分解与非朗伯体检测": "deep",
+          "双掩码网络与自适应路由": "deep",
+          "多领域平衡训练策略": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "primary",
+          "创新点2": "primary"
+        },
+        "must_include": [
+          "I(u,v)物理模型的完整数学推导与解耦机制",
+          "5个核心几何特征的定义与RF分类器设计",
+          "双掩码生成机制与EPINet4Dir V3的特征路由数据流",
+          "contribution_claim: 每个模块设计必须与解决真实场景限制的核心动机紧密相连",
+          "[动机锚点] Each module should be justified by connecting back to the core motivation"
+        ],
+        "should_avoid": [
+          "标准卷积或基础随机森林算法的教科书式介绍",
+          "与本文创新无关的数据预处理细节",
+          "缺乏物理意义的纯经验性网络设计"
+        ],
+        "target_emphasis": "详细阐述如何通过物理驱动的三层分解解耦材质与深度，并利用双掩码网络实现异质材质下的自适应深度回归。"
+      }
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: 名称, 规模, 场景类型, 划分方式"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "实验设置与参数选择 (Experimental Setup & Parameter Selection)",
+          "核心任务": "介绍使用的数据集（公开与合成）、评估指标、网络超参数选择依据以及消融实验的初步设计，为后续评估奠定基准。"
+        },
+        {
+          "子节名称": "主实验结果评估 (Main Results Evaluation)",
+          "核心任务": "在标准数据集和特定场景（如透明物体）下，通过定量指标和定性可视化对比，证明提出方法的整体优越性（SOTA）。"
+        },
+        {
+          "子节名称": "鲁棒性与敏感性分析 (Robustness and Sensitivity Analysis)",
+          "核心任务": "通过控制变量实验（如改变透明度），探究算法在极端或不同物理条件下的表现极限、优势及局限性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "多领域数据集上的SOTA定量对比",
+          "双掩码与物理分解的消融实验",
+          "非朗伯体区域的定性可视化与误差分析"
+        ],
+        "depth_map": {
+          "数据集与实现细节": "brief",
+          "定量对比与SOTA分析": "deep",
+          "消融实验": "deep",
+          "可视化与误差分析": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "evidence_support: 设计直接验证每个贡献claim的实验",
+          "UrbanLF-Syn等170个场景的多领域综合评估结果",
+          "朗伯体与非朗伯体区域的分别评估指标与掩码可视化",
+          "完整的消融实验表格证明各模块有效性",
+          "[动机锚点] Design experiments that directly validate each contribution claim"
+        ],
+        "should_avoid": [
+          "仅展示最优结果而隐藏失败案例或负面分析",
+          "缺乏统计显著性或方差分析的单一指标对比",
+          "过度吹嘘结果而缺乏客观的局限性讨论"
+        ],
+        "target_emphasis": "通过严谨的定量对比和消融实验，证明物理分解与双掩码机制在真实复杂场景下显著提升了深度估计的鲁棒性和精度。"
+      }
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "研究总结与核心贡献 (Summary of Work and Core Contributions)",
+          "核心任务": "重申研究背景与动机，高度概括本文提出的核心方法、模型框架、数据集或理论创新，奠定结论的基调。"
+        },
+        {
+          "子节名称": "实验验证与主要发现 (Experimental Validation and Key Findings)",
+          "核心任务": "概述实验设置与验证结果，强调模型性能、对比优势以及研究结论的科学价值或实际应用意义。"
+        },
+        {
+          "子节名称": "局限性与未来工作 (Limitations and Future Work)",
+          "核心任务": "客观指出当前研究在数据规模、应用场景、理论推导或方法设计上的局限性，并据此提出具体的未来改进方向或拓展计划。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "核心贡献与动机呼应",
+          "物理模型与双掩码的有效性重申",
+          "局限性与未来工作"
+        ],
+        "depth_map": {
+          "核心贡献总结": "moderate",
+          "局限性与未来展望": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "contribution_claim: 呼应核心叙事，重申本文如何突破真实场景光场深度估计的根本限制",
+          "核心定量指标提升的简明总结",
+          "对当前方法在极端光照或极低分辨率下局限性的客观反思",
+          "[动机锚点] Echo the core narrative: Light field depth estimation in real-world scenes is fundamentally limited "
+        ],
+        "should_avoid": [
+          "引入新的方法细节或实验结果",
+          "冗长的背景重复",
+          "过度宽泛且无针对性的未来工作展望"
+        ],
+        "target_emphasis": "总结本文如何通过几何物理分解和双掩码架构解决真实场景光场深度估计的根本限制，并指明未来研究方向。"
+      }
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "Markdown（禁止混用 LaTeX 块级元素）"
+  }
+}

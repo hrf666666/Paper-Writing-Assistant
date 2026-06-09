@@ -1,0 +1,10 @@
+# Writing Rationale Matrix
+
+| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |
+|---|---|---|---|---|---|---|
+| Three-layer angular signal decomposition | The EPI linearity assumption is fundamentally brok | Replaces high-resolution-dependent frequency domai | Non-Lambertian Dataset (highlights, tran | Angular gradient feature achieves a Cohe | Methodology (Angular Signal Decomposition) | must |
+| Geometric Dual-Mask network architecture | Single-branch networks treat all pixels uniformly, | Unlike standard black-box attention mechanisms, th | Complex mixed scenes (UrbanLF-Syn) and N | Overall MAE reaches 0.133 across 132 exp | Methodology (Dual-Mask Depth Backbone) | must |
+| EPINet4Dir V3 extracting 4-directional E | Standard 2-directional (horizontal/vertical) EPI m | Maximizes EPI slope utilization compared to tradit | HCInew and UrbanLF-Syn datasets, specifi | Achieves an overall MAE of 0.133 and mee | Methodology (Network Architecture) | must |
+| Domain-balanced sampling via WeightedRan | Multi-domain light field datasets suffer from seve | Overcomes the limitation of single-dataset trainin | Joint training across HCInew (Lambertian | Maintains cross-domain exposure balance, | Experimental Setup (Training Strategy) | must |
+| Unified LF Dataset Loader supporting 4 d | Existing light field benchmarks use fragmented and | Eliminates the need for manual, error-prone data p | Cross-domain training and evaluation inv | Successfully parsed and aligned 4 distin | Experimental Setup (Implementation Details) | should |
+| Joint optimization using physical consis | Purely data-driven depth regression often produces | Injects explicit physical priors into the loss fun | Non-Lambertian Dataset and complex Urban | Reduces depth artifacts in specular regi | Methodology (Loss Functions and Optimization) | should |

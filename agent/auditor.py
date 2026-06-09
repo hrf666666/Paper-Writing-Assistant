@@ -297,7 +297,7 @@ class Auditor:
 4. 如果引用无法验证，删除该引用或替换为更通用的表述
 5. 保持学术化表述
 
-请直接给出修正后的完整章节内容（Markdown格式），无需解释："""
+请直接给出修正后的完整章节LaTeX代码（保持LaTeX格式），无需解释："""
 
         return prompt
 
@@ -306,7 +306,7 @@ class Auditor:
     def _audit_step_completion(self, report: AuditReport, chapter_name: str,
                                content: str, project_data: Dict = None):
         """检查章节是否真正完成了预期工作"""
-        # 定义每个章节必须包含的关键元素
+        # v11.8: 定义每个章节必须包含的关键元素（语义关键词，非字面词）
         required_elements = {
             "Introduction": {
                 "min_length": 1500,
@@ -315,7 +315,13 @@ class Auditor:
             },
             "Related Work": {
                 "min_length": 2000,
-                "must_contain": ["citation"],
+                # v11.8: 检查引用标记或引用语境（不再检查字面词 "citation"）
+                "must_contain_patterns": [
+                    r'\[?\d+\]?',             # [1] 风格引用
+                    r'<citation>',             # citation 标记
+                    r'\\cite\{',               # LaTeX 引用
+                    r'(?:propose|proposed|approach|method|technique)',  # 引用语境
+                ],
                 "must_have_sections": 2,
             },
             "Methodology": {
@@ -360,6 +366,17 @@ class Auditor:
                     chapter_name,
                     f"在章节中未找到 '{kw}' 相关内容",
                     f"确保章节包含与 '{kw}' 相关的论述"
+                )
+
+        # v11.8: 正则模式检查（如引用标记检测）
+        for pattern in requirements.get("must_contain_patterns", []):
+            if not re.search(pattern, content, re.IGNORECASE):
+                report.add_issue(
+                    "warning", "step_completion",
+                    f"章节未匹配预期模式: {pattern[:50]}",
+                    chapter_name,
+                    f"正则模式 '{pattern[:40]}' 未命中",
+                    "确保章节包含相关类型的内容"
                 )
 
         # 段落/子章节数检查
@@ -670,7 +687,7 @@ class Auditor:
 
         检查维度：
         1. "achieve/obtain XX%" 类声明是否有项目数据支撑
-        2. Markdown 表格中的数值是否来自真实实验
+        2. LaTeX 表格中的数值是否来自真实实验
         3. "Ours" 行的数据是否与 PROJECT_BRIEF 中的目标完全一致（可能是编造）
         """
         # 检查 1: 句子级数值声明
@@ -692,8 +709,11 @@ class Auditor:
 
         # 检查 2: 表格数值幻觉检测
         if chapter_name == "Experiments":
-            # 提取 Markdown 表格中的数值
+            # 提取表格中的数值（兼容 LaTeX tabular 和 Markdown 格式）
             table_rows = re.findall(r'\|(.+)\|', content)
+            if not table_rows:
+                # LaTeX 表格行：以 \\ 结尾
+                table_rows = re.findall(r'(.+?)\\\\', content)
             our_values = []
             for row in table_rows:
                 cells = [c.strip() for c in row.split('|')]
@@ -919,7 +939,8 @@ class Auditor:
                     with os.fdopen(fd, 'w', encoding='utf-8') as f:
                         json.dump(data, f, ensure_ascii=False, indent=2)
                     os.replace(tmp_path, filepath)
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"审计结果保存失败: {e}")
                     os.unlink(tmp_path)
                     raise
             except Exception as e:

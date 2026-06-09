@@ -1,0 +1,213 @@
+{
+  "total_phases_audited": 13,
+  "total_issues": 101,
+  "critical_issues": 24,
+  "warning_issues": 59,
+  "info_issues": 18,
+  "overall_passed": false,
+  "phase_results": {
+    "phase1": {
+      "passed": false,
+      "issue_count": 17
+    },
+    "phase2": {
+      "passed": true,
+      "issue_count": 2
+    },
+    "phase3": {
+      "passed": true,
+      "issue_count": 12
+    },
+    "phase4": {
+      "passed": false,
+      "issue_count": 10
+    },
+    "phase5": {
+      "passed": true,
+      "issue_count": 2
+    },
+    "phase5_1": {
+      "passed": false,
+      "issue_count": 10
+    },
+    "phase5_2": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_5": {
+      "passed": false,
+      "issue_count": 5
+    }
+  },
+  "verified_references": 0,
+  "all_critical": [
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#1无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>1</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#2无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>2, 3</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#3无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>4</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#4无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>5</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#5无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>6</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>7</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#7无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>8</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase4",
+      "category": "factuality",
+      "description": "Experiments 表格中 'Ours' 行包含 5 个数值（如 ['82.4', '95.1', '97.8']），但项目数据中无任何实验结果",
+      "location": "Experiments tables",
+      "suggestion": "如果实验未运行，所有表格数值应使用占位符 'X.XX'"
+    },
+    {
+      "phase": "phase5_1",
+      "category": "reference",
+      "description": "引用#1无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>1</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase5_1",
+      "category": "reference",
+      "description": "引用#2无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>2</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase5_1",
+      "category": "reference",
+      "description": "引用#3无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>3</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase5_1",
+      "category": "reference",
+      "description": "引用#4无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>4</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase5_1",
+      "category": "reference",
+      "description": "引用#5无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>5</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#1无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>1</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#2无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>2, 3</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#3无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>4</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#4无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>5</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#5无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>6</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#6无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>7</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase1",
+      "category": "reference",
+      "description": "引用#7无法检索到任何论文，可能是编造的引用",
+      "location": "<citation>8</citation>",
+      "suggestion": "请替换为真实可检索的参考文献"
+    },
+    {
+      "phase": "phase4",
+      "category": "factuality",
+      "description": "Experiments 表格中 'Ours' 行包含 5 个数值（如 ['82.4', '95.1', '97.8']），但项目数据中无任何实验结果",
+      "location": "Experiments tables",
+      "suggestion": "如果实验未运行，所有表格数值应使用占位符 'X.XX'"
+    },
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: 摘要声明本文的研究主题是“光场深度估计”和“EPI（对极平面图像）”。",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    },
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: 摘要声明使用了“随机森林分类器”进行材料分类。",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    },
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: 摘要暗示实验评估是在光场数据集上进行的。",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    }
+  ]
+}

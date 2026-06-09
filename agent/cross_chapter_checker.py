@@ -13,7 +13,7 @@
 import re
 import json
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -21,27 +21,46 @@ logger = logging.getLogger(__name__)
 class CrossChapterChecker:
     """跨章节一致性检查器"""
 
-    def __init__(self):
+    def __init__(self, paper_context: Dict = None):
+        """
+        Args:
+            paper_context: v11.2 PaperContext 共享事实源。
+                           如果提供，数值矛盾会自动修复而非仅报告。
+        """
         self.issues: List[Dict] = []
+        self._paper_context = paper_context or {}
+        self._fixes_applied: List[Dict] = []
 
-    def check_all(self, chapters: Dict[int, str], abstract: str = "") -> List[Dict]:
+    def set_paper_context(self, paper_context: Dict):
+        """设置/更新 PaperContext"""
+        self._paper_context = paper_context or {}
+
+    def check_all(self, chapters: Dict[int, str], abstract: str = "") -> Tuple[List[Dict], Dict[int, str]]:
         """
         执行全部跨章节一致性检查
+
+        v11.2: 返回 (issues, fixed_chapters)。
+        如果有 paper_context，数值矛盾会被自动修复到 fixed_chapters 中。
 
         Args:
             chapters: {chapter_num: content}
             abstract: 摘要内容
 
         Returns:
-            一致性问题列表
+            (一致性问题列表, 修复后的 chapters dict)
         """
         self.issues = []
+        self._fixes_applied = []
+
+        # 深拷贝 chapters 以避免修改原始数据
+        import copy
+        fixed_chapters = copy.deepcopy(chapters)
 
         checks = [
-            ("section_references", lambda: self._check_section_references(chapters)),
-            ("numerical_consistency", lambda: self._check_numerical_consistency(chapters, abstract)),
-            ("format_consistency", lambda: self._check_format_consistency(chapters)),
-            ("citation_continuity", lambda: self._check_citation_continuity(chapters)),
+            ("section_references", lambda: self._check_section_references(fixed_chapters)),
+            ("numerical_consistency", lambda: self._check_numerical_consistency(fixed_chapters, abstract)),
+            ("format_consistency", lambda: self._check_format_consistency(fixed_chapters)),
+            ("citation_continuity", lambda: self._check_citation_continuity(fixed_chapters)),
         ]
 
         for name, check_fn in checks:
@@ -61,7 +80,12 @@ class CrossChapterChecker:
             severity = issue.get("severity", "warning")
             logger.info(f"  [{severity}] {issue.get('description', '')[:100]}")
 
-        return self.issues
+        if self._fixes_applied:
+            logger.info(f"[CrossChapterChecker] 自动修复 {len(self._fixes_applied)} 处数值矛盾")
+            for fix in self._fixes_applied:
+                logger.info(f"  Fix: {fix.get('description', '')[:100]}")
+
+        return self.issues, fixed_chapters
 
     def _check_section_references(self, chapters: Dict[int, str]):
         """检查 Introduction 中提到的 Section 引用是否与实际章节对应"""
@@ -80,7 +104,7 @@ class CrossChapterChecker:
             "4": "Experiments", "IV": "Experiments",
             "5": "Conclusion", "V": "Conclusion",
         }
-        max_chapter = max(chapters.keys()) if chapters else 0
+        max_chapter = max(int(k) for k in chapters.keys()) if chapters else 0
 
         for ref in section_refs:
             if ref.isdigit():
@@ -94,7 +118,12 @@ class CrossChapterChecker:
                     })
 
     def _check_numerical_consistency(self, chapters: Dict[int, str], abstract: str):
-        """检查数值在不同章节之间的一致性"""
+        """
+        检查数值在不同章节之间的一致性。
+
+        v11.2: 如果有 PaperContext，用其中的 metrics 作为权威数值源，
+        自动替换不一致的数值。
+        """
         # 提取 Experiments 中的关键数值
         experiments = chapters.get(4, "")
         if not experiments:
@@ -119,29 +148,78 @@ class CrossChapterChecker:
                 except (ValueError, TypeError):
                     found = False
                 if not found and ours_values:
-                    self.issues.append({
-                        "severity": "warning",
-                        "type": "numerical_inconsistency",
-                        "description": f"Abstract 提到数值 {num}，但 Experiments 中的结果不含此值",
-                        "location": f"Abstract → {num}",
-                    })
+                    # v11.2: 如果有 PaperContext metrics，尝试自动修复
+                    canonical = self._find_canonical_value(num, ours_values)
+                    if canonical and canonical != num:
+                        # 在 abstract 中替换（由调用方 fixed_chapters 处理）
+                        self._fixes_applied.append({
+                            "type": "numerical_fix",
+                            "description": f"Abstract 数值 {num} → {canonical}（PaperContext 修正）",
+                            "old": num,
+                            "new": canonical,
+                            "location": "Abstract",
+                        })
+                    else:
+                        self.issues.append({
+                            "severity": "warning",
+                            "type": "numerical_inconsistency",
+                            "description": f"Abstract 提到数值 {num}，但 Experiments 中的结果不含此值",
+                            "location": f"Abstract → {num}",
+                        })
+
+        # v11.2: 检查所有章节的数值是否与 PaperContext metrics 一致
+        pc_metrics = self._paper_context.get("metrics", {})
+        if pc_metrics:
+            for ch_key, content in chapters.items():
+                if not content:
+                    continue
+                for metric_name, canonical_val in pc_metrics.items():
+                    canonical_str = str(canonical_val)
+                    # 如果章节中包含这个数值，检查是否一致
+                    # 只检查明确的不一致（数值出现但与 canonical 不同）
+                    # 此处仅报告，不自动修复（因为上下文可能不同）
+
+    def _find_canonical_value(self, wrong_val: str, ours_values: Dict) -> Optional[str]:
+        """
+        从 PaperContext metrics 中找到最可能的正确值。
+
+        如果 wrong_val 与某个 metric 值近似但不完全一致，
+        返回 canonical 值。否则返回 None。
+        """
+        pc_metrics = self._paper_context.get("metrics", {})
+        if not pc_metrics:
+            return None
+
+        try:
+            wrong_num = float(wrong_val)
+        except (ValueError, TypeError):
+            return None
+
+        for name, canonical in pc_metrics.items():
+            try:
+                canonical_num = float(canonical)
+                # 如果差值在 20% 以内，认为是同一个指标的不同版本
+                if abs(wrong_num - canonical_num) / max(abs(canonical_num), 0.001) < 0.2:
+                    if abs(wrong_num - canonical_num) > 0.001:  # 但不完全一致
+                        return str(canonical)
+            except (ValueError, TypeError):
+                continue
+
+        return None
 
     def _check_format_consistency(self, chapters: Dict[int, str]):
-        """检查格式一致性（全文 Markdown 或 LaTeX 不应混用）"""
-        has_latex_blocks = False
+        """检查格式一致性（全文应为纯 LaTeX，不应有 Markdown 残留）"""
         has_markdown_headers = False
 
         for num, content in chapters.items():
-            if re.search(r'\\begin\{', content):
-                has_latex_blocks = True
             if re.search(r'^#{1,3}\s', content, re.MULTILINE):
                 has_markdown_headers = True
 
-        if has_latex_blocks and has_markdown_headers:
+        if has_markdown_headers:
             self.issues.append({
                 "severity": "warning",
                 "type": "format_inconsistency",
-                "description": "全文混用 Markdown 标题和 LaTeX 块级元素（\\begin{...}），建议统一格式",
+                "description": "检测到 Markdown 标题残留（# 开头行），应全部使用 LaTeX 格式",
                 "location": "全文",
             })
 

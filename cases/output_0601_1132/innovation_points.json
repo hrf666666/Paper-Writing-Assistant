@@ -1,0 +1,40 @@
+[
+  {
+    "创新点名称": "基于三层角信号分解的几何特征材质分类机制",
+    "创新点工作内容": [
+      "提出光场角信号的三层物理分解模型：将角信号解耦为DC分量（环境光照）、线性分量（视差/深度对应的EPI斜率）以及残差分量（材质/反射特性）。",
+      "摒弃在低角分辨率（如9×9）下失效的2D-DFT频域分析（MRI类比）方法，转而提取几何角特征（如角梯度、角相关性、变异系数等）。",
+      "构建基于随机森林（RF）的分类器，利用上述几何特征实现朗伯体与非朗伯体（高光、散射）表面的高精度像素级分类与掩码生成。"
+    ],
+    "创新点价值": "从物理和几何层面揭示了非朗伯体表面破坏EPI线性假设的根本原因，为光场深度估计中的材质干扰问题提供了可解释的理论支撑；克服了离散角采样分辨率不足导致的频域特征混叠问题，提供了一种在真实低分辨率光场数据下鲁棒且高效的材质识别方案，为后续双分支深度估计奠定基础。",
+    "支撑证据": "Phase 1 随机森林分类准确率达到 89.6%，AUC 达到 0.962；角梯度特征的 Cohen's d 效应量高达 0.983；Wang 2017 (TPAMI) 的角锥约束理论与 Cui 2024 (TCSVT) 的 EPI 双峰分布特征均印证了该几何分解的有效性。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "基于三层角信号分解的几何特征材质分类机制",
+      "contribution_statement": "We identify that the entanglement of material properties in mixed-reflection scenes creates a fundamental bottleneck for accurate depth estimation."
+    }
+  },
+  {
+    "创新点名称": "面向混合反射场景的统一双掩码（Dual-Mask）深度估计架构",
+    "创新点工作内容": [
+      "设计 GeometricDualMask 网络架构，利用材质分类生成的掩码将光场特征自适应路由至专门处理朗伯体和非朗伯体/复杂纹理的独立网络分支。",
+      "结合多方向 EPI（如 4-direction EPI）提取多视角几何结构，通过双掩码机制显式处理非朗伯体带来的 EPI 结构破坏（如 X 型图案），优化最终深度图回归。",
+      "引入域平衡采样（Domain-balanced sampling）与加权随机采样器（WeightedRandomSampler），在包含丰富场景的混合数据集上进行多域联合训练，缓解非朗伯体数据稀缺带来的过拟合问题。"
+    ],
+    "创新点价值": "有效缓解了传统单一 EPI 方法在面对高光、半透明等非朗伯体表面时因物理假设失效而导致的深度估计崩溃问题；通过统一架构和掩码路由机制，实现了单一模型在混合场景和整体场景下的高精度深度估计，显著提升了模型的泛化能力和实际应用价值。",
+    "支撑证据": "整体 MAE 降至 0.133（优于 <0.20 的目标阈值），混合（Urban）场景 MAE 降至 0.081（优于 <0.22 的目标阈值）；GeometricDualMask 模型的掩码间隙（mask gap）降至 0.041（低于 0.08 的目标）；相关训练脚本与 132 次实验记录验证了架构的工程可行性。",
+    "novelty_score": 0.8,
+    "novelty_verdict": "likely_novel",
+    "anchor": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "面向混合反射场景的统一双掩码（Dual-Mask）深度估计架构",
+      "contribution_statement": "We propose an integrated framework that sequentially combines a three-layer angular signal decomposition mechanism for material classification with a unified dual-mask architecture for robust depth estimation."
+    }
+  }
+]

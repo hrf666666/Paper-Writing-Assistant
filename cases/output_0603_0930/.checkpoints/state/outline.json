@@ -1,0 +1,416 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 基于物理先验的三层角信号分解模型 (Three-Layer Angular Signal Decomposition Physical Model) - 从物理和几何层面彻底解耦了光照、深度和材质信息，为光场深度估计提供了坚实的理论基础；证明了在离散角分辨率下几何特征比频谱特征更具判别力，解决了非朗伯表面材质特征提取的理论可行性问题。",
+        "Contribution: 面向非朗伯场景的自适应几何双掩码路由架构 (Adaptive Geometric Dual-Mask Routing Architecture) - 突破了传统单一EPI模型在非朗伯表面（如镜面、散射表面）因物理假设违反而失效的瓶颈，实现了朗伯与非朗伯区域的统一、自适应处理；显著提升了复杂真实世界混合场景下的深度估计精度和鲁棒性。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景与意义 (Background & Significance)",
+          "核心任务": "介绍研究领域的宏观背景，定义具体任务，并强调该任务在实际应用或理论发展中的重要性和价值。"
+        },
+        {
+          "子节名称": "现有工作及局限性 (Existing Works & Limitations)",
+          "核心任务": "梳理当前主流的技术路线或代表性工作，深入剖析它们在解决当前任务时存在的固有缺陷、瓶颈或未解决的痛点。"
+        },
+        {
+          "子节名称": "本文方法与核心思想 (Proposed Method & Core Idea)",
+          "核心任务": "针对上述局限性，提出本文的创新解决方案，概述核心架构、关键模块或理论机制，解释其为何能克服现有缺陷。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Limitations of continuous spectral methods in discrete light fields",
+          "Challenges of non-Lambertian surfaces in depth estimation",
+          "Proposed physical decomposition and dual-mask routing"
+        ],
+        "depth_map": {
+          "background_and_motivation": "moderate",
+          "limitations_of_existing_methods": "deep",
+          "proposed_contributions": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "motivation_hook: Current light field analysis relies on continuous spectral methods that fail on discrete samples",
+          "contribution_claim: 2 explicit contributions with quantitative preview (e.g., accuracy improvements on non-Lambertian surfaces)",
+          "Clear gap statement regarding discrete angular resolution and non-Lambertian failures",
+          "[动机锚点] The introduction must establish: Current light field analysis relies on continuous spectral methods ",
+          "[动机锚点] Clearly enumerate 3-4 contributions with quantitative evidence where possible"
+        ],
+        "should_avoid": [
+          "Detailed mathematical derivations of the physical model",
+          "Paper structure paragraph (e.g., 'The rest of this paper is organized as...')",
+          "Extensive literature review"
+        ],
+        "target_emphasis": "Establish the failure of continuous spectral methods on discrete non-Lambertian light fields and introduce the physical decomposition and routing solutions."
+      }
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "任务背景与基础方法 (Task Background & Fundamental Methods)",
+          "核心任务": "回顾研究任务（如多人运动预测、多尺度目标检测、图像分类）的发展历程，介绍传统或早期的基线方法，确立研究背景与基础范式。"
+        },
+        {
+          "子节名称": "核心相关技术/架构 (Core Related Techniques/Architectures)",
+          "核心任务": "详细探讨与本文所用核心技术（如Transformer、GNN、特征金字塔）相关的近期进展，分析不同技术流派的优势与局限性。"
+        },
+        {
+          "子节名称": "最相关工作与本文定位 (Closest Related Work & Our Positioning)",
+          "核心任务": "聚焦与本文最相似的SOTA工作，明确指出它们的不足（Research Gap），并强调本文方法的独特性、创新点以及如何解决上述Gap。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Light field depth estimation approaches",
+          "Non-Lambertian surface handling techniques",
+          "Angular signal analysis methods (spectral vs. geometric)"
+        ],
+        "depth_map": {
+          "light_field_depth_estimation": "moderate",
+          "non_lambertian_handling": "deep",
+          "angular_signal_analysis": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "gap_bridge: Show existing approaches fail because current light field analysis relies on continuous spectral methods",
+          "Integrated critiques of prior architectural limitations grouped by approach",
+          "Discussion on discrete vs. continuous angular sampling limitations",
+          "[动机锚点] Transition to method by showing existing approaches do not address: Current light field analysis rel"
+        ],
+        "should_avoid": [
+          "Chronological listing of papers without critical synthesis",
+          "Detailed descriptions of standard CNN/Transformer architectures",
+          "Presenting related work as a mere chronological list without integrating critiques"
+        ],
+        "target_emphasis": "Critically synthesize prior works to highlight the gap in handling discrete angular sampling and non-Lambertian reflections without continuous spectral assumptions."
+      }
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 三层角度信号分解模块 (Three-Layer Angular Signal Decomposition)",
+          "description": "将角度信号分解为直流分量（环境光照）、线性分量（视差/深度）和残差分量（材质/反射类型），并计算高判别力的几何特征（如角度梯度）。"
+        },
+        {
+          "title": "3.3 朗伯体 EPI 分支 (Lambertian EPI Branch)",
+          "description": "利用 EPI 线结构提取视差，结合平面规则采样算子 (PRSO) 或位移场 (Displacement Field) 施加 piecewise smooth 连续深度先验，处理符合朗伯体假设的区域。"
+        },
+        {
+          "title": "3.4 非朗伯体几何分支 (Non-Lambertian Geometric Branch)",
+          "description": "检测 EPI 中的 X 型模式和双峰分布特征，利用几何结构（而非频谱）提取非朗伯体区域的深度和材质信息，结合随机色调映射增强(RTA)处理数据稀缺。"
+        },
+        {
+          "title": "3.5 双掩码路由与融合模块 (Dual-Mask Routing & Fusion)",
+          "description": "基于高判别力的几何特征（Cohen's d=0.983）生成像素级掩码以替代场景级BCE；通过 FUSE_DIM 投影平衡双分支通道数，并进行掩码加权融合。"
+        },
+        {
+          "title": "3.6 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出将光场角信号 I(u,v) 物理分解为三个独立层：DC分量（代表环境光照）、线性分量 a·u+b·v（代表视差和深度，即EPI斜率）以及残差分量 ε(u,v)（代表材质和反射类型）。; 摒弃了依赖连续角分辨率的频谱分析（如2D-DFT/MRI类比），转而采用几何角特征（如角梯度 angular_gradient、角相关性 correlation_coherence）来提取残差中的材质信息，完美适配9x9等离散角分辨率采样。; 构建并验证了基于提取几何特征的材质分类器（如随机森林），实现朗伯（Lambertian）与非朗伯（Non-Lambertian）表面的高精度像素级二分类。",
+        "Module motivation and design: 设计了一种统一的双掩码（Dual-Mask）网络架构，利用三层分解模型提取的几何特征（如EPI中的双峰分布和X型图案）生成空间-角度掩码。; 构建双分支处理机制，通过掩码将朗伯区域和非朗伯区域自适应地路由到专门的处理分支，以应对不同反射特性下EPI线结构破坏（如角锥几何约束被违反）的问题。; 结合域平衡采样（Domain-balanced sampling）和加权随机采样器（WeightedRandomSampler），优化模型在复杂混合场景（Urban/Mixed）下的训练稳定性和跨域泛化能力。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Architecture Overview (整体架构概述)",
+          "核心任务": "提供模型的全局视角，展示整体Pipeline、核心组件的拓扑结构以及数据的前向流向，帮助读者建立宏观认知。"
+        },
+        {
+          "子节名称": "Preliminaries / Feature Representation (基础特征表示/预处理)",
+          "核心任务": "定义输入数据的数学表达形式（如图像Patch化、骨骼图构建、序列嵌入），为后续的核心模块提供标准化的张量输入。"
+        },
+        {
+          "子节名称": "Core Proposed Modules (核心创新模块)",
+          "核心任务": "详细阐述本文提出的关键机制（如特征融合、注意力机制、金字塔构建），包含设计动机、网络结构细节以及严谨的数学公式推导。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Three-layer angular signal decomposition physical model",
+          "Adaptive geometric dual-mask routing architecture",
+          "Domain-balanced training strategy"
+        ],
+        "depth_map": {
+          "overview_and_decomposition": "deep",
+          "dual_mask_routing": "deep",
+          "training_and_optimization": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "primary",
+          "创新点2": "primary"
+        },
+        "must_include": [
+          "contribution_claim: Justify each module by connecting back to the core motivation (discrete geometric vs continuous spectral)",
+          "Key formulas only for the physical decomposition (DC, linear, residual)",
+          "Data flow between decomposition, mask generation, and dual-branch routing",
+          "Description of a horizontal flow architecture diagram with detailed boxes and blue dominant color scheme",
+          "[动机锚点] Each module should be justified by connecting back to the core motivation"
+        ],
+        "should_avoid": [
+          "Extensive mathematical derivations without connecting to practical system implementation",
+          "Algorithm boxes or pseudocode blocks",
+          "Over-describing standard backbone networks"
+        ],
+        "target_emphasis": "Detail the physical decomposition and dual-mask routing mechanisms, emphasizing how geometric features replace spectral methods for discrete light fields."
+      }
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [
+        "Datasets: HCInew, UrbanLF-Syn, Non-Lambertian Dataset, HCI-Old"
+      ],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Experimental Setup (实验设置)",
+          "核心任务": "详细说明实验环境、数据集、评估指标、基线模型选择以及训练超参数，确保实验的可重复性和对比的公平性。"
+        },
+        {
+          "子节名称": "Main Results / Comparison with SOTA (主要结果与SOTA对比)",
+          "核心任务": "在标准基准数据集上展示定量结果，与现有最先进方法进行全面对比，证明提出方法的整体优越性。"
+        },
+        {
+          "子节名称": "Ablation Studies (消融实验)",
+          "核心任务": "通过控制变量法验证模型中各个核心创新组件（如FPN的自顶向下结构、ViT的Patch划分、JRTransformer的关系感知注意力）的有效性，并分析关键超参数的影响。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Quantitative comparison with SOTA on standard datasets",
+          "Ablation studies on physical decomposition and dual-mask routing",
+          "Runtime and computational efficiency analysis"
+        ],
+        "depth_map": {
+          "dataset_and_setup": "brief",
+          "quantitative_comparison": "deep",
+          "ablation_study": "deep",
+          "efficiency_analysis": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting"
+        },
+        "must_include": [
+          "evidence_support: Experiments directly validating the 3-layer decomposition and dual-mask routing",
+          "Comprehensive ablation study tables for newly proposed architectural components",
+          "Runtime, memory, and computational efficiency analysis",
+          "Rigorous quantitative benchmarking on standard public datasets (e.g., HCI, Stanford)",
+          "[动机锚点] Design experiments that directly validate each contribution claim"
+        ],
+        "should_avoid": [
+          "Over-relying on qualitative visual results without rigorous quantitative benchmarking",
+          "Failure analysis section or explicit failure case subsections",
+          "Excessive visualizations without quantitative backing"
+        ],
+        "target_emphasis": "Comprehensively validate the proposed physical model and routing architecture through rigorous quantitative benchmarks, ablations, and efficiency metrics."
+      }
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "核心贡献总结 (Summary of Contributions)",
+          "核心任务": "高度概括本文提出的核心方法、模型架构或理论创新，重申研究动机和主要解决的科学问题，与Introduction形成首尾呼应。"
+        },
+        {
+          "子节名称": "关键结果回顾 (Recap of Key Findings/Results)",
+          "核心任务": "总结实验验证的核心结论，强调方法在基准数据集上的优越性、鲁棒性或效率提升，进行定性归纳而非重复具体数值。"
+        },
+        {
+          "子节名称": "局限性分析 (Limitations)",
+          "核心任务": "客观剖析当前方法在特定场景、计算资源、数据依赖或理论假设条件下的不足与边界，展现学术严谨性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Summary of physical decomposition and routing achievements",
+          "Impact on discrete light field analysis",
+          "Future research directions"
+        ],
+        "depth_map": {
+          "summary_of_contributions": "moderate",
+          "broader_impact": "brief",
+          "future_work": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention"
+        },
+        "must_include": [
+          "contribution_claim: Echo the core narrative that continuous spectral methods fail and geometric discrete methods succeed",
+          "Final quantitative highlights demonstrating the superiority of the dual-mask routing in mixed scenes",
+          "[动机锚点] Echo the core narrative: Current light field analysis relies on continuous spectral methods that fai"
+        ],
+        "should_avoid": [
+          "Introducing new concepts, methods, or references",
+          "Repeating the abstract verbatim",
+          "Detailed discussion of limitations"
+        ],
+        "target_emphasis": "Reinforce the paradigm shift from continuous spectral to discrete geometric analysis and summarize the practical benefits of the proposed architecture."
+      }
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "Markdown（禁止混用 LaTeX 块级元素）"
+  }
+}

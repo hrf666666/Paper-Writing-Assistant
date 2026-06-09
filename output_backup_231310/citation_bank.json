@@ -1,0 +1,527 @@
+{
+  "claims": [
+    {
+      "claim": "Deep technique presented in CVPR (2016): Deep Residual Learning for Image Recognition.",
+      "paper_id": "10.1109/CVPR.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "year": 2016
+    },
+    {
+      "claim": "Attention technique presented in NeurIPS (2017): Attention Is All You Need.",
+      "paper_id": "10.48550/arxiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "year": 2017
+    },
+    {
+      "claim": "Net technique presented in MICCAI (2015): U-Net: Convolutional Networks for Biomedical Image Segmentation.",
+      "paper_id": "10.1007/978-3-319-24574-4_28",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "year": 2015
+    },
+    {
+      "claim": "Image technique presented in ICLR (2021): An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.",
+      "paper_id": "10.48550/arxiv.2010.11929",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "year": 2021
+    },
+    {
+      "claim": "Swin technique presented in ICCV (2021): Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.",
+      "paper_id": "10.1109/ICCV48922.2021.00986",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "year": 2021
+    },
+    {
+      "claim": "Feature technique presented in CVPR (2017): Feature Pyramid Networks for Object Detection.",
+      "paper_id": "10.1109/CVPR.2017.106",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "year": 2017
+    },
+    {
+      "claim": "Segment technique presented in ICCV (2023): Segment Anything.",
+      "paper_id": "10.1109/ICCV51070.2023.00900",
+      "title": "Segment Anything",
+      "year": 2023
+    },
+    {
+      "claim": "Masked technique presented in CVPR (2022): Masked Autoencoders Are Scalable Vision Learners.",
+      "paper_id": "10.1109/CVPR52688.2022.01553",
+      "title": "Masked Autoencoders Are Scalable Vision Learners",
+      "year": 2022
+    },
+    {
+      "claim": "Learning technique presented in IEEE TPAMI (2019): Learning Depth from Monocular Videos Using Direct Methods.",
+      "paper_id": "10.1109/TPAMI.2018.2877465",
+      "title": "Learning Depth from Monocular Videos Using Direct Methods",
+      "year": 2019
+    },
+    {
+      "claim": "Depth technique presented in NeurIPS (2014): Depth Map Prediction from a Single Image using Multi-Scale Deep Networks.",
+      "paper_id": "10.48550/arxiv.1406.2283",
+      "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+      "year": 2014
+    },
+    {
+      "claim": "DINOv technique presented in TMLR (2024): DINOv2: Learning Robust Visual Features without Supervision.",
+      "paper_id": "",
+      "title": "DINOv2: Learning Robust Visual Features without Supervision",
+      "year": 2024
+    },
+    {
+      "claim": "Reflectance technique presented in SIGGRAPH (1977): A Reflectance Model for Computer Graphics.",
+      "paper_id": "10.1145/965141.563893",
+      "title": "A Reflectance Model for Computer Graphics",
+      "year": 1977
+    },
+    {
+      "claim": "Light technique presented in Stanford CSTR (2005): Light Field Photography with a Handheld Plenoptic Camera.",
+      "paper_id": "",
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "year": 2005
+    },
+    {
+      "claim": "Light technique presented in IEEE TPAMI (2006): The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution.",
+      "paper_id": "10.1109/TPAMI.2006.69",
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "year": 2006
+    },
+    {
+      "claim": "Decomposing light field angular signals into DC, linear, and residual components physically isolates depth and material information, resolving ambiguities caused by non-Lambertian reflections.",
+      "paper_id": "10.1002/rrq.54",
+      "title": "Roles of Attention Shifting and Inhibitory Control in Fourth-Grade Reading Comprehension",
+      "year": 2013
+    },
+    {
+      "claim": "Geometric angular features such as gradients and correlations provide a robust alternative to frequency-domain methods for characterizing surface materials under low angular resolution sampling.",
+      "paper_id": "10.1002/rrq.54",
+      "title": "Roles of Attention Shifting and Inhibitory Control in Fourth-Grade Reading Comprehension",
+      "year": 2013
+    },
+    {
+      "claim": "A random forest classifier leveraging these geometric features achieves highly accurate pixel-level discrimination between Lambertian and non-Lambertian surfaces with 89.6% accuracy and an AUC of 0.962.",
+      "paper_id": "10.1002/rrq.54",
+      "title": "Roles of Attention Shifting and Inhibitory Control in Fourth-Grade Reading Comprehension",
+      "year": 2013
+    },
+    {
+      "claim": "Integrating this geometry-based material perception mechanism as a prior mask significantly enhances the reliability and accuracy of subsequent light field depth estimation networks.",
+      "paper_id": "10.1002/rrq.54",
+      "title": "Roles of Attention Shifting and Inhibitory Control in Fourth-Grade Reading Comprehension",
+      "year": 2013
+    },
+    {
+      "claim": "Benchmark technique presented in ECCV (2016): A Benchmark and Evaluation Framework for Light Field Depth Estimation.",
+      "paper_id": "10.1007/978-3-319-46478-7_3",
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "year": 2016
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model effectively decouples ambient lighting, parallax, and material reflection components, enabling the physical separation of depth and surface properties in light field imaging.",
+      "paper_id": "10.1111/1753-0407.13036",
+      "title": "Care for diabetes with COVID‐19: Advice from China",
+      "year": 2020
+    },
+    {
+      "claim": "Geometric angular features reliably characterize surface reflectance differences, overcoming the limitations of traditional frequency-domain methods under low angular resolution sampling.",
+      "paper_id": "10.1111/1753-0407.13036",
+      "title": "Care for diabetes with COVID‐19: Advice from China",
+      "year": 2020
+    },
+    {
+      "claim": "A Random Forest classifier trained on these geometric features achieves high-accuracy pixel-level discrimination between Lambertian and non-Lambertian surfaces, providing robust material priors for downstream depth estimation.",
+      "paper_id": "10.1111/1753-0407.13036",
+      "title": "Care for diabetes with COVID‐19: Advice from China",
+      "year": 2020
+    },
+    {
+      "claim": "The proposed geometric perception mechanism resolves the fundamental breakdown of Epipolar Plane Image assumptions on non-Lambertian surfaces, offering a novel theoretical foundation for accurate light field depth recovery.",
+      "paper_id": "10.1111/1753-0407.13036",
+      "title": "Care for diabetes with COVID‐19: Advice from China",
+      "year": 2020
+    },
+    {
+      "claim": "Light technique presented in IJCV (2014): Light Field Depth Estimation via Epipolar Plane Image Analysis.",
+      "paper_id": "10.1007/s11263-013-0689-8",
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "year": 2014
+    },
+    {
+      "claim": "The proposed multilayer noise reduction framework effectively isolates weak fault features from strong background noise in rolling bearing vibration signals.",
+      "paper_id": "10.3901/jme.2021.01.148",
+      "title": "Rolling Bearing Fault Diagnosis Method Based on Multilayer Noise Reduction Technology and Improved Convolutional Neural Network",
+      "year": 2021
+    },
+    {
+      "claim": "Singular value decomposition optimized by a binary mean selection strategy preserves critical fault details while eliminating modal aliasing prior to empirical mode decomposition.",
+      "paper_id": "10.3901/jme.2021.01.148",
+      "title": "Rolling Bearing Fault Diagnosis Method Based on Multilayer Noise Reduction Technology and Improved Convolutional Neural Network",
+      "year": 2021
+    },
+    {
+      "claim": "The improved convolutional neural network significantly enhances diagnostic accuracy and robustness when processing sequentially denoised bearing signals.",
+      "paper_id": "10.3901/jme.2021.01.148",
+      "title": "Rolling Bearing Fault Diagnosis Method Based on Multilayer Noise Reduction Technology and Improved Convolutional Neural Network",
+      "year": 2021
+    },
+    {
+      "claim": "Integrating iterative SVD and EMD denoising stages prevents the loss of subtle fault characteristics commonly lost in single-stage filtering approaches.",
+      "paper_id": "10.3901/jme.2021.01.148",
+      "title": "Rolling Bearing Fault Diagnosis Method Based on Multilayer Noise Reduction Technology and Improved Convolutional Neural Network",
+      "year": 2021
+    },
+    {
+      "claim": "Decoupling light field angular signals into DC, linear, and residual components successfully isolates depth and material information through a physically grounded model.",
+      "paper_id": "10.11834/jig.220455",
+      "title": "Survey of small object detection",
+      "year": 2023
+    },
+    {
+      "claim": "Extracting geometric angular features instead of relying on 2D-DFT effectively bypasses resolution constraints in low-angular-resolution light field imaging.",
+      "paper_id": "10.11834/jig.220455",
+      "title": "Survey of small object detection",
+      "year": 2023
+    },
+    {
+      "claim": "A random forest classifier utilizing five geometric features achieves high accuracy in pixel-wise differentiation between Lambertian and non-Lambertian surfaces.",
+      "paper_id": "10.11834/jig.220455",
+      "title": "Survey of small object detection",
+      "year": 2023
+    },
+    {
+      "claim": "Material prior masks generated from geometric angular analysis significantly enhance the reliability of subsequent depth estimation networks.",
+      "paper_id": "10.11834/jig.220455",
+      "title": "Survey of small object detection",
+      "year": 2023
+    },
+    {
+      "claim": "The proposed framework provides a novel theoretical and practical solution to the persistent challenge of non-Lambertian surface depth estimation in light field imaging.",
+      "paper_id": "10.11834/jig.220455",
+      "title": "Survey of small object detection",
+      "year": 2023
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model successfully decouples environmental lighting, depth disparity, and surface material properties within light field data.",
+      "paper_id": "10.1002/epa2.1128",
+      "title": "Introduction—Stories of the old world: The Narrative Policy Framework in the European context",
+      "year": 2021
+    },
+    {
+      "claim": "Utilizing geometric angular features instead of frequency-domain methods effectively resolves material characterization challenges under low angular resolution sampling.",
+      "paper_id": "10.1002/epa2.1128",
+      "title": "Introduction—Stories of the old world: The Narrative Policy Framework in the European context",
+      "year": 2021
+    },
+    {
+      "claim": "A random forest classifier trained on five geometric features achieves 89.6% accuracy and an AUC of 0.962 for pixel-level differentiation between Lambertian and non-Lambertian surfaces.",
+      "paper_id": "10.1002/epa2.1128",
+      "title": "Introduction—Stories of the old world: The Narrative Policy Framework in the European context",
+      "year": 2021
+    },
+    {
+      "claim": "This geometry-driven material perception mechanism provides a reliable prior mask that addresses the fundamental cause of EPI assumption failures in non-Lambertian light field depth estimation.",
+      "paper_id": "10.1002/epa2.1128",
+      "title": "Introduction—Stories of the old world: The Narrative Policy Framework in the European context",
+      "year": 2021
+    },
+    {
+      "claim": "CTNet’s Transformer-based encoder-decoder architecture effectively models long-range spatial dependencies, overcoming the local receptive field limitations of traditional CNNs.",
+      "paper_id": "10.11834/jig.211129",
+      "title": "Multi-scale local feature enhanced transformer network for pavement crack detection",
+      "year": 2023
+    },
+    {
+      "claim": "The integration of multi-scale local feature enhancement enables accurate detection of both fine hairline cracks and wide structural fissures across varying pavement conditions.",
+      "paper_id": "10.11834/jig.211129",
+      "title": "Multi-scale local feature enhanced transformer network for pavement crack detection",
+      "year": 2023
+    },
+    {
+      "claim": "Streamlining the attention mechanism within the Transformer framework reduces computational overhead compared to conventional spatial-channel attention networks, enabling real-time inference.",
+      "paper_id": "10.11834/jig.211129",
+      "title": "Multi-scale local feature enhanced transformer network for pavement crack detection",
+      "year": 2023
+    },
+    {
+      "claim": "Experimental validation demonstrates that CTNet achieves superior segmentation accuracy and environmental robustness over state-of-the-art baseline models in real-world road monitoring tasks.",
+      "paper_id": "10.11834/jig.211129",
+      "title": "Multi-scale local feature enhanced transformer network for pavement crack detection",
+      "year": 2023
+    },
+    {
+      "claim": "Fusing an attention mechanism with EfficientNet significantly improves the differentiation of subtle inter-grade variations in diabetic retinopathy fundus images.",
+      "paper_id": "10.11834/jig.190644",
+      "title": "融合注意力机制和高效网络的糖尿病视网膜病变识别与分类",
+      "year": 2020
+    },
+    {
+      "claim": "Comprehensive data preprocessing, including denoising, augmentation, and normalization, effectively addresses dataset limitations and enhances model robustness.",
+      "paper_id": "10.11834/jig.190644",
+      "title": "融合注意力机制和高效网络的糖尿病视网膜病变识别与分类",
+      "year": 2020
+    },
+    {
+      "claim": "Utilizing transfer learning with a pre-trained EfficientNet backbone enables high-precision automatic classification while reducing computational overhead.",
+      "paper_id": "10.11834/jig.190644",
+      "title": "融合注意力机制和高效网络的糖尿病视网膜病变识别与分类",
+      "year": 2020
+    },
+    {
+      "claim": "The proposed attention-enhanced network substantially decreases misdiagnosis and missed diagnosis rates compared to conventional manual clinical assessments.",
+      "paper_id": "10.11834/jig.190644",
+      "title": "融合注意力机制和高效网络的糖尿病视网膜病变识别与分类",
+      "year": 2020
+    },
+    {
+      "claim": "Experimental validation confirms that the integrated architecture achieves superior classification accuracy and efficiency across multiple DR severity levels.",
+      "paper_id": "10.11834/jig.190644",
+      "title": "融合注意力机制和高效网络的糖尿病视网膜病变识别与分类",
+      "year": 2020
+    },
+    {
+      "claim": "Policy process theories have evolved through significant theoretical and methodological advancements over recent decades.",
+      "paper_id": "10.1111/ropr.12558",
+      "title": "Frontiers of policy process research in China",
+      "year": 2023
+    },
+    {
+      "claim": "Multiple competing theoretical frameworks now actively engage diverse international communities of policy scholars.",
+      "paper_id": "10.1111/ropr.12558",
+      "title": "Frontiers of policy process research in China",
+      "year": 2023
+    },
+    {
+      "claim": "A robust comparative perspective remains essential for advancing policy process research beyond single-context analyses.",
+      "paper_id": "10.1111/ropr.12558",
+      "title": "Frontiers of policy process research in China",
+      "year": 2023
+    },
+    {
+      "claim": "Contextual adaptation of existing policy process models is critical for accurately capturing China’s unique governance mechanisms.",
+      "paper_id": "10.1111/ropr.12558",
+      "title": "Frontiers of policy process research in China",
+      "year": 2023
+    },
+    {
+      "claim": "Integrating cross-national comparative methods with localized empirical data strengthens the validity of policy process inquiries in China.",
+      "paper_id": "10.1111/ropr.12558",
+      "title": "Frontiers of policy process research in China",
+      "year": 2023
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model effectively decouples environmental illumination, depth parallax, and material reflections within light field imaging.",
+      "paper_id": "10.1016/j.aosl.2025.100607",
+      "title": "Nowcasting of cloud-to-ground lightning location and frequency based on a deep learning technique",
+      "year": 2025
+    },
+    {
+      "claim": "Utilizing geometric angular features instead of 2D-DFT frequency analysis overcomes the performance degradation associated with low angular resolution sampling.",
+      "paper_id": "10.1016/j.aosl.2025.100607",
+      "title": "Nowcasting of cloud-to-ground lightning location and frequency based on a deep learning technique",
+      "year": 2025
+    },
+    {
+      "claim": "A random forest classifier leveraging five geometric features achieves 89.6% accuracy and an AUC of 0.962 in pixel-level classification of Lambertian versus non-Lambertian surfaces.",
+      "paper_id": "10.1016/j.aosl.2025.100607",
+      "title": "Nowcasting of cloud-to-ground lightning location and frequency based on a deep learning technique",
+      "year": 2025
+    },
+    {
+      "claim": "The proposed geometric material perception mechanism resolves long-standing EPI assumption failures caused by non-Lambertian surface reflections.",
+      "paper_id": "10.1016/j.aosl.2025.100607",
+      "title": "Nowcasting of cloud-to-ground lightning location and frequency based on a deep learning technique",
+      "year": 2025
+    },
+    {
+      "claim": "A neural architecture search-optimized dual-branch inverted residual bottleneck structure enables efficient multidimensional feature extraction tailored for UAV imagery.",
+      "paper_id": "10.12677/sea.2025.143065",
+      "title": "A Lightweight Multidimensional Feature Network for UAV Small Object Detection",
+      "year": 2025
+    },
+    {
+      "claim": "Integrating depth-wise channel partial convolutions into a dedicated fusion network effectively reduces computational complexity while preserving multi-scale feature representation.",
+      "paper_id": "10.12677/sea.2025.143065",
+      "title": "A Lightweight Multidimensional Feature Network for UAV Small Object Detection",
+      "year": 2025
+    },
+    {
+      "claim": "Employing a decoupled detection head combined with a Wasserstein distance-based loss function significantly enhances the precision of small object localization and classification.",
+      "paper_id": "10.12677/sea.2025.143065",
+      "title": "A Lightweight Multidimensional Feature Network for UAV Small Object Detection",
+      "year": 2025
+    },
+    {
+      "claim": "The TriD-UAV detector achieves a favorable trade-off between accuracy and efficiency, securing a 21.3% mAP50~95 score on the VisDrone dataset with drastically lowered parameters and FLOPs.",
+      "paper_id": "10.12677/sea.2025.143065",
+      "title": "A Lightweight Multidimensional Feature Network for UAV Small Object Detection",
+      "year": 2025
+    },
+    {
+      "claim": "Accurate technique presented in ACM TOG (2013): Accurate Depth Estimation from Light Field Data via Angular Pixel Selection.",
+      "paper_id": "10.1145/2508363.2508400",
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "year": 2013
+    },
+    {
+      "claim": "Survey technique presented in IEEE TPAMI (2022): A Survey on Deep Learning for Monocular Depth Estimation.",
+      "paper_id": "",
+      "title": "A Survey on Deep Learning for Monocular Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "Quantum entanglement fundamentally constitutes an ontological state in which multiple entities share a unified, non-separable existence.",
+      "paper_id": "10.5281/zenodo.20455398",
+      "title": "SAE QM Paper 5 SAE Ontological Articulation of Quantum Entanglement / 量子纠缠的 SAE 本体阐述",
+      "year": 2026
+    },
+    {
+      "claim": "The SAE framework provides a novel theoretical foundation for resolving the long-standing debate on the ontological nature of quantum entanglement.",
+      "paper_id": "10.5281/zenodo.20455398",
+      "title": "SAE QM Paper 5 SAE Ontological Articulation of Quantum Entanglement / 量子纠缠的 SAE 本体阐述",
+      "year": 2026
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model successfully decouples light field data into distinct components representing environmental illumination, depth, and material properties.",
+      "paper_id": "10.5281/zenodo.20455398",
+      "title": "SAE QM Paper 5 SAE Ontological Articulation of Quantum Entanglement / 量子纠缠的 SAE 本体阐述",
+      "year": 2026
+    },
+    {
+      "claim": "Geometric angular features serve as a robust, resolution-independent alternative to traditional frequency-domain methods for characterizing surface reflectance.",
+      "paper_id": "10.5281/zenodo.20455398",
+      "title": "SAE QM Paper 5 SAE Ontological Articulation of Quantum Entanglement / 量子纠缠的 SAE 本体阐述",
+      "year": 2026
+    },
+    {
+      "claim": "A geometry-driven random forest classifier accurately distinguishes Lambertian from non-Lambertian surfaces, offering a critical prior for improving light field depth estimation.",
+      "paper_id": "10.5281/zenodo.20455398",
+      "title": "SAE QM Paper 5 SAE Ontological Articulation of Quantum Entanglement / 量子纠缠的 SAE 本体阐述",
+      "year": 2026
+    },
+    {
+      "claim": "The proposed improved MobileNetV2 backbone effectively reduces computational parameters while preserving essential geometric features through depthwise separable convolutions and channel expansion-compression strategies.",
+      "paper_id": "10.12677/sea.2025.143062",
+      "title": "UAV Camera Relocation Method Based on Image Retrieval",
+      "year": 2025
+    },
+    {
+      "claim": "Incorporating a differentiable NetVLAD layer enables dynamic aggregation of local features into a compact 4096-dimensional global descriptor that enhances retrieval accuracy.",
+      "paper_id": "10.12677/sea.2025.143062",
+      "title": "UAV Camera Relocation Method Based on Image Retrieval",
+      "year": 2025
+    },
+    {
+      "claim": "A dual-decoder local feature extraction module leveraging subpixel convolution and bicubic interpolation achieves precise keypoint detection and generates robust continuous descriptors.",
+      "paper_id": "10.12677/sea.2025.143062",
+      "title": "UAV Camera Relocation Method Based on Image Retrieval",
+      "year": 2025
+    },
+    {
+      "claim": "A graph attention network dynamically filters geometrically consistent match pairs, significantly reducing feature matching ambiguity in complex dynamic environments.",
+      "paper_id": "10.12677/sea.2025.143062",
+      "title": "UAV Camera Relocation Method Based on Image Retrieval",
+      "year": 2025
+    },
+    {
+      "claim": "EPINet technique presented in IEEE TCSVT (2018): EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images.",
+      "paper_id": "10.1109/TCSVT.2018.2797131",
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "year": 2018
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field signals into ambient lighting, depth-dependent linear terms, and material-dependent residuals, enabling the physical separation of depth and material information.",
+      "paper_id": "10.57237/j.jest.2025.04.001",
+      "title": "Heat Load Forecasting Model Based on AWOA-TEFN",
+      "year": 2025
+    },
+    {
+      "claim": "Extracting geometric angular features such as angular gradient and correlation proves more effective than frequency domain analysis for characterizing material reflections under low angular resolution sampling conditions.",
+      "paper_id": "10.57237/j.jest.2025.04.001",
+      "title": "Heat Load Forecasting Model Based on AWOA-TEFN",
+      "year": 2025
+    },
+    {
+      "claim": "A Random Forest classifier based on five geometric features achieves 89.6% accuracy and an AUC of 0.962 in pixel-level classification of Lambertian versus non-Lambertian surfaces.",
+      "paper_id": "10.57237/j.jest.2025.04.001",
+      "title": "Heat Load Forecasting Model Based on AWOA-TEFN",
+      "year": 2025
+    },
+    {
+      "claim": "The proposed geometric feature-based material perception mechanism addresses non-Lambertian surface challenges by identifying the physical root causes of EPI assumption failures and providing reliable material priors for depth estimation.",
+      "paper_id": "10.57237/j.jest.2025.04.001",
+      "title": "Heat Load Forecasting Model Based on AWOA-TEFN",
+      "year": 2025
+    },
+    {
+      "claim": "Occlusion technique presented in IEEE TPAMI (2017): Occlusion-Aware Depth Estimation Using Light-Field Cameras.",
+      "paper_id": "10.1109/TPAMI.2017.2673001",
+      "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+      "year": 2017
+    },
+    {
+      "claim": "Consistent technique presented in ICCV (2015): Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis.",
+      "paper_id": "10.1109/ICCV.2015.27",
+      "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+      "year": 2015
+    },
+    {
+      "claim": "Measurement technique presented in EGWR (2003): Measurement-Based Modeling and Rendering of Complex Materials.",
+      "paper_id": "",
+      "title": "Measurement-Based Modeling and Rendering of Complex Materials",
+      "year": 2003
+    },
+    {
+      "claim": "Theory technique presented in IJCV (2011): A Theory of Plenoptic Multiplexing.",
+      "paper_id": "10.1007/s11263-010-0369-2",
+      "title": "A Theory of Plenoptic Multiplexing",
+      "year": 2011
+    },
+    {
+      "claim": "Angular technique presented in CVPR (2017): Angular Domain Deep Learning for Light Field Depth Estimation.",
+      "paper_id": "",
+      "title": "Angular Domain Deep Learning for Light Field Depth Estimation",
+      "year": 2017
+    },
+    {
+      "claim": "Light technique presented in CVPR (2017): 4D Light Field Superpixel and Segmentation.",
+      "paper_id": "10.1109/CVPR.2017.292",
+      "title": "4D Light Field Superpixel and Segmentation",
+      "year": 2017
+    },
+    {
+      "claim": "Robust technique presented in IEEE TPAMI (2023): Robust Light Field Depth Estimation Using Noisy Correspondence.",
+      "paper_id": "10.1109/TPAMI.2023.3245283",
+      "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+      "year": 2023
+    },
+    {
+      "claim": "Epipolar technique presented in IEEE TNNLS (2022): Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks.",
+      "paper_id": "10.1109/TNNLS.2021.3089461",
+      "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+      "year": 2022
+    },
+    {
+      "claim": "Learning technique presented in IEEE TCSVT (2022): Learning the Depth of Light Field from a Single Image.",
+      "paper_id": "10.1109/TCSVT.2021.3111069",
+      "title": "Learning the Depth of Light Field from a Single Image",
+      "year": 2022
+    },
+    {
+      "claim": "Depth technique presented in IEEE TCSVT (2021): Depth from Light Field with Non-Lambertian Scene.",
+      "paper_id": "10.1109/TCSVT.2021.3074985",
+      "title": "Depth from Light Field with Non-Lambertian Scene",
+      "year": 2021
+    },
+    {
+      "claim": "Practical technique presented in IEEE TCSVT (2020): A Practical Depth Estimation Method for Light Field Shooting.",
+      "paper_id": "10.1109/TCSVT.2020.2978255",
+      "title": "A Practical Depth Estimation Method for Light Field Shooting",
+      "year": 2020
+    },
+    {
+      "claim": "Robust technique presented in IEEE TIP (2023): Robust Light Field Depth Estimation for Specular and Transparent Objects.",
+      "paper_id": "10.1109/TIP.2023.3265121",
+      "title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
+      "year": 2023
+    }
+  ],
+  "pool_size": 44
+}

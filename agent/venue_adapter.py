@@ -37,8 +37,8 @@ def get_active_profile(article_type: str = None) -> VenueProfile:
 
     try:
         if article_type is None:
-            from config.project_config import ARTICLE_TYPE
-            article_type = ARTICLE_TYPE
+            from config.project_config import _resolve_article_type
+            article_type = _resolve_article_type()  # TARGET_VENUE 优先
         _active_profile = get_profile(article_type)
     except (ImportError, KeyError, ValueError) as e:
         logger.error(f"获取 venue profile 失败: {e}")
@@ -187,6 +187,62 @@ class VenueAdapter:
             self.get_prohibited_terms_prompt(),
         ]
         return "\n".join(b for b in blocks if b)
+
+    # ---- v10.1: 风格管理器集成 ----
+
+    def build_chapter_style_instruction(
+        self,
+        chapter_name: str,
+        content_strategy: Optional[Dict] = None,
+    ) -> str:
+        """
+        v10.1: 为指定章节构建完整的风格指导。
+        使用 StyleManager 统一管理所有风格维度。
+        """
+        try:
+            from agent.style_manager import StyleManager
+            sm = StyleManager(
+                venue_adapter=self,
+                journal_style_profile=getattr(self, '_journal_style', None),
+                ref_style_guide=getattr(self, '_ref_style_guide', None),
+                ieee_trans_profile=self._load_ieee_profile(),
+            )
+            return sm.build_chapter_style_instruction(chapter_name, content_strategy)
+        except Exception as e:
+            logger.warning(f"构建章节风格指导失败 ({chapter_name}): {e}")
+            return self._fallback_chapter_style(chapter_name)
+
+    def _load_ieee_profile(self) -> Dict:
+        """加载 IEEE Trans 风格配置"""
+        try:
+            from config.ieee_trans_style_profile import (
+                INTRODUCTION_CONVENTIONS, LITERATURE_REVIEW_NORMS,
+                CONTRIBUTION_EXPRESSION,
+            )
+            return {
+                "introduction_conventions": INTRODUCTION_CONVENTIONS,
+                "literature_review_norms": LITERATURE_REVIEW_NORMS,
+                "contribution_expression": CONTRIBUTION_EXPRESSION,
+            }
+        except ImportError:
+            return {}
+
+    def _fallback_chapter_style(self, chapter_name: str) -> str:
+        """兜底风格指导"""
+        return (
+            f"**写作风格指导**（{chapter_name}）:\n"
+            "- 文风必须学术化，禁止口语化表达\n"
+            "- 每句话都要有明确的论述目的\n"
+            "- 引用要自然融入句式\n"
+        )
+
+    def set_journal_style(self, journal_style: Dict):
+        """设置从 JournalStyleLearner 学习到的期刊风格"""
+        self._journal_style = journal_style
+
+    def set_ref_style_guide(self, ref_style_guide: Dict):
+        """设置从 ref_pdf_analyzer 学习到的参考论文风格"""
+        self._ref_style_guide = ref_style_guide
 
     # ---- 兼容性：返回与旧 get_article_type_info() 相同结构的字典 ----
 

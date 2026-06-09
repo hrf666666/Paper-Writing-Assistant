@@ -1,0 +1,12 @@
+# 5. Conclusion
+
+# 5. Conclusion
+
+In this paper, we propose a unified dual-mask physical model for light field depth estimation to address the severe performance degradation caused by non-Lambertian reflectance and complex textures. By introducing a physical-level angular signal decoupling mechanism and an adaptive dual-mask routing architecture, our framework effectively mitigates the conflict between Epipolar Plane Image (EPI) geometric assumptions and complex optical phenomena, achieving superior accuracy in mixed and overall scenes.
+
+The core contributions of this work are summarized as follows:
+* **Three-Layer Angular Signal Decomposition and Geometric Material Classification:** We introduced a physical-level decoupling mechanism that explicitly separates illumination, depth, and material properties. This resolves spectral feature degradation under low angular resolutions (e.g., $9 \times 9$) and provides robust material priors, enabling the accurate identification of non-Lambertian regions that inherently violate EPI assumptions.
+* **Geometry Dual-Mask Routing for Unified Depth Estimation:** We constructed an adaptive routing architecture that overcomes the bottleneck of single-EPI networks in handling mixed reflectance properties. By dynamically processing complex reflections within a unified model, our method significantly enhances depth accuracy in mixed and overall scenarios, achieving an Overall MAE of 0.133 and a Mixed (Urban) MAE of 0.081.
+* **Quantitative Analysis of EPI Assumption Failure Boundaries:** We rigorously defined the theoretical performance boundaries and root causes of EPI assumption breakdowns. By quantifying the inherent architectural limitations of EPI-based networks through 132 extensive empirical trials, this analysis prevents ineffective computational efforts and provides a solid theoretical foundation for future non-EPI paradigms and non-Lambertian dataset construction.
+
+Finally, since our extensive empirical analysis demonstrates that single EPI architectures possess an inherent physical ceiling when resolving extreme non-Lambertian reflections and texture-induced slope ambiguities, future work will pivot towards non-EPI paradigms. Specifically, we plan to integrate neural radiance fields (NeRF) and learned feature matching techniques to transcend the theoretical boundaries of epipolar geometry and achieve universally robust light field depth estimation.

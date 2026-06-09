@@ -1,0 +1,855 @@
+[
+  {
+    "phase_name": "phase1",
+    "timestamp": 1780624557.6611154,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (7 严重, 2 警告)",
+    "issue_count": 10,
+    "critical_count": 7,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解的几何双掩码物理模型' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于三层角信号分解的几何双掩码物理模型'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解的几何双掩码物理模型' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的域平衡四方向EPI统一估计框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '面向多域光场数据的域平衡四方向EPI统一估计框架'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的域平衡四方向EPI统一估计框架' 的描述"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Depth Map Prediction\", \"Single Image\"]</citation>",
+        "evidence": "搜索关键词: ['Depth Map Prediction', 'Single Image'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Learning Depth\", \"Monocular Videos\"]</citation>",
+        "evidence": "搜索关键词: ['Learning Depth', 'Monocular Videos'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Swin Transformer\", \"Hierarchical Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Swin Transformer', 'Hierarchical Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Reflectance Model\", \"Computer Graphics\"]</citation>",
+        "evidence": "搜索关键词: ['Reflectance Model', 'Computer Graphics'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Masked Autoencoders\", \"Scalable Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Masked Autoencoders', 'Scalable Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#8无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Robust Principal Component Analysis\", \"Exact Recovery\"]</citation>",
+        "evidence": "搜索关键词: ['Robust Principal Component Analysis', 'Exact Recovery'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"GeoNet\", \"Unsupervised Learning\"]</citation>",
+        "evidence": "搜索关键词: ['GeoNet', 'Unsupervised Learning'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1780625568.4259143,
+    "passed": false,
+    "summary": "审计完成: 11 个问题 (9 严重, 1 警告)",
+    "issue_count": 11,
+    "critical_count": 9,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: \\\\cite\\{",
+        "location": "Related Work",
+        "evidence": "正则模式 '\\\\cite\\{' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Robust Principal Component Analysis\", \"Convex Optimization\"]</citation>",
+        "evidence": "搜索关键词: ['Robust Principal Component Analysis', 'Convex Optimization'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Feature Pyramid Networks\", \"Object Detection\"]</citation>",
+        "evidence": "搜索关键词: ['Feature Pyramid Networks', 'Object Detection'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"A Reflectance Model\", \"Computer Graphics\"]</citation>",
+        "evidence": "搜索关键词: ['A Reflectance Model', 'Computer Graphics'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Deep Residual Learning\", \"Image Recognition\"]</citation>",
+        "evidence": "搜索关键词: ['Deep Residual Learning', 'Image Recognition'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Attention Is All\", \"You Need\"]</citation>",
+        "evidence": "搜索关键词: ['Attention Is All', 'You Need'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Swin Transformer\", \"Hierarchical Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Swin Transformer', 'Hierarchical Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"A Database and Evaluation Methodology for Optical Flow\", \"angular signals\"]</citation>",
+        "evidence": "搜索关键词: ['A Database and Evaluation Methodology for Optical Flow', 'angular signals'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#11无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Aerosol properties over bright-reflecting source regions\", \"three-layer angular signal decomposition\"]</citation>",
+        "evidence": "搜索关键词: ['Aerosol properties over bright-reflecting source regions', 'three-layer angular signal decomposition'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#12无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Robust Principal Component Analysis\", \"Convex Optimization\"]</citation>",
+        "evidence": "搜索关键词: ['Robust Principal Component Analysis', 'Convex Optimization'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1780626387.837856,
+    "passed": true,
+    "summary": "审计完成: 12 个问题 (0 严重, 11 警告)",
+    "issue_count": 12,
+    "critical_count": 0,
+    "warning_count": 11,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解的几何双掩码物理模型' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于三层角信号分解的几何双掩码物理模型'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解的几何双掩码物理模型' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的域平衡四方向EPI统一估计框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '面向多域光场数据的域平衡四方向EPI统一估计框架'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的域平衡四方向EPI统一估计框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCInew' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: HCInew",
+        "suggestion": "在实验章节中补充对 HCInew 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'UrbanLF-Syn' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: UrbanLF-Syn",
+        "suggestion": "在实验章节中补充对 UrbanLF-Syn 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'Non-Lambertian Dataset' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: Non-Lambertian Dataset",
+        "suggestion": "在实验章节中补充对 Non-Lambertian Dataset 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCI-Old' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: HCI-Old",
+        "suggestion": "在实验章节中补充对 HCI-Old 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '光场输入归一化模块 (LF Normalization)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 光场输入归一化模块 (LF Normalization)",
+        "suggestion": "在方法论中补充对 光场输入归一化模块 (LF Normalization) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '三层角信号分解模块 (Angular Signal Decomposition)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 三层角信号分解模块 (Angular Signal Decomposition)",
+        "suggestion": "在方法论中补充对 三层角信号分解模块 (Angular Signal Decomposition) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '双掩码深度估计主干网络 (DualMaskDepthModel)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 双掩码深度估计主干网络 (DualMaskDepthModel)",
+        "suggestion": "在方法论中补充对 双掩码深度估计主干网络 (DualMaskDepthModel) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '相位正则化模块 (Phase Regularization)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 相位正则化模块 (Phase Regularization)",
+        "suggestion": "在方法论中补充对 相位正则化模块 (Phase Regularization) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '物理一致性约束模块 (Physical Consistency Loss)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 物理一致性约束模块 (Physical Consistency Loss)",
+        "suggestion": "在方法论中补充对 物理一致性约束模块 (Physical Consistency Loss) 的详细描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1780627341.9109993,
+    "passed": true,
+    "summary": "审计完成: 9 个问题 (0 严重, 1 警告)",
+    "issue_count": 9,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#1检索时发生异常",
+        "location": "<citation>[1]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#2检索时发生异常",
+        "location": "<citation>[2]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#3检索时发生异常",
+        "location": "<citation>[3]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#4检索时发生异常",
+        "location": "<citation>[4]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#5检索时发生异常",
+        "location": "<citation>[5]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#6检索时发生异常",
+        "location": "<citation>[6]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#7检索时发生异常",
+        "location": "<citation>[7]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCInew' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: HCInew",
+        "suggestion": "在实验章节中补充对 HCInew 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1780627472.0263376,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_1",
+    "timestamp": 1780627637.0364802,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase5_2",
+    "timestamp": 1780627758.6905274,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase1",
+    "timestamp": 1780627950.8448582,
+    "passed": false,
+    "summary": "审计完成: 11 个问题 (8 严重, 2 警告)",
+    "issue_count": 11,
+    "critical_count": 8,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解的几何双掩码物理模型' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于三层角信号分解的几何双掩码物理模型'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解的几何双掩码物理模型' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的域平衡四方向EPI统一估计框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '面向多域光场数据的域平衡四方向EPI统一估计框架'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的域平衡四方向EPI统一估计框架' 的描述"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#1无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Depth Map Prediction\", \"Single Image\"]</citation>",
+        "evidence": "搜索关键词: ['Depth Map Prediction', 'Single Image'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Learning Depth\", \"Monocular Videos\"]</citation>",
+        "evidence": "搜索关键词: ['Learning Depth', 'Monocular Videos'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Deep Residual Learning\", \"Image Recognition\"]</citation>",
+        "evidence": "搜索关键词: ['Deep Residual Learning', 'Image Recognition'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Swin Transformer\", \"Hierarchical Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Swin Transformer', 'Hierarchical Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#5无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Reflectance Model\", \"Computer Graphics\"]</citation>",
+        "evidence": "搜索关键词: ['Reflectance Model', 'Computer Graphics'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Attention Is All You Need\", \"Attention technique\"]</citation>",
+        "evidence": "搜索关键词: ['Attention Is All You Need', 'Attention technique'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Masked Autoencoders\", \"Scalable Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Masked Autoencoders', 'Scalable Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"GeoNet\", \"Unsupervised Learning\"]</citation>",
+        "evidence": "搜索关键词: ['GeoNet', 'Unsupervised Learning'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1780628428.196058,
+    "passed": false,
+    "summary": "审计完成: 10 个问题 (8 严重, 1 警告)",
+    "issue_count": 10,
+    "critical_count": 8,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: \\\\cite\\{",
+        "location": "Related Work",
+        "evidence": "正则模式 '\\\\cite\\{' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#2无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Feature Pyramid Networks\", \"Object Detection\"]</citation>",
+        "evidence": "搜索关键词: ['Feature Pyramid Networks', 'Object Detection'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#3无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"A Reflectance Model\", \"Computer Graphics\"]</citation>",
+        "evidence": "搜索关键词: ['A Reflectance Model', 'Computer Graphics'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#4无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Deep Residual Learning\", \"Image Recognition\"]</citation>",
+        "evidence": "搜索关键词: ['Deep Residual Learning', 'Image Recognition'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#6无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Attention Is All\", \"You Need\"]</citation>",
+        "evidence": "搜索关键词: ['Attention Is All', 'You Need'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#7无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Swin Transformer\", \"Hierarchical Vision\"]</citation>",
+        "evidence": "搜索关键词: ['Swin Transformer', 'Hierarchical Vision'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#9无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"A Database and Evaluation Methodology for Optical Flow\", \"angular signals\"]</citation>",
+        "evidence": "搜索关键词: ['A Database and Evaluation Methodology for Optical Flow', 'angular signals'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#10无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"A Reflectance Model for Computer Graphics\", \"Reflectance\"]</citation>",
+        "evidence": "搜索关键词: ['A Reflectance Model for Computer Graphics', 'Reflectance'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      },
+      {
+        "severity": "critical",
+        "category": "reference",
+        "description": "引用#11无法检索到任何论文，可能是编造的引用",
+        "location": "<citation>[\"Aerosol properties over bright-reflecting source regions\", \"three-layer angular signal decomposition\"]</citation>",
+        "evidence": "搜索关键词: ['Aerosol properties over bright-reflecting source regions', 'three-layer angular signal decomposition'], MCP+Semantic Scholar均无结果",
+        "suggestion": "请替换为真实可检索的参考文献"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1780628875.1019924,
+    "passed": true,
+    "summary": "审计完成: 12 个问题 (0 严重, 11 警告)",
+    "issue_count": 12,
+    "critical_count": 0,
+    "warning_count": 11,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于三层角信号分解的几何双掩码物理模型' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于三层角信号分解的几何双掩码物理模型'",
+        "suggestion": "在章节中补充对 '基于三层角信号分解的几何双掩码物理模型' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '面向多域光场数据的域平衡四方向EPI统一估计框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '面向多域光场数据的域平衡四方向EPI统一估计框架'",
+        "suggestion": "在章节中补充对 '面向多域光场数据的域平衡四方向EPI统一估计框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCInew' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: HCInew",
+        "suggestion": "在实验章节中补充对 HCInew 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'UrbanLF-Syn' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: UrbanLF-Syn",
+        "suggestion": "在实验章节中补充对 UrbanLF-Syn 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'Non-Lambertian Dataset' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: Non-Lambertian Dataset",
+        "suggestion": "在实验章节中补充对 Non-Lambertian Dataset 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCI-Old' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: HCI-Old",
+        "suggestion": "在实验章节中补充对 HCI-Old 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '光场输入归一化模块 (LF Normalization)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 光场输入归一化模块 (LF Normalization)",
+        "suggestion": "在方法论中补充对 光场输入归一化模块 (LF Normalization) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '三层角信号分解模块 (Angular Signal Decomposition)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 三层角信号分解模块 (Angular Signal Decomposition)",
+        "suggestion": "在方法论中补充对 三层角信号分解模块 (Angular Signal Decomposition) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '双掩码深度估计主干网络 (DualMaskDepthModel)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 双掩码深度估计主干网络 (DualMaskDepthModel)",
+        "suggestion": "在方法论中补充对 双掩码深度估计主干网络 (DualMaskDepthModel) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '相位正则化模块 (Phase Regularization)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 相位正则化模块 (Phase Regularization)",
+        "suggestion": "在方法论中补充对 相位正则化模块 (Phase Regularization) 的详细描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "模型模块 '物理一致性约束模块 (Physical Consistency Loss)' 在代码分析中被识别但未在方法论中描述",
+        "location": "Methodology",
+        "evidence": "代码分析发现模块: 物理一致性约束模块 (Physical Consistency Loss)",
+        "suggestion": "在方法论中补充对 物理一致性约束模块 (Physical Consistency Loss) 的详细描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1780628875.1024556,
+    "passed": true,
+    "summary": "审计完成: 9 个问题 (0 严重, 1 警告)",
+    "issue_count": 9,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#1检索时发生异常",
+        "location": "<citation>[1]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#2检索时发生异常",
+        "location": "<citation>[2]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#3检索时发生异常",
+        "location": "<citation>[3]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#4检索时发生异常",
+        "location": "<citation>[4]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#5检索时发生异常",
+        "location": "<citation>[5]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#6检索时发生异常",
+        "location": "<citation>[6]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "info",
+        "category": "reference",
+        "description": "引用#7检索时发生异常",
+        "location": "<citation>[7]</citation>",
+        "evidence": "can only join an iterable",
+        "suggestion": "请人工确认此引用的真实性"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 'HCInew' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: HCInew",
+        "suggestion": "在实验章节中补充对 HCInew 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1780628875.1061943,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_5",
+    "timestamp": 1780628875.106397,
+    "passed": true,
+    "summary": "摘要审计完成: 3 个问题 (0 严重, 3 警告)",
+    "issue_count": 3,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 摘要声称取得了“overall mean absolute error (MAE) of 0.133 and a remarkably low MAE of 0.081 in complex mixed urban scenes”的具体数值结果。",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "需要在正文第四章或实验结果章节中补充包含具体MAE数值的表格或文本说明，以确保关键结果可被正文查证。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 摘要提到的“decoupled angular signals into direct current, linear, and residual components”具体分解形式。",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "在正文方法论（第三章）或讨论部分应明确对这三个分量的命名和定义进行详细阐述。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 摘要提到的“guided training strategy where geometric angular features supervised material mask generation”以及“progressive training paradigm”。",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "确保在正文第三章补充关于掩模生成监督机制和渐进式训练范式的详细说明，以确保摘要与正文方法论保持完整对应。"
+      }
+    ]
+  }
+]

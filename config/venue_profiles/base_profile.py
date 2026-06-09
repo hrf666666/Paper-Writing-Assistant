@@ -9,7 +9,7 @@ Venue Profile 基类 — 定义所有期刊/会议场景的配置接口
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -91,6 +91,34 @@ class VenueProfile:
 
     # ---- 写作风格 ----
     writing_style: Dict[str, str] = field(default_factory=dict)
+
+    # ---- v10.1: 内容编排软约束（从 ref_pdf 学习填充）----
+    # 期刊特有的内容编排模式（由 JournalStyleLearner 从 ref_pdf 填充）
+    content_patterns: Dict[str, Any] = field(default_factory=dict)
+    # 例: {"Introduction": {"opening": "problem_motivation", "contributions": "bulleted_3items"}}
+
+    # 论证节奏（哪里放数据/图表/引用，哪里详写/略写）
+    argument_rhythm: Dict[str, Any] = field(default_factory=dict)
+    # 例: {"Methodology": {"theory_first": True, "derivation_depth": "full"}}
+
+    # 深度梯度（每个子节的推导深度）
+    depth_gradients: Dict[str, str] = field(default_factory=dict)
+    # 例: {"Methodology.3.1": "full_derivation", "Methodology.3.2": "overview"}
+
+    # 图片风格偏好（从该期刊论文中学习的图表风格）
+    figure_preferences: Dict[str, Any] = field(default_factory=dict)
+    # 例: {"architecture": {"style": "clean_lines", "detail_level": "moderate"}}
+
+    # 期刊特有的内容侧重点（该期刊更看重什么）
+    content_emphasis: Dict[str, str] = field(default_factory=dict)
+    # 例: {"methodology": "system_implementation", "experiments": "cross_dataset"}
+
+    # 审稿偏好（该期刊审稿人通常关注的点）
+    reviewer_preferences: List[str] = field(default_factory=list)
+    # 例: ["always include complexity analysis", "prefer real-world datasets"]
+
+    # 期刊特有的 Red Flags（该期刊明确不欢迎的写作模式）
+    journal_red_flags: List[str] = field(default_factory=list)
 
     # ---- 质量门控 ----
     quality_pass_threshold: float = 70.0

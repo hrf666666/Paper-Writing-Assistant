@@ -1,0 +1,61 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+Warning--string name "june" is undefined
+--line 1 of file references.bib
+Warning--I didn't find a database entry for "vaswani2017"
+Warning--I didn't find a database entry for "dosovitskiy2021"
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 2 entries,
+            4087 wiz_defined-function locations,
+            837 strings with 7724 characters,
+and the built_in function-call counts, 1738 in all, are:
+= -- 138
+> -- 37
+< -- 9
++ -- 20
+- -- 7
+* -- 90
+:= -- 260
+add.period$ -- 5
+call.type$ -- 2
+change.case$ -- 2
+chr.to.int$ -- 21
+cite$ -- 2
+duplicate$ -- 127
+empty$ -- 137
+format.name$ -- 9
+if$ -- 398
+int.to.chr$ -- 0
+int.to.str$ -- 2
+missing$ -- 20
+newline$ -- 31
+num.names$ -- 2
+pop$ -- 52
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 136
+stack$ -- 0
+substring$ -- 69
+swap$ -- 98
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 2
+warning$ -- 0
+while$ -- 6
+width$ -- 3
+write$ -- 43
+(There were 3 warnings)

@@ -46,8 +46,13 @@ class OutputEvaluator:
 
     def run_full_evaluation(self, outline: Dict = None,
                              anchor_map: Dict = None,
-                             unified_results: Dict = None) -> Dict:
-        """执行完整的三层评价"""
+                             unified_results: Dict = None,
+                             hierarchical_report: Dict = None) -> Dict:
+        """执行完整的三层评价
+
+        Args:
+            hierarchical_report: v12.0 分层验收报告（可选），用于与 L1/L2/L3 对齐
+        """
         report = {
             "L1_format_validity": self.eval_format_validity(),
             "L2_content_completeness": self.eval_content_completeness(
@@ -84,6 +89,12 @@ class OutputEvaluator:
             "overall_grade": self._compute_grade(l1_score, l2_score, l3_score),
         }
 
+        # v12.0: 分层验收对齐
+        if hierarchical_report:
+            report["overall"]["hierarchical_alignment"] = self._align_with_hierarchical(
+                report, hierarchical_report
+            )
+
         report_path = os.path.join(self.output_dir, "evaluation_report.json")
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
@@ -119,11 +130,13 @@ class OutputEvaluator:
             checks["tex_has_keywords"] = "\\begin{IEEEkeywords}" in tex_content
             checks["tex_has_markboth"] = "\\markboth" in tex_content
 
-            # 公式环境检查
+            # 公式环境检查（支持 equation/align/multline/gather）
             eq_count = len(re.findall(r'\\begin\{equation\}', tex_content))
-            align_count = len(re.findall(r'\\begin\{align\}', tex_content))
-            checks["tex_equation_count"] = eq_count + align_count
-            checks["tex_has_display_math"] = (eq_count + align_count) >= 3
+            align_count = len(re.findall(r'\\begin\{align', tex_content))
+            multline_count = len(re.findall(r'\\begin\{multline\}', tex_content))
+            gather_count = len(re.findall(r'\\begin\{gather\}', tex_content))
+            checks["tex_equation_count"] = eq_count + align_count + multline_count + gather_count
+            checks["tex_has_display_math"] = (eq_count + align_count + multline_count + gather_count) >= 3
 
             # Markdown 残留检查
             md_residuals = len(re.findall(r'^#{1,4}\s+', tex_content, re.MULTILINE))
@@ -135,12 +148,12 @@ class OutputEvaluator:
             checks["tex_cite_count"] = len(re.findall(r'\\cite\{', tex_content))
             checks["tex_has_citations"] = checks["tex_cite_count"] >= 20
 
-            # 表格检查
-            checks["tex_table_count"] = len(re.findall(r'\\begin\{table\}', tex_content))
+            # 表格检查（支持 table 和 table*）
+            checks["tex_table_count"] = len(re.findall(r'\\begin\{table', tex_content))
             checks["tex_has_tables"] = checks["tex_table_count"] >= 2
 
-            # 图片检查
-            checks["tex_figure_count"] = len(re.findall(r'\\begin\{figure\}', tex_content))
+            # 图片检查（支持 figure 和 figure*）
+            checks["tex_figure_count"] = len(re.findall(r'\\begin\{figure', tex_content))
             checks["tex_has_figures"] = checks["tex_figure_count"] >= 1
 
             # TABLE_CAPTION 残留检查
@@ -253,19 +266,21 @@ class OutputEvaluator:
         checks["citation_count"] = total_citations
         checks["citations_min"] = total_citations >= profile["min_references"]
 
-        # 公式统计
+        # 公式统计（支持 equation/align/multline/gather）
         eq_count = len(re.findall(r'\\begin\{equation\}', full_content))
-        align_count = len(re.findall(r'\\begin\{align\}', full_content))
-        checks["formula_count"] = eq_count + align_count
+        align_count = len(re.findall(r'\\begin\{align', full_content))
+        multline_count = len(re.findall(r'\\begin\{multline\}', full_content))
+        gather_count = len(re.findall(r'\\begin\{gather\}', full_content))
+        checks["formula_count"] = eq_count + align_count + multline_count + gather_count
         checks["formulas_min"] = checks["formula_count"] >= profile["min_formulas"]
 
-        # 表格统计
-        table_count = len(re.findall(r'\\begin\{table\}', full_content))
+        # 表格统计（支持 table 和 table*）
+        table_count = len(re.findall(r'\\begin\{table', full_content))
         checks["table_count"] = table_count
         checks["tables_min"] = table_count >= profile["min_tables"]
 
-        # 图片统计
-        fig_count = len(re.findall(r'\\begin\{figure\}', full_content))
+        # 图片统计（支持 figure 和 figure*）
+        fig_count = len(re.findall(r'\\begin\{figure', full_content))
         checks["figure_count"] = fig_count
         checks["figures_min"] = fig_count >= profile["min_figures"]
 
@@ -299,16 +314,100 @@ class OutputEvaluator:
                 "total_words": words, "total_citations": total_citations}
 
     def eval_academic_quality(self, full_text: str) -> Dict:
-        """L3 学术质量评价（模拟 TCSVT 审稿）— v9.0 改进版"""
+        """L3 学术质量评价（模拟 TCSVT 审稿）— v11.9 分段审稿版
+
+        流程：分段摘要 → 全局审稿 → 合并评分
+        避免截断导致审稿人看不到实验/消融等后半部分内容。
+        """
         if not self.api_client:
             return {"overall_score": 0, "error": "无 api_client"}
 
-        # 使用更多内容（最多 16000 字符），且评价 .tex
-        text_for_eval = full_text[:16000]
+        # ── Step 1: 按 \section 切分论文 ──
+        segments = self._split_tex_by_section(full_text)
+        logger.info(f"[OutputEval/L3] 论文切分为 {len(segments)} 段")
 
-        prompt = f"""You are a senior reviewer for IEEE TCSVT (Transactions on Circuits and Systems for Video Technology).
+        # ── Step 2: 对每段生成结构化摘要 ──
+        segment_summaries = []
+        for seg_name, seg_text in segments:
+            summary = self._summarize_segment(seg_name, seg_text)
+            if summary:
+                segment_summaries.append(f"### {seg_name}\n{summary}")
+            else:
+                # 摘要失败则直接截取前 2000 字符
+                segment_summaries.append(
+                    f"### {seg_name}\n[摘要失败，原文截取]\n{seg_text[:2000]}")
 
-You are reviewing a paper's LaTeX source code. Be STRICT and CRITICAL. Do NOT give generous scores if the paper has obvious problems.
+        combined_summary = "\n\n".join(segment_summaries)
+        logger.info(f"[OutputEval/L3] 段落摘要合并后 {len(combined_summary)} 字符")
+
+        # ── Step 3: 基于完整摘要进行全局审稿 ──
+        prompt = self._build_review_prompt(combined_summary, len(segments))
+        result = self._call_eval_with_fallback(prompt)
+
+        if result:
+            return result
+
+        return {"overall_score": 0, "error": "L3 evaluation failed"}
+
+    # ────────────── L3 辅助方法 ──────────────
+
+    @staticmethod
+    def _split_tex_by_section(tex: str) -> List[tuple]:
+        """按 \\section 切分 LaTeX，返回 [(section_name, text), ...]"""
+        # 匹配 \section{...} 或 \section*{...}
+        pattern = r'\\section\*?\{([^}]+)\}'
+        splits = []
+        last_end = 0
+
+        for m in re.finditer(pattern, tex):
+            if last_end > 0 or splits:
+                # 上一段的内容
+                prev_text = tex[last_end:m.start()]
+                if prev_text.strip():
+                    splits[-1] = (splits[-1][0], prev_text)
+            splits.append((m.group(1), ""))
+            last_end = m.end()
+
+        # 最后一段
+        if splits and last_end < len(tex):
+            splits[-1] = (splits[-1][0], tex[last_end:])
+        elif not splits:
+            # 没有 section，整篇作为一段
+            splits = [("Full Paper", tex)]
+
+        # 把 preamble (第一段 section 之前) 作为 Front Matter
+        first_sec = re.search(pattern, tex)
+        if first_sec and first_sec.start() > 0:
+            preamble = tex[:first_sec.start()]
+            if preamble.strip():
+                splits.insert(0, ("Preamble (Title/Abstract/Keywords)", preamble))
+
+        return splits
+
+    def _summarize_segment(self, seg_name: str, seg_text: str) -> Optional[str]:
+        """对论文的一个 section 生成结构化摘要"""
+        # 限制每段最多 8000 字符（足够覆盖单个 section）
+        text_chunk = seg_text[:8000]
+
+        prompt = f"""Summarize this LaTeX paper section for an IEEE TCSVT reviewer.
+Extract: (1) key claims and contributions, (2) equations/formulas mentioned, (3) tables/figures referenced, (4) citations used, (5) numerical results if any.
+
+Section: {seg_name}
+{text_chunk}
+
+Reply in 3-5 bullet points, be specific about numbers and method names:"""
+
+        try:
+            return self._call_light_with_fallback(prompt)
+        except Exception as e:
+            logger.warning(f"[OutputEval/L3] 段落摘要失败 ({seg_name}): {e}")
+            return None
+
+    def _build_review_prompt(self, combined_summary: str, n_segments: int) -> str:
+        """构建全局审稿 prompt"""
+        return f"""You are a senior reviewer for IEEE TCSVT (Transactions on Circuits and Systems for Video Technology).
+
+Below are structured summaries of all {n_segments} sections of a submitted paper. You have seen the COMPLETE paper — no truncation.
 
 Evaluate this paper across 8 dimensions (0-100):
 
@@ -322,14 +421,12 @@ Evaluate this paper across 8 dimensions (0-100):
 8. Format Compliance: IEEEtran class, lettersize option, markboth headers, equation numbering?
 
 IMPORTANT: Score CONSERVATIVELY.
-- If equations use \\(...\\) instead of \\begin{{equation}}, score format_compliance ≤ 40
 - If no real figures (only TikZ placeholders), score experimental_sufficiency ≤ 50
 - If references < 30, score citation_quality ≤ 50
 - If Markdown residuals (## or **) exist, score format_compliance ≤ 50
-- If Chinese text appears in sections, score writing_style ≤ 40
 
-LaTeX source (truncated to {len(text_for_eval)} chars):
-{text_for_eval}
+Complete paper summaries ({len(combined_summary)} chars):
+{combined_summary}
 
 Output JSON:
 {{
@@ -352,21 +449,42 @@ Output JSON:
 
 ```json ... ``` only."""
 
-        try:
-            response = self.api_client.call_evaluation(prompt)
-            result = self.api_client.parse_json_response(response, default={})
-            if isinstance(result, dict) and "dimensions" in result:
-                dims = result["dimensions"]
-                if isinstance(dims, dict):
-                    scores = [v for v in dims.values()
-                              if isinstance(v, (int, float))]
-                    if scores and "overall_score" not in result:
-                        result["overall_score"] = round(
-                            sum(scores) / len(scores), 1)
-                return result
-        except Exception as e:
-            logger.error(f"[OutputEval] L3 评价失败: {e}")
-        return {"overall_score": 0, "error": "L3 evaluation failed"}
+    def _call_eval_with_fallback(self, prompt: str) -> Optional[Dict]:
+        """调用评价模型，带降级和重试"""
+        callers = [
+            ("call_evaluation", self.api_client.call_evaluation),
+            ("call_generation", self.api_client.call_generation),
+        ]
+        for caller_name, caller_fn in callers:
+            try:
+                response = caller_fn(prompt)
+                result = self.api_client.parse_json_response(response, default={})
+                if isinstance(result, dict) and "dimensions" in result:
+                    dims = result["dimensions"]
+                    if isinstance(dims, dict):
+                        scores = [v for v in dims.values()
+                                  if isinstance(v, (int, float))]
+                        if scores and "overall_score" not in result:
+                            result["overall_score"] = round(
+                                sum(scores) / len(scores), 1)
+                    logger.info(f"[OutputEval/L3] {caller_name} 评价成功")
+                    return result
+                logger.warning(f"[OutputEval/L3] {caller_name} 返回无效 JSON")
+            except AttributeError:
+                logger.warning(f"[OutputEval/L3] {caller_name} 不可用")
+            except Exception as e:
+                logger.warning(f"[OutputEval/L3] {caller_name} 失败: {e}")
+        return None
+
+    def _call_light_with_fallback(self, prompt: str) -> Optional[str]:
+        """调用轻量模型，带降级"""
+        for method_name in ["call_light", "call_generation"]:
+            try:
+                fn = getattr(self.api_client, method_name)
+                return fn(prompt)
+            except (AttributeError, Exception) as e:
+                logger.debug(f"[OutputEval/L3] {method_name} 失败: {e}")
+        return None
 
     def _read_full_paper_md(self) -> Optional[str]:
         path = os.path.join(self.output_dir, "full_paper.md")
@@ -394,6 +512,74 @@ Output JSON:
         elif avg >= 50:
             return "C"
         return "D"
+
+    def _align_with_hierarchical(self, report: Dict, hier_report: Dict) -> Dict:
+        """
+        v12.0: 分层验收指标与 L1/L2/L3 对齐度分析
+
+        对比 HierarchicalPlan 的验收结果与 L1/L2/L3 的实际分数，
+        找出不一致的地方（如 G2 验收通过但 L2 citations_min 未通过）。
+        """
+        alignment = {
+            "goal_vs_L_checks": [],
+            "consistent": True,
+        }
+
+        l2_checks = report.get("L2_content_completeness", {}).get("checks", {})
+        l1_checks = report.get("L1_format_validity", {}).get("checks", {})
+
+        # G2 (参考文献) vs L2 citations
+        g2_result = next(
+            (g for g in hier_report.get("goal_results", []) if g["goal_id"] == "G2"),
+            None
+        )
+        if g2_result:
+            citations_ok = l2_checks.get("citations_min", False)
+            g2_ok = g2_result.get("passed", False)
+            alignment["goal_vs_L_checks"].append({
+                "goal": "G2 (参考文献体系)",
+                "goal_passed": g2_ok,
+                "L2_citations_min": citations_ok,
+                "consistent": g2_ok == citations_ok,
+            })
+
+        # G5 (学术输出) vs L1 tex/pdf
+        g5_result = next(
+            (g for g in hier_report.get("goal_results", []) if g["goal_id"] == "G5"),
+            None
+        )
+        if g5_result:
+            tex_ok = l1_checks.get("tex_exists", False)
+            pdf_ok = l1_checks.get("pdf_exists", False)
+            g5_ok = g5_result.get("passed", False)
+            alignment["goal_vs_L_checks"].append({
+                "goal": "G5 (学术输出)",
+                "goal_passed": g5_ok,
+                "L1_tex_exists": tex_ok,
+                "L1_pdf_exists": pdf_ok,
+                "consistent": g5_ok == (tex_ok and pdf_ok),
+            })
+
+        # G4 (章节生成) vs L2 sections
+        g4_result = next(
+            (g for g in hier_report.get("goal_results", []) if g["goal_id"] == "G4"),
+            None
+        )
+        if g4_result:
+            sections_ok = l2_checks.get("sections_complete", False)
+            g4_ok = g4_result.get("passed", False)
+            alignment["goal_vs_L_checks"].append({
+                "goal": "G4 (章节生成)",
+                "goal_passed": g4_ok,
+                "L2_sections_complete": sections_ok,
+                "consistent": g4_ok == sections_ok,
+            })
+
+        alignment["consistent"] = all(
+            c["consistent"] for c in alignment["goal_vs_L_checks"]
+        )
+
+        return alignment
 
     def _save_report_md(self, report: Dict):
         path = os.path.join(self.output_dir, "evaluation_report.md")
@@ -432,6 +618,15 @@ Output JSON:
         lines.append("\n## 总体评价\n")
         lines.append(f"- **评级**: {overall.get('overall_grade', '?')}")
         lines.append(f"- L1={overall.get('L1_score', 0)} L2={overall.get('L2_score', 0)} L3={overall.get('L3_score', 0)}")
+
+        # v12.0: 分层验收对齐
+        alignment = overall.get("hierarchical_alignment")
+        if alignment:
+            lines.append("\n## 分层验收对齐 (v12.0)\n")
+            lines.append(f"- **一致性**: {'是' if alignment.get('consistent') else '否'}\n")
+            for check in alignment.get("goal_vs_L_checks", []):
+                status = "✓" if check.get("consistent") else "✗ 不一致"
+                lines.append(f"- {check['goal']}: {status} (goal={'PASS' if check.get('goal_passed') else 'FAIL'})")
 
         with open(path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))

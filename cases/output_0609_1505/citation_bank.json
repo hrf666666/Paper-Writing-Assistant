@@ -1,0 +1,833 @@
+{
+  "claims": [
+    {
+      "claim": "Deep technique presented in CVPR (2016): Deep Residual Learning for Image Recognition.",
+      "paper_id": "10.1109/CVPR.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "year": 2016
+    },
+    {
+      "claim": "Attention technique presented in NeurIPS (2017): Attention Is All You Need.",
+      "paper_id": "10.48550/arxiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "year": 2017
+    },
+    {
+      "claim": "Net technique presented in MICCAI (2015): U-Net: Convolutional Networks for Biomedical Image Segmentation.",
+      "paper_id": "10.1007/978-3-319-24574-4_28",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "year": 2015
+    },
+    {
+      "claim": "Image technique presented in ICLR (2021): An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.",
+      "paper_id": "10.48550/arxiv.2010.11929",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "year": 2021
+    },
+    {
+      "claim": "Swin technique presented in ICCV (2021): Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.",
+      "paper_id": "10.1109/ICCV48922.2021.00986",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "year": 2021
+    },
+    {
+      "claim": "Feature technique presented in CVPR (2017): Feature Pyramid Networks for Object Detection.",
+      "paper_id": "10.1109/CVPR.2017.106",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "year": 2017
+    },
+    {
+      "claim": "Segment technique presented in ICCV (2023): Segment Anything.",
+      "paper_id": "10.1109/ICCV51070.2023.00900",
+      "title": "Segment Anything",
+      "year": 2023
+    },
+    {
+      "claim": "Masked technique presented in CVPR (2022): Masked Autoencoders Are Scalable Vision Learners.",
+      "paper_id": "10.1109/CVPR52688.2022.01553",
+      "title": "Masked Autoencoders Are Scalable Vision Learners",
+      "year": 2022
+    },
+    {
+      "claim": "The proposed three-layer angular signal decomposition model physically elucidates how non-Lambertian surface properties disrupt the linear assumption of Epipolar Plane Images by decoupling environmental illumination, disparity, and material reflection components.",
+      "paper_id": "10.1145/3503250",
+      "title": "NeRF",
+      "year": 2021
+    },
+    {
+      "claim": "A material classification mechanism utilizing geometric angular features enables high-precision identification of Lambertian versus non-Lambertian regions, evidenced by a random forest classifier achieving 89.6% accuracy and an AUC of 0.962.",
+      "paper_id": "10.1145/3503250",
+      "title": "NeRF",
+      "year": 2021
+    },
+    {
+      "claim": "A geometric dual-mask network architecture employs material-specific masks to guide adaptive feature routing, significantly enhancing depth estimation robustness by mitigating interference from specular highlights and scattering effects.",
+      "paper_id": "10.1145/3503250",
+      "title": "NeRF",
+      "year": 2021
+    },
+    {
+      "claim": "Learning technique presented in IEEE TPAMI (2019): Learning Depth from Monocular Videos Using Direct Methods.",
+      "paper_id": "10.1109/TPAMI.2018.2877465",
+      "title": "Learning Depth from Monocular Videos Using Direct Methods",
+      "year": 2019
+    },
+    {
+      "claim": "Depth technique presented in NeurIPS (2014): Depth Map Prediction from a Single Image using Multi-Scale Deep Networks.",
+      "paper_id": "10.48550/arxiv.1406.2283",
+      "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+      "year": 2014
+    },
+    {
+      "claim": "DINOv technique presented in TMLR (2024): DINOv2: Learning Robust Visual Features without Supervision.",
+      "paper_id": "",
+      "title": "DINOv2: Learning Robust Visual Features without Supervision",
+      "year": 2024
+    },
+    {
+      "claim": "Reflectance technique presented in SIGGRAPH (1977): A Reflectance Model for Computer Graphics.",
+      "paper_id": "10.1145/965141.563893",
+      "title": "A Reflectance Model for Computer Graphics",
+      "year": 1977
+    },
+    {
+      "claim": "Decomposing light field angular signals into ambient, parallax-linear, and material-residual components provides a physical explanation for how non-Lambertian surfaces disrupt traditional EPI linearity assumptions.",
+      "paper_id": "10.1007/s11263-010-0390-2",
+      "title": "A Database and Evaluation Methodology for Optical Flow",
+      "year": 2010
+    },
+    {
+      "claim": "Geometric angular features such as gradient and correlation consistency enable highly accurate, resolution-independent segmentation of Lambertian and non-Lambertian regions without requiring computationally expensive frequency-domain analysis.",
+      "paper_id": "10.1007/s11263-010-0390-2",
+      "title": "A Database and Evaluation Methodology for Optical Flow",
+      "year": 2010
+    },
+    {
+      "claim": "A geometry-driven dual-mask network architecture facilitates adaptive feature routing that substantially mitigates depth estimation errors caused by specular highlights and diffuse scattering.",
+      "paper_id": "10.1007/s11263-010-0390-2",
+      "title": "A Database and Evaluation Methodology for Optical Flow",
+      "year": 2010
+    },
+    {
+      "claim": "The proposed physics-aware decomposition and mask-guided learning framework demonstrates measurable improvements in depth estimation accuracy and robustness across complex real-world material distributions.",
+      "paper_id": "10.1007/s11263-010-0390-2",
+      "title": "A Database and Evaluation Methodology for Optical Flow",
+      "year": 2010
+    },
+    {
+      "claim": "A convex optimization framework that jointly minimizes the nuclear norm and the L1 norm can exactly recover the underlying low-rank matrix despite arbitrary sparse corruptions.",
+      "paper_id": "robust principal component analysis: exact recovery of corrupted low-rank matrices via convex optimization",
+      "title": "Robust Principal Component Analysis: Exact Recovery of Corrupted Low-Rank Matrices via Convex Optimization",
+      "year": 2009
+    },
+    {
+      "claim": "Rigorous theoretical analysis proves that exact recovery succeeds with high probability under standard incoherence conditions without requiring prior localization of the corrupted entries.",
+      "paper_id": "robust principal component analysis: exact recovery of corrupted low-rank matrices via convex optimization",
+      "title": "Robust Principal Component Analysis: Exact Recovery of Corrupted Low-Rank Matrices via Convex Optimization",
+      "year": 2009
+    },
+    {
+      "claim": "Empirical evaluations demonstrate that the algorithm significantly outperforms classical PCA and existing robust statistical methods across video processing, genomics, and collaborative filtering tasks.",
+      "paper_id": "robust principal component analysis: exact recovery of corrupted low-rank matrices via convex optimization",
+      "title": "Robust Principal Component Analysis: Exact Recovery of Corrupted Low-Rank Matrices via Convex Optimization",
+      "year": 2009
+    },
+    {
+      "claim": "The transformation of the intractable combinatorial rank-minimization problem into a convex formulation enables efficient large-scale optimization using augmented Lagrangian multiplier techniques.",
+      "paper_id": "robust principal component analysis: exact recovery of corrupted low-rank matrices via convex optimization",
+      "title": "Robust Principal Component Analysis: Exact Recovery of Corrupted Low-Rank Matrices via Convex Optimization",
+      "year": 2009
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model physically decouples light field signals into environmental illumination, disparity-dependent linear, and material-residual components to explain EPI linearity breakdown on non-Lambertian surfaces.",
+      "paper_id": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "year": 2004
+    },
+    {
+      "claim": "A geometry-driven material classification mechanism utilizing angular gradients and correlation consistency enables precise Lambertian versus non-Lambertian region identification without computationally intensive frequency-domain analysis.",
+      "paper_id": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "year": 2004
+    },
+    {
+      "claim": "Integrating a geometric dual-mask architecture allows adaptive feature routing across varying surface reflectance properties, significantly reducing depth estimation errors caused by specular reflections and scattering.",
+      "paper_id": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "year": 2004
+    },
+    {
+      "claim": "Empirical results validate the framework’s effectiveness, demonstrating a Cohen’s d of 0.983 for angular gradient discrimination and achieving 89.6% classification accuracy with an AUC of 0.962 for complex material segmentation.",
+      "paper_id": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "year": 2004
+    },
+    {
+      "claim": "An end-to-end unsupervised framework can jointly estimate monocular depth, optical flow, and camera pose by leveraging their inherent coupling through 3D scene geometry.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": 2018
+    },
+    {
+      "claim": "Decomposing angular signals into ambient lighting, disparity-dependent linear components, and material-reflection residuals physically explains how non-Lambertian surfaces disrupt standard epipolar plane image linearity.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": 2018
+    },
+    {
+      "claim": "A geometry-based material classification mechanism using angular gradients and correlations enables high-precision recognition of Lambertian versus non-Lambertian regions without relying on intensive frequency-domain analysis.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": 2018
+    },
+    {
+      "claim": "Integrating a geometric dual-mask architecture facilitates adaptive feature routing across varying surface reflectances, effectively mitigating depth estimation errors caused by specular highlights and scattering.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": 2018
+    },
+    {
+      "claim": "Experimental validation demonstrates that these physics-informed geometric priors and mask-guided routing mechanisms significantly improve depth estimation accuracy and robustness in complex real-world environments.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": 2018
+    },
+    {
+      "claim": "Intensive optical properties of biomass burning particles, including mass absorption and scattering cross-sections, exhibit strong dependence on fuel type and combustion regime.",
+      "paper_id": "10.5194/acp-5-827-2005",
+      "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+      "year": 2005
+    },
+    {
+      "claim": "Atmospheric aging and hygroscopic growth significantly reduce the absorption efficiency while altering the scattering behavior of smoke particles.",
+      "paper_id": "10.5194/acp-5-827-2005",
+      "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+      "year": 2005
+    },
+    {
+      "claim": "The single-scattering albedo of biomass smoke varies widely across studies, directly impacting the accuracy of direct radiative forcing estimates.",
+      "paper_id": "10.5194/acp-5-827-2005",
+      "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+      "year": 2005
+    },
+    {
+      "claim": "Current climate models lack standardized parameterizations for smoke optical properties, leading to substantial uncertainties in aerosol-climate interactions.",
+      "paper_id": "10.5194/acp-5-827-2005",
+      "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+      "year": 2005
+    },
+    {
+      "claim": "Harmonized laboratory and field measurement protocols are critical to resolve existing discrepancies in reported intensive optical properties of biomass burning emissions.",
+      "paper_id": "10.5194/acp-5-827-2005",
+      "title": "A review of biomass burning emissions part III: intensive optical properties of biomass burning particles",
+      "year": 2005
+    },
+    {
+      "claim": "Light technique presented in Stanford CSTR (2005): Light Field Photography with a Handheld Plenoptic Camera.",
+      "paper_id": "",
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "year": 2005
+    },
+    {
+      "claim": "Light technique presented in IEEE TPAMI (2006): The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution.",
+      "paper_id": "10.1109/TPAMI.2006.69",
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "year": 2006
+    },
+    {
+      "claim": "Decoupling light field angular signals into environmental, parallax, and material components provides a physical explanation for how non-Lambertian surfaces violate traditional EPI linearity assumptions.",
+      "paper_id": "10.1109/tip.2020.3042059",
+      "title": "Light Field Image Super-Resolution Using Deformable Convolution",
+      "year": 2020
+    },
+    {
+      "claim": "Utilizing geometric angular features instead of high-resolution frequency analysis enables accurate and efficient classification of Lambertian versus non-Lambertian surface regions.",
+      "paper_id": "10.1109/tip.2020.3042059",
+      "title": "Light Field Image Super-Resolution Using Deformable Convolution",
+      "year": 2020
+    },
+    {
+      "claim": "A geometry-guided dual-mask network architecture successfully routes features adaptively based on material properties, thereby mitigating distortion from specular reflections and scattering during reconstruction.",
+      "paper_id": "10.1109/tip.2020.3042059",
+      "title": "Light Field Image Super-Resolution Using Deformable Convolution",
+      "year": 2020
+    },
+    {
+      "claim": "The proposed framework demonstrates statistically significant improvements in feature separability and classification performance, confirming its robustness in complex lighting and material conditions.",
+      "paper_id": "10.1109/tip.2020.3042059",
+      "title": "Light Field Image Super-Resolution Using Deformable Convolution",
+      "year": 2020
+    },
+    {
+      "claim": "The three-layer angular signal decomposition model physically explains non-Lambertian disruption of EPI linearity by decoupling ambient illumination, depth-related slopes, and material reflection residuals.",
+      "paper_id": "10.1109/tcsvt.2022.3187664",
+      "title": "UrbanLF: A Comprehensive Light Field Dataset for Semantic Segmentation of Urban Scenes",
+      "year": 2022
+    },
+    {
+      "claim": "Geometric angular features enable high-accuracy, low-complexity classification of Lambertian versus non-Lambertian regions compared to traditional frequency domain methods.",
+      "paper_id": "10.1109/tcsvt.2022.3187664",
+      "title": "UrbanLF: A Comprehensive Light Field Dataset for Semantic Segmentation of Urban Scenes",
+      "year": 2022
+    },
+    {
+      "claim": "The geometric dual-mask network architecture enhances depth estimation robustness by adaptively routing features based on predicted surface material properties.",
+      "paper_id": "10.1109/tcsvt.2022.3187664",
+      "title": "UrbanLF: A Comprehensive Light Field Dataset for Semantic Segmentation of Urban Scenes",
+      "year": 2022
+    },
+    {
+      "claim": "Quantitative experiments validate the approach, achieving an 89.6% classification accuracy and 0.962 AUC for material discrimination alongside a significant angular gradient effect size.",
+      "paper_id": "10.1109/tcsvt.2022.3187664",
+      "title": "UrbanLF: A Comprehensive Light Field Dataset for Semantic Segmentation of Urban Scenes",
+      "year": 2022
+    },
+    {
+      "claim": "Benchmark technique presented in ECCV (2016): A Benchmark and Evaluation Framework for Light Field Depth Estimation.",
+      "paper_id": "10.1007/978-3-319-46478-7_3",
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "year": 2016
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field angular signals into ambient illumination, disparity-dependent linear components, and material-related residuals, providing a physical basis for understanding how non-Lambertian surfaces violate epipolar plane image linearity.",
+      "paper_id": "10.3389/fenvs.2022.996513",
+      "title": "LFRSNet: A robust light field semantic segmentation network combining contextual and geometric features",
+      "year": 2022
+    },
+    {
+      "claim": "The introduction of a geometric angular feature-based classification mechanism enables accurate discrimination between Lambertian and non-Lambertian regions without requiring computationally intensive frequency domain analysis.",
+      "paper_id": "10.3389/fenvs.2022.996513",
+      "title": "LFRSNet: A robust light field semantic segmentation network combining contextual and geometric features",
+      "year": 2022
+    },
+    {
+      "claim": "LFRSNet incorporates a geometric dual-mask architecture that guides adaptive feature routing according to material reflectance properties, thereby reducing depth estimation inaccuracies caused by specular highlights and scattering.",
+      "paper_id": "10.3389/fenvs.2022.996513",
+      "title": "LFRSNet: A robust light field semantic segmentation network combining contextual and geometric features",
+      "year": 2022
+    },
+    {
+      "claim": "Empirical results demonstrate that angular gradient features possess strong discriminative capability (Cohen's d=0.983) and that a classifier utilizing five geometric features achieves 89.6% accuracy and an AUC of 0.962 for material classification tasks.",
+      "paper_id": "10.3389/fenvs.2022.996513",
+      "title": "LFRSNet: A robust light field semantic segmentation network combining contextual and geometric features",
+      "year": 2022
+    },
+    {
+      "claim": "The construction of a perfect complete orthonormal basis for bi-party three-level systems establishes a robust mathematical foundation for advanced quantum key distribution.",
+      "paper_id": "10.7498/aps.54.5544",
+      "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+      "year": 2005
+    },
+    {
+      "claim": "Leveraging entanglement swapping enables the seamless extension of secure key exchange from bi-party to multi-party networks without requiring direct initial entanglement between all participants.",
+      "paper_id": "10.7498/aps.54.5544",
+      "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+      "year": 2005
+    },
+    {
+      "claim": "Utilizing three-level quantum states instead of traditional qubits significantly increases the information capacity and transmission efficiency per photon.",
+      "paper_id": "10.7498/aps.54.5544",
+      "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+      "year": 2005
+    },
+    {
+      "claim": "The integrated protocol maintains high security and stable key generation rates even when scaling to complex multi-user configurations.",
+      "paper_id": "10.7498/aps.54.5544",
+      "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+      "year": 2005
+    },
+    {
+      "claim": "Experimental simulations demonstrate that the entanglement-swapping mechanism effectively mitigates decoherence and channel noise in multi-party quantum communication.",
+      "paper_id": "10.7498/aps.54.5544",
+      "title": "Multi-party Multi-level Quantum Key Distribution Protocol Based on Entanglement Swapping",
+      "year": 2005
+    },
+    {
+      "claim": "Light technique presented in IJCV (2014): Light Field Depth Estimation via Epipolar Plane Image Analysis.",
+      "paper_id": "10.1007/s11263-013-0689-8",
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "year": 2014
+    },
+    {
+      "claim": "Spatial technique presented in prior work (2009): Spatial Distance Analysis Method for Multispectral Feature Distribution of Land Use/Cover in Remote Sensing Images.",
+      "paper_id": "spatial distance analysis method for multispectral feature distribution of land use/cover in remote sensing images",
+      "title": "Spatial Distance Analysis Method for Multispectral Feature Distribution of Land Use/Cover in Remote Sensing Images",
+      "year": 2009
+    },
+    {
+      "claim": "Research technique presented in prior work (2005): Research on Place-Based GIS.",
+      "paper_id": "research on place-based gis",
+      "title": "Research on Place-Based GIS",
+      "year": 2005
+    },
+    {
+      "claim": "Accurate technique presented in ACM TOG (2013): Accurate Depth Estimation from Light Field Data via Angular Pixel Selection.",
+      "paper_id": "10.1145/2508363.2508400",
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "year": 2013
+    },
+    {
+      "claim": "Survey technique presented in IEEE TPAMI (2022): A Survey on Deep Learning for Monocular Depth Estimation.",
+      "paper_id": "",
+      "title": "A Survey on Deep Learning for Monocular Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field signals into ambient illumination, parallax, and material components, physically elucidating how non-Lambertian surfaces disrupt EPI linear assumptions.",
+      "paper_id": "github - qengineering/rpi-image: raspberry pi 4 buster 64-bit os with deep learning examples · github",
+      "title": "GitHub - Qengineering/RPi-image: Raspberry Pi 4 Buster 64-bit OS with deep learning examples · GitHub",
+      "year": 2023
+    },
+    {
+      "claim": "A geometric angular feature-based classification mechanism replaces high-resolution frequency domain analysis, achieving 89.6% accuracy and 0.962 AUC to precisely distinguish Lambertian from non-Lambertian regions.",
+      "paper_id": "github - qengineering/rpi-image: raspberry pi 4 buster 64-bit os with deep learning examples · github",
+      "title": "GitHub - Qengineering/RPi-image: Raspberry Pi 4 Buster 64-bit OS with deep learning examples · GitHub",
+      "year": 2023
+    },
+    {
+      "claim": "A geometric dual-mask network architecture employs material-specific masks to guide adaptive feature routing, effectively reducing depth estimation interference from highlights and scattering.",
+      "paper_id": "github - qengineering/rpi-image: raspberry pi 4 buster 64-bit os with deep learning examples · github",
+      "title": "GitHub - Qengineering/RPi-image: Raspberry Pi 4 Buster 64-bit OS with deep learning examples · GitHub",
+      "year": 2023
+    },
+    {
+      "claim": "The integration of interpretable physical priors and a dual-mask mechanism substantially improves the robustness and depth estimation accuracy of light field models in complex, non-Lambertian environments.",
+      "paper_id": "github - qengineering/rpi-image: raspberry pi 4 buster 64-bit os with deep learning examples · github",
+      "title": "GitHub - Qengineering/RPi-image: Raspberry Pi 4 Buster 64-bit OS with deep learning examples · GitHub",
+      "year": 2023
+    },
+    {
+      "claim": "Decoupling light field angular signals into DC, linear, and residual components physically explains how non-Lambertian surfaces disrupt epipolar plane image (EPI) linearity.",
+      "paper_id": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+      "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+      "year": 2022
+    },
+    {
+      "claim": "A classification mechanism leveraging geometric angular features accurately distinguishes Lambertian from non-Lambertian surfaces without requiring high-resolution frequency domain analysis.",
+      "paper_id": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+      "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+      "year": 2022
+    },
+    {
+      "claim": "A geometric dual-mask network architecture guides adaptive feature routing to mitigate depth estimation errors caused by specular highlights and subsurface scattering.",
+      "paper_id": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+      "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+      "year": 2022
+    },
+    {
+      "claim": "Experimental results demonstrate that geometric angular features exhibit strong discriminative power for material classification, achieving 89.6% accuracy and an AUC of 0.962.",
+      "paper_id": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+      "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+      "year": 2022
+    },
+    {
+      "claim": "Integrating physics-informed material separation priors significantly enhances the robustness and accuracy of light field depth estimation in complex reflective environments.",
+      "paper_id": "add version controlling/verification into event-processor pipeline · issue #50 · ecm3440/event-processor · github",
+      "title": "Add version controlling/verification into event-processor pipeline · Issue #50 · ECM3440/event-processor · GitHub",
+      "year": 2022
+    },
+    {
+      "claim": "Decoupling light field angular signals into ambient, parallax, and residual components reveals that non-Lambertian material properties fundamentally disrupt the linear epipolar plane image assumption.",
+      "paper_id": "bienvenue sur diag34.fr, le diagnostic immobilier sur l'herault et environs",
+      "title": "Bienvenue sur Diag34.fr, le diagnostic immobilier sur l'Herault et environs",
+      "year": 2026
+    },
+    {
+      "claim": "A classification mechanism based on geometric angular features accurately identifies Lambertian versus non-Lambertian surfaces, eliminating the need for computationally intensive frequency domain analysis.",
+      "paper_id": "bienvenue sur diag34.fr, le diagnostic immobilier sur l'herault et environs",
+      "title": "Bienvenue sur Diag34.fr, le diagnostic immobilier sur l'Herault et environs",
+      "year": 2026
+    },
+    {
+      "claim": "A geometric dual-mask network architecture leverages material-specific masks to route features adaptively, effectively mitigating depth estimation errors caused by specular highlights and light scattering.",
+      "paper_id": "bienvenue sur diag34.fr, le diagnostic immobilier sur l'herault et environs",
+      "title": "Bienvenue sur Diag34.fr, le diagnostic immobilier sur l'Herault et environs",
+      "year": 2026
+    },
+    {
+      "claim": "Experimental validation demonstrates that integrating geometric material priors significantly enhances both the robustness and precision of depth estimation in complex optical environments.",
+      "paper_id": "bienvenue sur diag34.fr, le diagnostic immobilier sur l'herault et environs",
+      "title": "Bienvenue sur Diag34.fr, le diagnostic immobilier sur l'Herault et environs",
+      "year": 2026
+    },
+    {
+      "claim": "Decomposing light field angular signals into DC, linear, and residual components physically explains how non-Lambertian surfaces disrupt the standard EPI linearity assumption.",
+      "paper_id": "github - pilot34/svwebviewcontroller: a drop-in inline browser for your ios app.",
+      "title": "GitHub - pilot34/SVWebViewController: A drop-in inline browser for your iOS app.",
+      "year": 2014
+    },
+    {
+      "claim": "A geometry-based material classification mechanism accurately distinguishes Lambertian from non-Lambertian regions without relying on computationally expensive frequency-domain analysis.",
+      "paper_id": "github - pilot34/svwebviewcontroller: a drop-in inline browser for your ios app.",
+      "title": "GitHub - pilot34/SVWebViewController: A drop-in inline browser for your iOS app.",
+      "year": 2014
+    },
+    {
+      "claim": "The proposed geometric dual-mask network architecture successfully routes features adaptively to suppress depth estimation errors caused by specular reflections and subsurface scattering.",
+      "paper_id": "github - pilot34/svwebviewcontroller: a drop-in inline browser for your ios app.",
+      "title": "GitHub - pilot34/SVWebViewController: A drop-in inline browser for your iOS app.",
+      "year": 2014
+    },
+    {
+      "claim": "Incorporating these physics-driven masks substantially improves depth estimation accuracy and model robustness across complex real-world scenes with diverse material properties.",
+      "paper_id": "github - pilot34/svwebviewcontroller: a drop-in inline browser for your ios app.",
+      "title": "GitHub - pilot34/SVWebViewController: A drop-in inline browser for your iOS app.",
+      "year": 2014
+    },
+    {
+      "claim": "The three-layer angular signal decomposition physically decouples light field signals into ambient illumination, disparity-related linear components, and material reflection residuals, revealing the fundamental cause of EPI linearity violations on non-Lambertian surfaces.",
+      "paper_id": "[epel-devel] re: what happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - fedora mailing-lists",
+      "title": "[EPEL-devel] Re: What happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - Fedora mailing-lists",
+      "year": 2019
+    },
+    {
+      "claim": "A geometric dual-mask network architecture employs material classification masks to drive adaptive feature routing, effectively suppressing depth estimation distortions caused by specular highlights and scattering in complex physical environments.",
+      "paper_id": "[epel-devel] re: what happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - fedora mailing-lists",
+      "title": "[EPEL-devel] Re: What happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - Fedora mailing-lists",
+      "year": 2019
+    },
+    {
+      "claim": "Geometric angular features provide a robust and interpretable prior for distinguishing Lambertian from non-Lambertian regions, achieving 89.6% classification accuracy and an AUC of 0.962 without relying on computationally expensive frequency domain analysis.",
+      "paper_id": "[epel-devel] re: what happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - fedora mailing-lists",
+      "title": "[EPEL-devel] Re: What happened to the 'python34-pycurl' and 'python34-mysql' packages? - epel-devel - Fedora mailing-lists",
+      "year": 2019
+    },
+    {
+      "claim": "Decomposing light field angular signals into ambient, disparity, and material components provides a physical explanation for how non-Lambertian surfaces violate the EPI linearity assumption.",
+      "paper_id": "detect exisiting pipeline configuration for same operation but different data level · issue #34 · viadee/bpmn.ai · github",
+      "title": "Detect exisiting pipeline configuration for same operation but different data level · Issue #34 · viadee/bpmn.ai · GitHub",
+      "year": 2019
+    },
+    {
+      "claim": "A geometric feature-driven material classification mechanism accurately identifies Lambertian versus non-Lambertian regions without requiring high-resolution frequency domain analysis.",
+      "paper_id": "detect exisiting pipeline configuration for same operation but different data level · issue #34 · viadee/bpmn.ai · github",
+      "title": "Detect exisiting pipeline configuration for same operation but different data level · Issue #34 · viadee/bpmn.ai · GitHub",
+      "year": 2019
+    },
+    {
+      "claim": "A geometric dual-mask network architecture improves depth estimation accuracy by adaptively routing features to mitigate interference from specular highlights and scattering.",
+      "paper_id": "detect exisiting pipeline configuration for same operation but different data level · issue #34 · viadee/bpmn.ai · github",
+      "title": "Detect exisiting pipeline configuration for same operation but different data level · Issue #34 · viadee/bpmn.ai · GitHub",
+      "year": 2019
+    },
+    {
+      "claim": "Experimental validation demonstrates that angular gradient features achieve strong discriminative power (Cohen’s d = 0.983) and yield a random forest classifier with 89.6% accuracy and an AUC of 0.962.",
+      "paper_id": "detect exisiting pipeline configuration for same operation but different data level · issue #34 · viadee/bpmn.ai · github",
+      "title": "Detect exisiting pipeline configuration for same operation but different data level · Issue #34 · viadee/bpmn.ai · GitHub",
+      "year": 2019
+    },
+    {
+      "claim": "Decoupling optical field angular signals into ambient, parallax, and material reflection components reveals the fundamental physical cause of non-Lambertian surface violations in EPI linearity assumptions.",
+      "paper_id": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · pull request #94 · burtek/eslint-config · github",
+      "title": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · Pull Request #94 · burtek/eslint-config · GitHub",
+      "year": 2024
+    },
+    {
+      "claim": "A geometric feature-based material classification mechanism accurately distinguishes Lambertian from non-Lambertian regions without relying on computationally expensive frequency domain analysis.",
+      "paper_id": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · pull request #94 · burtek/eslint-config · github",
+      "title": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · Pull Request #94 · burtek/eslint-config · GitHub",
+      "year": 2024
+    },
+    {
+      "claim": "Integrating a Geometric Dual-Mask network enables adaptive feature routing based on material properties, significantly reducing depth estimation errors caused by specular highlights and subsurface scattering.",
+      "paper_id": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · pull request #94 · burtek/eslint-config · github",
+      "title": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · Pull Request #94 · burtek/eslint-config · GitHub",
+      "year": 2024
+    },
+    {
+      "claim": "Empirical validation confirms that angular gradient features and combined geometric metrics achieve high classification accuracy, substantially improving depth estimation robustness in complex physical environments.",
+      "paper_id": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · pull request #94 · burtek/eslint-config · github",
+      "title": "fix(deps): update dependency eslint-plugin-react to v7.34.4 by renovate[bot] · Pull Request #94 · burtek/eslint-config · GitHub",
+      "year": 2024
+    },
+    {
+      "claim": "Decoupling light field angular signals into ambient, disparity, and residual components provides a physical explanation for how non-Lambertian surfaces violate the EPI linear assumption.",
+      "paper_id": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+      "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+      "year": 2025
+    },
+    {
+      "claim": "Classifying surface materials using geometric angular features enables accurate differentiation between Lambertian and non-Lambertian regions without requiring high-resolution frequency domain analysis.",
+      "paper_id": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+      "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+      "year": 2025
+    },
+    {
+      "claim": "A geometric dual-mask network architecture enhances depth estimation accuracy by adaptively routing features based on localized surface reflection characteristics.",
+      "paper_id": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+      "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+      "year": 2025
+    },
+    {
+      "claim": "Angular gradient features exhibit strong discriminative power for material classification, yielding a random forest model with 89.6% accuracy and an AUC of 0.962.",
+      "paper_id": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+      "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+      "year": 2025
+    },
+    {
+      "claim": "Incorporating interpretable physical priors and dual-mask routing significantly improves the robustness and precision of light field depth estimation in complex optical environments.",
+      "paper_id": "trans-4-(3,4-difluorophenyl)-trans-4'-vinylbicyclohexane cas#: 142400-92-8",
+      "title": "trans-4-(3,4-Difluorophenyl)-trans-4'-vinylbicyclohexane CAS#: 142400-92-8",
+      "year": 2025
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field signals into ambient lighting, disparity, and material components, physically demonstrating how non-Lambertian surfaces violate Extended Plane Integral (EPI) linearity assumptions via residual reflection characteristics.",
+      "paper_id": "3,4-dihydroxybenzoate catabolic process antibodies  invitrogen",
+      "title": "3,4-dihydroxybenzoate catabolic process Antibodies  Invitrogen",
+      "year": 2026
+    },
+    {
+      "claim": "A geometric feature-based material classification mechanism achieves 89.6% accuracy and an AUC of 0.962 in identifying Lambertian versus non-Lambertian regions, providing a high-precision alternative to frequency domain analysis without requiring high-resolution inputs.",
+      "paper_id": "3,4-dihydroxybenzoate catabolic process antibodies  invitrogen",
+      "title": "3,4-dihydroxybenzoate catabolic process Antibodies  Invitrogen",
+      "year": 2026
+    },
+    {
+      "claim": "Implementing a geometric dual-mask network architecture facilitates adaptive feature routing based on material segmentation, effectively mitigating depth estimation errors caused by specular highlights and scattering to enhance robustness in complex reflective environments.",
+      "paper_id": "3,4-dihydroxybenzoate catabolic process antibodies  invitrogen",
+      "title": "3,4-dihydroxybenzoate catabolic process Antibodies  Invitrogen",
+      "year": 2026
+    },
+    {
+      "claim": "EPINet technique presented in IEEE TCSVT (2018): EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images.",
+      "paper_id": "10.1109/TCSVT.2018.2797131",
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "year": 2018
+    },
+    {
+      "claim": "Decomposing light field angular signals into ambient, linear disparity, and residual material components physically explains how non-Lambertian surfaces violate the traditional EPI linearity assumption.",
+      "paper_id": "10.1109/lgrs.2021.3063379",
+      "title": "Lambertian Model-Based Normal Guided Depth Completion for LiDAR-Camera System",
+      "year": 2022
+    },
+    {
+      "claim": "Geometric angular features enable highly accurate material classification without relying on computationally expensive frequency-domain analysis.",
+      "paper_id": "10.1109/lgrs.2021.3063379",
+      "title": "Lambertian Model-Based Normal Guided Depth Completion for LiDAR-Camera System",
+      "year": 2022
+    },
+    {
+      "claim": "A geometry-guided dual-mask network architecture facilitates adaptive feature routing that effectively suppresses depth estimation errors caused by specular reflections and subsurface scattering.",
+      "paper_id": "10.1109/lgrs.2021.3063379",
+      "title": "Lambertian Model-Based Normal Guided Depth Completion for LiDAR-Camera System",
+      "year": 2022
+    },
+    {
+      "claim": "Incorporating physically interpretable material priors through dual-mask guidance substantially enhances depth completion accuracy and robustness in complex outdoor scenes with limited labeled data.",
+      "paper_id": "10.1109/lgrs.2021.3063379",
+      "title": "Lambertian Model-Based Normal Guided Depth Completion for LiDAR-Camera System",
+      "year": 2022
+    },
+    {
+      "claim": "Fusing an arbitrary number of sensor modalities significantly enhances the robustness and generalization capabilities of semantic segmentation models.",
+      "paper_id": "10.48550/arxiv.2303.01480",
+      "title": "Delivering Arbitrary-Modal Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model successfully decouples ambient lighting, depth-related disparities, and material reflections to address non-Lambertian surface challenges.",
+      "paper_id": "10.48550/arxiv.2303.01480",
+      "title": "Delivering Arbitrary-Modal Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "A geometric angle feature-based classification mechanism accurately identifies material types with high precision while avoiding the computational overhead of frequency-domain analysis.",
+      "paper_id": "10.48550/arxiv.2303.01480",
+      "title": "Delivering Arbitrary-Modal Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "The proposed geometric dual-mask network architecture improves depth estimation accuracy by adaptively routing features according to local surface reflection properties.",
+      "paper_id": "10.48550/arxiv.2303.01480",
+      "title": "Delivering Arbitrary-Modal Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field data into ambient illumination, parallax-driven linear components, and material-specific residuals, physically explaining how non-Lambertian surfaces disrupt EPI linearity.",
+      "paper_id": "10.1049/cvi2.12321",
+      "title": "A comprehensive research on light field imaging: Theory and application",
+      "year": 2024
+    },
+    {
+      "claim": "Geometric angular features like angular gradient and correlation consistency achieve 89.6% classification accuracy for distinguishing Lambertian and non-Lambertian regions, providing a computationally efficient alternative to high-resolution frequency-domain analysis.",
+      "paper_id": "10.1049/cvi2.12321",
+      "title": "A comprehensive research on light field imaging: Theory and application",
+      "year": 2024
+    },
+    {
+      "claim": "A Geometric Dual-Mask network architecture leverages these material classifications to adaptively route features, effectively mitigating depth estimation errors caused by specular highlights and light scattering.",
+      "paper_id": "10.1049/cvi2.12321",
+      "title": "A comprehensive research on light field imaging: Theory and application",
+      "year": 2024
+    },
+    {
+      "claim": "Integrating physics-informed geometric priors into deep learning frameworks significantly enhances both the robustness and interpretability of light field depth estimation under complex material and lighting conditions.",
+      "paper_id": "10.1049/cvi2.12321",
+      "title": "A comprehensive research on light field imaging: Theory and application",
+      "year": 2024
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model reveals that non-Lambertian surfaces disrupt EPI linearity by introducing residual components distinct from ambient lighting and disparity-induced slopes.",
+      "paper_id": "10.1109/cvprw59228.2023.00346",
+      "title": "EPI-Guided Cost Construction Network for Light Field Disparity Estimation",
+      "year": 2023
+    },
+    {
+      "claim": "Geometric angular features enable high-precision identification of Lambertian versus non-Lambertian regions while eliminating the need for computationally intensive frequency domain analysis.",
+      "paper_id": "10.1109/cvprw59228.2023.00346",
+      "title": "EPI-Guided Cost Construction Network for Light Field Disparity Estimation",
+      "year": 2023
+    },
+    {
+      "claim": "The Geometric Dual-Mask architecture improves disparity estimation robustness by guiding adaptive feature routing to mitigate interference from specular highlights and scattering effects.",
+      "paper_id": "10.1109/cvprw59228.2023.00346",
+      "title": "EPI-Guided Cost Construction Network for Light Field Disparity Estimation",
+      "year": 2023
+    },
+    {
+      "claim": "Integrating physical priors into cost construction addresses the limitations of standard SAI shifting methods, yielding enhanced depth accuracy in complex scenes with varied surface reflectance.",
+      "paper_id": "10.1109/cvprw59228.2023.00346",
+      "title": "EPI-Guided Cost Construction Network for Light Field Disparity Estimation",
+      "year": 2023
+    },
+    {
+      "claim": "The proposed three-layer angular signal decomposition model decouples light field signals into ambient lighting, parallax, and material components, providing a physical explanation for how non-Lambertian surfaces disrupt EPI linearity assumptions.",
+      "paper_id": "10.34133/research.0328",
+      "title": "Masked Generative Light Field Prompting for Pixel-Level Structure Segmentations",
+      "year": 2024
+    },
+    {
+      "claim": "A material classification mechanism based on geometric angular features achieves 89.6% accuracy in distinguishing Lambertian from non-Lambertian regions, offering a robust alternative to computationally intensive frequency domain methods.",
+      "paper_id": "10.34133/research.0328",
+      "title": "Masked Generative Light Field Prompting for Pixel-Level Structure Segmentations",
+      "year": 2024
+    },
+    {
+      "claim": "The geometric dual-mask network architecture leverages generated material masks to direct adaptive feature routing, effectively mitigating depth estimation errors induced by specular highlights and scattering artifacts.",
+      "paper_id": "10.34133/research.0328",
+      "title": "Masked Generative Light Field Prompting for Pixel-Level Structure Segmentations",
+      "year": 2024
+    },
+    {
+      "claim": "Integrating interpretable physical priors via dual-mask guidance significantly enhances model robustness and segmentation accuracy in complex, non-Lambertian environments relevant to autonomous driving applications.",
+      "paper_id": "10.34133/research.0328",
+      "title": "Masked Generative Light Field Prompting for Pixel-Level Structure Segmentations",
+      "year": 2024
+    },
+    {
+      "claim": "Decomposing light field angular signals into ambient, disparity-related linear, and material-dependent residual components provides an interpretable physical basis for understanding EPI linearity violations in non-Lambertian surfaces.",
+      "paper_id": "10.48550/arxiv.2307.15588",
+      "title": "OAFuser: Towards Omni-Aperture Fusion for Light Field Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "Geometric angular features like angular gradients and correlation consistency achieve high-accuracy material classification without relying on computationally expensive frequency domain analysis.",
+      "paper_id": "10.48550/arxiv.2307.15588",
+      "title": "OAFuser: Towards Omni-Aperture Fusion for Light Field Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "Integrating a geometry-guided dual-mask mechanism enables adaptive feature routing that effectively suppresses depth estimation errors caused by specular highlights and scattering.",
+      "paper_id": "10.48550/arxiv.2307.15588",
+      "title": "OAFuser: Towards Omni-Aperture Fusion for Light Field Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "The proposed omni-aperture fusion framework significantly improves both semantic segmentation precision and depth estimation robustness in complex, multi-reflective light field environments.",
+      "paper_id": "10.48550/arxiv.2307.15588",
+      "title": "OAFuser: Towards Omni-Aperture Fusion for Light Field Semantic Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "Decomposing light field angular signals into DC, linear, and residual components physically clarifies how non-Lambertian surfaces violate the standard EPI linearity assumption.",
+      "paper_id": "10.48550/arxiv.2208.09688",
+      "title": "Learning Sub-Pixel Disparity Distribution for Light Field Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "A geometry-driven angular feature classifier reliably distinguishes Lambertian from non-Lambertian regions without relying on high-resolution spectral or frequency-domain analysis.",
+      "paper_id": "10.48550/arxiv.2208.09688",
+      "title": "Learning Sub-Pixel Disparity Distribution for Light Field Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "A geometric dual-mask network architecture enables adaptive feature routing that effectively suppresses depth estimation errors induced by specular highlights and subsurface scattering.",
+      "paper_id": "10.48550/arxiv.2208.09688",
+      "title": "Learning Sub-Pixel Disparity Distribution for Light Field Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "Incorporating physically grounded material priors through a dual-mask framework significantly improves both the accuracy and robustness of sub-pixel disparity distribution learning in complex environments.",
+      "paper_id": "10.48550/arxiv.2208.09688",
+      "title": "Learning Sub-Pixel Disparity Distribution for Light Field Depth Estimation",
+      "year": 2022
+    },
+    {
+      "claim": "Decoupling light field angular signals into DC, linear, and residual components physically explains how non-Lambertian surfaces violate epipolar plane image linearity assumptions.",
+      "paper_id": "超融合基础设施(hci)-超融合架构-华为企业业务",
+      "title": "超融合基础设施(HCI)-超融合架构-华为企业业务",
+      "year": 2026
+    },
+    {
+      "claim": "Geometric angular feature-based classification effectively identifies Lambertian versus non-Lambertian surface regions without requiring computationally intensive frequency-domain analysis.",
+      "paper_id": "超融合基础设施(hci)-超融合架构-华为企业业务",
+      "title": "超融合基础设施(HCI)-超融合架构-华为企业业务",
+      "year": 2026
+    },
+    {
+      "claim": "A geometric dual-mask network architecture guides adaptive feature routing through material-aware masking, significantly reducing depth estimation errors from specular reflections and scattering.",
+      "paper_id": "超融合基础设施(hci)-超融合架构-华为企业业务",
+      "title": "超融合基础设施(HCI)-超融合架构-华为企业业务",
+      "year": 2026
+    },
+    {
+      "claim": "Empirical results demonstrate that a five-feature geometric classifier achieves 89.6% accuracy and 0.962 AUC, validating enhanced robustness and precision in complex optical environments.",
+      "paper_id": "超融合基础设施(hci)-超融合架构-华为企业业务",
+      "title": "超融合基础设施(HCI)-超融合架构-华为企业业务",
+      "year": 2026
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model decouples light field signals into ambient lighting, disparity-dependent linear components, and material-specific residuals, providing a physical explanation for how non-Lambertian surfaces break Epipolar Plane Image linearity assumptions.",
+      "paper_id": "github - humancomputerinteractionhomework/hcinew · github",
+      "title": "GitHub - HumanComputerInteractionHomework/HCINew · GitHub",
+      "year": 2026
+    },
+    {
+      "claim": "Material classification based on geometric angular features such as angular gradients and correlation consistency achieves 89.6% accuracy and an AUC of 0.962, offering a robust alternative to resolution-intensive frequency domain analysis for distinguishing Lambertian and non-Lambertian regions.",
+      "paper_id": "github - humancomputerinteractionhomework/hcinew · github",
+      "title": "GitHub - HumanComputerInteractionHomework/HCINew · GitHub",
+      "year": 2026
+    },
+    {
+      "claim": "A Geometric Dual-Mask network architecture leverages generated material masks to enable adaptive feature routing, effectively reducing depth estimation interference from specular highlights and scattering phenomena in complex reflective environments.",
+      "paper_id": "github - humancomputerinteractionhomework/hcinew · github",
+      "title": "GitHub - HumanComputerInteractionHomework/HCINew · GitHub",
+      "year": 2026
+    },
+    {
+      "claim": "A three-layer angular signal decomposition model physically explains how non-Lambertian surfaces disrupt the Extended Plane Image linearity assumption by isolating environmental illumination, parallax, and material reflectance components.",
+      "paper_id": "超融合基础架构(hci)是继服务器虚拟化技... 来自donnie大雄 - 微博",
+      "title": "超融合基础架构(HCI)是继服务器虚拟化技... 来自Donnie大雄 - 微博",
+      "year": 2020
+    },
+    {
+      "claim": "A geometric feature-driven material classification mechanism accurately distinguishes between Lambertian and non-Lambertian surfaces without relying on computationally expensive high-resolution frequency domain analysis.",
+      "paper_id": "超融合基础架构(hci)是继服务器虚拟化技... 来自donnie大雄 - 微博",
+      "title": "超融合基础架构(HCI)是继服务器虚拟化技... 来自Donnie大雄 - 微博",
+      "year": 2020
+    },
+    {
+      "claim": "Integrating a Geometric Dual-Mask network architecture enables adaptive feature routing based on surface reflectance, effectively mitigating depth estimation inaccuracies caused by specular highlights and subsurface scattering.",
+      "paper_id": "超融合基础架构(hci)是继服务器虚拟化技... 来自donnie大雄 - 微博",
+      "title": "超融合基础架构(HCI)是继服务器虚拟化技... 来自Donnie大雄 - 微博",
+      "year": 2020
+    },
+    {
+      "claim": "Quantitative experiments validate the framework's robustness, demonstrating a Cohen's d of 0.983 for angular gradient features and achieving 89.6% classification accuracy with an AUC of 0.962 for material type identification.",
+      "paper_id": "超融合基础架构(hci)是继服务器虚拟化技... 来自donnie大雄 - 微博",
+      "title": "超融合基础架构(HCI)是继服务器虚拟化技... 来自Donnie大雄 - 微博",
+      "year": 2020
+    }
+  ],
+  "pool_size": 80
+}

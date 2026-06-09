@@ -1,0 +1,36 @@
+\section{Methodology}
+
+\subsection{Overall Architecture}
+
+In this section, we present the overall architecture of the proposed Unified Dual-Mask Physical Model for non-Lambertian light field depth estimation. Different from previous works that predominantly rely on the linear Epipolar Plane Image (EPI) assumption—which inherently fails on complex reflective surfaces—our framework explicitly decouples geometric depth and material reflectance through a physics-driven dual-branch design. As illustrated in Fig. 1, the proposed pipeline integrates an Input Normalization module, a DualMaskDepthModel backbone, and a comprehensive physical constraint mechanism. By leveraging a three-layer angular signal decomposition theory [1], the network routes features adaptively based on material-aware masks, enabling robust depth recovery across both Lambertian and non-Lambertian regions.
+
+\subsection{Input Normalization}
+
+The pipeline begins with the Input Normalization module, which processes the raw light field tensor. The input consists of multi-view light field images, specifically formulated as a 5-view RGB configuration flattened into a 15-channel tensor, denoted as $\mathbf{X}_{in} \in \mathbb{R}^{B \times 15 \times H \times W}$, where $B$, $H$, and $W$ represent the batch size, height, and width, respectively. The motivation for this preprocessing step is to mitigate the adverse effects of varying illumination conditions and to accelerate network convergence by standardizing the input distribution. Specifically, we apply a channel-wise Min-Max normalization to map the intensity values linearly into the $[-1, 1]$ range. The normalized light field tensor $\mathbf{X}_{norm}$ is computed as:
+\begin{equation}
+\label{eq:eq1}
+\mathbf{X}_{norm} = \frac{\mathbf{X}_{in} - \mathbf{X}_{min}}{\mathbf{X}_{max} - \mathbf{X}_{min} + \epsilon} \times 2.0 - 1.0
+\end{equation}
+where $\mathbf{X}_{min}$ and $\mathbf{X}_{max}$ are the minimum and maximum values along the channel dimension for each sample, and $\epsilon = 10^{-8}$ is a small constant to prevent division by zero. This normalization ensures that the subsequent feature extractors operate on a unified scale, enhancing the stability of gradient propagation.
+
+\subsection{Dual-Mask Depth Model}
+
+Following preprocessing, $\mathbf{X}_{norm}$ is fed into the DualMaskDepthModel, which serves as the core backbone for feature extraction and physical decomposition. The design motivation stems from the fact that non-Lambertian reflections introduce non-linear residuals that corrupt standard EPI slopes. To address this, we formulate the light field angular signal based on a three-layer decomposition theory [1]:
+\begin{equation}
+\label{eq:eq2}
+I(u,v) = I_{DC} + a \cdot u + b \cdot v + \varepsilon(u,v)
+\end{equation}
+where $I(u,v)$ is the pixel intensity at angular coordinates $(u,v)$, $I_{DC}$ represents the ambient illumination (DC component), $a$ and $b$ denote the linear parallax slopes corresponding to depth, and $\varepsilon(u,v)$ captures the material-dependent residual. Guided by this physical prior, the DualMaskDepthModel employs a dual-branch architecture comprising a Lambertian EPI branch and a Non-Lambertian geometric feature branch. The Lambertian branch utilizes a 4-direction EPI extractor to capture linear parallax structures, while the non-Lambertian branch extracts geometric angular features—such as angular gradients and variation coefficients—to characterize complex reflectance properties. A material-aware mask, generated via a pre-trained geometric random forest classifier [2], dynamically routes and fuses features from both branches. This dual-mask routing mechanism effectively alleviates the assumption conflicts inherent in single-branch EPI architectures, allowing the network to isolate depth cues from specular or scattering artifacts.
+
+\subsection{Optimization and Loss Functions}
+
+The DualMaskDepthModel ultimately yields three core physical predictions: a depth map $\mathbf{D}_{pred} \in \mathbb{R}^{B \times 1 \times H \times W}$, a reflectance mask $\mathbf{R}_{pred} \in \mathbb{R}^{B \times 1 \times H \times W}$, and a disparity vector field $\mathbf{V}_{pred} \in \mathbb{R}^{B \times 2 \times H \times W}$. To ensure these outputs strictly adhere to the underlying optical physics, we design a comprehensive optimization scheme involving multiple loss functions. The depth and reflectance predictions are supervised by Mean Squared Error (MSE) losses against their respective ground truths, denoted as $\mathcal{L}_{depth}$ and $\mathcal{L}_{r}$. 
+
+To enforce spatial coherence, a Phase Regularization module is introduced to compute the spatial gradients of $\mathbf{V}_{pred}$ and penalize them using an inverted sigmoid weight derived from $\mathbf{R}_{pred}$. The intuitive rationale for this design is that non-Lambertian regions (where reflectance mask values approach 1) inherently violate the local smoothness assumption of disparity fields due to view-dependent specularities and scattering. By employing the inverted sigmoid function, the regularization imposes a strong smoothness penalty in Lambertian regions while adaptively relaxing the constraint in non-Lambertian areas, thereby preventing the over-smoothing of depth boundaries and mitigating reflection-induced artifacts. The phase loss is formulated as:
+\begin{equation}
+\label{eq:eq3}
+\mathcal{L}_{phase} = \text{mean}\left( \left( \left(\frac{\partial V_x}{\partial x}\right)^2 + \left(\frac{\partial V_y}{\partial y}\right)^2 \right) \odot (1.0 - \sigma(\mathbf{R}_{pred})) \right)
+\end{equation}
+where $\sigma(\cdot)$ is the sigmoid function, and $V_x, V_y$ are the spatial components of the vector field. 
+
+A Physical Consistency Loss $\mathcal{L}_{phys}$ is also applied to $\mathbf{V}_{pred}$ and $\mathbf{R}_{pred}$ to guarantee that the predicted geometry and material properties satisfy light field imaging constraints. The total loss is formulated as a weighted sum: $\mathcal{L}_{total} = \mathcal{L}_{depth} + 0.5\mathcal{L}_{r} + 0.1\mathcal{L}_{phase} + \lambda_{phys}\mathcal{L}_{phys}$, which is optimized via backpropagation with a gradient clipping max norm of 1.0 to ensure stable training across diverse data domains. To empirically validate the proposed framework, we now proceed to the experimental evaluation, beginning with an overview of the datasets used for comprehensive assessment.

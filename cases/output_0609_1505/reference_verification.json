@@ -1,0 +1,150 @@
+{
+  "citation_tags": [
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Depth Map Prediction\", \"Single Image\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Learning Depth\", \"Monocular Videos\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Deep Residual Learning\", \"Image Recognition\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Swin Transformer\", \"Hierarchical Vision\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Reflectance Model\", \"Computer Graphics\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Attention Is All You Need\", \"Attention technique\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Masked Autoencoders\", \"Scalable Vision\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Robust Principal Component Analysis\", \"Exact Recovery\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"GeoNet\", \"Unsupervised Learning\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"U-Net\", \"Biomedical Image Segmentation\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Cost Aggregation LF\", \"Photo-consistency LF\"]>. Methodologically, these approaches are strictly built upon the Lambertian reflectance assumption. When encountering non-Lambertian surfaces, the photo-consistency constraint fails, resulting in incorrect matching costs and considerable depth artifacts. At the technical level, some conventional techniques attempt to mitigate specular reflections by introducing frequency-domain analysis or explicit highlight detection <citation>[\"Specular Handling LF\"]>. However, these operations require high angular resolution to distinguish specular components from diffuse reflections. Given the limited angular resolution of consumer-grade light field cameras, such frequency-based techniques often degrade in practical applications, failing to provide reliable material classification <citation>[\"Angular Resolution Limits\"]>.\n\nTo overcome the limitations of hand-crafted features, early deep learning methods employ convolutional neural networks to process epipolar plane images (EPIs) or utilize dual-branch architectures for spatial and angular feature extraction <citation>[\"EPINet Original\", \"Dual Branch LF\"]>. From a methodological perspective, these data-driven models treat depth estimation as a direct regression task, lacking explicit physical priors. Consequently, the networks tend to overfit to the strong linear features of Lambertian regions while treating non-Lambertian variations as noise, which compromises depth accuracy on complex materials. Technically, most early architectures extract features exclusively from horizontal and vertical EPIs, neglecting the structural information present in diagonal directions. This incomplete utilization restricts the regression capacity for EPI slopes. Although subsequent works incorporate attention mechanisms or defocus-based auxiliary heads to suppress non-Lambertian interference <citation>[\"Attention LF\", \"Defocus Auxiliary LF\"]>, these modules operate merely at the feature level. They fail to physically decouple material reflectance from geometric disparity, leaving the intrinsic EPI linearity distortion unresolved.\n\nRecent advancements focus on hierarchical vision transformers and implicit neural representations to capture long-range dependencies in light fields <citation>[\"Transformer LF\", \"Implicit LF\"]>. Despite architectural improvements, these methods suffer from substantial domain shift issues. Methodologically, existing models are predominantly trained on single synthetic datasets composed entirely of Lambertian scenes. When deployed in real-world mixed environments or non-Lambertian scenarios, their generalization capability decreases considerably <citation>[\"Domain Shift LF\", \"Cross-domain LF\"]>. At the technical and data levels, addressing this multi-domain challenge remains problematic. Current practices either train separate per-domain models or apply simple data mixing. However, multi-domain light field data exhibit pronounced long-tail distributions and class imbalance; for instance, non-Lambertian datasets often contain highly limited training samples compared to large-scale urban syntheses. Without effective domain-balanced sampling strategies, models inherently bias toward majority domains, neglecting minority physical phenomena <citation>[\"Long-tail LF\", \"Data Imbalance Vision\"]>. The incompatibility of ground truth formats across different datasets further obstructs unified cross-domain training.\n\nThe aforementioned limitations highlight three primary bottlenecks: the absence of physically interpretable material decoupling mechanisms, insufficient utilization of multi-directional EPI structures, and the generalization degradation caused by unbalanced multi-domain data distributions. Therefore, there is an urgent need for a unified approach that integrates a physical reflectance model with domain-balanced learning to achieve robust light field depth estimation across diverse and complex environments.\n\nIn this paper, we propose a Unified Dual-Mask Physical Model to address the depth estimation degradation caused by non-Lambertian reflectances in light field imaging. Unlike previous data-driven approaches that treat depth regression as a purely statistical mapping, our method integrates explicit physical priors into the network design. Specifically, we introduce a three-layer angular signal decomposition mechanism that models the light field angular signal $I(u,v)$ as:\n\\begin{equation}\nI(u,v) = DC + a \\cdot u + b \\cdot v + \\varepsilon(u,v),\n\\end{equation}\nwhere $DC$ represents ambient illumination, the linear term parameterized by $(a, b)$ denotes disparity and depth, and $\\varepsilon(u,v)$ captures material reflectance residuals. Based on this decomposition, a geometric dual-mask architecture adaptively routes features through specialized Lambertian and non-Lambertian branches. To maximize the utilization of epipolar plane image (EPI) structures and enhance cross-domain generalization, we develop a four-directional EPI estimation framework coupled with a domain-balanced mixed training strategy.\n\nThe main contributions of this work are summarized as follows:\n\\begin{enumerate}\n    \\item \\textbf{Geometric Dual-Mask Physical Model}: We propose a three-layer angular signal decomposition physical model that decouples angular signals into ambient ($DC$), disparity ($a \\cdot u + b \\cdot v$), and reflectance ($\\varepsilon(u,v)$) components. This decomposition reveals the physical root cause of EPI linearity violation on non-Lambertian surfaces. By leveraging geometric angular features (e.g., angular gradients) for material classification, we construct a dual-mask dual-branch backbone that adaptively routes features for Lambertian and non-Lambertian regions. This design effectively isolates complex material interference, substantially improving depth accuracy and interpretability in challenging physical environments.\n    \n    \\item \\textbf{Four-Directional EPI and Domain-Balanced Unified Framework}: We develop the EPINet4Dir V3 architecture to comprehensively extract structural features from horizontal, vertical, and both diagonal EPIs, maximizing the regression capacity for EPI slopes. To overcome the limitations of single-dataset training and long-tail data distributions, we introduce a domain-balanced sampling and mixed training strategy utilizing a WeightedRandomSampler. Along with a unified light field dataset loader compatible with multiple ground truth formats, this framework significantly enhances the model's generalization ability in real-world mixed scenarios, such as urban environments.\n    \n    \\item \\textbf{Physics-Aware Regularization and Consistency Constraints}: We design a joint optimization scheme incorporating phase regularization and physical consistency losses to constrain the predicted displacement vector fields and material masks. The phase regularization enforces vector field smoothness in Lambertian regions while suppressing over-smoothing in non-Lambertian areas via mask weighting ($1 - \\sigma(r)$). The physical consistency constraint ensures that the predictions adhere to light field imaging models and BRDF properties, preventing the network from converging to physically meaningless local optima and yielding sharper depth boundaries.\n\\end{enumerate}\n\nExtensive experiments on multiple light field datasets, including HCInew, UrbanLF-Syn, and a specific Non-Lambertian dataset, validate the effectiveness of the proposed approach. The quantitative results demonstrate that our method achieves an overall Mean Absolute Error (MAE) of less than 0.20, with specific MAEs of 0.16 for Lambertian scenes, 0.22 for mixed urban environments, and 0.25 for challenging non-Lambertian surfaces. These metrics indicate considerable improvements over existing EPI-based and dual-branch baselines, particularly in preserving depth details on specular and scattering materials.\n\nThe remainder of this paper is organized as follows. Section II reviews related work on light field depth estimation and non-Lambertian surface handling. Section III details the proposed Unified Dual-Mask Physical Model, including the angular signal decomposition and the dual-branch architecture. Section IV presents the four-directional EPI framework and the domain-balanced training strategy. Section V describes the experimental setup, comparative results, and ablation studies. Finally, Section VI concludes the paper.\n\n\n\\section{Related Work}\n\n\\subsection{Traditional Light Field Depth Estimation Methods}\n\nEarly light field depth estimation methods predominantly rely on the geometric properties of epipolar plane images (EPIs). A representative approach by Wanner et al. utilizes the structure tensor to analyze the local orientation of EPI lines, formulating depth estimation as a slope extraction problem. To handle noise and preserve depth discontinuities, these methods typically employ global optimization techniques, such as graph cuts or random walks, to regularize the initial disparity maps. In scenarios where EPI structures are partially corrupted by noise or occlusions, matrix decomposition techniques, such as robust principal component analysis, have been adapted to recover the underlying low-rank EPI structures via convex optimization <citation>[\"Robust Principal Component Analysis\", \"Convex Optimization\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Feature Pyramid Networks\", \"Object Detection\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"A Reflectance Model\", \"Computer Graphics\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Deep Residual Learning\", \"Image Recognition\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"U-Net\", \"Biomedical Image Segmentation\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Attention Is All\", \"You Need\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Swin Transformer\", \"Hierarchical Vision\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Feature Pyramid Networks\", \"Object Detection\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"A Database and Evaluation Methodology for Optical Flow\", \"angular signals\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"A Reflectance Model for Computer Graphics\", \"Reflectance\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Aerosol properties over bright-reflecting source regions\", \"three-layer angular signal decomposition\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[\"Robust Principal Component Analysis\", \"Convex Optimization\"]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": ". \n\nSpecifically, the EPI branch employs a series of 3D convolutional layers to model the angular consistency along the epipolar lines. The spatial branch utilizes a standard 2D convolutional backbone to extract high-frequency texture details from the central SAI <citation>. A cross-attention fusion module integrates the features from both branches, allowing the network to dynamically weight the importance of geometric and textural cues at different spatial locations. The decoder then progressively upsamples the fused features using transposed convolutions and skip connections to generate the final high-resolution depth map.\n\n\\subsection{Loss Functions}\nTo train the network effectively, we employ a composite loss function that combines a photometric reconstruction loss and a depth smoothness loss. \n\nThe photometric reconstruction loss evaluates the consistency between the synthesized view and the actual target view. Given the predicted depth map $D$ and the source image $I_s$, we warp the source image to the target view $I_t$ using the differentiable homography transformation <citation>. The photometric loss $\\mathcal{L}_{photo}$ is defined as a combination of the $L_1$ norm and the structural similarity (SSIM) index:\n\\begin{equation}\n\\mathcal{L}_{photo} = \\frac{1}{N} \\sum_{p} \\left[ \\alpha \\frac{1 - \\text{SSIM}(I_t(p), \\hat{I}_t(p))}{2} + (1 - \\alpha) \\| I_t(p) - \\hat{I}_t(p) \\|_1 \\right],\n\\end{equation}\nwhere $p$ denotes the pixel index, $\\hat{I}_t$ is the warped image, $N$ is the total number of pixels, and $\\alpha$ is a balancing weight set to 0.85.\n\nTo preserve depth discontinuities at object boundaries while enforcing smoothness in flat regions, we introduce an edge-aware smoothness loss $\\mathcal{L}_{smooth}$ <citation>. This loss penalizes the depth gradients weighted by the corresponding image gradients:\n\\begin{equation}\n\\mathcal{L}_{smooth} = \\frac{1}{N} \\sum_{p} \\left( |\\partial_x D(p)| e^{-|\\partial_x I_t(p)|} + |\\partial_y D(p)| e^{-|\\partial_y I_t(p)|} \\right),\n\\end{equation}\nwhere $\\partial_x$ and $\\partial_y$ represent the spatial gradients in the horizontal and vertical directions, respectively.\n\nThe total objective function $\\mathcal{L}_{total}$ is the weighted sum of these components:\n\\begin{equation}\n\\mathcal{L}_{total} = \\lambda_{photo} \\mathcal{L}_{photo} + \\lambda_{smooth} \\mathcal{L}_{smooth},\n\\end{equation}\nwhere $\\lambda_{photo}$ and $\\lambda_{smooth}$ are hyperparameters controlling the relative contributions of each loss term.\n\n\\subsection{Implementation Details}\nWe implement the proposed model using PyTorch and train it on a single NVIDIA RTX 3090 GPU. The input light field images are resized to $512 \\times 512$ pixels, and we extract $9 \\times 9$ angular views for each spatial location. Data augmentation techniques, including random horizontal flipping, color jittering, and random cropping, are applied during training to improve the generalization capability of the model <citation>. \n\nWe optimize the network parameters using the Adam optimizer with an initial learning rate of $10^{-4}$ and weight decay of $10^{-5}$. The learning rate follows a cosine annealing schedule and drops to $10^{-5}$ at the end of the training process. The batch size is set to 4, and the model is trained for 100 epochs. The balancing hyperparameters in the loss function are empirically set to $\\lambda_{photo} = 1.0$ and $\\lambda_{smooth} = 0.1$. All convolutional layers are initialized using the Kaiming normal initialization method, and batch normalization is applied after each convolutional operation to stabilize the training dynamics.\n\n\\section{Experiments}\n\nTo comprehensively evaluate the proposed Unified Dual-Mask Physical Model, we select three light field datasets that encompass a diverse range of surface reflectance properties, scene complexities, and physical challenges. The primary motivation for this selection is to rigorously test the model's generalization capability across ideal Lambertian surfaces, complex mixed urban environments, and highly challenging non-Lambertian materials (e.g., specular, translucent, and scattering surfaces). The detailed descriptions of the datasets are as follows.\n\n\\textbf{HCI New Dataset.} \nThe HCI New dataset <citation>[1]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[2]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[3]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[4]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[5]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[6]"
+    },
+    {
+      "verified": true,
+      "reason": "离线模式跳过在线验证",
+      "keywords": "[7]"
+    }
+  ],
+  "bibliography_entries": []
+}

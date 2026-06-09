@@ -1,0 +1,73 @@
+{
+  "数据集": {
+    "名称与描述": [
+      {
+        "名称": "HCInew",
+        "场景类型": "Lambertian (朗伯体)",
+        "规模与描述": "包含boxes, cotton, dino, sideboard, backgammon, dots等场景，81个视角，分辨率512x512，真值为pfm格式视差图"
+      },
+      {
+        "名称": "UrbanLF-Syn",
+        "场景类型": "Mixed/Urban (混合/城市场景)",
+        "规模与描述": "包含170个合成场景，提供丰富的训练信号"
+      },
+      {
+        "名称": "Non-Lambertian Dataset",
+        "场景类型": "Non-Lambertian (非朗伯体，如高光、半透明、散射)",
+        "规模与描述": "仅包含4个训练场景，存在严重的数据稀缺问题"
+      }
+    ],
+    "划分方式": "按场景物理属性(Lambertian, Non-Lambertian, Mixed/Urban)进行领域划分，训练时使用WeightedRandomSampler进行领域平衡采样"
+  },
+  "评估指标": {
+    "主要指标": "Mean Absolute Error (MAE，平均绝对误差)",
+    "目标值": {
+      "Overall MAE": "< 0.20",
+      "Mixed (Urban) MAE": "< 0.22",
+      "Lambertian MAE": "< 0.16",
+      "Non-Lambertian MAE": "< 0.25"
+    }
+  },
+  "训练策略": {
+    "优化器与学习率": "初始学习率约 1e-4 (9.99e-05)，采用学习率衰减策略，结合EMA训练尝试",
+    "损失函数": "复合损失函数，包含 depth_loss (深度损失) 和 domain_loss (领域分类损失)，探索过Focal loss, Dice/Lovász losses等变体",
+    "采样与Batch策略": "使用 WeightedRandomSampler 进行 Domain-balanced sampling (领域平衡采样)，进行过 batch size 和 LR 的网格搜索",
+    "其他策略": "尝试过 Curriculum learning (课程学习) 和 Oversampling minority domains (少数领域过采样)"
+  },
+  "对比方法": {
+    "基线模型": "EPINet baseline variants (如 EPINet4Dir V3，4方向EPI)",
+    "对比架构": "Dual-branch architectures (双分支架构), Attention mechanisms (注意力机制), Defocus-based auxiliary heads (基于散焦的辅助头), Domain-specific mask learning (特定领域掩码学习)",
+    "理论对比": "Angular frequency analysis (角频率分析/FFT材质分类), Feature matching alternatives (特征匹配替代方案)"
+  },
+  "消融设计": {
+    "消融模块与对比方式": [
+      {
+        "模块": "网络架构",
+        "对比方式": "对比基础EPINet与双分支架构、引入注意力机制、添加散焦辅助头的效果"
+      },
+      {
+        "模块": "掩码与物理模型 (Dual-Mask)",
+        "对比方式": "对比是否使用Domain-specific mask learning以及Phase 1的Angular FFT材质分类"
+      },
+      {
+        "模块": "损失函数",
+        "对比方式": "对比基础Depth+Domain loss与Focal loss变体、Dice/Lovász loss、多复合损失项的效果"
+      },
+      {
+        "模块": "训练与采样策略",
+        "对比方式": "对比EMA训练、课程学习、少数域过采样、不同学习率/Batch size组合的效果"
+      }
+    ]
+  },
+  "关键结果": {
+    "达标指标": {
+      "Overall MAE": "0.133 (目标 < 0.20，达标)",
+      "Mixed (Urban) MAE": "0.081 (目标 < 0.22，达标)"
+    },
+    "未达标指标": {
+      "Lambertian MAE": "0.387 (目标 < 0.16，未达标，原因：复杂纹理导致EPI斜率模糊)",
+      "Non-Lambertian MAE": "0.411 (目标 < 0.25，未达标，原因：非朗伯体表面破坏EPI假设且训练数据仅4个场景)"
+    },
+    "核心结论": "EPI（极平面图像）方法在朗伯体和混合场景下有效（最佳模型为EPINet4Dir V3），但在非朗伯体表面（高光、散射）因物理假设失效和数据稀缺而遭遇根本性瓶颈；复杂纹理场景下的EPI斜率模糊是架构层面的限制。"
+  }
+}

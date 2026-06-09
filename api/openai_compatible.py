@@ -21,6 +21,193 @@ from typing import Optional, Dict, Any, List, Union
 logger = logging.getLogger(__name__)
 
 
+# ==================== 智谱 GLM 专用客户端（zai SDK） ====================
+
+class ZhipuAIClient:
+    """
+    智谱 GLM 系列专用客户端（基于 zai SDK）
+
+    解决的问题：
+    - openai SDK 无法正确获取 reasoning_content（思考过程）
+    - zai SDK 原生支持 thinking 参数和 reasoning_content 字段
+    - 适用于所有 GLM 模型：glm-5.1, glm-5, glm-4.7, glm-4.6v 等
+    """
+
+    def __init__(self, api_key: str, model: str,
+                 base_url: str = None,
+                 max_tokens: int = 8192, temperature: float = 0.7,
+                 stream: bool = False, timeout: int = 300):
+        from zai._client import ZhipuAiClient as _ZhipuAiClient
+
+        self.model = model
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.stream = stream
+        self.timeout = timeout
+
+        kwargs = {
+            "api_key": api_key,
+            "timeout": timeout,
+        }
+        if base_url:
+            kwargs["base_url"] = base_url
+
+        self._client = _ZhipuAiClient(**kwargs)
+
+    def query(self, prompt: str, system_prompt: str = None,
+              temperature: float = None, max_tokens: int = None) -> str:
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        temp = temperature if temperature is not None else self.temperature
+        max_tok = max_tokens if max_tokens is not None else self.max_tokens
+
+        # GLM 思考模型走流式路径以正确获取 reasoning_content
+        is_thinking = self._is_thinking_model()
+
+        try:
+            if is_thinking or self.stream:
+                result = self._query_stream(messages, temp, max_tok)
+            else:
+                result = self._query_sync(messages, temp, max_tok)
+            return result if result is not None else ""
+        except Exception as e:
+            logger.error(f"[ZhipuAI] {self.model} 调用失败: {e}")
+            raise
+
+    def _query_sync(self, messages: list, temperature: float, max_tokens: int) -> str:
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+        }
+        # 思考模型启用 thinking 参数
+        if self._is_thinking_model():
+            kwargs["thinking"] = {"type": "enabled"}
+        else:
+            kwargs["temperature"] = temperature
+
+        try:
+            completion = self._client.chat.completions.create(**kwargs)
+            msg = completion.choices[0].message
+            # 优先取 content，为空取 reasoning_content
+            content = msg.content if msg.content else ""
+            if not content and hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+                content = msg.reasoning_content
+            return content if content is not None else ""
+        except IndexError:
+            logger.error(f"[ZhipuAI] {self.model} 返回空 choices")
+            return ""
+        except Exception as e:
+            logger.error(f"[ZhipuAI] {self.model} 同步调用失败: {e}")
+            raise
+
+    def _query_stream(self, messages: list, temperature: float, max_tokens: int) -> str:
+        answer_content = ""
+        reasoning_fallback = ""
+
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+        if self._is_thinking_model():
+            kwargs["thinking"] = {"type": "enabled"}
+        else:
+            kwargs["temperature"] = temperature
+
+        try:
+            completion = self._client.chat.completions.create(**kwargs)
+        except Exception as e:
+            logger.error(f"[ZhipuAI] {self.model} 流式调用失败: {e}")
+            raise
+
+        try:
+            for chunk in completion:
+                if not chunk.choices:
+                    continue
+
+                delta = chunk.choices[0].delta
+
+                # 收集 reasoning_content（思考过程）作为备用
+                if hasattr(delta, 'reasoning_content') and delta.reasoning_content:
+                    reasoning_fallback += delta.reasoning_content
+                    continue
+
+                if delta.content:
+                    answer_content += delta.content
+        except Exception as e:
+            logger.error(f"[ZhipuAI] {self.model} 流式读取中断: {e}")
+            if not answer_content and not reasoning_fallback:
+                raise
+
+        # 优先用 content，为空时用 reasoning_content
+        if answer_content:
+            return answer_content
+        if reasoning_fallback:
+            logger.info(f"[ZhipuAI] {self.model} content 为空，使用 reasoning_content ({len(reasoning_fallback)} chars)")
+            return reasoning_fallback
+        return ""
+
+    def query_vision(self, text_prompt: str,
+                     image_paths: List[str] = None,
+                     image_base64_list: List[str] = None,
+                     temperature: float = None,
+                     max_tokens: int = None) -> str:
+        """
+        多模态视觉查询 — 发送文本 + 图片给视觉模型 (如 glm-4.6v)
+        """
+        content_parts = [{"type": "text", "text": text_prompt}]
+
+        if image_paths:
+            for path in image_paths:
+                with open(path, "rb") as f:
+                    b64 = base64.b64encode(f.read()).decode("utf-8")
+                ext = path.rsplit(".", 1)[-1].lower()
+                mime = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+                        "gif": "image/gif", "webp": "image/webp"}.get(ext, "image/png")
+                content_parts.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mime};base64,{b64}"}
+                })
+
+        if image_base64_list:
+            for b64 in image_base64_list:
+                content_parts.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{b64}"}
+                })
+
+        messages = [{"role": "user", "content": content_parts}]
+        temp = temperature if temperature is not None else self.temperature
+        max_tok = max_tokens if max_tokens is not None else self.max_tokens
+
+        try:
+            completion = self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=max_tok,
+                temperature=temp,
+            )
+            result = completion.choices[0].message.content
+            return result if result is not None else ""
+        except Exception as e:
+            logger.error(f"[ZhipuAI Vision] {self.model} 调用失败: {e}")
+            raise
+
+    def _is_thinking_model(self) -> bool:
+        """GLM 系列中支持思考的模型"""
+        thinking_models = ["glm-5", "glm-4.7", "glm-4.8"]
+        model_lower = self.model.lower()
+        return any(m in model_lower for m in thinking_models)
+
+    def __repr__(self):
+        return f"ZhipuAIClient(model={self.model})"
+
+
 # ==================== OpenAI 系统一客户端 ====================
 
 class OpenAIClient:
@@ -71,14 +258,21 @@ class OpenAIClient:
             raise
 
     def _query_sync(self, messages: list, temperature: float, max_tokens: int) -> str:
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+        }
+        if not self._is_reasoning_model():
+            kwargs["temperature"] = temperature
+
         try:
-            completion = self._client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-            )
-            content = completion.choices[0].message.content
+            completion = self._client.chat.completions.create(**kwargs)
+            msg = completion.choices[0].message
+            # 优先取 content，如果为空则取 reasoning_content（某些模型把答案放在 thinking 里）
+            content = msg.content if msg.content else ""
+            if not content and hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+                content = msg.reasoning_content
             return content if content is not None else ""
         except IndexError:
             logger.error(f"[OpenAI] {self.model} 返回空 choices")
@@ -89,6 +283,7 @@ class OpenAIClient:
 
     def _query_stream(self, messages: list, temperature: float, max_tokens: int) -> str:
         answer_content = ""
+        reasoning_fallback = ""
 
         kwargs = {
             "model": self.model,
@@ -96,7 +291,6 @@ class OpenAIClient:
             "max_tokens": max_tokens,
             "stream": True,
         }
-        # 推理模型不支持 temperature 参数
         if not self._is_reasoning_model():
             kwargs["temperature"] = temperature
 
@@ -113,18 +307,25 @@ class OpenAIClient:
 
                 delta = chunk.choices[0].delta
 
-                # 推理模型有 reasoning_content 字段，跳过思考过程
-                if hasattr(delta, 'reasoning_content') and delta.reasoning_content is not None:
+                # 收集 reasoning_content 作为备用（某些模型把答案放在 thinking 里）
+                if hasattr(delta, 'reasoning_content') and delta.reasoning_content:
+                    reasoning_fallback += delta.reasoning_content
                     continue
-                else:
-                    if delta.content:
-                        answer_content += delta.content
+
+                if delta.content:
+                    answer_content += delta.content
         except Exception as e:
             logger.error(f"[OpenAI] {self.model} 流式读取中断: {e}")
-            if not answer_content:
+            if not answer_content and not reasoning_fallback:
                 raise
 
-        return answer_content if answer_content else ""
+        # 优先用 content，为空时用 reasoning_content
+        if answer_content:
+            return answer_content
+        if reasoning_fallback:
+            logger.info(f"[OpenAI] {self.model} content 为空，使用 reasoning_content ({len(reasoning_fallback)} chars)")
+            return reasoning_fallback
+        return ""
 
     def query_vision(self, text_prompt: str,
                      image_paths: List[str] = None,
@@ -248,6 +449,51 @@ class AnthropicClient:
 
 # ==================== 统一工厂函数 ====================
 
+def create_client_for_model(model_alias: str, **overrides) -> object:
+    """
+    根据模型别名自动创建正确类型的客户端实例。
+
+    自动判断 use_zai / non_openai，调用者无需关心底层 SDK。
+    适用于 visual_verifier、figure_critic 等需要按别名创建客户端的场景。
+
+    Args:
+        model_alias: 模型别名（如 "glm_4_6v", "glm_5_1"）
+        **overrides: 覆盖参数（如 temperature, max_tokens）
+
+    Returns:
+        ZhipuAIClient、OpenAIClient 或 AnthropicClient 实例
+    """
+    import config.api_config as _cfg
+
+    cfg = _cfg.MODEL_ALIASES.get(model_alias)
+    if not cfg:
+        raise ValueError(f"未知模型别名: {model_alias}")
+
+    provider_name = cfg["provider"]
+    provider_config = _cfg.PROVIDERS.get(provider_name, {})
+    api_key_env = provider_config.get("api_key_env", "")
+    api_key = getattr(_cfg, api_key_env, "")
+    if not api_key:
+        raise ValueError(f"{provider_name} API Key 未配置")
+
+    params = {
+        "api_key": api_key,
+        "model": cfg["model_id"],
+        "max_tokens": overrides.pop("max_tokens", cfg.get("max_tokens", 8192)),
+        "temperature": overrides.pop("temperature", cfg.get("temperature", 0.7)),
+        "stream": overrides.pop("stream", cfg.get("stream", False)),
+    }
+
+    if cfg.get("non_openai"):
+        return AnthropicClient(**{k: v for k, v in params.items() if k != "stream"})
+    elif cfg.get("use_zai"):
+        params["base_url"] = provider_config.get("base_url")
+        return ZhipuAIClient(**params)
+    else:
+        params["base_url"] = provider_config.get("base_url", "https://api.openai.com/v1")
+        return OpenAIClient(**params)
+
+
 def create_client(provider_config: Dict) -> object:
     """
     根据 provider 配置自动创建对应的客户端实例。
@@ -256,7 +502,7 @@ def create_client(provider_config: Dict) -> object:
         provider_config: 包含 api_key, base_url, model_id, non_openai 等字段的字典
 
     Returns:
-        OpenAIClient 或 AnthropicClient 实例
+        ZhipuAIClient、OpenAIClient 或 AnthropicClient 实例
     """
     if provider_config.get("non_openai"):
         return AnthropicClient(
@@ -264,6 +510,16 @@ def create_client(provider_config: Dict) -> object:
             model=provider_config["model_id"],
             max_tokens=provider_config.get("max_tokens", 8192),
             temperature=provider_config.get("temperature", 1.0),
+        )
+    elif provider_config.get("use_zai"):
+        # GLM 系列走 zai SDK，支持原生 thinking 和 reasoning_content
+        return ZhipuAIClient(
+            api_key=provider_config["api_key"],
+            base_url=provider_config.get("base_url"),
+            model=provider_config["model_id"],
+            max_tokens=provider_config.get("max_tokens", 8192),
+            temperature=provider_config.get("temperature", 0.7),
+            stream=provider_config.get("stream", False),
         )
     else:
         return OpenAIClient(
@@ -285,12 +541,12 @@ def _get_model_config(alias: str) -> Dict:
 
 
 def query_glm(prompt: str, model: str = None, **kwargs) -> str:
-    """调用智谱GLM模型"""
+    """调用智谱GLM模型（使用 zai SDK，支持 thinking）"""
     from config.api_config import ZHIPU_GLM_API_KEY, ZHIPU_GLM_BASE_URL
     if not ZHIPU_GLM_API_KEY:
         raise ValueError("智谱GLM API Key 未配置，请在 .env 中设置 ZHIPU_GLM_API_KEY")
     cfg = _get_model_config("glm_5_1")
-    client = OpenAIClient(
+    client = ZhipuAIClient(
         api_key=ZHIPU_GLM_API_KEY,
         base_url=ZHIPU_GLM_BASE_URL,
         model=model or cfg.get("model_id", "glm-5.1"),
@@ -356,6 +612,9 @@ def query_model(prompt: str, alias: str, **kwargs) -> str:
     if cfg.get("non_openai"):
         client = AnthropicClient(api_key=api_key, model=model_id,
                                  max_tokens=max_tokens, temperature=temperature)
+    elif cfg.get("use_zai"):
+        client = ZhipuAIClient(api_key=api_key, base_url=base_url, model=model_id,
+                               max_tokens=max_tokens, temperature=temperature, stream=stream)
     else:
         client = OpenAIClient(api_key=api_key, base_url=base_url, model=model_id,
                               max_tokens=max_tokens, temperature=temperature, stream=stream)

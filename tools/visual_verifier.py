@@ -122,7 +122,7 @@ def _get_vision_client_and_config(model_alias: str):
     统一入口，不再硬编码单个 provider。
     """
     import config.api_config as _cfg
-    from api.openai_compatible import OpenAIClient
+    from api.openai_compatible import create_client_for_model
 
     config = _cfg.MODEL_ALIASES.get(model_alias)
     if not config:
@@ -135,16 +135,18 @@ def _get_vision_client_and_config(model_alias: str):
     if not api_key:
         return None, None
 
-    base_url = provider_config.get("base_url", "")
     model_id = config["model_id"]
 
-    client = OpenAIClient(
-        api_key=api_key,
-        base_url=base_url,
-        model=model_id,
-        max_tokens=config.get("max_tokens", 4096),
-        temperature=config.get("temperature", 0.3),
-    )
+    try:
+        client = create_client_for_model(
+            model_alias,
+            max_tokens=config.get("max_tokens", 4096),
+            temperature=config.get("temperature", 0.3),
+        )
+    except Exception as e:
+        logger.warning(f"[vision] 创建客户端失败 {model_alias}: {e}")
+        return None, None
+
     return client, model_id
 
 

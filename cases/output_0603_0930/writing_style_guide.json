@@ -1,0 +1,57 @@
+{
+  "句式特征": {
+    "对比与转折句式": {
+      "说明": "用于强调现有方法与本文方法、或不同领域方法之间的差异与优劣。",
+      "例句": [
+        "Compared to traditional single-person motion prediction, multi-person motion prediction is more practical as people are mostly associated with a group and interacting with each other.",
+        "While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited.",
+        "In computer vision, however, convolutional architectures remain dominant."
+      ]
+    },
+    "问题导向与动机句式": {
+      "说明": "用于指出现有方法的缺陷、未解决的问题，并顺理成章地引出本文的解决方案或研究目标。",
+      "例句": [
+        "While encouraging results are shown in the Transformer-based methods, those previous works only implicitly learn the inter-joint relation through the attention mechanism and lack the explicit awareness of skeleton structure.",
+        "To address this issue, we propose Joint-Relation Transformer, a two-stream Transformer architecture for multi-person motion prediction.",
+        "The goal of this paper is to naturally leverage the pyramidal shape of a ConvNet's feature hierarchy while..."
+      ]
+    },
+    "因果与解释句式": {
+      "说明": "用于解释现象背后的深层原因、方法设计的合理性或实验结果的预期。",
+      "例句": [
+        "These pyramids are scale-invariant in the sense that an object's scale change is offset by shifting its level in the pyramid.",
+        "This seemingly discouraging outcome may be expected: Transformers lack some of the inductive biases inherent...",
+        "For these reasons, Fast and Faster R-CNN opt to not use featurized image pyramids under default settings."
+      ]
+    }
+  },
+  "段落组织": {
+    "段落开头引入方式": "通常以宏观背景、领域共识、任务定义或前人工作的总结作为切入点。例如直接定义任务（'Multi-person motion prediction aims to...'）、指出核心挑战（'Recognizing objects at vastly different scales is a fundamental challenge...'）或陈述领域现状（'Self-attention-based architectures... have become the model of choice...'）。",
+    "段内论证逻辑": "遵循“现状/优势 -> 局限/问题 -> 改进/本文方案”的递进逻辑。先肯定前人工作的贡献，随后通过转折词指出其未解决的痛点，最后引出本文的设计动机。段落内部逻辑严密，层层剥茧。",
+    "段落结尾收束方式": "多以总结本文方法的核心优势、点明研究目标、引出实验结果或留下悬念引出下文分析来收尾。例如明确研究目标（'The goal of this paper is to...'）、总结实验表现（'The quantitative results show we outperform...'）或解释初步实验现象（'This seemingly discouraging outcome may be expected...'）。"
+  },
+  "用词特征": [
+    "过渡词：Compared to/with, However, While, Nevertheless, Moreover, Additionally, Therefore, Thus, Instead of, Ideally",
+    "强调词：fundamental, crucial, explicit, inherent, unprecedented, dominant, state-of-the-art, significant, de-facto, critical",
+    "限定词：partially, largely, mostly, vastly, substantially, theoretically, inherently, obviously",
+    "学术动词/短语：exploit, leverage, formulate, address this issue, pave a path to, opt to, suffer from, attain excellent results, forego"
+  ],
+  "论证模式": [
+    "背景与挑战 -> 现有方案及其局限 -> 提出本文方案及核心机制 -> 实验验证与优势总结（标准计算机视觉论文Introduction范式）",
+    "跨领域经验借鉴 -> 目标领域现状分析 -> 现有结合方法的缺陷 -> 提出极简/直接的迁移方案（如ViT从NLP到CV的论证逻辑）",
+    "问题定义 -> 传统方案回顾 -> 深度学习时代方案回顾 -> 剖析当前SOTA方法的根本瓶颈 -> 确立本文研究目标（如FPN对多尺度检测的历史脉络梳理）",
+    "先总后分模式：先概述本文提出的整体架构，随后分段详细阐述各个核心组件（如特征融合层、监督信号设计）的具体设计与物理/几何意义"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": {
+      "句末引用": "最为常见，用于支撑整句陈述的事实、观点或数据来源。如 '...multi-person motion prediction is more practical...<sup>11, 7</sup>' 或 '...Transformers (Vaswani et al., 2017).'",
+      "句中/主语引用": "用于具体指代某篇文献、某个特定模型或某类方法。如 'The former one, such as TRiPOD<sup>3</sup>, models...' 或 'The Single Shot Detector (SSD)<sup>22</sup> is one of the first attempts...'",
+      "括号内补充引用": "用于举例说明或补充相关文献。如 '...multi-scale testing on featurized image pyramids (e.g.,<sup>16, 35</sup>).'"
+    },
+    "引用与论述的衔接方式": {
+      "归纳式衔接": "将多篇相关文献打包引用，作为某一类方法、应用场景或共识的背书（如 '...surveillance systems<sup>13, 42, 52</sup>'）。",
+      "对比/批判式衔接": "在指出某篇具体文献或某类方法的局限性时，将其作为靶子，随后引出本文的改进（如指出SSD foregoes reusing already computed layers，从而misses the opportunity）。",
+      "溯源式衔接": "追溯某一概念、基础架构或经典解决方案的来源（如 '...standard solution<sup>1</sup> (Fig. 1(a))'）。"
+    }
+  }
+}
