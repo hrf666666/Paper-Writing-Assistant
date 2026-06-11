@@ -1,3 +1,0 @@
-# References
-
-*No references verified.*

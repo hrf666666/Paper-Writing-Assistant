@@ -1,5 +1,0 @@
-# Writing Style Profile
-
-```json
-{}
-```

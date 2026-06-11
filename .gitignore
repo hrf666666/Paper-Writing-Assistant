@@ -20,32 +20,34 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Output
+# Runtime output (regenerable)
 output/
 workspace/
+cases/
+input/
+
+# Old backups
+output_backup*/
+
+# Test artifacts
+test/
+
+# Fetched reference data (regenerable via pipeline)
+ref_md/
+ref_pdf/*.pdf
+
+# Logs
+*.log
+pipeline_run.log
+monitor_*.sh
 
 # Distribution
 dist/
 build/
 *.egg-info/
 
-# Logs
-*.log
-monitor_*.sh
-
 # Codebuddy
 .codebuddy/
 
-# PDF output (large binary)
-output/**/*.pdf
-
-# Reference PDFs (large binary)
-ref_pdf/*.pdf
-
-# Test / run outputs
-cases/
-pipeline_run.log
-
-# Fetched reference metadata (regenerable)
-ref_md/*.md
-ref_md/*.json
+# Generated images
+generated-images/
