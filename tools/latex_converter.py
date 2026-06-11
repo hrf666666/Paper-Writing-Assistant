@@ -118,16 +118,66 @@ def _get_tool_api():
 # LLM LaTeX 审查 + 修复
 # ═══════════════════════════════════════════════════════════════
 
+def _count_sections(latex: str) -> int:
+    """统计 \\section / \\subsection 数量，用于结构完整性检查"""
+    return len(re.findall(r'\\section\{|\\subsection\{', latex))
+
+
+def _safe_llm_replace(original: str, candidate: str, label: str,
+                      min_ratio: float = 0.5) -> str:
+    """
+    安全替换守卫：防止 LLM 返回截断/压缩内容覆盖原始内容。
+
+    Args:
+        original: 原始 LaTeX 内容
+        candidate: LLM 返回的候选内容
+        label: 日志标签（如 "章节1审查"）
+        min_ratio: 最低长度比率，低于此值拒绝替换
+
+    Returns:
+        安全的内容（candidate 或 original）
+    """
+    if not candidate or len(candidate.strip()) < 50:
+        logger.info(f"[latex_converter] {label}: LLM返回过短(<50)，保留原文")
+        return original
+
+    orig_len = len(original)
+    cand_len = len(candidate)
+
+    # 长度守卫：如果候选内容 < 原始的 min_ratio，拒绝替换
+    if orig_len > 200 and cand_len < orig_len * min_ratio:
+        logger.warning(
+            f"[latex_converter] {label}: 长度守卫触发 — "
+            f"候选 {cand_len} < 原始 {orig_len} 的 {min_ratio:.0%}，保留原文"
+        )
+        return original
+
+    # 结构守卫：section/subsection 数量不应大幅减少
+    orig_secs = _count_sections(original)
+    cand_secs = _count_sections(candidate)
+    if orig_secs > 0 and cand_secs < orig_secs - 1:
+        logger.warning(
+            f"[latex_converter] {label}: 结构守卫触发 — "
+            f"section/subsection 从 {orig_secs} 减少到 {cand_secs}，保留原文"
+        )
+        return original
+
+    return candidate
+
+
 def _review_latex(latex_content: str, chapter_num: int) -> Tuple[str, List[str]]:
     """
-    LLM 审查 LaTeX 内容，返回 (修复后内容, 问题列表)
+    LLM 审查 LaTeX 内容，返回 (修复后内容, 问题列表)。
+    v12.1: 添加长度/结构守卫，防止 LLM 截断/压缩内容。
     """
     api = _get_tool_api()
     if not api:
         return latex_content, []
 
     prompt = f"""你是一名 IEEE Transactions (IEEEtran 格式) 的 LaTeX 审查专家。
-请审查以下 LaTeX 章节代码，发现并修复所有问题。
+请审查以下 LaTeX 章节代码，只修复格式问题。
+
+**CRITICAL: 保持所有原始内容不变！不要删除、总结或压缩任何文字段落。只修复格式错误。**
 
 **检查清单**:
 1. 花括号 {{ }} 是否正确配对
@@ -141,8 +191,7 @@ def _review_latex(latex_content: str, chapter_num: int) -> Tuple[str, List[str]]
 9. 文本中使用 \\&（不要在 tabular 外使用裸 &）
 10. 不重复输出已有的 \\section/\\subsection 标题
 
-**修复所有发现的问题。只输出修正后的 LaTeX 代码。**
-如果没有问题，原样输出。
+**输出完整的修正后 LaTeX 代码，包含所有原始文字内容。如果没有格式问题，原样输出。**
 
 待审查的 LaTeX:
 ```
@@ -151,13 +200,22 @@ def _review_latex(latex_content: str, chapter_num: int) -> Tuple[str, List[str]]
 
     try:
         result = api.call_generation(prompt)
-        if result and len(result.strip()) > 50:
+        if result:
             # 清理 markdown 包裹
             result = result.strip()
             if result.startswith("```"):
                 lines = result.split("\n")
                 result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-            return result.strip(), []
+            # v12.1: 安全替换守卫（50% 长度阈值 + 结构完整性检查）
+            safe_result = _safe_llm_replace(
+                latex_content, result.strip(),
+                f"章节{chapter_num}审查", min_ratio=0.5
+            )
+            # 检测修复了哪些问题
+            issues = []
+            if safe_result != latex_content:
+                issues.append(f"章节{chapter_num}: LLM审查修复了格式问题")
+            return safe_result, issues
     except Exception as e:
         logger.warning(f"[latex_converter] 章节 {chapter_num} LLM审查失败: {e}")
 
@@ -187,12 +245,17 @@ Fix the errors and output the corrected LaTeX:"""
 
     try:
         result = api.call_generation(prompt)
-        if result and len(result.strip()) > 50:
+        if result:
             result = result.strip()
             if result.startswith("```"):
                 lines = result.split("\n")
                 result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-            return result.strip()
+            # v12.1: 安全替换守卫（编译修复允许更激进，30% 阈值）
+            safe_result = _safe_llm_replace(
+                latex_content, result.strip(),
+                "编译修复", min_ratio=0.3
+            )
+            return safe_result
     except Exception as e:
         logger.warning(f"[latex_converter] 编译修复失败: {e}")
 

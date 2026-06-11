@@ -233,7 +233,7 @@ Output ONLY the transition sentence, nothing else:"""
         checked = set()
         for ch_a, sents_a in fingerprints.items():
             for ch_b, sents_b in fingerprints.items():
-                if ch_a >= ch_b:
+                if str(ch_a) >= str(ch_b):
                     continue
                 pair = (ch_a, ch_b)
                 if pair in checked:

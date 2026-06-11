@@ -229,6 +229,7 @@ class BibTeXBuilder:
 
         # 从 bib 文件中收集所有有效 key
         bib_path = os.path.join(self.latex_dir, "references.bib")
+        bib_content = ""
         if os.path.exists(bib_path):
             with open(bib_path, "r", encoding="utf-8") as f:
                 bib_content = f.read()
@@ -237,19 +238,21 @@ class BibTeXBuilder:
 
         # 构建 key → title 映射用于模糊匹配
         key_titles = {}
-        for m in re.finditer(r'@\w+\{(\w+)[^@]*?title\s*=\s*\{([^}]*)\}', bib_content, re.DOTALL):
-            key_titles[m.group(1)] = m.group(2).lower()
+        if bib_content:
+            for m in re.finditer(r'@\w+\{(\w+)[^@]*?title\s*=\s*\{([^}]*)\}', bib_content, re.DOTALL):
+                key_titles[m.group(1)] = m.group(2).lower()
 
-        # 收集 citation_map 中 key → paper_info
+        # 收集 citation_map 中 key → paper_info（正确：外层 citation_map，内层 ref_pool 匹配）
         pool_by_key = {}
         ref_pool = self._load_reference_pool()
-        for paper in ref_pool:
-            doi = paper.get("doi", "")
-            t = paper.get("title", "").lower().strip()
-            # 用 citation_map 反查
-            for idx, k in self._citation_map.items():
-                if k not in pool_by_key:
-                    pool_by_key[k] = {"title": t, "doi": doi}
+        for idx, bib_key in self._citation_map.items():
+            if idx <= len(ref_pool):
+                paper = ref_pool[idx - 1] if idx >= 1 else None
+                if paper:
+                    pool_by_key[bib_key] = {
+                        "title": paper.get("title", "").lower().strip(),
+                        "doi": paper.get("doi", ""),
+                    }
 
         def _remap_cite(match):
             keys_str = match.group(1)
@@ -354,7 +357,20 @@ class BibTeXBuilder:
             return []
 
     def _load_reference_pool(self) -> List[Dict]:
-        """加载引用池（优先从文件，降级到离线数据包）"""
+        """
+        v12.2: 优先从 ReferenceStore 加载，降级到 JSON 文件
+        """
+        # 优先 ReferenceStore
+        try:
+            from tools.reference_store import get_reference_store
+            store = get_reference_store()
+            pool = store.get_all_papers(limit=200)
+            if pool:
+                return pool
+        except Exception:
+            pass
+
+        # 降级: JSON 文件
         path = os.path.join(self.output_dir, "reference_pool.json")
         if os.path.exists(path):
             try:
@@ -369,7 +385,7 @@ class BibTeXBuilder:
             except Exception:
                 pass
 
-        # v11.1: 如果文件中没有数据，尝试离线数据包
+        # 最后降级: 离线数据包
         try:
             from tools.reference_pack_manager import get_reference_pack_manager
             mgr = get_reference_pack_manager()
@@ -378,7 +394,8 @@ class BibTeXBuilder:
                 return mgr.to_reference_pool_format(papers)
         except Exception:
             pass
-            return []
+
+        return []
 
     def _load_phase71_citation_map(self) -> List[Dict]:
         """
@@ -482,60 +499,15 @@ class BibTeXBuilder:
         return bib_content, citation_map
 
     def _generate_cite_key(self, cite_info: Dict, num: int) -> str:
-        """生成 cite key: authorYear + 首词
-        
-        v10.1: 改进无作者时的 key 生成 — 从 title 提取有意义的缩写
-        """
-        # 尝试从作者提取
+        """生成 cite key: 委托给公共 text_utils.generate_bib_key"""
+        from tools.text_utils import generate_bib_key
         authors = cite_info.get("authors", [])
-        if isinstance(authors, list) and authors:
-            first_author = authors[0]
-            if isinstance(first_author, dict):
-                name = first_author.get("name", "")
-            else:
-                name = str(first_author)
-            # 取姓
-            surname = name.split()[-1].lower() if name else ""
-            # 清理非字母字符
-            surname = re.sub(r'[^a-z]', '', surname)
-            
-            if not surname or len(surname) < 2:
-                surname = f"ref{num}"
-        else:
-            # v10.1: 没有作者信息时，从 title 提取有意义的缩写
-            title = cite_info.get("title", "")
-            if title and len(title) > 5:
-                words = re.findall(r'[a-zA-Z]+', title)
-                # 过滤掉停用词
-                stopwords = {'the', 'a', 'an', 'of', 'for', 'and', 'in', 'on', 'to',
-                             'from', 'with', 'by', 'at', 'is', 'are', 'using', 'based',
-                             'light', 'field', 'depth', 'estimation', 'image', 'method'}
-                meaningful = [w.lower() for w in words if w.lower() not in stopwords and len(w) > 2]
-                if len(meaningful) >= 2:
-                    # 取前两个有意义词的缩写
-                    surname = meaningful[0][:6] + meaningful[1][:4]
-                elif meaningful:
-                    surname = meaningful[0][:10]
-                else:
-                    surname = f"ref{num}"
-            else:
-                surname = f"ref{num}"
-
         year = cite_info.get("year", "")
-        if isinstance(year, int):
-            year = str(year)
-        elif not isinstance(year, str):
-            year = ""
-
-        key = f"{surname}{year}"
-        # 确保 key 不会太长或重复
-        if len(key) > 20:
-            key = key[:20]
-
+        title = cite_info.get("title", "")
+        key = generate_bib_key(authors, year, title, num)
         # 确保唯一
         if key in self._bib_entries:
             key += f"_{num}"
-
         return key or f"ref{num}"
 
     def _create_bib_entry(self, cite_info: Dict, key: str) -> Optional[str]:

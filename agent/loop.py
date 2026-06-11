@@ -750,6 +750,7 @@ Respond with just the strategy, no explanation:"""
                         "previous_content": previous_summary,
                         "style_guide": self._ref_data.get("style_guide", {}),
                         "experiments_summary": experiments_summary,
+                        "citation_context": self._build_citation_context(),
                     },
                     style_guide=self._ref_data.get("style_guide", {}),
                 )
@@ -873,35 +874,74 @@ Respond with just the strategy, no explanation:"""
 
     def _build_paper_context(self):
         """
-        v11.2: 构建共享事实字典 PaperContext。
+        v12.1: 构建共享事实字典 PaperContext。
 
         从 project_data + experiment_design 提取硬件、epochs、loss 项、数据集、
         指标数值、模型名称等，注入到 self._project_data["paper_context"]。
 
-        所有 chapter generator 从 project_data["paper_context"] 读取，
-        保证跨章节数值一致。不改变任何 generator 的函数签名。
+        适配实际 experiment_design.json 的中文嵌套结构：
+        {
+          "数据集": [{"名称": "...", ...}],
+          "训练策略": {"优化器": "...", "学习率": "...", "损失函数": "..."},
+          "评估指标": [{"指标名称": "...", "实际达成值": 0.133, ...}],
+          "关键实验结果": {"成功发现": [...], "失败与局限性": [...]}
+        }
         """
         pd = self._project_data or {}
+        # 多路径查找 experiment_design
         exp_design = pd.get("experiment_design", {})
+        if not exp_design:
+            # 有时 experiment_design 就是顶层字典本身
+            if any(k in pd for k in ["数据集", "训练策略", "评估指标"]):
+                exp_design = pd
 
-        # 提取硬件配置
-        hardware = exp_design.get("硬件配置", "") or exp_design.get("hardware", "")
-        if not hardware:
-            impl_details = exp_design.get("implementation_details", {})
-            if isinstance(impl_details, dict):
-                hardware = impl_details.get("hardware", "")
-
-        # 提取训练参数
-        training_params = {}
-        for key in ["epochs", "batch_size", "optimizer", "learning_rate",
-                     "训练轮数", "批次大小", "优化器", "学习率"]:
+        # ── 提取硬件配置 ──
+        hardware = ""
+        for key in ["硬件配置", "hardware"]:
             val = exp_design.get(key, "")
             if val:
-                training_params[key] = val
+                hardware = str(val)
+                break
+        if not hardware:
+            impl = exp_design.get("implementation_details", {})
+            if isinstance(impl, dict):
+                hardware = impl.get("hardware", "")
+        if not hardware:
+            # 尝试从 project_info.json 或 训练策略 中获取
+            for key in ["训练设备", "GPU", "gpu"]:
+                val = exp_design.get(key, "")
+                if val:
+                    hardware = str(val)
+                    break
 
-        # 提取 loss 函数
+        # ── 提取训练参数 ──
+        training_params = {}
+        # 先从 训练策略 子字典提取
+        strategy = exp_design.get("训练策略", {})
+        if isinstance(strategy, dict):
+            key_map = {
+                "优化器": "optimizer", "学习率": "learning_rate",
+                "权重衰减": "weight_decay", "batch_size": "batch_size",
+                "损失函数": "loss_function", "采样与数据策略": "sampling_strategy",
+                "epoch": "epochs", "训练轮数": "epochs",
+            }
+            for cn_key, en_key in key_map.items():
+                val = strategy.get(cn_key, "")
+                if val:
+                    training_params[en_key] = str(val)
+        # 再用英文 key 做补充（兼容旧格式）
+        for key in ["epochs", "batch_size", "optimizer", "learning_rate"]:
+            val = exp_design.get(key, "")
+            if val and key not in training_params:
+                training_params[key] = str(val)
+
+        # ── 提取 loss 函数 ──
         loss_terms = []
-        loss_info = exp_design.get("loss_function", "") or exp_design.get("损失函数", "")
+        loss_info = ""
+        if isinstance(strategy, dict):
+            loss_info = strategy.get("损失函数", "")
+        if not loss_info:
+            loss_info = exp_design.get("loss_function", "") or exp_design.get("损失函数", "")
         if loss_info:
             loss_terms.append(str(loss_info))
         for key in ["loss_terms", "loss_components"]:
@@ -909,13 +949,36 @@ Respond with just the strategy, no explanation:"""
             if isinstance(val, list):
                 loss_terms.extend(str(v) for v in val)
 
-        # 提取数据集
+        # ── 提取数据集 ──
         datasets = exp_design.get("datasets", []) or exp_design.get("数据集", [])
         if isinstance(datasets, str):
             datasets = [datasets]
+        elif isinstance(datasets, dict):
+            # dict 格式：提取 名称 字段（可能是 list 或 str）
+            names = datasets.get("名称", datasets.get("name", []))
+            if isinstance(names, (list, tuple, set)):
+                datasets = [str(n) for n in names]
+            elif isinstance(names, str):
+                datasets = [names]
+            else:
+                datasets = []
+        # 处理 list of dict 格式：提取名称
+        if isinstance(datasets, list):
+            dataset_names = []
+            for ds in datasets:
+                if isinstance(ds, dict):
+                    name = ds.get("名称", ds.get("name", ""))
+                    if name:
+                        dataset_names.append(name)
+                elif isinstance(ds, str):
+                    dataset_names.append(ds)
+            datasets = dataset_names
+        elif isinstance(datasets, (set, tuple)):
+            datasets = list(datasets)
 
-        # 提取指标数值（从 ablation_results 或 experiment_design）
+        # ── 提取指标数值 ──
         metrics = {}
+        # 从 ablation_results 提取
         ablation = self._ablation_results or {}
         if isinstance(ablation, dict):
             main_results = ablation.get("main_results", {})
@@ -923,14 +986,45 @@ Respond with just the strategy, no explanation:"""
                 for k, v in main_results.items():
                     if isinstance(v, (int, float)):
                         metrics[k] = v
+        # 从 评估指标 list of dict 提取（v12.1 新增）
+        eval_metrics = exp_design.get("评估指标", [])
+        if isinstance(eval_metrics, list):
+            for em in eval_metrics:
+                if isinstance(em, dict):
+                    name = em.get("指标名称", em.get("name", ""))
+                    actual = em.get("实际达成值", em.get("actual", ""))
+                    if name and actual is not None:
+                        try:
+                            metrics[name] = float(actual)
+                        except (ValueError, TypeError):
+                            metrics[name] = str(actual)
+        # 从 关键实验结果 / 关键结果 / key_results 提取
         key_results = exp_design.get("关键结果", {}) or exp_design.get("key_results", {})
         if isinstance(key_results, dict):
             for k, v in key_results.items():
                 if isinstance(v, (int, float, str)):
                     metrics[k] = v
+        # 从 关键实验结果.成功发现 解析数值（格式: "Overall MAE 达到 0.133"）
+        key_exp = exp_design.get("关键实验结果", {})
+        if isinstance(key_exp, dict):
+            for item in key_exp.get("成功发现", []):
+                if isinstance(item, str):
+                    # 尝试解析 "XXX 达到 N.NNN" 格式
+                    m = re.search(r'(\S+ MAE)\s+达到\s+([\d.]+)', item)
+                    if m:
+                        try:
+                            metrics[m.group(1)] = float(m.group(2))
+                        except ValueError:
+                            pass
 
-        # 提取模型名称和创新点
-        model_name = pd.get("model_name", "") or pd.get("模型名称", "")
+        # ── 提取模型名称和创新点 ──
+        model_name = (pd.get("model_name", "") or pd.get("模型名称", "")
+                      or pd.get("项目名称", ""))
+        if not model_name:
+            arch = pd.get("model_architecture", pd.get("模型架构", {}))
+            if isinstance(arch, dict):
+                model_name = arch.get("name", arch.get("模型名称", ""))
+
         innovation_points = pd.get("innovation_points", [])
         inn_names = []
         if isinstance(innovation_points, list):
@@ -960,9 +1054,10 @@ Respond with just the strategy, no explanation:"""
 
         logger.info(f"[PaperContext] 构建完成: "
                      f"hardware={hardware[:50] if hardware else 'N/A'}, "
+                     f"training_params={list(training_params.keys())}, "
                      f"loss_terms={len(loss_terms)}, "
-                     f"datasets={len(datasets)}, "
-                     f"metrics={len(metrics)}, "
+                     f"datasets={datasets}, "
+                     f"metrics={list(metrics.keys())}, "
                      f"model={model_name}")
 
         return paper_context
@@ -984,9 +1079,11 @@ Respond with just the strategy, no explanation:"""
                 for k, v in pc["training_params"].items():
                     fact_lines.append(f"  {k}: {v}")
             if pc.get("loss_terms"):
-                fact_lines.append(f"  Loss components: {', '.join(str(t) for t in pc['loss_terms'][:6])}")
+                lt = list(pc['loss_terms']) if not isinstance(pc['loss_terms'], list) else pc['loss_terms']
+                fact_lines.append(f"  Loss components: {', '.join(str(t) for t in lt[:6])}")
             if pc.get("datasets"):
-                fact_lines.append(f"  Datasets: {', '.join(str(d) for d in pc['datasets'][:5])}")
+                ds = list(pc['datasets']) if not isinstance(pc['datasets'], list) else pc['datasets']
+                fact_lines.append(f"  Datasets: {', '.join(str(d) for d in ds[:5])}")
             if pc.get("metrics"):
                 metric_lines = [f"    {k}: {v}" for k, v in list(pc["metrics"].items())[:8]]
                 fact_lines.append("  Key metrics (use these EXACT values throughout):")
@@ -994,45 +1091,184 @@ Respond with just the strategy, no explanation:"""
             if pc.get("model_name"):
                 fact_lines.append(f"  Model name: {pc['model_name']}")
             if pc.get("innovation_names"):
-                fact_lines.append(f"  Innovation components: {', '.join(str(n) for n in pc['innovation_names'][:5])}")
+                inn = list(pc['innovation_names']) if not isinstance(pc['innovation_names'], list) else pc['innovation_names']
+                fact_lines.append(f"  Innovation components: {', '.join(str(n) for n in inn[:5])}")
             if fact_lines:
                 parts.append("**MANDATORY FACT SHEET (PaperContext)** — Use these exact values. Do NOT invent different numbers:")
                 parts.append("\n".join(fact_lines))
 
-        # 1. 从 citation_bank 提取可引用的 claim
+        # 1. 从 citation_bank 提取可引用的 claim（仅提供论文主张摘要，供 LLM 引用时理解上下文）
         if self._citation_bank and self._citation_bank.get("claims"):
-            claims = self._citation_bank["claims"][:40]  # 限制数量避免 token 膨胀
+            claims = self._citation_bank["claims"][:50]
             claim_lines = []
             for c in claims:
                 title = c.get("title", "")
                 year = c.get("year", "")
                 claim_text = c.get("claim", "")
                 if title and claim_text:
-                    claim_lines.append(f"  - [{year}] {title}: {claim_text[:120]}")
+                    claim_lines.append(f"  - [{year}] {title}: {claim_text[:150]}")
             if claim_lines:
-                parts.append("**Available references (cite these papers using <citation> tags):**")
-                parts.append("\n".join(claim_lines[:30]))
+                parts.append("**Reference claims (use these papers for citations):**")
+                parts.append("\n".join(claim_lines[:40]))
 
-        # 2. 从 reference_pool 补充论文列表（标题+年份+venue）
-        if self._reference_pool:
-            pool_lines = []
-            for p in self._reference_pool[:30]:
-                title = p.get("title", "")
-                year = p.get("year", "")
-                venue = p.get("venue_abbr", "") or p.get("venue", "")
-                if title:
-                    venue_str = f", {venue}" if venue else ""
-                    pool_lines.append(f"  - {title} ({year}{venue_str})")
-            if pool_lines and len(parts) < 3:
-                parts.append("**Reference pool (use these in <citation> tags):**")
-                parts.append("\n".join(pool_lines[:25]))
+        # 2. v13.0: 生成精确 cite key 列表，让 LLM 直接用 \\cite{key}
+        cite_key_block = self._build_cite_key_list()
+        if cite_key_block:
+            parts.append(cite_key_block)
 
         if not parts:
             return ""
 
-        return ("\n\n".join(parts) +
-                "\n\n**IMPORTANT**: When citing, use <citation>[\"author keyword\", \"topic keyword\"]</citation> "
-                "with keywords that match the paper titles above. Do NOT fabricate citations.")
+        instruction = ("\n\n**IMPORTANT**: When citing, "
+                       "use \\cite{key} format with keys from the CITE KEY REFERENCE LIST above. "
+                       "Do NOT fabricate cite keys not in that list. "
+                       "Each chapter must cite at least 5 different references.")
+        return "\n\n".join(parts) + instruction
+
+    def _build_cite_key_list(self) -> str:
+        """
+        v13.0: 从 reference_pool 生成精确 cite key 列表。
+        让 LLM 直接用 \\cite{key} 写引用，绕过模糊的 <citation> 匹配。
+        """
+        from tools.text_utils import generate_bib_key
+        entries = {}  # key -> "title (year, venue)"
+
+        # 1. 从 reference_pool (优先，经过验证的真实论文)
+        if self._reference_pool:
+            for idx, p in enumerate(self._reference_pool[:60]):
+                title = p.get("title", "")
+                if not title:
+                    continue
+                authors = p.get("authors", [])
+                year = str(p.get("year", ""))
+                venue = p.get("venue_abbr", "") or p.get("venue", "")
+                key = generate_bib_key(authors, year, title, idx + 1)
+                if key not in entries:
+                    venue_str = f", {venue}" if venue else ""
+                    entries[key] = f"{title[:80]} ({year}{venue_str})"
+
+        # 2. 从 citation_bank claims 补充
+        if self._citation_bank and self._citation_bank.get("claims"):
+            for idx, c in enumerate(self._citation_bank.get("claims", [])):
+                title = c.get("title", "")
+                if not title:
+                    continue
+                authors = c.get("authors", [])
+                year = str(c.get("year", ""))
+                key = generate_bib_key(authors, year, title, len(entries) + idx + 1)
+                if key not in entries:
+                    entries[key] = f"{title[:80]} ({year})"
+
+        if not entries:
+            return ""
+
+        lines = [f"  \\cite{{{key}}} — {desc}" for key, desc in entries.items()]
+        return (
+            "**CITE KEY REFERENCE LIST** — Use these EXACT \\cite{key} commands in your LaTeX output. "
+            "Do NOT fabricate cite keys not in this list:\n"
+            + "\n".join(lines[:60])
+        )
+
+    def _ensure_bib_has_all_cited_keys(self, tex_path: str):
+        """
+        v13.0: 扫描 main.tex 中所有 \\cite{key}，确保 references.bib 中有对应条目。
+        缺失的 key 从 reference_pool / refs.db / citation_bank 中查找并补充。
+        """
+        import re as _re
+        if not os.path.exists(tex_path):
+            return
+
+        with open(tex_path, "r", encoding="utf-8") as f:
+            tex_content = f.read()
+
+        # 提取所有 cite key
+        cited_keys = set(_re.findall(r'\\cite\{([^}]+)\}', tex_content))
+        # Flatten: \cite{a,b} → {a, b}
+        flat_keys = set()
+        for k in cited_keys:
+            for part in k.split(","):
+                flat_keys.add(part.strip())
+
+        # 读取现有 bib
+        bib_path = tex_path.replace("main.tex", "references.bib")
+        if os.path.exists(bib_path):
+            with open(bib_path, "r", encoding="utf-8") as f:
+                bib_content = f.read()
+            existing_keys = set(_re.findall(r'@\w+\{([^,\s]+)', bib_content))
+        else:
+            bib_content = ""
+            existing_keys = set()
+
+        missing = flat_keys - existing_keys
+        if not missing:
+            return
+
+        logger.info(f"[Phase 7.8b] 补充 {len(missing)} 个缺失 bib 条目: {missing}")
+
+        # 从 reference_pool / citation_bank / refs.db 查找并补充
+        from tools.text_utils import generate_bib_key
+        from tools.bibtex_builder import BibTeXBuilder
+
+        builder = BibTeXBuilder(os.path.dirname(os.path.dirname(tex_path)))
+        new_entries = []
+
+        # 构建查找源，同时建立 key → paper 的映射（用与 prompt 阶段相同的 idx 生成 key）
+        all_sources = list(self._reference_pool or [])
+        if self._citation_bank and self._citation_bank.get("claims"):
+            all_sources.extend(self._citation_bank["claims"])
+
+        # 预计算：对每个 source，用与 _build_cite_key_list 相同的 idx 生成 key
+        key_to_source = {}
+        for idx, p in enumerate(all_sources):
+            title = p.get("title", "")
+            if not title:
+                continue
+            authors = p.get("authors", [])
+            year = str(p.get("year", ""))
+            key = generate_bib_key(authors, year, title, idx + 1)
+            if key not in key_to_source:
+                key_to_source[key] = p
+
+        removed_keys = []
+        for missing_key in missing:
+            # 精确匹配：直接用预计算的 key 映射
+            best_match = key_to_source.get(missing_key)
+            if not best_match:
+                # 降级：用 title 模糊匹配
+                for p in all_sources:
+                    title = p.get("title", "")
+                    year = str(p.get("year", ""))
+                    if year and year in missing_key:
+                        title_words = title.lower().split()[:3]
+                        if any(w in missing_key.lower() for w in title_words if len(w) > 3):
+                            best_match = p
+                            break
+
+            if best_match:
+                entry = builder._create_bib_entry_with_doi(best_match, missing_key)
+                if not entry:
+                    entry = builder._create_bib_entry(best_match, missing_key)
+                if entry:
+                    new_entries.append(entry)
+            else:
+                # 找不到对应论文 → 移除无效引用而非生成假条目
+                logger.warning(f"[Phase 7.8b] 无法为 cite key '{missing_key}' 找到真实论文，移除该引用")
+                tex_content = _re.sub(
+                    r'\\cite\{[^}]*' + _re.escape(missing_key) + r'[^}]*\}',
+                    '', tex_content
+                )
+                removed_keys.append(missing_key)
+
+        # 写回清理后的 tex
+        if removed_keys:
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(tex_content)
+
+        if new_entries:
+            with open(bib_path, "a", encoding="utf-8") as f:
+                f.write("\n\n")
+                f.write("\n".join(new_entries))
+            logger.info(f"[Phase 7.8b] 已补充 {len(new_entries)} 个 bib 条目")
 
     def _reflect(self, task: Task, result: Any,
                  verify_report=None) -> Dict[str, Any]:
@@ -1686,6 +1922,10 @@ Respond with just the strategy, no explanation:"""
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.8] LaTeX 引用替换完成: {len(citation_map)} 条")
+
+                    # v13.0: 扫描 tex 中所有 \cite{key}，确保 bib 中有对应条目
+                    self._ensure_bib_has_all_cited_keys(tex_path)
+
         except Exception as e:
             logger.warning(f"[Phase 7.8] BibTeX 生成失败: {e}")
 
@@ -2504,6 +2744,7 @@ Respond with just the strategy, no explanation:"""
         previous_summary = self._build_previous_summary()
         motivation = getattr(self, '_motivation_thread', '')
         matrix = getattr(self, '_rationale_matrix', {})
+        citation_context = self._build_citation_context()
 
         # 传入 Conclusion 摘要，避免重复内容
         conclusion_summary = ""
@@ -2524,6 +2765,8 @@ Previous chapters summary:
 Innovation points: {json.dumps(self._project_data.get('innovation_points', []), ensure_ascii=False)[:800]}
 
 Venue style: {self.venue_adapter.profile.writing_style.get('tone', 'formal')}.
+
+{citation_context}
 
 **关键约束**：不要重复 Conclusion 章节中已经提到的内容。提供新的分析和见解。
 

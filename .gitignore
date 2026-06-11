@@ -41,3 +41,11 @@ output/**/*.pdf
 
 # Reference PDFs (large binary)
 ref_pdf/*.pdf
+
+# Test / run outputs
+cases/
+pipeline_run.log
+
+# Fetched reference metadata (regenerable)
+ref_md/*.md
+ref_md/*.json

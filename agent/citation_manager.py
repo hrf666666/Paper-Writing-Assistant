@@ -16,6 +16,7 @@
 - 生成格式化的 References 列表
 """
 
+import os
 import re
 import json
 import logging
@@ -65,16 +66,18 @@ class CitationManager:
             })
             paired_positions.add(m.start())
 
+        # 预计算配对标签的 (start, end) 区间，用于快速排除
+        paired_ranges = [
+            (pm.start(), pm.end())
+            for pm in re.finditer(r'<citation>.*?</citation>', full_text, re.DOTALL)
+        ]
+
         # 再找所有未配对的 <citation>（不在配对范围内的）
         for m in re.finditer(r'<citation>', full_text):
             if m.start() in paired_positions:
                 continue
-            # 检查这个位置是否在某个配对标签内部
-            in_paired = False
-            for pm in re.finditer(r'<citation>.*?</citation>', full_text, re.DOTALL):
-                if pm.start() < m.start() < pm.end():
-                    in_paired = True
-                    break
+            # 检查是否在配对标签内部
+            in_paired = any(s < m.start() < e for s, e in paired_ranges)
             if not in_paired:
                 # v11.8: 自闭合 <citation> — 结合前文语境提取关键词
                 preceding = full_text[max(0, m.start()-200):m.start()]
@@ -138,55 +141,12 @@ class CitationManager:
                     result["matched_paper"] = match
                     result["paper_id"] = match.get("paperId", "") or match.get("doi", "")
 
-            # v12.0: Semantic Scholar 境内永久 429，彻底禁用在线验证
-            # 离线池匹配 + MCP 兜底已足够
-            should_try_online = False
 
-            # 2. 多源在线验证（MCP → 百度学术 → Semantic Scholar）
-            if should_try_online:
-                try:
-                    from api.paper_search import verify_citation_with_mcp
-                    # 从 keywords 构造搜索标题
-                    search_title = self._keywords_to_title(cite["keywords"])
-                    if search_title:
-                        mcp_result = verify_citation_with_mcp(search_title)
-                        if mcp_result.get("verified"):
-                            result["verified"] = True
-                            result["paper_id"] = mcp_result.get("found_urls", [""])[0] if mcp_result.get("found_urls") else ""
-                            matched = mcp_result.get("matched_paper")
-                            if matched:
-                                result["matched_paper"] = matched
-                            else:
-                                # MCP 验证通过但无结构化数据，构造最小匹配
-                                result["matched_paper"] = {
-                                    "title": mcp_result.get("title", search_title),
-                                    "year": None,
-                                    "authors": [],
-                                    "venue": "",
-                                    "paperId": result["paper_id"],
-                                }
-                            logger.debug(f"  MCP验证通过: {search_title[:50]} ({mcp_result.get('method')})")
-                except Exception as e:
-                    logger.debug(f"[CitationManager] MCP验证失败: {e}")
-
-            # 3. 兜底：统一搜索接口（仅离线池不足时）
-            if not result["verified"] and should_try_online and self.api_client:
-                try:
-                    from api.paper_search import search_papers, get_paper_details
-                    keywords = cite["keywords"]
-                    if keywords:
-                        search_result = search_papers(keywords, 3)
-                        if "data" in search_result and search_result["data"]:
-                            for paper_brief in search_result["data"][:2]:
-                                details = get_paper_details(paper_brief["id"])
-                                if "data" in details and details["data"]:
-                                    paper = details["data"][0]
-                                    result["verified"] = True
-                                    result["matched_paper"] = paper
-                                    result["paper_id"] = paper_brief.get("id", "")
-                                    break
-                except Exception as e:
-                    logger.warning(f"[CitationManager] 在线检索失败: {e}")
+            # v12.0: 在线验证已禁用（Semantic Scholar 境内永久 429）
+            # 如需恢复，设置环境变量 CITATION_ONLINE_VERIFY=1
+            _online_ok = os.environ.get("CITATION_ONLINE_VERIFY", "").strip() == "1"
+            if _online_ok and not result["verified"]:
+                result = self._try_online_verify(result, cite)
 
             verified.append(result)
             status = "✓" if result["verified"] else "✗"
@@ -208,6 +168,29 @@ class CitationManager:
             elif isinstance(group, str):
                 parts.append(group)
         return " ".join(parts)[:120]
+
+    def _try_online_verify(self, result: Dict, cite: Dict) -> Dict:
+        """在线验证降级链（MCP → 百度学术 → S2），仅在 CITATION_ONLINE_VERIFY=1 时启用"""
+        try:
+            from api.paper_search import verify_citation_with_mcp
+            search_title = self._keywords_to_title(cite["keywords"])
+            if search_title:
+                mcp_result = verify_citation_with_mcp(search_title)
+                if mcp_result.get("verified"):
+                    result["verified"] = True
+                    result["paper_id"] = mcp_result.get("found_urls", [""])[0] if mcp_result.get("found_urls") else ""
+                    matched = mcp_result.get("matched_paper")
+                    if matched:
+                        result["matched_paper"] = matched
+                    else:
+                        result["matched_paper"] = {
+                            "title": mcp_result.get("title", search_title),
+                            "year": None, "authors": [], "venue": "",
+                            "paperId": result["paper_id"],
+                        }
+        except Exception as e:
+            logger.debug(f"[CitationManager] 在线验证失败: {e}")
+        return result
 
     def dedup(self, verified_citations: List[Dict]) -> Dict[str, int]:
         """
@@ -305,8 +288,7 @@ class CitationManager:
                     tag_to_index[cite["raw_tag"]] = best_idx
                     logger.debug(f"兜底匹配: {cite['raw_tag'][:40]} -> [{best_idx}]")
 
-        # v11.5: 如果还有未验证引用，使用 reference_pool 全局兜底
-        # 放宽条件：只要有未验证引用就触发
+        # v12.2: 全局兜底 — 只匹配相关论文，不伪造引用
         remaining_unverified = [c for c in unverified_tags if c["raw_tag"] not in tag_to_index]
         if remaining_unverified:
             try:
@@ -314,26 +296,23 @@ class CitationManager:
                 offline_pool = get_offline_reference_pool()
                 if offline_pool:
                     next_idx = max(self._citation_map.values()) + 1 if self._citation_map else 1
-                    # 收集已使用的论文 dedup_key，避免重复分配
                     used_keys = set(self._citation_map.keys())
-                    pool_queue = [p for p in offline_pool
-                                  if (p.get("doi", "") or p.get("title", "").lower().strip()) not in used_keys]
                     for cite in remaining_unverified:
                         keywords = cite.get("keywords", [])
                         best_paper = self._match_in_pool(keywords, offline_pool)
-                        if not best_paper and pool_queue:
-                            # 匹配失败时，轮流分配池中未使用的论文
-                            best_paper = pool_queue.pop(0)
+                        # v12.2 fix: 匹配失败不塞随机论文，留 [?]
                         if best_paper:
                             dedup_key = best_paper.get("doi", "") or best_paper.get("title", "").lower().strip()
                             if dedup_key in self._citation_map:
                                 tag_to_index[cite["raw_tag"]] = self._citation_map[dedup_key]
-                            else:
+                            elif dedup_key not in used_keys:
                                 self._citation_map[dedup_key] = next_idx
                                 tag_to_index[cite["raw_tag"]] = next_idx
+                                used_keys.add(dedup_key)
                                 next_idx += 1
                     matched = sum(1 for c in remaining_unverified if c["raw_tag"] in tag_to_index)
-                    logger.info(f"[CitationManager] 全局兜底: {matched}/{len(remaining_unverified)} 个未验证引用已分配编号")
+                    logger.info(f"[CitationManager] 全局兜底: {matched}/{len(remaining_unverified)} "
+                                f"(匹配失败 {len(remaining_unverified)-matched} 个保留[?])")
             except Exception as e:
                 logger.warning(f"[CitationManager] 全局兜底失败: {e}")
 
@@ -348,21 +327,39 @@ class CitationManager:
             # 未匹配的引用标记为需要检查
             return f"[?]"
 
-        # v11.2: 处理自闭合 <citation> 标记
-        # 使用最后一个有效引用编号作为兜底
-        last_idx = max(self._citation_map.values()) if self._citation_map else 0
-
-        def replace_citation_standalone(match):
-            if last_idx > 0:
-                return f"[{last_idx}]"
-            return ""
-
+        # 先处理配对 <citation>...</citation>，结果存入 result
         result = re.sub(
             r'<citation>(.*?)</citation>',
             replace_citation,
             full_text,
             flags=re.DOTALL
         )
+
+        # v12.2: 处理自闭合 <citation> 标记 — 按上下文匹配不同论文
+        last_idx = max(self._citation_map.values()) if self._citation_map else 0
+
+        def replace_citation_standalone(match):
+            # 从位置周围的文本提取关键词，尝试匹配不同的论文
+            pos = match.start()
+            preceding = result[max(0, pos-200):pos]
+            kw_candidates = re.findall(r'\(([A-Z][^)]{3,40})\)', preceding)
+            kw_candidates += re.findall(r'([A-Z][a-z]+(?:\s+[a-z]+){0,3})', preceding)
+            _stop = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'has',
+                     'have', 'been', 'this', 'that', 'and', 'but', 'for',
+                     'with', 'from', 'which', 'where', 'when', 'how', 'can',
+                     'not', 'also', 'such', 'into', 'more', 'than', 'its'}
+            kw_candidates = [k.strip() for k in kw_candidates
+                             if k.strip() and k.lower().split()[0] not in _stop
+                             and len(k.strip()) > 3]
+            if kw_candidates and self._ref_entries:
+                kw_list = [[k.lower() for k in kw_candidates[:5]]]
+                best_idx = self._find_best_fallback(kw_list)
+                if best_idx is not None:
+                    return f"[{best_idx}]"
+            if last_idx > 0:
+                return f"[{last_idx}]"
+            return ""
+
         # v11.2: 也替换自闭合的 <citation> 标记
         result = re.sub(
             r'<citation>',
@@ -373,14 +370,37 @@ class CitationManager:
         return result
 
     def _save_ref_entries(self):
-        """v11.1: 保存编号映射供 BibTeXBuilder 使用"""
+        """v12.2: 保存到 ReferenceStore + 兼容 JSON"""
+        # 写入 ReferenceStore
+        try:
+            from tools.reference_store import get_reference_store
+            store = get_reference_store()
+            for entry in self._ref_entries:
+                # 查找 paper
+                paper = store.find_paper_by_title(entry.get("title", ""))
+                paper_id = paper["id"] if paper else None
+                # 查找或创建 citation
+                # dedup_key → cite_num 映射
+                dedup_key = entry.get("dedup_key", "")
+                if dedup_key in self._citation_map:
+                    cite_num = self._citation_map[dedup_key]
+                    store.upsert_citation(
+                        chapter_num=0,  # 全局编号
+                        citation_tag=dedup_key,
+                        paper_id=paper_id,
+                        cite_num=cite_num,
+                        verified=True,
+                    )
+        except Exception as e:
+            logger.debug(f"[CitationManager] ReferenceStore 写入失败: {e}")
+
+        # 兼容旧 JSON
         try:
             import os
             from config.project_config import OUTPUT_DIR
             path = os.path.join(OUTPUT_DIR, "citation_entries.json")
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(self._ref_entries, f, ensure_ascii=False, indent=2)
-            logger.debug(f"[CitationManager] 编号映射已保存: {path}")
         except Exception as e:
             logger.debug(f"[CitationManager] 保存编号映射失败: {e}")
 
@@ -452,8 +472,7 @@ class CitationManager:
         """
         基于 reference_pool 构建引用支撑库（claim 级映射）
 
-        为每篇参考论文提取可支撑的 claim（论断/观点），
-        建立从 claim 到参考文献的映射表，供章节生成时使用。
+        v12.2: claims 写入 ReferenceStore，兼容导出 JSON。
 
         Args:
             reference_pool: 参考文献池（来自 reference_pool_builder）
@@ -467,11 +486,21 @@ class CitationManager:
         innovation_points = project_data.get("innovation_points", [])
         model_arch = project_data.get("model_architecture", {})
 
-        for paper in reference_pool[:50]:  # 限制处理量
+        # 尝试使用 ReferenceStore
+        store = None
+        try:
+            from tools.reference_store import get_reference_store
+            store = get_reference_store()
+        except Exception:
+            pass
+
+        for paper in reference_pool[:50]:
             title = paper.get("title", "")
             abstract = paper.get("abstract", "")
             venue = paper.get("venue", "") or paper.get("venue_abbr", "")
             year = paper.get("year", "")
+
+            paper_claims_data = []
 
             # v11.6: 无 abstract 时使用 title + tags 生成有意义的 claim
             if not abstract:
@@ -480,31 +509,29 @@ class CitationManager:
                     year_str = str(year) if year else "recent"
                     tags = paper.get("tags", [])
                     tag_str = ", ".join(tags[:3]) if tags else ""
-                    # 从标题提取关键技术方向
                     meaningful = [w for w in re.findall(r'[A-Za-z]+', title)
                                   if w.lower() not in {'the', 'a', 'an', 'of', 'for',
                                   'and', 'in', 'on', 'to', 'from', 'with', 'using', 'based'}
                                   and len(w) > 2]
                     technique = meaningful[0] if meaningful else "this approach"
-                    claims.append({
+                    paper_claims_data.append({
                         "claim": f"{technique} technique presented in {short_venue} ({year_str}): {title}.",
                         "paper_id": paper.get("paperId", "") or paper.get("doi", ""),
                         "title": title,
                         "year": year,
                     })
                     if tag_str:
-                        claims.append({
+                        paper_claims_data.append({
                             "claim": f"Related method using {tag_str} — {title} ({short_venue}, {year_str}).",
                             "paper_id": paper.get("paperId", "") or paper.get("doi", ""),
                             "title": title,
                             "year": year,
                         })
-                continue
-
-            # 使用 LLM 提取该论文的可支撑 claim
-            if self.api_client:
-                try:
-                    prompt = f"""Given this paper, list 3-5 key claims/findings that could support a research paper.
+            else:
+                # 使用 LLM 提取该论文的可支撑 claim
+                if self.api_client:
+                    try:
+                        prompt = f"""Given this paper, list 3-5 key claims/findings that could support a research paper.
 Each claim should be a concise statement (one sentence).
 
 Paper title: {title}
@@ -513,24 +540,36 @@ Abstract: {abstract[:500]}
 Innovation points of our paper: {json.dumps(innovation_points[:3], ensure_ascii=False)[:500]}
 
 Return ONLY a JSON array of strings. No explanation needed."""
-                    response = self.api_client.call_light(prompt)
-                    if response:
-                        response = response.strip()
-                        if response.startswith("```"):
-                            response = "\n".join(response.split("\n")[1:-1])
-                        paper_claims = json.loads(response)
-                        if isinstance(paper_claims, list):
-                            for claim in paper_claims[:5]:
-                                if isinstance(claim, str) and len(claim) > 10:
-                                    claims.append({
-                                        "claim": claim,
-                                        "paper_id": paper.get("paperId", ""),
-                                        "title": title,
-                                        "year": paper.get("year"),
-                                    })
-                except (json.JSONDecodeError, Exception) as e:
-                    logger.debug(f"提取 claim 失败 ({title[:30]}): {e}")
-                    continue
+                        response = self.api_client.call_light(prompt)
+                        if response:
+                            response = response.strip()
+                            if response.startswith("```"):
+                                response = "\n".join(response.split("\n")[1:-1])
+                            parsed = json.loads(response)
+                            if isinstance(parsed, list):
+                                for claim in parsed[:5]:
+                                    if isinstance(claim, str) and len(claim) > 10:
+                                        paper_claims_data.append({
+                                            "claim": claim,
+                                            "paper_id": paper.get("paperId", ""),
+                                            "title": title,
+                                            "year": paper.get("year"),
+                                        })
+                    except (json.JSONDecodeError, Exception) as e:
+                        logger.debug(f"提取 claim 失败 ({title[:30]}): {e}")
+
+            # 写入 ReferenceStore
+            if store and paper_claims_data:
+                try:
+                    db_paper = store.find_paper_by_title(title)
+                    if db_paper:
+                        existing = store.get_claims_for_paper(db_paper["id"])
+                        if not existing:
+                            store.add_claims(db_paper["id"], paper_claims_data)
+                except Exception as e:
+                    logger.debug(f"[CitationManager] ReferenceStore claims 写入失败: {e}")
+
+            claims.extend(paper_claims_data)
 
         result = {"claims": claims, "pool_size": len(reference_pool)}
         logger.info(f"[CitationManager] 引用支撑库: {len(claims)} 个 claim, 来自 {len(reference_pool)} 篇论文")

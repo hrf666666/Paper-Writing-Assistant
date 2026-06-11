@@ -17,7 +17,7 @@ from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, WORKSPACE_DIR, PROJECT_CODE_PATH,
     RUN_ABLATION, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction, build_citation_instruction
 from api.paper_search import search_papers, get_paper_details
 
 import logging
@@ -508,18 +508,19 @@ def generate_experiments(project_data, ref_data, previous_chapters=None, citatio
 1. 使用表格呈现与SOTA方法的性能对比（至少5个对比方法）
 2. 表格必须包含以下指标列：MSE、MAE、BadPix（三个指标缺一不可）
 3. 每个数据集分别报告指标，最优结果加粗
-4. 表格后逐项分析对比结果：
-   - 本文方法在哪些指标/数据集上表现最优
-   - 与各baseline相比的优势幅度（用百分比表示）
-   - 分析优势的原因（关联到方法设计）
+4. 表格后逐项分析对比结果
 5. 对于本文方法表现不是最优的情况，分析原因
-6. 引用至少5篇不同的参考文献，使用<citation>标记
 
 **表格格式要求**：
 - 使用 \\begin{{table*}}...\\end{{table*}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)
 - 整体用 \\resizebox{{\\textwidth}}{{!}}{{...}} 缩放
-- 表格列：Method | Year | HCI New (MSE/MAE/BadPix) | UrbanLF-Syn (MSE/MAE/BadPix) | Non-Lambertian (MSE/MAE/BadPix)
 - 如果表格太宽，按数据集分成2-3个子表格
+
+{style_instruction}
+
+{citation_context}
+
+{build_citation_instruction(5)}
 
 请使用学术英语撰写。请直接输出LaTeX代码。
 **重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
@@ -577,16 +578,19 @@ def generate_experiments(project_data, ref_data, previous_chapters=None, citatio
 4. 逐项分析每个消融实验的结果：
    - 移除/替换该模块后性能如何变化（用百分比量化）
    - 这证明了该模块的什么作用
-   - 与预期的假设是否一致
 5. 在分析中自然关联到方法设计的动机
-6. 引用相关文献支持消融分析，使用<citation>标记
-7. 消融段落中至少提及"ablation"关键词5次以上
 
 **表格格式**：
 - 使用 \\begin{{table}}...\\end{{table}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)
 - 整体用 \\resizebox{{\\columnwidth}}{{!}}{{...}} 缩放
-- 列：Configuration | MSE $\downarrow$ | MAE $\downarrow$ | BadPix $\downarrow$
-- Full Model 行放在最前面，最优值用 \textbf{{...}} 加粗
+- 列：Configuration | MSE $\\downarrow$ | MAE $\\downarrow$ | BadPix $\\downarrow$
+- Full Model 行放在最前面，最优值用 \\textbf{{...}} 加粗
+
+{style_instruction}
+
+{citation_context}
+
+{build_citation_instruction(3)}
 
 请使用学术英语撰写。请直接输出LaTeX代码。
 **重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：

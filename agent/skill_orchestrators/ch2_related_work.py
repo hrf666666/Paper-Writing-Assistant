@@ -13,7 +13,7 @@ import json
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction, build_citation_instruction
 from api.paper_search import search_papers, get_paper_details
 
 import logging
@@ -183,8 +183,10 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
 
 {citation_context}
 
-请使用学术英语撰写。引用使用<citation>["keyword1","keyword2"]</citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
-**重要**：不要输出 \section 或 \subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
+{build_citation_instruction(5)}
+
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
         
         logger.info(f"[chapter2] 生成 2.{idx+1} {title}...")
@@ -212,7 +214,11 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
 前序内容摘要：
 {sections[-1][:1000]}
 
-请使用学术英语，2-3句话。直接输出LaTeX代码。不要输出 \section 标题。直接给出内容：
+{citation_context}
+
+{build_citation_instruction(2)}
+
+请使用学术英语，2-3句话。直接输出LaTeX代码。不要输出 \\section 标题。直接给出内容：
 """
     
     logger.info("[chapter2] 生成总结过渡段...")

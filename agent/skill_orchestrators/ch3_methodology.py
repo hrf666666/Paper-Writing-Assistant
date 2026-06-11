@@ -13,7 +13,7 @@ import json
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction, build_citation_instruction
 
 import logging
 logger = logging.getLogger(__name__)
@@ -77,12 +77,6 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
         logger.error(f"[chapter3] TikZ架构图生成失败: {e}")
         tikz_code = "% TikZ architecture figure generation failed"
 
-    try:
-        with open(f"{OUTPUT_DIR}/chapter3/architecture_figure.tex", 'w', encoding='utf-8') as f:
-            f.write(tikz_code)
-    except Exception as e:
-        logger.error(f"[chapter3] TikZ文件写入失败: {e}")
-
     # 构建前序章节摘要块
     _prev_summary_block = ""
     if prev_summary:
@@ -116,9 +110,13 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 
 {_prev_summary_block}
 
-请使用学术英语撰写。引用使用<citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
-架构图引用使用 "Fig.~\ref{fig:architecture}" 或 "As illustrated in Fig.~\ref{fig:architecture}"。
-**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
+{citation_context}
+
+{build_citation_instruction(3)}
+
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
+架构图引用使用 "Fig.~\\ref{{fig:architecture}}" 或 "As illustrated in Fig.~\\ref{{fig:architecture}}"。
+**重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     
     try:
@@ -169,13 +167,9 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 5. 突出该模块的创新点和与现有方法的不同之处
 
 **公式要求**（关键）：
-- 每个子节至少包含1个独立的行间公式（使用 \begin{{equation}}...\end{{equation}} 格式）
+- 每个子节至少包含1个独立的行间公式（使用 \\begin{{equation}}...\\end{{equation}} 格式）
 - 不要只给出文字描述，必须有数学形式化
 - 公式中的每个变量都要在正文中定义
-
-**引用要求**：
-- 每个子节至少引用2-3篇不同的文献
-- 使用<citation>标记标注引用
 
 **模型整体架构**（用于保持一致性）：
 {json.dumps(model_architecture, ensure_ascii=False, indent=2)[:2000]}
@@ -187,9 +181,12 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 
 {style_instruction}
 
-请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
-引用使用<citation>标记。
-**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
+{citation_context}
+
+{build_citation_instruction(2)}
+
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
+**重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
         
         logger.info(f"[chapter3] 生成 3.{section_num} {module_name}...")
@@ -220,7 +217,7 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 </loss_config>
 
 **具体要求**：
-1. 给出总体损失函数的定义（必须使用 \begin{{equation}}...\end{{equation}} 行间公式）
+1. 给出总体损失函数的定义（必须使用 \\begin{{equation}}...\\end{{equation}} 行间公式）
 2. 逐项解释每个损失项的物理/几何含义（每个损失项至少一个独立公式）
 3. 说明各损失项之间的权重设置及理由
 4. 如有物理一致性约束或正则化，详细说明其推导过程
@@ -228,15 +225,15 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 **公式要求**：
 - 总体损失函数必须是行间公式
 - 每个损失分量也应有独立的公式定义
-- 确保至少有2-3个行间公式（\begin{{equation}}...\end{{equation}}）
-
-**引用要求**：
-- 引用至少2-3篇相关方法或损失函数设计的文献
-- 使用<citation>标记
+- 确保至少有2-3个行间公式（\\begin{{equation}}...\\end{{equation}}）
 
 {style_instruction}
 
-请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。直接给出LaTeX代码：
+{citation_context}
+
+{build_citation_instruction(2)}
+
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。直接给出LaTeX代码：
 """
     
     logger.info(f"[chapter3] 生成 3.{len(modules)+2} Training Objective...")

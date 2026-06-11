@@ -10,7 +10,7 @@ import json
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, get_article_type_info
 )
-from agent.base_orchestrator import BaseOrchestrator, build_style_instruction
+from agent.base_orchestrator import BaseOrchestrator, build_style_instruction, build_citation_instruction
 
 import logging
 logger = logging.getLogger(__name__)
@@ -50,6 +50,7 @@ def generate_introduction(project_data, ref_data, citation_context=""):
     style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Introduction")
     
     # ==================== 子节1.1: 研究背景与问题重要性 ====================
+    _cite_instruction = build_citation_instruction(min_cites=8)
     prompt_1_1 = f"""
 你是一名{article_info['name']}级别的学术论文写作专家。请为论文"{PAPER_TITLE}"撰写第1.1节"研究背景与问题重要性"。
 
@@ -76,15 +77,10 @@ def generate_introduction(project_data, ref_data, citation_context=""):
 
 {citation_context}
 
-**引用要求**（关键）：
-- 本节至少引用8-10篇不同的参考文献
-- 引用使用<citation>["keyword1", "keyword2"]</citation>标记
-- 引用应覆盖：领域背景、现有方法、关键数据集等
-- 不要堆砌引用，每处引用都要有明确的论述目的
+{_cite_instruction}
 
-请使用学术英语撰写，文风严谨但不失流畅。对于潜在可以添加引用的部分，使用<citation>["keyword1", "keyword2"]</citation>标记。
-请直接输出IEEE Transactions格式的LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}} 或 \begin{{align}}...\end{{align}}。加粗用 \textbf{{...}}。列表用 \begin{{itemize}}\item ...\end{{itemize}}。
-**重要**：不要输出 \section 或 \subsection 标题，标题由系统自动添加。不要输出 \documentclass 或 \begin{{document}}。直接从正文内容开始，只输出LaTeX代码：
+请使用学术英语撰写，文风严谨但不失流畅。请直接输出IEEE Transactions格式的LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}} 或 \\begin{{align}}...\\end{{align}}。加粗用 \\textbf{{...}}。列表用 \\begin{{itemize}}\\item ...\\end{{itemize}}。
+**重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。不要输出 \\documentclass 或 \\begin{{document}}。直接从正文内容开始，只输出LaTeX代码：
 """
     
     logger.info("[chapter1] 生成 1.1 研究背景与问题重要性...")
@@ -95,6 +91,7 @@ def generate_introduction(project_data, ref_data, citation_context=""):
         section_1_1 = ""
     
     # ==================== 子节1.2: 现有方法的不足 ====================
+    _cite_instruction_12 = build_citation_instruction(min_cites=5)
     prompt_1_2 = f"""
 你是一名{article_info['name']}级别的学术论文写作专家。请为论文"{PAPER_TITLE}"撰写第1.2节"现有方法的局限性"。
 
@@ -120,13 +117,12 @@ def generate_introduction(project_data, ref_data, citation_context=""):
 
 {style_instruction}
 
-**引用要求**：
-- 本节至少引用5-8篇不同的参考文献（不同于1.1节已引用的）
-- 引用使用<citation>标记
-- 每类方法至少引用1-2篇代表性文献
+{citation_context}
 
-请使用学术英语撰写。引用使用<citation>标记。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \begin{{equation}}...\end{{equation}}。
-**重要**：不要输出 \section 或 \subsection 标题。直接从正文开始，只输出LaTeX代码：
+{_cite_instruction_12}
+
+请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
+**重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     
     logger.info("[chapter1] 生成 1.2 现有方法的局限性...")
@@ -137,6 +133,7 @@ def generate_introduction(project_data, ref_data, citation_context=""):
         section_1_2 = ""
     
     # ==================== 子节1.3: 本文方法与贡献 ====================
+    _cite_instruction_13 = build_citation_instruction(min_cites=3)
     prompt_1_3 = f"""
 你是一名{article_info['name']}级别的学术论文写作专家。请为论文"{PAPER_TITLE}"撰写第1.3节"本文方法与贡献"。
 
@@ -165,6 +162,10 @@ def generate_introduction(project_data, ref_data, citation_context=""):
 </previous_content>
 
 {style_instruction}
+
+{citation_context}
+
+{_cite_instruction_13}
 
 请使用学术英语撰写。贡献列表使用 \\begin{{enumerate}} \\item \\textbf{{Contribution 1}}: ... \\end{{enumerate}} 格式。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
 **重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：

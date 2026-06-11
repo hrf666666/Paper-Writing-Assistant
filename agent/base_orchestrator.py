@@ -175,6 +175,23 @@ class BaseOrchestrator:
             return None
 
 
+def build_citation_instruction(min_cites: int = 5) -> str:
+    """
+    构建统一的引用指令片段。所有 chapter prompt 统一使用。
+
+    citation_context 由 loop.py 的 _build_citation_context() 生成，
+    包含 CITE KEY REFERENCE LIST。每个 prompt 末尾必须同时注入
+    {citation_context} 和 build_citation_instruction()。
+    """
+    return (
+        f"**引用要求**（关键）：\n"
+        f"- 本节至少引用 {min_cites} 篇不同的参考文献\n"
+        f"- 使用 \\cite{{key}} 格式。**CITE KEY REFERENCE LIST** 中列出了所有可用的 cite key\n"
+        f"- **只能使用列表中给出的 key，禁止编造不存在的 cite key**\n"
+        f"- 引用应自然融入句式，每处引用都要有明确的论述目的\n"
+    )
+
+
 def build_style_instruction(style_guide: dict, chapter_org: dict,
                            chapter_name: str = None,
                            is_related_work: bool = False) -> str:

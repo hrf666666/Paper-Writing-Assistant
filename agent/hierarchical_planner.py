@@ -344,6 +344,7 @@ class ValidationEngine:
             "pdf_exists": self._read_pdf_exists,
             "compile_success": self._read_compile_success,
             "unknown_citations": self._read_unknown_citations,
+            "paper_context_exists": self._read_paper_context_exists,
         }
 
         reader = readers.get(metric)
@@ -363,11 +364,27 @@ class ValidationEngine:
         return None
 
     def _read_innovation_points(self) -> int:
-        path = os.path.join(self.output_dir, "project_data.json")
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return len(data.get("innovation_points", []))
+        # 尝试多个候选文件
+        candidates = [
+            os.path.join(self.output_dir, "project_data.json"),
+            os.path.join(self.output_dir, "innovation_points.json"),
+            os.path.join(self.output_dir, "innovation_verified.json"),
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if isinstance(data, list):
+                        return len(data)
+                    if isinstance(data, dict):
+                        pts = data.get("innovation_points",
+                                       data.get("创新点",
+                                                data.get("verified_points", [])))
+                        if isinstance(pts, list):
+                            return len(pts)
+                except (json.JSONDecodeError, IOError):
+                    continue
         return 0
 
     def _read_model_architecture(self) -> int:
@@ -402,11 +419,13 @@ class ValidationEngine:
 
     def _read_motivation(self) -> int:
         """返回 1=存在且非空, 0=不存在或空"""
-        # 多种可能的存储位置
         candidates = [
             os.path.join(self.output_dir, "motivation_thread.json"),
             os.path.join(self.output_dir, "motivation_thread.txt"),
             os.path.join(self.output_dir, "motivation.json"),
+            os.path.join(self.output_dir, "motivation_result.json"),
+            os.path.join(self.output_dir, "motivation_candidates.md"),
+            os.path.join(self.output_dir, "confirmed_motivation.md"),
         ]
         for path in candidates:
             if os.path.exists(path):
@@ -419,7 +438,10 @@ class ValidationEngine:
         """返回 1=存在且非空"""
         candidates = [
             os.path.join(self.output_dir, "style_profile.json"),
+            os.path.join(self.output_dir, "style_profile.md"),
             os.path.join(self.output_dir, "journal_style.json"),
+            os.path.join(self.output_dir, "writing_style_guide.json"),
+            os.path.join(self.output_dir, "figure_style_guide.json"),
         ]
         for path in candidates:
             if os.path.exists(path):
@@ -462,16 +484,41 @@ class ValidationEngine:
             return len(re.findall(r'\[\?\]', content))
         return 999
 
+    def _read_paper_context_exists(self) -> int:
+        """返回 1=paper_context 存在且非空, 0=不存在"""
+        # 直接文件
+        pc_path = os.path.join(self.output_dir, "paper_context.json")
+        if os.path.exists(pc_path) and os.path.getsize(pc_path) > 10:
+            return 1
+        # 从 project_data.json 中查找
+        pd_path = os.path.join(self.output_dir, "project_data.json")
+        if os.path.exists(pd_path):
+            try:
+                with open(pd_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                pc = data.get("paper_context", {})
+                return 1 if pc and any(pc.values()) else 0
+            except (json.JSONDecodeError, IOError):
+                pass
+        return 0
+
     def _read_chapter_words(self, ch_num: str) -> int:
-        """读取章节字数"""
-        # 尝试从 chapters/ 目录读取
-        ch_path = os.path.join(self.output_dir, f"chapter{ch_num}", "content.tex")
-        if not os.path.exists(ch_path):
-            ch_path = os.path.join(self.output_dir, f"chapter{ch_num}", "content.md")
-        if os.path.exists(ch_path):
-            with open(ch_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            return len(content.split())
+        """读取章节字数 — v12.1: glob 匹配实际文件名"""
+        import glob as glob_mod
+        ch_dir = os.path.join(self.output_dir, f"chapter{ch_num}")
+        if not os.path.isdir(ch_dir):
+            return 0
+        # glob 匹配 chapter{N}_*.md 或 chapter{N}_*.tex
+        for pattern in [f"chapter{ch_num}_*.md", f"chapter{ch_num}_*.tex",
+                        "content.tex", "content.md"]:
+            matches = glob_mod.glob(os.path.join(ch_dir, pattern))
+            for ch_path in matches:
+                try:
+                    with open(ch_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    return len(content.split())
+                except IOError:
+                    continue
         return 0
 
     # ────────────── 工具方法 ──────────────

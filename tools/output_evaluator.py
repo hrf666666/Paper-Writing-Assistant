@@ -121,7 +121,8 @@ class OutputEvaluator:
         tex_path = os.path.join(self.latex_dir, "main.tex")
         checks["tex_exists"] = os.path.exists(tex_path)
         if checks["tex_exists"]:
-            tex_content = open(tex_path, "r", encoding="utf-8").read()
+            with open(tex_path, "r", encoding="utf-8") as f:
+                tex_content = f.read()
 
             # IEEE 格式合规
             checks["tex_has_ieeetran"] = "IEEEtran" in tex_content
@@ -175,7 +176,8 @@ class OutputEvaluator:
         bib_path = os.path.join(self.latex_dir, "references.bib")
         checks["bib_exists"] = os.path.exists(bib_path)
         if checks["bib_exists"]:
-            bib_content = open(bib_path, "r", encoding="utf-8").read()
+            with open(bib_path, "r", encoding="utf-8") as f:
+                bib_content = f.read()
             checks["bib_entries"] = bib_content.count("@")
             checks["bib_min_entries"] = checks["bib_entries"] >= 25
 
@@ -634,6 +636,8 @@ Output JSON:
 
 def run_output_evaluator(output_dir: str, api_client=None,
                           outline: Dict = None, anchor_map: Dict = None,
-                          unified_results: Dict = None) -> Dict:
+                          unified_results: Dict = None,
+                          hierarchical_report: Dict = None) -> Dict:
     evaluator = OutputEvaluator(output_dir, api_client)
-    return evaluator.run_full_evaluation(outline, anchor_map, unified_results)
+    return evaluator.run_full_evaluation(outline, anchor_map, unified_results,
+                                         hierarchical_report)
