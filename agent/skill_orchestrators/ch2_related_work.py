@@ -238,14 +238,15 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
     
     return full_chapter
 
-def run_chapter2(project_data, ref_data, previous_chapters=None, citation_context=""):
+def run_chapter2(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """主入口：生成第二章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter2", exist_ok=True)
     
     logger.info("[chapter2] 开始生成第二章 Related Work...")
     try:
         chapter_content = generate_related_work(project_data, ref_data, previous_chapters,
-                                                   citation_context=citation_context)
+                                                   citation_context=citation_context,
+                                                   venue_adapter=venue_adapter)
     except Exception as e:
         logger.error(f"[chapter2] 第二章生成失败: {e}")
         chapter_content = "\\section{Related Work}\n\n(生成失败，请重新运行)\n"

@@ -194,17 +194,21 @@ def build_citation_instruction(min_cites: int = 5) -> str:
 
 def build_style_instruction(style_guide: dict, chapter_org: dict,
                            chapter_name: str = None,
-                           is_related_work: bool = False) -> str:
+                           is_related_work: bool = False,
+                           venue_adapter=None) -> str:
     """
-    统一的写作风格指导构建函数（替代 ch1/ch2/ch3/ch4 各自的 _build_style_instruction 副本）
+    统一的写作风格指导构建函数（替代 ch1/ch2/ch3/ch4/ch5 各自的 _build_style_instruction 副本）
 
     优先级：VenueAdapter (P1) → IEEE Trans profile (P2) → 学术写作指南 (P4) → style_guide → chapter_org
+
+    Args:
+        venue_adapter: 已注入的 VenueAdapter 实例（含 journal_style）。
+                       如果不传，会新建一个（但将丢失 Phase 0.65 学习的风格）。
     """
     # P1: VenueAdapter（统一风格中心）
     if chapter_name:
         try:
-            from agent.venue_adapter import VenueAdapter
-            adapter = VenueAdapter()
+            adapter = venue_adapter or VenueAdapter()
             style_text = adapter.build_chapter_style_instruction(chapter_name)
             if style_text and len(style_text) > 100:
                 return style_text

@@ -62,6 +62,8 @@ class VenueAdapter:
     场景适配器
 
     封装 VenueProfile，提供面向下游 skill 的便捷查询接口。
+    journal_style / ref_style_guide 为实例属性，由 loop.py 注入，
+    通过参数链传递给所有章节生成器（依赖注入，不使用全局状态）。
     """
 
     def __init__(self, profile: VenueProfile = None):
@@ -70,6 +72,8 @@ class VenueAdapter:
         except Exception as e:
             logger.error(f"VenueAdapter 初始化失败: {e}")
             raise
+        self._journal_style: Optional[Dict] = None
+        self._ref_style_guide: Optional[Dict] = None
 
     # ---- 章节篇幅 ----
 
@@ -237,11 +241,11 @@ class VenueAdapter:
         )
 
     def set_journal_style(self, journal_style: Dict):
-        """设置从 JournalStyleLearner 学习到的期刊风格"""
+        """设置从 JournalStyleLearner 学习到的期刊风格（实例属性）"""
         self._journal_style = journal_style
 
     def set_ref_style_guide(self, ref_style_guide: Dict):
-        """设置从 ref_pdf_analyzer 学习到的参考论文风格"""
+        """设置从 ref_pdf_analyzer 学习到的参考论文风格（实例属性）"""
         self._ref_style_guide = ref_style_guide
 
     # ---- 兼容性：返回与旧 get_article_type_info() 相同结构的字典 ----

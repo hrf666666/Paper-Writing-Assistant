@@ -54,6 +54,8 @@ class UnifiedAPIClient:
         self._call_stats: Dict[str, Dict[str, int]] = {}
         self._available_models: Dict[str, Dict] = {}
         self._client_pool: Dict[str, object] = {}  # pooled SDK clients by alias (avoid re-init per call)
+        self._prompt_chars_total = 0   # v13: 累计注入字符数（上下文可观测）
+        self._prompt_calls_logged = 0  # 用于采样日志，避免每条都打
 
         # 启动时检测可用模型
         self._detect_available_models()
@@ -141,9 +143,25 @@ class UnifiedAPIClient:
         """
         按优先级尝试调用模型，失败时自动降级到下一个模型
 
-        采用指数退避重试策略
+        v13: 错误分级驱动重试策略（替代旧的"所有异常一刀切指数退避"）
+        - 瞬时错误（429 配额/超时）：有 retry_after 则按它等，否则指数退避；同一 provider
+          耗尽后 failover 到下一个 provider。
+        - 永久错误（401/403/参数）：不重试同一模型，直接 failover。
+        - 不再把瞬时配额错误（如 GLM 5 小时上限）静默为"重试 30s 两次就放弃"。
         """
+        from agent.core.errors import classify
+
         errors = []
+        # 记录 prompt 规模（上下文可观测；采样打日志避免刷屏）
+        prompt_chars = len(prompt)
+        self._prompt_chars_total += prompt_chars
+        self._prompt_calls_logged += 1
+        if self._prompt_calls_logged % 20 == 0 or prompt_chars > 60000:
+            logger.info(f"[ctx] 累计注入 {self._prompt_chars_total} 字符 "
+                        f"(本次 {prompt_chars}, 调用 #{self._prompt_calls_logged})"
+                        + (" [超大prompt!]" if prompt_chars > 60000 else ""))
+
+        last_level = "unknown"
 
         for model_name in model_list:
             # 跳过不可用的模型
@@ -159,20 +177,44 @@ class UnifiedAPIClient:
                     return result
                 except Exception as e:
                     self._record_stats(model_name, False)
-                    error_msg = f"{model_name} 第{attempt}次调用失败: {e}"
+                    level, retry_after, _ = classify(e)
+                    last_level = level
+                    error_msg = f"{model_name} 第{attempt}次调用失败 [{level}]: {e}"
                     logger.warning(error_msg)
                     errors.append(error_msg)
 
-                    if attempt < max_retries:
-                        wait_time = backoff_base * (2 ** (attempt - 1))
-                        logger.info(f"等待 {wait_time}s 后重试...")
-                        time.sleep(wait_time)
+                    # 永久错误：不重试同一模型，直接 failover
+                    if level == "permanent":
+                        logger.info(f"{model_name} 永久错误，跳过重试，failover")
+                        break
 
-        # 所有模型都失败
-        raise APIError(
+                    # 瞬时错误：决定等待时间
+                    if level == "transient":
+                        if retry_after:
+                            # 配额类（如 GLM 5h 上限）：按重置时间等
+                            wait_time = min(retry_after, 3600.0)  # 上限 1h，避免死等
+                            logger.info(f"{model_name} 配额受限，等待 {wait_time:.0f}s 后重试 "
+                                        f"(重置时间已解析)")
+                        elif attempt < max_retries:
+                            wait_time = backoff_base * (2 ** (attempt - 1))
+                            logger.info(f"等待 {wait_time}s 后重试...")
+                        else:
+                            break
+                        time.sleep(wait_time)
+                    else:
+                        # unknown：保留旧行为（退避重试），保守可恢复
+                        if attempt < max_retries:
+                            wait_time = backoff_base * (2 ** (attempt - 1))
+                            logger.info(f"等待 {wait_time}s 后重试 (unknown)...")
+                            time.sleep(wait_time)
+
+        # 所有模型都失败 — 把分级附在 APIError 上，供调用方判断
+        all_exhausted = APIError(
             f"所有模型调用失败:\n" + "\n".join(errors),
             model="all", attempt=max_retries
         )
+        all_exhausted.error_level = last_level  # type: ignore[attr-defined]
+        raise all_exhausted
 
     def _get_client(self, model_name: str):
         """Get (or lazily create) a pooled SDK client by alias.
@@ -267,6 +309,13 @@ class UnifiedAPIClient:
     def get_stats(self) -> Dict[str, Dict[str, int]]:
         """获取调用统计"""
         return self._call_stats.copy()
+
+    def get_context_stats(self) -> Dict[str, int]:
+        """v13: 获取上下文注入统计（prompt 字符累计 + 调用次数）"""
+        return {
+            "prompt_chars_total": self._prompt_chars_total,
+            "prompt_calls": self._prompt_calls_logged,
+        }
 
     def get_available_models(self) -> List[str]:
         """获取所有可用模型列表"""

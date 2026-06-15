@@ -59,7 +59,7 @@ def generate_architecture_diagram(model_architecture, figure_style, paper_title,
     return arch_pdf, arch_description
 
 
-def generate_methodology(project_data, ref_data, previous_chapters=None, citation_context=""):
+def generate_methodology(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """生成第三章 Methodology"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -72,7 +72,7 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
     figure_style = ref_data.get("figure_style", {})
     article_info = get_article_type_info()
     
-    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Methodology")
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Methodology", venue_adapter=venue_adapter)
 
     # 构建前序章节摘要
     prev_summary = ""
@@ -281,14 +281,15 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
     
     return full_chapter, arch_pdf_path
 
-def run_chapter3(project_data, ref_data, previous_chapters=None, citation_context=""):
+def run_chapter3(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """主入口：生成第三章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter3", exist_ok=True)
     
     logger.info("[chapter3] 开始生成第三章 Methodology...")
     try:
         chapter_content, arch_pdf_path = generate_methodology(project_data, ref_data, previous_chapters,
-                                                            citation_context=citation_context)
+                                                            citation_context=citation_context,
+                                                            venue_adapter=venue_adapter)
     except Exception as e:
         logger.error(f"[chapter3] 第三章生成失败: {e}")
         chapter_content = "\\section{Methodology}\n\n(生成失败，请重新运行)\n"

@@ -355,7 +355,7 @@ if __name__ == "__main__":
     return ablation_dir
 
 
-def generate_experiments(project_data, ref_data, previous_chapters=None, citation_context=""):
+def generate_experiments(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """生成第四章 Experiments"""
     
     innovation_points = project_data.get("innovation_points", [])
@@ -618,14 +618,15 @@ def generate_experiments(project_data, ref_data, previous_chapters=None, citatio
     
     return full_chapter
 
-def run_chapter4(project_data, ref_data, previous_chapters=None, citation_context=""):
+def run_chapter4(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """主入口：生成第四章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter4", exist_ok=True)
     
     logger.info("[chapter4] 开始生成第四章 Experiments...")
     try:
         chapter_content = generate_experiments(project_data, ref_data, previous_chapters,
-                                                 citation_context=citation_context)
+                                                 citation_context=citation_context,
+                                                 venue_adapter=venue_adapter)
     except Exception as e:
         logger.error(f"[chapter4] 第四章生成失败: {e}")
         chapter_content = "\\section{Experiments}\n\n(生成失败，请重新运行)\n"

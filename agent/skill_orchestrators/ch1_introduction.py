@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 _orch = BaseOrchestrator(output_dir=OUTPUT_DIR)
 
 
-def generate_introduction(project_data, ref_data, citation_context=""):
+def generate_introduction(project_data, ref_data, citation_context="", venue_adapter=None):
     """
     生成第一章 Introduction
     
@@ -47,7 +47,7 @@ def generate_introduction(project_data, ref_data, citation_context=""):
         innovation_summary += f"  价值: {ip.get('创新点价值', 'N/A')}\n"
     
     # 构建写作风格指导
-    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Introduction")
+    style_instruction = build_style_instruction(style_guide, chapter_org, chapter_name="Introduction", venue_adapter=venue_adapter)
     
     # ==================== 子节1.1: 研究背景与问题重要性 ====================
     _cite_instruction = build_citation_instruction(min_cites=8)
@@ -193,14 +193,15 @@ def generate_introduction(project_data, ref_data, citation_context=""):
     return full_chapter
 
 
-def run_chapter1(project_data, ref_data, citation_context=""):
+def run_chapter1(project_data, ref_data, citation_context="", venue_adapter=None):
     """主入口：生成第一章"""
     os.makedirs(f"{OUTPUT_DIR}/chapter1", exist_ok=True)
     
     logger.info("[chapter1] 开始生成第一章 Introduction...")
     try:
         chapter_content = generate_introduction(project_data, ref_data,
-                                                  citation_context=citation_context)
+                                                  citation_context=citation_context,
+                                                  venue_adapter=venue_adapter)
     except Exception as e:
         logger.error(f"[chapter1] 第一章生成失败: {e}")
         chapter_content = "\\section{Introduction}\n\n(生成失败，请重新运行)\n"

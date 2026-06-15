@@ -216,29 +216,39 @@ class CrossChapterChecker:
 
     def _find_canonical_value(self, wrong_val: str, ours_values: Dict) -> Optional[str]:
         """
-        从 PaperContext metrics 中找到最可能的正确值。
+        从 PaperContext metrics 或 Experiments ours_values 中找到最可能的正确值。
 
-        如果 wrong_val 与某个 metric 值近似但不完全一致，
-        返回 canonical 值。否则返回 None。
+        查找优先级：
+        1. PaperContext metrics（权威数值源）
+        2. ours_values（从 Experiments "Ours" 行提取的数值）
         """
-        pc_metrics = self._paper_context.get("metrics", {})
-        if not pc_metrics:
-            return None
-
         try:
             wrong_num = float(wrong_val)
         except (ValueError, TypeError):
             return None
 
-        for name, canonical in pc_metrics.items():
-            try:
-                canonical_num = float(canonical)
-                # 如果差值在 20% 以内，认为是同一个指标的不同版本
-                if abs(wrong_num - canonical_num) / max(abs(canonical_num), 0.001) < 0.2:
-                    if abs(wrong_num - canonical_num) > 0.001:  # 但不完全一致
-                        return str(canonical)
-            except (ValueError, TypeError):
-                continue
+        # 路径 1: PaperContext metrics
+        pc_metrics = self._paper_context.get("metrics", {})
+        if pc_metrics:
+            for name, canonical in pc_metrics.items():
+                try:
+                    canonical_num = float(canonical)
+                    if abs(wrong_num - canonical_num) / max(abs(canonical_num), 0.001) < 0.2:
+                        if abs(wrong_num - canonical_num) > 0.001:
+                            return str(canonical)
+                except (ValueError, TypeError):
+                    continue
+
+        # 路径 2: Experiments ours_values 兜底
+        if ours_values:
+            for val_str, count in ours_values.items():
+                try:
+                    val_num = float(val_str)
+                    if abs(wrong_num - val_num) / max(abs(val_num), 0.001) < 0.2:
+                        if abs(wrong_num - val_num) > 0.001:
+                            return val_str
+                except (ValueError, TypeError):
+                    continue
 
         return None
 

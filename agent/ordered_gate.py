@@ -101,8 +101,11 @@ class OrderedGatePipeline:
         overall_passed = True
         blocked_by = None
 
+        # v12.2: verify_all 只调用一次，复用给 Gate 0 和 Gate 1
+        verify_report = self.verifier.verify_all(chapters, abstract, bibliography)
+
         # ===== Gate 0: P0-Critical — 格式检查（纯代码，零LLM成本） =====
-        gate0 = self._run_gate0(chapters, abstract, bibliography)
+        gate0 = self._run_gate0(verify_report)
         results.append(gate0)
 
         if not gate0.passed and self._is_hard_gate(gate0.name):
@@ -113,7 +116,7 @@ class OrderedGatePipeline:
                 results.append(g)
         else:
             # ===== Gate 1: P1-High — 事实一致性（纯代码） =====
-            gate1 = self._run_gate1(chapters, abstract)
+            gate1 = self._run_gate1(verify_report)
             results.append(gate1)
 
             if not gate1.passed and self._is_hard_gate(gate1.name):
@@ -154,14 +157,9 @@ class OrderedGatePipeline:
 
         return result
 
-    def _run_gate0(self, chapters: Dict, abstract: str,
-                    bibliography: str) -> GateResult:
+    def _run_gate0(self, verify_report) -> GateResult:
         """Gate 0: P0-Critical 格式检查"""
         start = time.time()
-
-        verify_report = self.verifier.verify_all(
-            chapters, abstract, bibliography
-        )
 
         # 只关注 P0 级别的检查项（引用完整性、公式语法、残留标记）
         p0_checks = [
@@ -193,11 +191,9 @@ class OrderedGatePipeline:
         result.execution_time = time.time() - start
         return result
 
-    def _run_gate1(self, chapters: Dict, abstract: str) -> GateResult:
+    def _run_gate1(self, verify_report) -> GateResult:
         """Gate 1: P1-High 事实一致性检查"""
         start = time.time()
-
-        verify_report = self.verifier.verify_all(chapters, abstract)
 
         # 只关注 P1 级别的检查项
         p1_checks = [

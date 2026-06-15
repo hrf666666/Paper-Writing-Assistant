@@ -1,6 +1,6 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v12.0 | 更新: 2026-06-09
+> 版本: v12.3 | 更新: 2026-06-15
 
 ---
 
@@ -51,7 +51,7 @@ paper-writing-assistant/
 │   └── paper_search.py          # 论文检索（S2 语义搜索）
 │
 ├── agent/                       # Agent 核心层
-│   ├── loop.py                  # 自主循环引擎（系统心脏, 含 PaperContext + Phase 7.35）
+│   ├── loop.py                  # 自主循环引擎（系统心脏, v12.2: _CHAPTER_CONFIGS 统一分发 + 子方法提取）
 │   ├── api_client.py            # 统一 API 客户端（降级链管理）
 │   ├── dispatcher.py            # Leader-Worker 分层调度
 │   ├── base_orchestrator.py     # LLM 调用基类 + 公共工具函数
@@ -67,12 +67,12 @@ paper-writing-assistant/
 │   │   ├── ch5_conclusion.py    # Phase 5: Conclusion
 │   │   └── ...                  # 审查、引用池、范例学习等
 │   │
-│   ├── venue_adapter.py         # 期刊适配器（统一风格中心）
+│   ├── venue_adapter.py         # 期刊适配器（v12.2: 类级风格共享，消除实例断裂）
 │   ├── style_manager.py         # 统一风格管理 (v12.0: P0 通用写作纪律层)
-│   ├── quality_gate.py          # 质量门控 + 反馈循环
+│   ├── quality_gate.py          # 质量门控 + 反馈循环 (v12.2: 修复 should_retry 覆盖)
 │   ├── auditor.py               # 反幻觉审计引擎
 │   ├── citation_manager.py      # 引用去重、编号 (v12.0: chapters dict 接口)
-│   ├── cross_chapter_checker.py # 跨章节一致性检查 (v12.0: PaperContext 自动修复)
+│   ├── cross_chapter_checker.py # 跨章节一致性检查 (v12.2: PaperContext + ours_values 双路修复)
 │   ├── hierarchical_planner.py  # 分层任务规划 (v12.0: phase0_98 PaperContext)
 │   ├── memory.py                # 双层记忆系统
 │   ├── checkpoint.py            # 断点恢复
@@ -85,11 +85,11 @@ paper-writing-assistant/
 │
 ├── tools/                       # 工具层
 │   ├── latex_converter.py       # LaTeX 组装 + LLM 审查修复 + 中文字符过滤 (v12.0)
+│   ├── latex_constraint_checker.py  # 编译前结构合规审计
 │   ├── bibtex_builder.py        # BibTeX 生成（模板组装）
 │   ├── output_evaluator.py      # L1/L2/L3 三层评价
 │   ├── pdf_compiler.py          # XeLaTeX 编译
 │   ├── pdf_validator.py         # PDF 验证 + 溢出修复
-│   ├── tikz_generator.py        # TikZ 架构图生成
 │   └── ...
 │
 └── data/                        # 离线数据
@@ -158,7 +158,7 @@ paper-writing-assistant/
 | 6.5 | 反幻觉审计 | `auditor.py` | 逐步验证 + 参考文献反向检索 + 内容真实性校验 |
 | 7.0 | 全局打磨 | `loop.py` | 修正常见表述问题 |
 | 7.1 | 引用解析 | `citation_manager.py` | 🆕 按 chapters dict 独立处理 `<citation>` → `[N]`（无 join-then-split） |
-| 7.15 | 有序门控 | `ordered_gate.py` | P0 格式 → P1 一致性 → P2 写作质量 |
+| 7.15 | 有序门控 | `ordered_gate.py` | P0 格式 → P1 一致性 → P2 写作质量 (v12.2: verify_all 只调用一次) |
 | 7.2 | 跨章节检查 | `cross_chapter_checker.py` | 🆕 基于 PaperContext 数值矛盾自动修复，返回 (issues, fixed_chapters) |
 | 7.3 | LaTeX 组装 | `latex_converter.py` | 章节合并 → LLM 审查 → 模板填充 → 中文字符过滤 |
 | 7.35 | citation 清理 | `loop.py` | 🆕 tex 后 `<citation>` 残留正则清理（Phase 7.3 LLM review 兜底） |
@@ -248,7 +248,7 @@ Chapter Prompt (原生 LaTeX)
    output/latex/main.tex
 ```
 
-**后处理修复链**（来自 `latex_direct_generator.py`）：
+**后处理修复链**（内置于 `latex_converter.py`）：
 1. `_fix_textwidth_confusion()` — 修复 `\textwidth` / `\columnwidth` 混用
 2. `_ensure_table_resizebox()` — 确保表格有 `\resizebox` 包裹
 3. `_ensure_tikz_fits()` — TikZ 图片尺寸适配
@@ -279,7 +279,7 @@ loop.py: <citation> 残留正则清理
 bibtex_builder.py: [N] → \cite{ref_N} 替换 + 生成 references.bib
 ```
 
-### 5.5 PaperContext 共享事实源 (v12.0)
+### 5.5 PaperContext 共享事实源 (v12.2: 磁盘持久化 + 双路修复)
 
 ```
 Phase 0.98: _build_paper_context()
@@ -298,8 +298,13 @@ paper_context = {
        ├─→ 注入 self._project_data["paper_context"]
        │     └→ 各 chapter generator 通过 citation_context 自动获得
        │
+       ├─→ v12.2: 持久化到 output/paper_context.json
+       │     └→ ValidationEngine._read_paper_context_exists 验收通过
+       │
        └─→ 注入 CrossChapterChecker
-             └→ 数值矛盾自动修复 (0.145 → 0.133)
+             └→ v12.2: 双路数值修复
+                 ├─ PaperContext metrics（权威源）
+                 └─ Experiments "Ours" 行提取值（兜底）
 ```
 
 ### 5.6 风格系统层级 (v12.0)
@@ -454,6 +459,89 @@ outline ──→ draft ──→ review ──→ revision ──→ final
 - **工作记忆**：当前正在处理的信息
 - **短期记忆**：最近 N 个 Phase 的摘要
 - **长期记忆**：持久化的关键结论（磁盘存储）
+
+### 7.5 v12.2 章节生成统一分发 (Wave 6 重构)
+
+```python
+_CHAPTER_CONFIGS = {
+    1: ("ch1_introduction", "Introduction"),
+    2: ("ch2_related_work", "Related Work"),
+    3: ("ch3_methodology", "Methodology"),
+    4: ("ch4_experiments", "Experiments"),
+    5: ("ch5_conclusion", "Conclusion"),
+}
+# phase1-phase5 统一通过 _run_chapter_phase(ch_num) 分发
+# 消除了 5 个重复的 if/elif 块（~80 行）
+```
+
+Wave 6 同时将 `_run_output_phase`（664 行）拆分为 5 个子方法：
+- `_postprocess_content()` — 全局打磨 + 门控 + 一致性 + 公式 + 去重
+- `_generate_figures()` — 图表规划 + 生成
+- `_generate_latex_output()` — LaTeX/BibTeX/约束预检
+- `_run_table_fallback()` — 表格兜底
+- `_compile_and_validate()` — PDF 编译 + 验证 + 分层验收 + 评价
+
+### 7.6 v12.2 系统性 Bug 修复
+
+| 问题 | 根因 | 修复 |
+|------|------|------|
+| ch5 Conclusion 仅输出 2 词 | f-string 中 `\begin{X}` 的 `{X}` 被解释为替换字段 → NameError → 异常被 try/except 静默捕获 → 返回 2 词降级字符串 | `\\begin{{X}}` 转义（与 ch1-ch4 对齐） |
+| PaperContext 验收失败 (G3-S6) | `_build_paper_context` 只更新内存，不写磁盘 → `_read_paper_context_exists` 读磁盘文件返回 0 | 构建后 `json.dump` 到 `paper_context.json` |
+| 禁用术语永不修复 | `should_retry` 被分数判断覆盖（line 244 覆盖 line 230） | 改为 `score_based_retry OR issue_based_retry` |
+| 数值矛盾修复静默失效 | `_find_canonical_value` 只查 PaperContext，`ours_values` 参数是死代码 | 双路查找：PaperContext metrics → Experiments ours_values 兜底 |
+| VenueAdapter 风格丢失 | 章节生成器各自 `VenueAdapter()` 新建实例 → `_journal_style` 丢失 | v12.3: 依赖注入参数链（替代 v12.2 的类级属性方案） |
+| ordered_gate verify_all 重复调用 | Gate 0 和 Gate 1 各自调用 `verify_all()` | `run()` 中调用一次，传入两个 Gate |
+| content_strategy/motivation_thread 未消费 | `_run_chapter_phase` 不注入这些 Phase 0.65 的分析结果 | 注入 `self._project_data` 供章节生成器读取 |
+
+### 7.7 Wave 1-6 代码瘦身记录
+
+| Wave | 内容 | 删除行数 |
+|------|------|---------|
+| 1-5 | 删除 13 个废弃模块（chapter_state_machine, exceptions, serper_normal, tavily_normal, webpilot_wattpro, ablation_runner, data_source_manager, iterate_controller, latex_direct_generator, paragraph_controller, ref_pdf_downloader, scholar_search, tikz_generator） | ~3,000 |
+| 6 | loop.py 重构：`_CHAPTER_CONFIGS` 统一分发 + `_run_output_phase` 拆分（664→36 行） + 提取 7 个子方法 | ~700（净减） |
+
+### 7.8 v12.3 架构净化 — PipelineContext + 依赖注入
+
+#### PipelineContext（单一真相源）
+
+```
+agent/pipeline_context.py
+├── PipelineContext (dataclass)
+│   ├── project_data, ref_data          # Phase 0 核心数据
+│   ├── chapters, abstract              # 生成的内容
+│   ├── reference_pool, outline         # 预生成分析
+│   ├── motivation_thread               # 动机驱动
+│   ├── exemplar_dossier, style_profile # 范文学习
+│   ├── citation_bank, rationale_matrix  # 引用/论证
+│   ├── ablation_results                # 消融实验
+│   ├── journal_style, content_strategy # 学习到的风格
+│   ├── paper_context                   # 验证上下文
+│   └── cite_key_map, title_to_key      # 引用映射
+│
+├── to_checkpoint_dict() / from_checkpoint_dict()  # 序列化
+└── save_to_checkpoint() / load_from_checkpoint()  # CheckpointManager 集成
+```
+
+**集成方式**：ResearchLoop 类级属性代理（`_ctx_property`），将 17 个 `self._xxx` 透明路由到 `self.ctx.xxx`。现有代码无需修改，新代码直接使用 `self.ctx.xxx`。
+
+#### 依赖注入参数链（VenueAdapter）
+
+```
+ResearchLoop.__init__     →  self.venue_adapter = VenueAdapter()   # 唯一实例
+    ↓
+_run_chapter_phase        →  kwargs["venue_adapter"] = self.venue_adapter
+    ↓
+run_chapterN(..., venue_adapter=...)
+    ↓
+generate_*(..., venue_adapter=...)
+    ↓
+build_style_instruction(..., venue_adapter=...)   # 不再 VenueAdapter() 新建
+```
+
+**关键变化**：
+- `base_orchestrator.py:build_style_instruction` 接受 `venue_adapter` 参数，不再每次 `VenueAdapter()` 新建
+- `ch5_conclusion.py` 使用统一的 `build_style_instruction`（不再自建 VenueAdapter + IEEE 降级链）
+- `venue_adapter.py` 的 `_journal_style` / `_ref_style_guide` 回退为实例属性（不再是类级共享）
 
 ---
 

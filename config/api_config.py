@@ -50,18 +50,6 @@ CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY", "")
 
 # ==================== 工具API ====================
 
-# AMiner开放平台API密钥
-AMINER_API_KEY = os.getenv("AMINER_API_KEY", "")
-
-# WebPilot WattPro API密钥
-WATTPRO_API_KEY = os.getenv("WATTPRO_API_KEY", "")
-
-# Serper API密钥
-SERPER_API_KEY = os.getenv("SERPER_API_KEY", "")
-
-# Tavily API密钥
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
-
 # ==================== Provider配置（配置驱动） ====================
 
 PROVIDERS = {

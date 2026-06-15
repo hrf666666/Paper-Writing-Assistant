@@ -936,7 +936,7 @@ def run_constraint_check(tex_content: str, template_type: str = "ieee_trans",
 def sanitize_tikz(tikz_code: str) -> str:
     """
     TikZ ASCII 清洗公共接口。
-    在 tikz_generator.py 生成后调用。
+    架构图 ASCII 清洗（已替代原 tikz_generator 流程）。
     """
     constraint = ASCIITextConstraint()
     violations = constraint.check(tikz_code)

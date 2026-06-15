@@ -254,51 +254,6 @@ def fetch_page_content(url: str) -> Optional[str]:
     return None
 
 
-def extract_paper_from_url(url: str) -> Optional[Dict]:
-    """
-    从URL提取论文信息（用于验证引用真实性）
-    
-    Args:
-        url: 论文页面URL（如arXiv, IEEE Xplore, ACM DL等）
-        
-    Returns:
-        论文信息字典
-    """
-    if not _check_mcp_available():
-        return None
-    
-    content = fetch_page_content(url)
-    if not content:
-        return None
-    
-    # 尝试提取论文信息
-    paper_info = {
-        "title": "",
-        "authors": [],
-        "abstract": "",
-        "url": url,
-    }
-    
-    # 提取标题
-    title_match = re.search(r'<title>(.*?)</title>', content, re.IGNORECASE)
-    if title_match:
-        paper_info["title"] = title_match.group(1).strip()
-    
-    # 提取摘要
-    abstract_patterns = [
-        r'abstract[^>]*>(.*?)</abstract>',
-        r'Abstract[^>]*>(.*?)</abstract>',
-        r'"abstract":\s*"(.*?)"',
-    ]
-    for pattern in abstract_patterns:
-        match = re.search(pattern, content, re.IGNORECASE | re.DOTALL)
-        if match:
-            paper_info["abstract"] = match.group(1).strip()
-            break
-    
-    return paper_info if paper_info.get("title") else None
-
-
 # ========== 百度学术搜索 ==========
 
 def search_papers_baidu(query: str, limit: int = 10) -> List[Dict]:
@@ -485,86 +440,30 @@ S2_SEARCH_URL = f"{S2_BASE_URL}/paper/search"
 S2_PAPER_URL = f"{S2_BASE_URL}/paper"
 
 
-def search_papers_semantic(query: str, limit: int = 10,
-                           fields: str = None) -> List[Dict]:
+def search_papers_semantic(query: str, limit: int = 10) -> List[Dict]:
     """
-    搜索论文 - 优先使用智谱MCP，fallback到Semantic Scholar
+    搜索论文 — 智谱 MCP 搜索 + 缓存
+
+    Semantic Scholar 直连已永久禁用（境内 429）。
 
     Args:
         query: 搜索查询字符串
         limit: 返回结果数量
-        fields: 要返回的字段（逗号分隔），默认包含title,year,authors,abstract,venue
 
     Returns:
         List[Dict]: 论文列表
     """
-    # 优先使用智谱MCP增强搜索
     mcp_results = search_with_zhipu_mcp(query, max_results=limit)
     if mcp_results:
         logger.debug(f"智谱MCP搜索到 {len(mcp_results)} 条结果")
-        # 尝试从MCP结果中提取可验证的论文信息
         return _convert_mcp_to_paper_format(mcp_results)
 
-    # 检查缓存
     cached = _get_cache(query)
     if cached is not None:
         logger.debug(f"使用缓存结果: {query[:50]}")
         return cached
 
-    # 回退到Semantic Scholar API
-    if fields is None:
-        fields = "title,year,authors,abstract,venue,externalIds,citationCount"
-
-    params = {
-        "query": query,
-        "limit": min(limit, 100),
-        "fields": fields,
-    }
-
-    # 如果 S2 处于 429 退避期，直接跳过
-    if _is_rate_limited():
-        logger.debug("S2 处于 429 退避期，跳过搜索")
-        return []
-
-    try:
-        _rate_limit()  # API 调用限速
-        response = requests.get(S2_SEARCH_URL, params=params, timeout=15)
-
-        # 429 限速处理
-        if response.status_code == 429:
-            logger.warning("Semantic Scholar 搜索 429 限速")
-            _handle_rate_limit_429(response)
-            return []
-
-        response.raise_for_status()
-        data = response.json()
-
-        papers = data.get("data", [])
-        result = [
-            {
-                "paperId": p.get("paperId", ""),
-                "title": p.get("title", ""),
-                "year": p.get("year"),
-                "authors": [
-                    {"name": a.get("name", "")}
-                    for a in (p.get("authors") or [])
-                ],
-                "abstract": p.get("abstract", ""),
-                "venue": p.get("venue", ""),
-                "citationCount": p.get("citationCount", 0),
-                "externalIds": p.get("externalIds", {}),
-                "source": "semantic_scholar",
-            }
-            for p in papers
-        ]
-        _set_cache(query, result)  # 缓存结果
-        return result
-    except requests.exceptions.Timeout:
-        logger.warning("Semantic Scholar搜索超时")
-        return []
-    except requests.exceptions.RequestException as e:
-        logger.warning(f"Semantic Scholar搜索失败: {e}")
-        return []
+    return []
 
 
 def _convert_mcp_to_paper_format(mcp_results: List[Dict]) -> List[Dict]:
@@ -622,7 +521,9 @@ def _extract_authors_from_text(text: str) -> List[Dict]:
 
 def verify_citation_with_mcp(paper_title: str, author_hint: str = "") -> Dict:
     """
-    多源验证引用真实性 — 降级链：MCP → 百度学术 → Semantic Scholar
+    多源验证引用真实性 — 降级链：MCP → Web Search API → 百度学术
+
+    Semantic Scholar 直连已禁用（境内永久 429）。
 
     Args:
         paper_title: 论文标题
@@ -687,19 +588,7 @@ def verify_citation_with_mcp(paper_title: str, author_hint: str = "") -> Dict:
                 result["found_urls"] = [best["url"]]
             return result
 
-    # ── 3. Semantic Scholar ──
-    if not _is_rate_limited():
-        papers = search_papers_semantic(paper_title, limit=3)
-        if papers:
-            best = papers[0]
-            sim = _title_similarity(paper_title, best.get("title", ""))
-            if sim > 0.3:
-                result["verified"] = True
-                result["confidence"] = 0.95
-                result["method"] = "semantic_scholar"
-                result["matched_paper"] = best
-                return result
-
+    # S2 直连已禁用（境内永久 429）
     return result
 
 
@@ -942,105 +831,6 @@ def _handle_rate_limit_429(response=None):
     logger.info(f"S2 限速退避 {retry_after}s，新间隔 {_rate_limit_interval:.1f}s")
 
 
-def _is_rate_limited() -> bool:
-    """检查是否处于 429 退避期"""
-    # v12.0: Semantic Scholar 境内永久 429，直接禁用所有 S2 调用
-    return True
-    return time.time() < _backoff_until
-
-
-def search_papers_by_keywords(keywords: List[List[str]],
-                               limit: int = 5) -> List[Dict]:
-    """
-    使用嵌套关键词搜索论文
-
-    Args:
-        keywords: 嵌套关键词列表，内层OR，外层AND
-                  如 [["deep learning", "neural network"], ["depth estimation"]]
-        limit: 返回结果数量
-
-    Returns:
-        List[Dict]: 论文列表
-    """
-    # 将嵌套关键词组合为查询字符串
-    query_parts = []
-    for group in keywords:
-        if isinstance(group, list):
-            # OR关系用空格分隔
-            query_parts.append(" ".join(group))
-        else:
-            query_parts.append(str(group))
-
-    # AND关系用空格分隔
-    query = " ".join(query_parts)
-    return search_papers_semantic(query, limit=limit)
-
-
-def batch_verify_references(ref_entries: List[Dict],
-                             max_concurrent: int = 5) -> List[Dict]:
-    """
-    批量验证参考文献是否存在
-
-    Args:
-        ref_entries: 参考文献条目列表，每个包含 "content" 或 "title" 字段
-        max_concurrent: 最大并发数（控制API频率）
-
-    Returns:
-        List[Dict]: 验证结果列表
-    """
-    import time
-
-    results = []
-    for i, entry in enumerate(ref_entries):
-        # 提取标题
-        title = entry.get("title", "")
-        if not title:
-            content = entry.get("content", "")
-            # 尝试从引号中提取标题
-            import re
-            title_match = re.search(r'"(.+?)"', content)
-            if title_match:
-                title = title_match.group(1)
-            else:
-                title = content.split(".")[0] if content else ""
-
-        if not title:
-            results.append({
-                "verified": False,
-                "reason": "无法提取标题",
-                "original": entry,
-            })
-            continue
-
-        # 搜索验证
-        papers = search_papers_semantic(title, limit=3)
-
-        if papers:
-            # 检查标题相似度
-            best_match = papers[0]
-            best_title = best_match.get("title", "")
-            similarity = _title_similarity(title, best_title)
-
-            results.append({
-                "verified": True,
-                "similarity": similarity,
-                "matched_paper": best_match,
-                "original": entry,
-            })
-        else:
-            results.append({
-                "verified": False,
-                "reason": "未找到匹配论文",
-                "original": entry,
-            })
-
-        # 控制API频率
-        if i < len(ref_entries) - 1:
-            time.sleep(1)
-
-    return results
-
-
 def _title_similarity(title1: str, title2: str) -> float:
     """计算两个标题的相似度（词重叠率）"""
     if not title1 or not title2:
@@ -1052,71 +842,6 @@ def _title_similarity(title1: str, title2: str) -> float:
     # Jaccard-like: 重叠词 / 查询词
     overlap = len(words1 & words2) / len(words1)
     return round(overlap, 3)
-
-
-# ========== AMiner API (备选) ==========
-
-def _get_aminer_api_key():
-    """获取AMiner API Key"""
-    try:
-        from config.api_config import AMINER_API_KEY
-        return AMINER_API_KEY
-    except ImportError:
-        return None
-
-
-def search_papers_aminer(query, size):
-    """
-    使用AMiner API搜索论文（备选方案）
-
-    Args:
-        query: 嵌套关键词列表 [["kw1", "kw2"], ["kw3"]] 或字符串
-        size: 返回结果数量
-    """
-    api_key = _get_aminer_api_key()
-    if not api_key:
-        logger.warning("AMiner API key未配置，请使用search_papers_semantic")
-        return {"data": []}
-
-    url = "https://datacenter.aminer.cn/gateway/open_platform/api/paper/qa/search"
-
-    headers = {
-        "Content-Type": "application/json;charset=utf-8",
-        "Authorization": api_key
-    }
-
-    data = {
-        "topic_high": json.dumps(query, ensure_ascii=False) if isinstance(query, list) else query,
-        "n_citation_flag": False,
-        "force_citation_sort": False,
-        "force_year_sort": False,
-        "use_topic": isinstance(query, list),
-        "size": size,
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=15)
-        return response.json()
-    except Exception as e:
-        logger.warning(f"AMiner搜索失败: {e}")
-        return {"data": []}
-
-
-def get_paper_details_aminer(paper_id):
-    """使用AMiner API获取论文详情（备选方案）"""
-    api_key = _get_aminer_api_key()
-    if not api_key:
-        return {}
-
-    url = f"https://datacenter.aminer.cn/gateway/open_platform/api/paper/detail?id={paper_id}"
-    headers = {"Authorization": api_key}
-
-    try:
-        response = requests.get(url, headers=headers, timeout=15)
-        return response.json()
-    except Exception as e:
-        logger.warning(f"AMiner获取详情失败: {e}")
-        return {}
 
 
 # ========== 统一多源搜索入口（兼容旧接口） ==========
@@ -1135,7 +860,7 @@ def _build_query_string(query) -> str:
 
 
 def _to_aminer_format(papers: List[Dict]) -> Dict:
-    """将标准论文格式转为 AMiner 兼容格式（保留 IEEE BibTeX 所需字段）"""
+    """将标准论文格式转为统一输出格式（兼容下游 BibTeX 生成所需的全部字段）"""
     return {
         "data": [
             {
@@ -1271,7 +996,7 @@ def search_papers(query, size):
         size: 返回结果数量
 
     Returns:
-        搜索结果（保持AMiner格式兼容）
+        搜索结果（标准格式兼容）
     """
     query_str = _build_query_string(query)
 
@@ -1340,22 +1065,20 @@ def get_paper_details(paper_id):
             }]
         }
 
-    # 不再尝试 AMiner（境内不可用）
+    # S2 直连已禁用，MCP 通道是唯一来源
     return {"data": []}
 
 
 if __name__ == "__main__":
-    # 测试Semantic Scholar搜索
-    logger.info("=== Semantic Scholar 搜索测试 ===")
+    import sys
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(name)s: %(message)s")
+
+    logger.info("=== MCP 论文搜索测试 ===")
     results = search_papers_semantic("light field depth estimation dual mask", limit=5)
     for r in results:
         logger.info(f"  - [{r.get('year', 'N/A')}] {r.get('title', 'N/A')[:80]}")
-        logger.info(f"    Authors: {', '.join(a.get('name', '') for a in r.get('authors', [])[:3])}")
-        logger.info(f"    Citations: {r.get('citationCount', 0)}")
 
-    # 测试兼容接口
-    logger.info("=== 兼容接口测试 ===")
+    logger.info("=== 统一搜索接口测试 ===")
     compat_results = search_papers([['light field', 'depth estimation'], ['physical model']], 3)
-    if compat_results.get("data"):
-        for r in compat_results["data"][:3]:
-            logger.info(f"  - {r.get('title', 'N/A')[:80]}")
+    for r in (compat_results.get("data") or [])[:3]:
+        logger.info(f"  - {r.get('title', 'N/A')[:80]}")

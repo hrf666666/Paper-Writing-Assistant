@@ -241,7 +241,10 @@ class QualityGate:
                         # checker 不可用时只用 LLM 分数，不给免费分
                         report.overall_score = llm_score
                     # v11.8: should_retry 由代码决定，不依赖 LLM 判断
-                    report.should_retry = report.overall_score < self.PASS_THRESHOLD
+                    # v12.2: 禁用术语/风格问题也必须触发重试（修复覆盖 bug）
+                    score_based_retry = report.overall_score < self.PASS_THRESHOLD
+                    issue_based_retry = bool(prohibited_issues or style_check_issues)
+                    report.should_retry = score_based_retry or issue_based_retry
                     report.passed = (
                         report.overall_score >= self.PASS_THRESHOLD
                         and len(prohibited_issues) == 0

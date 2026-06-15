@@ -1,6 +1,56 @@
-# 论文范文写作助手 v12.0 (Paper Writing Assistant)
+# 论文范文写作助手 v12.3 (Paper Writing Assistant)
 
 一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → REFLECT** 自主循环架构，融合 **通用写作纪律层(P0)、PaperContext 共享事实源、引用管线修复、Web Search API + LLM 提取、OpenAlex 学术搜索、境内网络自适应、期刊风格学习、LaTeX 直出生成、5层溢出自愈闭环、动机驱动写作、多代理审阅** 等先进机制，能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v12.3 里程碑：架构净化 — PipelineContext + 依赖注入 + ch5 统一
+
+> **v12.3 核心突破**——系统性消除三个架构级反模式：(1) 22 个散落的 `self._xxx` 状态变量 → 统一为 `PipelineContext` dataclass (2) `VenueAdapter` 全局可变状态（类级属性）→ 依赖注入参数链 (3) ch5 "架构孤儿" → 统一使用 ch1-4 共享基础设施。
+
+### v12.3 架构改进
+
+| 改进 | 之前 | 之后 |
+|------|------|------|
+| **PipelineContext** | loop.py 中 22 个 `self._xxx` 散落状态，58 次赋值，无统一契约 | `PipelineContext` dataclass 作为单一真相源，属性代理透明路由 |
+| **VenueAdapter 依赖注入** | `build_style_instruction` 和 ch5 各自 `VenueAdapter()` 新建实例 → Phase 0.65 学习的风格丢失；v12.2 用类级属性修补（引入全局可变状态） | venue_adapter 通过参数链注入：`loop.py → run_chapterN → generate_* → build_style_instruction` |
+| **ch5 架构统一** | ch5 不使用 `build_style_instruction`、不使用 `build_citation_instruction`、签名与其他章节不一致 | ch5 使用统一的 `build_style_instruction`，消除"架构孤儿" |
+
+### v12.3 新增文件
+
+| 文件 | 职责 |
+|------|------|
+| `agent/pipeline_context.py` | `PipelineContext` dataclass — 全局共享状态容器（17 个字段），支持 `to_checkpoint_dict()` / `from_checkpoint_dict()` / `save_to_checkpoint()` / `load_from_checkpoint()` |
+
+### v12.3 回退 v12.2 的错误修复
+
+| v12.2 错误修复 | 问题 | v12.3 正确方案 |
+|------|------|------|
+| VenueAdapter `_journal_style` / `_ref_style_guide` 改为**类级属性** | 引入全局可变状态，多线程/多论文场景下存在隐患 | 回退为实例属性 + 依赖注入参数链 |
+
+### v12.2 CRITICAL 修复
+
+| 问题 | 根因 | 影响 | 修复 |
+|------|------|------|------|
+| ch5 Conclusion 仅输出 2 词 | f-string `\begin{X}` 的 `{X}` 被解释为 Python 替换字段 → NameError → 异常被静默捕获 → 降级为 2 词 fallback | G4-S5 验收失败（chapter_words_5: 2 >= 500） | `\\begin{{X}}` 转义（与 ch1-ch4 对齐） |
+| PaperContext 验收失败 | `_build_paper_context` 只更新内存不写磁盘 → `_read_paper_context_exists` 读磁盘返回 0 | G3-S6 失败 → CrossChapterChecker 无法修复数值矛盾 | 构建后持久化到 `paper_context.json` |
+| 禁用术语永不修复 | `should_retry` 被分数判断覆盖：先设 True（有禁用术语），后被 `score < 70` 覆盖为 False | 论文禁用术语永远不会被修正 | 改为 `score_based OR issue_based` |
+| 数值矛盾修复静默失效 | `_find_canonical_value` 的 `ours_values` 参数是死代码，只查 PaperContext | Abstract/章节间数值不一致无法自动修复 | 双路查找：PaperContext → ours_values 兜底 |
+
+### v12.2 HIGH 修复
+
+| 问题 | 修复 |
+|------|------|
+| VenueAdapter 实例断裂 → Phase 0.65 学习的风格丢失 | 依赖注入：`venue_adapter` 通过参数链传递（v12.3 修复，替代 v12.2 的类级属性方案） |
+| ordered_gate `verify_all` 重复调用 2 次 | `run()` 中调用一次，传入两个 Gate |
+| content_strategy/motivation_thread 未注入章节生成器（16 次 LLM 调用浪费） | `_run_chapter_phase` 注入到 `project_data` |
+
+### Wave 1-6 架构重构
+
+| Wave | 内容 |
+|------|------|
+| 1-5 | 删除 13 个废弃模块（~3,000 行死代码） |
+| 6 | loop.py：`_CHAPTER_CONFIGS` 统一分发 + `_run_output_phase` 664→36 行 + 7 个子方法提取 |
+
+---
 
 ## v12.0 里程碑：架构修正 — 通用性/特性分离 + 引用管线修复 + 事实表
 
@@ -371,7 +421,7 @@ python pipeline.py --debug      # 调试模式
 python pipeline.py --title "My Paper Title"    # 覆盖论文标题
 ```
 
-### Pipeline 流程 (v12.0)
+### Pipeline 流程 (v12.2)
 
 | Phase | 任务 | 说明 |
 |-------|------|------|
@@ -381,8 +431,8 @@ python pipeline.py --title "My Paper Title"    # 覆盖论文标题
 | Phase 0.8 | **引用支撑库** | 154 claims + 参考论文列表 → 注入章节 prompt |
 | Phase 0.9 | **写作矩阵** | 写作理由矩阵（事前规划型） |
 | Phase 0.95 | **消融实验** | 消融实验自动化 |
-| Phase 0.98 | **PaperContext** | 🆕 构建共享事实源（硬件/epochs/loss/数据集/指标） |
-| Phase 1-5 | **章节生成** | 逐章生成（PaperContext + 引用上下文注入 + 质量门控） |
+| Phase 0.98 | **PaperContext** | 构建共享事实源（硬件/epochs/loss/数据集/指标），v12.2 持久化到磁盘 |
+| Phase 1-5 | **章节生成** | 逐章生成（v12.2: _CHAPTER_CONFIGS 统一分发 + content_strategy 注入 + PaperContext + 引用上下文） |
 | Phase 6 | **文献审查** | 离线验证模式（跳过超时的 S2 在线验证） |
 | Phase 7.1 | **引用解析** | 🆕 按 chapters dict 独立处理，无 join-then-split |
 | Phase 7.2 | **跨章节检查** | 🆕 基于 PaperContext 数值矛盾自动修复 |
@@ -418,7 +468,7 @@ L3: 学术质量 (LLM 评价)
 ```
 paper-writing-assistant/
 ├── agent/                        # 自主循环架构核心
-│   ├── loop.py                   #   Pipeline 引擎 (PaperContext + 引用管线 + 离线验证)
+│   ├── loop.py                   #   Pipeline 引擎 (v12.2: _CHAPTER_CONFIGS 统一分发 + 子方法提取 + PaperContext 持久化)
 │   ├── citation_manager.py       #   引用管理 (v12.0: chapters dict 接口 + 全局编号)
 │   ├── api_client.py             #   统一 API 客户端 (zai/openai/anthropic)
 │   ├── dispatcher.py             #   任务调度器
