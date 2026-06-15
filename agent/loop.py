@@ -104,6 +104,9 @@ class ResearchLoop:
         # v13 PR3: 分层记忆（上下文治理：缓存重文本 + 检索式组装）
         from agent.core.memory import LayeredMemory
         self._memory = LayeredMemory()
+        # v13 PR4: 统一问题总线（audit/constraint/quality/cross_chapter 协作中枢）
+        from agent.core.finding import FindingBus
+        self._findings = FindingBus()
         self.checkpoint = CheckpointManager(OUTPUT_DIR)
         self.quality_gate = QualityGate(self.api_client)
         self.directive_mgr = DirectiveManager(OUTPUT_DIR)
@@ -1772,6 +1775,11 @@ Respond with just the strategy, no explanation:"""
                     logger.warning(f"  - {issue.get('description', '')[:100]}")
             else:
                 logger.info(f"[Phase 7.2] 一致性检查通过 ({len(issues)} 个警告)")
+            # v13 PR4: 统一录入 FindingBus（供 QualityLoop 修订回流）
+            from agent.core.finding import cross_chapter_issues_to_findings
+            self._findings.clear(source="cross_chapter")
+            self._findings.record_many(cross_chapter_issues_to_findings(issues))
+            logger.info(f"[Phase 7.2] FindingBus: {self._findings.summary()}")
             with open(f"{OUTPUT_DIR}/cross_chapter_check.json", 'w', encoding='utf-8') as f:
                 json.dump(issues, f, ensure_ascii=False, indent=2)
         except Exception as e:

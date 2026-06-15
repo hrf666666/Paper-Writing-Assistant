@@ -33,6 +33,11 @@ from agent.core.factbase import (
     exists as factbase_exists,
 )
 from agent.core.memory import LayeredMemory
+from agent.core.finding import (
+    Finding, FindingBus, Severity, Location, FixAction,
+    audit_report_to_findings, cross_chapter_issues_to_findings,
+    violations_to_findings, quality_issues_to_findings,
+)
 
 __all__ = [
     # errors
@@ -45,4 +50,8 @@ __all__ = [
     "load_factbase", "factbase_exists",
     # memory
     "LayeredMemory",
+    # finding
+    "Finding", "FindingBus", "Severity", "Location", "FixAction",
+    "audit_report_to_findings", "cross_chapter_issues_to_findings",
+    "violations_to_findings", "quality_issues_to_findings",
 ]
