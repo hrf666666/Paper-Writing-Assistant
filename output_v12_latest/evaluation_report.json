@@ -1,0 +1,132 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 66.6,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 14,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 75,
+      "tex_has_citations": true,
+      "tex_table_count": 4,
+      "tex_has_tables": true,
+      "tex_figure_count": 1,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 25,
+      "bib_min_entries": true,
+      "pdf_exists": true,
+      "pdf_size_kb": 182.4,
+      "pdf_min_size": true,
+      "figures_dir_exists": false,
+      "figure_files_count": 0,
+      "figures_min": false,
+      "compile_log_exists": true,
+      "compile_errors": 0,
+      "compile_success": true
+    },
+    "score": 92,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 8936,
+      "word_count_ok": true,
+      "citation_count": 75,
+      "citations_min": true,
+      "formula_count": 14,
+      "formulas_min": true,
+      "table_count": 4,
+      "tables_min": true,
+      "figure_count": 1,
+      "figures_min": false,
+      "ablation_mentions": 7,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 100,
+    "sections_found": 5,
+    "total_words": 8936,
+    "total_citations": 75
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 82,
+      "narrative_progression": 80,
+      "methodological_rigor": 72,
+      "experimental_sufficiency": 78,
+      "citation_quality": 45,
+      "writing_style": 82,
+      "data_consistency": 75,
+      "format_compliance": 75
+    },
+    "overall_score": 74,
+    "strengths": [
+      "Novel integration of physical BRDF modeling and MRI-inspired angular frequency analysis to address non-Lambertian depth estimation.",
+      "Comprehensive evaluation across multiple challenging light field datasets, including specific non-Lambertian and mixed-material scenarios.",
+      "Clear identification of the texture-copying failure mode in existing EPI networks, providing strong motivation for the proposed dual-mask approach."
+    ],
+    "weaknesses": [
+      "The mathematical formalization relies on trivial operations (e.g., grayscale conversion, bilinear interpolation) rather than deep theoretical derivations for the core physical models.",
+      "The reference list appears sparse (fewer than 30 unique citations identified in the text), lacking comprehensive coverage of recent state-of-the-art literature.",
+      "Inconsistent reporting of primary evaluation metrics across sections (MAE emphasized in Abstract/Introduction, while MSE and Bad Pixel ratios are highlighted in the Conclusion)."
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "Insufficient citation count and depth; TCSVT expects exhaustive surveys of related video/image technology literature (typically 50+ references).",
+      "Methodological rigor needs enhancement; the mathematical formulation of the BRDF and angular FFT modules must be explicitly detailed with proper equation environments.",
+      "Metric consistency and completeness; standard TCSVT papers require uniform reporting of MAE, MSE, and BadPix across all datasets and ablation studies without cut-off text."
+    ]
+  },
+  "overall": {
+    "L1_score": 92,
+    "L2_score": 100,
+    "L3_score": 74,
+    "L1_passed": true,
+    "overall_grade": "A",
+    "hierarchical_alignment": {
+      "goal_vs_L_checks": [
+        {
+          "goal": "G2 (参考文献体系)",
+          "goal_passed": true,
+          "L2_citations_min": true,
+          "consistent": true
+        },
+        {
+          "goal": "G5 (学术输出)",
+          "goal_passed": true,
+          "L1_tex_exists": true,
+          "L1_pdf_exists": true,
+          "consistent": true
+        },
+        {
+          "goal": "G4 (章节生成)",
+          "goal_passed": false,
+          "L2_sections_complete": true,
+          "consistent": false
+        }
+      ],
+      "consistent": false
+    }
+  }
+}

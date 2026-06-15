@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "Here is the motivation thread designed to weave through your academic paper:\n\n**CORE_NARRATIVE**: \nLight field depth estimation remains fundamentally bottlenecked by the pervasive \"texture-copy\" artifact in non-Lambertian regions, a catastrophic failure that stems not from a lack of network capacity, but from the field's over-reliance on the flawed view-consistency assumption. By shifting the paradigm from heuristic photo-consistency to wave-vector-level angular frequency physics (via MRI-like 2D-DFT and dual-mask modeling), we can explicitly decode material spectral signatures and eliminate these artifacts at their physical root. This approach replaces uniform depth constraints with adaptive, material-aware priors, bridging the critical gap between idealized diffuse benchmarks and complex, real-world mixed-material scenes.\n\n**INTRO_HOOK**: \nOpen by challenging the field's \"elephant in the room\": while current light field depth estimation methods perform exceptionally well on diffuse objects, they catastrophically fail on the glass, metal, and glossy surfaces that dominate real-world scenes. Highlight the direct consequence—the jarring \"texture-copy\" artifact—and boldly state that no amount of scaling network capacity will fix this until the fundamental, yet flawed, view-consistency assumption is discarded.\n\n**GAP_BRIDGE**: \nTransition from related work by framing previous deep learning approaches as \"symptom-suppressors\" that try to smooth over artifacts post-hoc, rather than diagnosing the physical disease. Establish the critical pivot for your method: to solve this, we must look below pixel-level intensities and analyze the angular domain through Maxwell's equations and wave-vector theory, extracting physical priors via k-space frequency analysis.\n\n**METHOD_JUSTIFY**: \nFrame the introduction of your 2D-DFT, dual-mask mechanism, and GCD/SAM strategy as physical necessities rather than arbitrary architectural choices. Justify that because diffuse, specular, and scattering materials inherently exhibit distinct spectral signatures (low-frequency dominance vs. high-frequency broadening), physics demands a system that classifies materials via medium/directional masks and applies differentiated energy adjustments (like the ternary-mask strategy) rather than treating all angular blocks equally.\n\n**EXPERIMENT_VALIDATE**: \nStructure your results section to act as a direct proof of your core claim, prioritizing visual and quantitative evidence of texture-copy artifact elimination over sheer benchmark dominance. Explicitly showcase the massive contrast ratio improvements (e.g., Apple scene jumping from 1.35 to 33.8) to prove that modeling wave-vector physics physically separates true depth structure from smooth non-Lambertian surfaces better than any data-driven heuristic.\n\n**CONCLUSION_ECHO**: \nConclude by reasserting that overcoming the view-consistency assumption is the master key to unlocking robust 3D reconstruction and AR in unconstrained, real-world environments. End with a forward-looking call to the community: future depth estimation models must be grounded in explicit, physically interpretable wave-vector analysis rather than brute-force scaling of fundamentally flawed heuristics.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "Establish the problem of **Direction**: Breaking the View-Consistency Assumption in Non-Lambertian Region, motivating the need for 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Enumerate contributions: 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架, with quantitative evidence",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Show existing methods lack **Direction**: Breaking the View-Consistency Assumption in N, bridging to our 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Justify each module (基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架) by connecting to: **Direction**: Breaking the View-Consistency Assumption in N",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments validating 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架 via ablation and SOTA comparison",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo how 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度估计框架 successfully addresses **Direction**: Breaking the View-Consistency Assumption in N",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Breaking the View-Consistency Assumption in Non-Lambertian Regions\n**Problem**: Conventional EPI-based light field depth estimation methods rely on a fundamental assumption that scene radiance remains view-consistent across angular samples. This assumption holds for ideal Lambertian surfaces but catastrophically fails on non-Lambertian materials (specular reflections, scattering surfaces), where angular intensity variations violate the photo-consistency constraint. The direct cons",
+  "candidates": [
+    {
+      "direction": "Breaking the View-Consistency Assumption in Non-Lambertian Regions",
+      "problem": "Conventional EPI-based light field depth estimation methods rely on a fundamental assumption that scene radiance remains view-consistent across angular samples. This assumption holds for ideal Lambertian surfaces but catastrophically fails on non-Lambertian materials (specular reflections, scattering surfaces), where angular intensity variations violate the photo-consistency constraint. The direct consequence is the pervasive texture-copy artifact: depth structure from adjacent textured regions is erroneously propagated into smooth or reflective areas, producing large-scale depth prediction errors that no amount of network capacity has been able to fully eliminate.",
+      "significance": "Texture-copy artifacts in non-Lambertian regions are the single most impactful failure mode in light field depth estimation, affecting downstream applications from 3D reconstruction to augmented reality. Real-world scenes are dominated by mixed materials—glass, metal, glossy paint, translucent objects—yet current benchmarks and methods still implicitly privilege diffuse-dominant scenes. Without resolving the root physical cause, scaling depth estimation to unconstrained real environments remains impossible.",
+      "approach": "This project replaces the view-consistency heuristic with a physically grounded angular frequency analysis derived from Maxwell's equations and wave-vector theory. By applying 2D-DFT to the 9×9 angular block of every pixel (analogous to MRI k-space analysis), it reveals that diffuse, specular, and scattering materials exhibit characteristic spectral signatures—low-frequency dominance, high-frequency broadening, and mid-frequency concentration respectively. A dual-mask mechanism (medium mask quantifying pixel-level roughness and angular-direction mask recording deflection vector fields) converts these spectral signatures into explicit physical priors that guide depth estimation per-material rather than assuming uniform view consistency.",
+      "key_claim": "Depth estimation failures in non-Lambertian regions stem not from insufficient model capacity but from a fundamentally wrong physical assumption, and this project resolves them by replacing view-consistency with wave-vector-level angular spectral physics."
+    },
+    {
+      "direction": "Material-Aware Depth Fusion for Heterogeneous Real-World Scenes",
+      "problem": "Existing light field depth estimation methods operate under a single-paradigm assumption: one geometric constraint or learning architecture is applied uniformly across the entire image regardless of the underlying material composition. EPI slope matching works for diffuse surfaces but breaks on specular highlights; specular-aware methods over-smooth diffuse regions; scattering-aware approaches introduce blur in sharp Lambertian areas. No single method simultaneously excels across all material types, and in real-world heterogeneous scenes—where diffuse walls, metallic fixtures, and glass surfaces coexist within a single image—uniform application of any one paradigm inevitably degrades at least one material class.",
+      "significance": "Real-world scenes are inherently material-heterogeneous, and the performance ceiling of any monolithic depth estimation method is bounded by the worst-performing material class in the scene. As depth estimation moves from controlled benchmarks to unconstrained robotics, autonomous driving, and medical imaging, the inability to adaptively match geometric constraints to material physics becomes the dominant bottleneck for deployment-grade reliability.",
+      "approach": "This project introduces a component-aware fusion framework that first performs per-pixel BRDF parameter inversion (fitting a simplified Cook-Torrance model to extract ρ_d, ρ_s, and roughness m via constrained least-squares), then assigns each pixel a material-dependent processing strategy: standard EPI for diffuse regions, attenuated EPI with neighborhood propagation for specular regions, and scattering-model correction for scattering regions. A confidence-weighted fusion equation D = w_d·D_EPI + w_s·D_specular + w_sc·D_scatter produces a unified depth map where each spatial location is processed by the physically optimal algorithm for its material class.",
+      "key_claim": "No single depth estimation paradigm can serve all material types, and the path to robust real-world performance lies in physically grounded per-pixel material identification followed by component-specific algorithm dispatch."
+    },
+    {
+      "direction": "Eliminating Smooth-Surface Depth Artifacts via Adaptive Energy Modulation",
+      "problem": "In depth-from-light-field pipelines, energy maps encoding depth candidate confidence are computed globally and applied uniformly. However, smooth surfaces—both Lambertian (e.g., painted walls) and non-Lambertian (e.g., polished metal)—generate spurious high-energy responses that are indistinguishable from genuine geometric depth edges. These 'smooth artifacts' cause the depth network to hallucinate depth discontinuities where none exist, corrupting the depth map in exactly the regions where smoothness is most critical. The problem is exacerbated because existing methods lack a mechanism to differentiate between texture-induced false energy and geometry-induced true energy.",
+      "significance": "Smooth-surface artifacts are particularly damaging because they corrupt the most visually salient and structurally important regions of a scene. In applications such as surface inspection, AR object placement, and robotic grasping, false depth edges on smooth surfaces can cause catastrophic downstream failures. The contrast ratio between true depth signals and smooth-surface noise directly determines whether a depth map is usable, and prior methods have been unable to achieve contrast ratios sufficient for reliable deployment.",
+      "approach": "This project introduces a geometric consistency descriptor (GCD) computed from patch-level variance-to-mean ratios that captures local depth variation and roughness, combined with a Segment Anything Model (SAM)-generated ternary mask classifying regions as rough-Lambertian, smooth-Lambertian, or smooth-non-Lambertian. A dual-subtraction strategy adaptively computes local alpha parameters (α_local = α_global × G/G_mean) to suppress energy in directions inconsistent with true geometry, while the ternary mask applies differentiated gains—boosting smooth-non-Lambertian regions 1.5× while suppressing smooth-Lambertian regions to 0.15×. This achieves a documented contrast ratio improvement from 1.35 to 33.8 in benchmark scenes.",
+      "key_claim": "Smooth-surface depth artifacts arise from the inability of uniform energy processing to distinguish texture-induced false signals from true geometric depth, and this project resolves them by fusing geometric consistency descriptors with semantic material segmentation for region-adaptive energy modulation."
+    }
+  ]
+}

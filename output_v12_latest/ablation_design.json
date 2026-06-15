@@ -1,0 +1,91 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Ablation_BlinnPhong_vs_PhysicalBRDF",
+      "target_module": "简化 BRDF 物理模型",
+      "hypothesis": "基于麦克斯韦方程推导的简化 Cook-Torrance 物理模型，比纯经验模型（如 Blinn-Phong）更能准确表征非朗伯材质的物理反射特性，从而为深度估计提供更可靠的先验指导。",
+      "modification": "在 `tools/brdf_modeling.py` 中，将 `simplified_brdf_model` 函数内部的物理公式替换为 Blinn-Phong 经验模型公式：I(θ) = ρ_d + ρ_s * (cos(θ))^n，并修改 `scipy.optimize.curve_fit` 的初始参数和边界以适配经验参数 n。",
+      "expected_result": "在非朗伯区域（如 UrbanLF-Syn 和 Non-lambertian_zhenglong 数据集）的深度 MAE 显著上升，材质分类的 AUC 下降。这证明物理模型比经验模型具有更强的泛化能力和物理可解释性。",
+      "comparison_with": "Blinn-Phong 经验反射模型"
+    },
+    {
+      "experiment_name": "Ablation_MLP_vs_CurveFit",
+      "target_module": "非线性最小二乘曲线拟合器",
+      "hypothesis": "基于物理先验的逐像素曲线拟合（curve_fit）比纯数据驱动的深度学习回归网络具有更好的物理可解释性和泛化能力，尤其在训练数据有限的非朗伯复杂场景下不易过拟合。",
+      "modification": "在 `tools/brdf_modeling.py` 中，注释掉 `scipy.optimize.curve_fit` 的调用，替换为一个预训练的轻量级 MLP 网络（如 3 层全连接层，输入 81 维角域展平向量，输出 3 维物理参数），通过前向传播直接预测 ρ_d, ρ_s, m。",
+      "expected_result": "MLP 在训练集上可能拟合较好，但在验证集（尤其是未见过的 Non-lambertian 场景）上深度 MAE 增加，材质参数预测出现物理不合理值（如负反射率）。证明 curve_fit 在少样本下泛化更好且严格遵循物理约束。",
+      "comparison_with": "基于 MLP 的深度学习参数回归网络"
+    },
+    {
+      "experiment_name": "Ablation_No_FFT_Features",
+      "target_module": "角域频率特征 (2D-DFT)",
+      "hypothesis": "引入角域 2D-DFT 频域特征能够有效捕捉不同材质（漫反射低频、镜面高频）的物理响应差异，为双掩码提供关键的频域先验，显著提升非朗伯区域的深度估计精度。",
+      "modification": "在 `models/angular_freq_net.py` (或对应的网络构建代码) 中，移除对角域 patch 进行 2D-DFT 及频域特征拼接的分支代码，仅将原始空间域角域特征和 BRDF 物理参数图拼接后输入卷积层。",
+      "expected_result": "深度估计 MAE 整体上升，特别是光滑非朗伯区域（如 Apple、David 场景中的高反光部分）误差显著增大，材质分类准确率下降。证明频域特征对区分材质和指导深度回归至关重要。",
+      "comparison_with": "仅使用空间域特征与 BRDF 物理参数图（移除 FFT 频域分支）"
+    },
+    {
+      "experiment_name": "Ablation_Uniform_Mask_vs_Ternary_Mask",
+      "target_module": "三元 Mask 自适应能量调整策略",
+      "hypothesis": "结合 GCD 与 SAM 的三元 Mask 及双减法策略，能有效消除“光滑伪影”（将纹理误认为深度），增强非朗伯真实深度信号与朗伯区域的对比度。",
+      "modification": "在能量图计算或特征融合模块中，移除基于 SAM 分割和 GCD 计算的三元 Mask 生成逻辑及双减法策略（即移除 α_local 的自适应计算），将局部能量调整参数强制设为全局统一常数（如 α_local = 1.0）。",
+      "expected_result": "场景中出现明显的“光滑伪影”，Non-Lambertian 子集的 MAE 显著上升，深度图在光滑非朗伯区域的对比度比率大幅下降。证明三元 Mask 和自适应能量调整对消除伪影和增强信号有效。",
+      "comparison_with": "全局统一固定权重掩码（无区域差异化调整）"
+    },
+    {
+      "experiment_name": "Ablation_GGX_vs_Beckmann",
+      "target_module": "Beckmann 法线分布函数",
+      "hypothesis": "在简化 BRDF 模型中，Beckmann 分布比 GGX 分布更适合描述光场 9x9 有限角域采样下的微表面法线分布，能提供更稳定、准确的粗糙度参数 m。",
+      "modification": "在 `tools/brdf_modeling.py` 的 `simplified_brdf_model` 函数中，将 Beckmann 分布的指数项 exp(-tan²(θ)/m²) 替换为 GGX (Trowbridge-Reitz) 分布公式 m² / (π * (cos²(θ)*(m²-1)+1)²)，并调整 curve_fit 中粗糙度 m 的边界条件。",
+      "expected_result": "BRDF 拟合优度（R-squared）下降，粗糙度参数 m 的估计方差增大，导致最终深度 MAE 轻微上升。证明 Beckmann 分布在 9x9 小角域离散采样下数值更稳定，拟合效果更好。",
+      "comparison_with": "GGX (Trowbridge-Reitz) 法线分布函数"
+    },
+    {
+      "experiment_name": "Ablation_RGB_vs_Gray_Fitting",
+      "target_module": "图像辐射度预处理与降维 (灰度化)",
+      "hypothesis": "将 RGB 转为灰度图进行 BRDF 拟合，能够在保留主要辐射度几何信息的同时，大幅降低逐像素 curve_fit 的计算开销，且对深度估计精度的负面影响可忽略。",
+      "modification": "在数据加载模块（如 `data/lightfield_dataset.py`）中，移除 Gray = 0.299*R + 0.587*G + 0.114*B 转换，保留 RGB 三通道数据；同时在 `tools/brdf_modeling.py` 中修改拟合逻辑，对 R、G、B 三个通道分别独立调用 curve_fit 进行 BRDF 参数拟合。",
+      "expected_result": "训练和推理时间大幅增加（约 3 倍），但深度 MAE 仅微弱下降甚至持平，材质分类指标无显著提升。证明灰度化降维在保证精度的前提下极大提升了计算效率，是工程上的最优折中。",
+      "comparison_with": "保留 RGB 三通道独立进行 BRDF 拟合"
+    }
+  ],
+  "_model_analysis": {
+    "modules": [
+      {
+        "module_name": "Beckmann 法线分布函数",
+        "code_location": "tools/brdf_modeling.py / beckmann_distribution",
+        "core_function": "计算微表面法线分布 D(θ)，用于控制镜面反射的波瓣形状和粗糙度衰减特性。",
+        "ablation_replacement": "替换为 GGX (Trowbridge-Reitz) 分布或 Gaussian 分布。",
+        "expected_impact": "GGX 分布具有更重的尾部，能更好地拟合真实材质在掠射角（grazing angles）的反射特性，预计可提升光滑非朗伯表面的拟合精度；Gaussian 分布计算更快但在大角度下误差较大。"
+      },
+      {
+        "module_name": "简化 BRDF 物理模型",
+        "code_location": "tools/brdf_modeling.py / simplified_brdf_model",
+        "core_function": "组合漫反射和镜面反射分量，忽略了几何衰减(G)和菲涅尔(F)项的角度依赖性，实现快速参数拟合。",
+        "ablation_replacement": "替换为完整的 Cook-Torrance 模型（引入 G 和 F 项），或退化为纯 Lambertian 漫反射模型，或替换为经验模型（如 Blinn-Phong）。",
+        "expected_impact": "引入完整 Cook-Torrance 会提升物理真实性和边缘拟合精度，但可能增加优化不稳定性；退化为纯 Lambertian 会导致非朗伯区域（如高光）拟合崩溃；Blinn-Phong 计算更简单但缺乏物理可解释性。"
+      },
+      {
+        "module_name": "角域坐标近似映射",
+        "code_location": "tools/brdf_modeling.py / fit_brdf_to_patch (角度计算逻辑部分)",
+        "core_function": "将 9x9 的离散视角 patch 像素坐标近似映射为连续的极角 θ，假设光源在中心且视角呈放射状均匀分布。",
+        "ablation_replacement": "替换为基于真实相机内外参计算的精确视角方向向量与半角向量（half-way vector），或引入可学习的坐标嵌入（Learnable Coordinate Embedding）。",
+        "expected_impact": "使用真实相机参数可消除近似映射带来的几何畸变，显著提升大视角或非正交观测下的拟合精度；可学习嵌入则能让模型自适应修正标定误差，但需要更多数据驱动训练。"
+      },
+      {
+        "module_name": "非线性最小二乘曲线拟合器",
+        "code_location": "tools/brdf_modeling.py / fit_brdf_to_patch (scipy.optimize.curve_fit 调用)",
+        "core_function": "使用 Levenberg-Marquardt 算法逐像素优化 BRDF 参数 (ρ_d, ρ_s, m)，最小化观测角域分布与模型预测值的误差。",
+        "ablation_replacement": "替换为基于深度学习的回归网络（如 MLP/CNN 直接前向预测参数），或基于梯度的优化器（如 Adam/L-BFGS），或启发式网格搜索法。",
+        "expected_impact": "替换为深度学习回归网络可将推理速度提升数个数量级（避免逐像素迭代），并通过数据驱动提升对噪声的鲁棒性；基于梯度的优化器可能更容易陷入局部最优且收敛速度较慢。"
+      },
+      {
+        "module_name": "图像辐射度预处理与降维",
+        "code_location": "tools/brdf_modeling.py / load_scene",
+        "core_function": "将多视角 RGB 图像通过固定权重转换为单通道灰度图，并进行双线性插值 Resize，以简化后续物理拟合的计算量。",
+        "ablation_replacement": "保留 RGB 三通道进行独立或联合拟合，或在拟合前引入 Gamma 校正/相机响应函数（CRF）逆映射。",
+        "expected_impact": "保留 RGB 通道可捕捉材质特有的颜色高光（如金属），提升材质区分度；引入 Gamma 校正可消除相机非线性响应带来的系统性偏差，使物理参数 (ρ_d, ρ_s) 的绝对值估计更准确。"
+      }
+    ]
+  }
+}

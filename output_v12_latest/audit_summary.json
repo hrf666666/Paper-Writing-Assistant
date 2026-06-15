@@ -1,0 +1,52 @@
+{
+  "total_phases_audited": 13,
+  "total_issues": 44,
+  "critical_issues": 1,
+  "warning_issues": 29,
+  "info_issues": 14,
+  "overall_passed": false,
+  "phase_results": {
+    "phase1": {
+      "passed": true,
+      "issue_count": 4
+    },
+    "phase2": {
+      "passed": true,
+      "issue_count": 2
+    },
+    "phase3": {
+      "passed": true,
+      "issue_count": 7
+    },
+    "phase4": {
+      "passed": true,
+      "issue_count": 6
+    },
+    "phase5": {
+      "passed": true,
+      "issue_count": 1
+    },
+    "phase5_1": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_2": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_5": {
+      "passed": false,
+      "issue_count": 4
+    }
+  },
+  "verified_references": 0,
+  "all_critical": [
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: 正文第5章（Conclusion）总结本文主要解决了无纹理区域（texture-less regions）的深度模糊和高计算复杂度问题，并集成了多尺度角度注意力（multi-scale angular attention）。",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    }
+  ]
+}

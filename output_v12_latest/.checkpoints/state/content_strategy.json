@@ -1,0 +1,144 @@
+{
+  "Introduction": {
+    "focus_areas": [
+      "Importance of light field depth estimation in multimedia and computer vision",
+      "Limitations of current methods: Failure of the view-consistency assumption in non-Lambertian regions (texture copying artifacts)",
+      "Overview of the proposed physical and component-aware framework"
+    ],
+    "depth_map": {
+      "background_and_motivation": "brief",
+      "limitation_analysis": "moderate",
+      "contributions": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "mention"
+    },
+    "must_include": [
+      "Motivation hook establishing the problem of 'Direction: Breaking the View-Consistency Assumption in Non-Lambertian R'",
+      "Clear gap statement regarding the inability of traditional EPI methods to handle complex materials",
+      "A cohesive paragraph enumerating the three main contributions (dual-mask/MRI analysis, GCD/SAM energy adjustment, BRDF-based fusion)",
+      "[动机锚点] Establish the problem of **Direction**: Breaking the View-Consistency Assumption in Non-Lambertian R",
+      "[动机锚点] Enumerate contributions: 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRD"
+    ],
+    "should_avoid": [
+      "Detailed mathematical equations or algorithmic steps",
+      "Excessive citations (more than 10 per paragraph)",
+      "Dedicated paragraph outlining the paper structure"
+    ],
+    "target_emphasis": "Establish the critical problem of view-consistency failure in non-Lambertian media and clearly articulate the three proposed physical-model-based contributions."
+  },
+  "Related Work": {
+    "focus_areas": [
+      "Traditional and learning-based light field depth estimation methods",
+      "Depth estimation challenges in non-Lambertian and textural scenes",
+      "Application of physical reflection models (BRDF) and frequency domain analysis in vision"
+    ],
+    "depth_map": {
+      "epi_and_defocus_methods": "moderate",
+      "deep_learning_methods": "moderate",
+      "non_lambertian_depth_methods": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "supporting"
+    },
+    "must_include": [
+      "Gap bridge showing that existing methods lack the capability to handle 'Direction: Breaking the View-Consistency Assumption in Non-Lambertian R'",
+      "Integrated critique of how current methods fail to distinguish depth structures from specular reflections or rough textures",
+      "[动机锚点] Show existing methods lack **Direction**: Breaking the View-Consistency Assumption in N, bridging to"
+    ],
+    "should_avoid": [
+      "Superficial listing of methods without critical analysis",
+      "Repeating detailed background already covered in the Introduction"
+    ],
+    "target_emphasis": "Bridge the gap by demonstrating that existing literature lacks physically interpretable mechanisms to break the view-consistency assumption in complex scenes."
+  },
+  "Methodology": {
+    "focus_areas": [
+      "Overall architecture and data flow of the proposed framework",
+      "Module 1: Physical material classification via dual-mask and MRI-like k-space analysis",
+      "Module 2: Ternary Mask adaptive energy adjustment using GCD and SAM",
+      "Module 3: Component-aware depth estimation framework based on BRDF fitting"
+    ],
+    "depth_map": {
+      "framework_overview": "brief",
+      "module_1_dual_mask_and_k_space": "deep",
+      "module_2_gcd_and_sam_energy": "deep",
+      "module_3_brdf_fusion": "deep"
+    },
+    "innovation_allocation": {
+      "创新点1": "primary",
+      "创新点2": "primary",
+      "创新点3": "primary"
+    },
+    "must_include": [
+      "Justification for each module corresponding to the contribution_claim",
+      "Key mathematical formulations (2D-DFT for k-space, GCD variance/mean ratio, Cook-Torrance BRDF fitting, and the weighted fusion equation)",
+      "Computational complexity and efficiency analysis to address TCSVT requirements",
+      "[动机锚点] Justify each module (基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参"
+    ],
+    "should_avoid": [
+      "Excessive step-by-step derivations that are not essential to the core understanding",
+      "Detailed implementation parameters of the Segment Anything Model (SAM)",
+      "Using an algorithm box (per journal style preferences)"
+    ],
+    "target_emphasis": "Justify the design of each module with mathematical rigor, demonstrating how physical models and frequency analysis jointly solve the non-Lambertian depth estimation problem."
+  },
+  "Experiments": {
+    "focus_areas": [
+      "Comprehensive quantitative comparison with State-of-the-Art (SOTA) methods",
+      "Thorough ablation studies validating each proposed module",
+      "Qualitative visualizations showing artifact removal and depth enhancement"
+    ],
+    "depth_map": {
+      "datasets_and_setup": "brief",
+      "sota_comparison": "deep",
+      "ablation_studies": "deep",
+      "qualitative_analysis": "moderate"
+    },
+    "innovation_allocation": {
+      "创新点1": "supporting",
+      "创新点2": "supporting",
+      "创新点3": "supporting"
+    },
+    "must_include": [
+      "evidence_support: Tables detailing ablation experiments for each innovation (Material Classification, Energy Adjustment, BRDF Fusion)",
+      "Comparison tables showing quantitative superiority on standard real-world and synthetic datasets",
+      "Visualization of the 9x9 k-space frequency maps and the ternary masks",
+      "[动机锚点] Design experiments validating 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, "
+    ],
+    "should_avoid": [
+      "Failure case analysis (per journal style preferences)",
+      "Overstating results without contextualizing metric improvements",
+      "Excessive textual description of datasets"
+    ],
+    "target_emphasis": "Provide extensive empirical data and visual evidence validating the efficacy of the proposed modules in handling mixed materials and breaking the view-consistency assumption."
+  },
+  "Conclusion": {
+    "focus_areas": [
+      "Summary of the proposed physical framework and its theoretical advantages",
+      "Final acknowledgment of how the innovations collectively solve the target problem"
+    ],
+    "depth_map": {
+      "summary_of_work": "brief",
+      "future_work": "brief"
+    },
+    "innovation_allocation": {
+      "创新点1": "mention",
+      "创新点2": "mention",
+      "创新点3": "mention"
+    },
+    "must_include": [
+      "Contribution claim echoing how the dual-mask/MRI, GCD/SAM, and BRDF fusion successfully address the non-Lambertian view-consistency issue",
+      "[动机锚点] Echo how 基于双掩码与类MRI角度频率分析的物理可解释材质分类, 结合多视角几何一致性描述子(GCD)与SAM分割的三元Mask自适应能量调整策略, 基于BRDF物理参数拟合的分量感知融合深度"
+    ],
+    "should_avoid": [
+      "Introducing new concepts or methods",
+      "Copying the abstract or introduction verbatim"
+    ],
+    "target_emphasis": "Concisely synthesize the paper's achievements and highlight the broad impact of physics-guided depth estimation for multimedia applications."
+  }
+}
