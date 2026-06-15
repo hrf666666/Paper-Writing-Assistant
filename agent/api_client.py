@@ -53,6 +53,7 @@ class UnifiedAPIClient:
         self._last_call_time = 0.0
         self._call_stats: Dict[str, Dict[str, int]] = {}
         self._available_models: Dict[str, Dict] = {}
+        self._client_pool: Dict[str, object] = {}  # pooled SDK clients by alias (avoid re-init per call)
 
         # 启动时检测可用模型
         self._detect_available_models()
@@ -173,6 +174,46 @@ class UnifiedAPIClient:
             model="all", attempt=max_retries
         )
 
+    def _get_client(self, model_name: str):
+        """Get (or lazily create) a pooled SDK client by alias.
+
+        v2.2: SDK clients are cached per-alias so HTTP connection pools /
+        TLS state are reused across the hundreds of calls in a run,
+        instead of being rebuilt on every single call.
+        """
+        if model_name in self._client_pool:
+            return self._client_pool[model_name]
+        config = self._available_models.get(model_name)
+        if not config:
+            raise ValueError(f"未知或不可用的模型: {model_name}")
+        client = self._build_client(config)
+        self._client_pool[model_name] = client
+        return client
+
+    def _build_client(self, config: Dict):
+        """Build a SDK client based on model type (runs once per alias)."""
+        from api.openai_compatible import OpenAIClient, ZhipuAIClient, AnthropicClient
+        if config.get("non_openai"):
+            return AnthropicClient(api_key=config["api_key"], model=config["model_id"],
+                                   max_tokens=config.get("max_tokens", 23333),
+                                   temperature=config.get("temperature", 1.0))
+        if config.get("use_zai"):
+            return ZhipuAIClient(api_key=config["api_key"], base_url=config.get("base_url"),
+                                 model=config["model_id"], max_tokens=config.get("max_tokens", 8192),
+                                 temperature=config.get("temperature", 0.7),
+                                 stream=config.get("stream", False))
+        return OpenAIClient(api_key=config["api_key"], base_url=config["base_url"],
+                            model=config["model_id"], max_tokens=config.get("max_tokens", 8192),
+                            temperature=config.get("temperature", 0.7),
+                            stream=config.get("stream", False))
+
+    def _find_alias_by_config(self, config: Dict) -> str:
+        """Reverse-lookup alias from config object identity (pool keyed by alias)."""
+        for alias, cfg in self._available_models.items():
+            if cfg is config:
+                return alias
+        return ""
+
     def _dispatch_call(self, model_name: str, prompt: str) -> str:
         """
         根据模型名称分发调用
@@ -196,43 +237,21 @@ class UnifiedAPIClient:
         return self._call_openai_compatible(prompt, config)
 
     def _call_openai_compatible(self, prompt: str, config: Dict) -> str:
-        """统一的OpenAI兼容API调用"""
-        from api.openai_compatible import OpenAIClient
-
-        client = OpenAIClient(
-            api_key=config["api_key"],
-            base_url=config["base_url"],
-            model=config["model_id"],
-            max_tokens=config.get("max_tokens", 8192),
-            temperature=config.get("temperature", 0.7),
-            stream=config.get("stream", False),
-        )
+        """OpenAI-compatible call via pooled client."""
+        alias = self._find_alias_by_config(config)
+        client = self._get_client(alias)
         return client.query(prompt)
 
     def _call_anthropic(self, prompt: str, config: Dict) -> str:
-        """Anthropic原生API调用（使用 anthropic SDK）"""
-        from api.openai_compatible import AnthropicClient
-
-        client = AnthropicClient(
-            api_key=config["api_key"],
-            model=config["model_id"],
-            max_tokens=config.get("max_tokens", 23333),
-            temperature=config.get("temperature", 1.0),
-        )
+        """Anthropic native call via pooled client."""
+        alias = self._find_alias_by_config(config)
+        client = self._get_client(alias)
         return client.query(prompt)
 
     def _call_zhipuai(self, prompt: str, config: Dict) -> str:
-        """智谱 GLM 调用（使用 zai SDK，原生支持 thinking）"""
-        from api.openai_compatible import ZhipuAIClient
-
-        client = ZhipuAIClient(
-            api_key=config["api_key"],
-            base_url=config.get("base_url"),
-            model=config["model_id"],
-            max_tokens=config.get("max_tokens", 8192),
-            temperature=config.get("temperature", 0.7),
-            stream=config.get("stream", False),
-        )
+        """GLM call via pooled client (zai SDK, native thinking support)."""
+        alias = self._find_alias_by_config(config)
+        client = self._get_client(alias)
         return client.query(prompt)
 
     def parse_json_response(self, response: str, default=None):

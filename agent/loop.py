@@ -105,9 +105,6 @@ class ResearchLoop:
             quality_gate=self.quality_gate,
         )
 
-        # 3. 恒定大小上下文管理器（3层记忆）
-        from agent.bounded_context import BoundedContextManager
-        self.bounded_ctx = BoundedContextManager(budget=5000)
 
         # 4. 章节级状态机
         from agent.chapter_state_machine import PaperStateMachine
@@ -193,13 +190,6 @@ class ResearchLoop:
         extra_sections = self.venue_adapter.get_extra_sections()
         for i, sec in enumerate(extra_sections or [], 1):
             self.paper_sm.register_chapter(f"phase5_{i}", sec)
-
-        # v8.0: 初始化 BoundedContext 长期记忆
-        if self._project_data:
-            self.bounded_ctx.set_project_brief(self._build_project_brief())
-            innovations = self._project_data.get("innovation_points", [])
-            if innovations:
-                self.bounded_ctx.set_innovation_points(innovations)
 
         # 跳过已完成的阶段
         if resume:
@@ -368,11 +358,6 @@ class ResearchLoop:
                     f"outline={bool(self._outline)}, "
                     f"ablation={bool(self._ablation_results)}"
                 )
-
-                # v8.0: 恢复 BoundedContext 章节 summary（从 chapters 重建）
-                for key, content in self._chapters.items():
-                    if content and isinstance(content, str):
-                        self.bounded_ctx.update_chapter_summary(str(key), content)
 
                 return bool(self._project_data)
         return False
@@ -628,9 +613,6 @@ Respond with just the strategy, no explanation:"""
                 content, report = self._quality_ensure("Introduction", content)
                 result = content
                 self._chapters[1] = result
-                # v8.0: 更新 BoundedContext
-                self.bounded_ctx.update_chapter_summary("1", result)
-                self.bounded_ctx.extract_symbols_from_content(result)
                 # v5.0: 即时审计
                 if ENABLE_AUDIT:
                     self._quick_audit("phase1", "Introduction", result)
@@ -648,8 +630,6 @@ Respond with just the strategy, no explanation:"""
                 self._chapters[2] = result
                 if ENABLE_AUDIT:
                     self._quick_audit("phase2", "Related Work", result)
-                # v8.0: 更新 BoundedContext
-                self.bounded_ctx.update_chapter_summary("2", result)
 
             elif phase == "phase3":
                 from agent.skill_orchestrators.ch3_methodology import run_chapter3
@@ -665,9 +645,6 @@ Respond with just the strategy, no explanation:"""
                 self._chapters[3] = result
                 if ENABLE_AUDIT:
                     self._quick_audit("phase3", "Methodology", result)
-                # v8.0: 更新 BoundedContext
-                self.bounded_ctx.update_chapter_summary("3", result)
-                self.bounded_ctx.extract_symbols_from_content(result)
 
             elif phase == "phase4":
                 from agent.skill_orchestrators.ch4_experiments import run_chapter4
@@ -683,8 +660,6 @@ Respond with just the strategy, no explanation:"""
                 self._chapters[4] = result
                 if ENABLE_AUDIT:
                     self._quick_audit("phase4", "Experiments", result)
-                # v8.0: 更新 BoundedContext
-                self.bounded_ctx.update_chapter_summary("4", result)
 
             elif phase == "phase5":
                 from agent.skill_orchestrators.ch5_conclusion import run_chapter5
@@ -860,13 +835,15 @@ Respond with just the strategy, no explanation:"""
 
     def _complete_task(self, task, result, reflection: dict):
         """统一完成任务：构造 quality_report 并标记完成"""
-        quality_info = None
         score = reflection.get("quality_score", -1)
-        if score >= 0:
-            quality_info = type('QReport', (), {
-                'overall_score': score,
-                'to_dict': lambda s=None, sc=score: {"overall_score": sc},
-            })()
+        # 直接构造 dict，避免 type('QReport',...)() 动态类的坏味道
+        # dispatcher.mark_task_completed 期望接收对象（调 .overall_score / .to_dict()），
+        # 这里用 SimpleNamespace 替代动态类，既保留属性访问又更健壮
+        from types import SimpleNamespace
+        quality_info = SimpleNamespace(
+            overall_score=score,
+            to_dict=lambda s=None, sc=score: {"overall_score": sc},
+        ) if score >= 0 else None
         self.dispatcher.mark_task_completed(task, result, quality_report=quality_info)
 
         # v12.0: 同步更新分层规划的 AtomicStep 状态
@@ -1674,10 +1651,17 @@ Respond with just the strategy, no explanation:"""
                             env = "figure*" if size_type in ("double", "teaser") else "figure"
                             width_cmd = "\\textwidth" if env == "figure*" else "\\columnwidth"
                             caption = fp.get("caption", fp.get("title", fig_id))
+                            # 图片路径规范化：main.tex 在 output/latex/ 下编译，
+                            # figures 已由 copytree 复制到 output/latex/figures/，
+                            # 所以只取文件名拼 figures/ 前缀，避免 ./output/figures/xxx 这种
+                            # 相对仓库根的路径（编译时找不到，导致 Division by 0）
+                            import os as _os
+                            _fig_filename = _os.path.basename(fig_result["pdf_path"])
+                            _fig_tex_path = f"figures/{_fig_filename}"
                             figure_latex_snippets += (
                                 f"\\begin{{{env}}}[!t]\n"
                                 f"\\centering\n"
-                                f"\\includegraphics[width={width_cmd}]{{{fig_result['pdf_path']}}}\n"
+                                f"\\includegraphics[width={width_cmd}]{{{_fig_tex_path}}}\n"
                                 f"\\caption{{{caption}}}\n"
                                 f"\\label{{fig:{fig_id}}}\n"
                                 f"\\end{{{env}}}\n\n"
@@ -1701,6 +1685,11 @@ Respond with just the strategy, no explanation:"""
         if os.path.exists(tikz_path):
             with open(tikz_path, 'r', encoding='utf-8') as f:
                 tikz_code = f.read()
+            # 防御性校验：只有含 \begin{tikzpicture} 的合法 TikZ 才注入
+            # 避免 LLM 的思考过程文本泄漏进 figure 环境（导致 xelatex 崩溃）
+            if tikz_code and "\\begin{tikzpicture}" not in tikz_code:
+                logger.warning(f"[Phase 7.3] architecture_figure.tex 不含 tikzpicture 环境，判定为无效输出，丢弃")
+                tikz_code = ""
 
         # 使用已生成的Abstract（由phase5_5生成）
         abstract = getattr(self, '_abstract', '')

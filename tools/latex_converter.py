@@ -635,16 +635,18 @@ def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
         from tools.latex_direct_generator import (
             _fix_textwidth_confusion, _ensure_table_resizebox,
             _ensure_tikz_fits, _validate_float_sizing,
-            _fix_long_equations,
         )
         latex_paper = _fix_textwidth_confusion(latex_paper)
         latex_paper = _ensure_table_resizebox(latex_paper)
         latex_paper = _ensure_tikz_fits(latex_paper)
         latex_paper = _validate_float_sizing(latex_paper)
-        latex_paper = _fix_long_equations(latex_paper)
+        # _fix_long_equations 已移除：它对 A=B 单等式按 = 拆行，
+        # 产生缺 & 对齐符的 split 块，导致 "split won't work here"
+        # 和级联的 Missing $ / Bad math / \eqno 错误（净负作用）。
+        # 公式溢出应由编译后的 _overflow_heal_loop（基于真实 Overfull 日志）处理。
         # 兜底：LLM 自行生成的 multline → equation+split（IEEEtran 安全）
         latex_paper = _replace_multline(latex_paper)
-        logger.info("[latex_converter] 后处理修复链完成 (6 步)")
+        logger.info("[latex_converter] 后处理修复链完成 (5 步)")
     except Exception as e:
         logger.warning(f"[latex_converter] 后处理修复链失败（不阻塞）: {e}")
 

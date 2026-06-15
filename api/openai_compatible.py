@@ -547,52 +547,6 @@ def _get_model_config(alias: str) -> Dict:
     return MODEL_ALIASES.get(alias, {})
 
 
-def query_glm(prompt: str, model: str = None, **kwargs) -> str:
-    """调用智谱GLM模型（使用 zai SDK，支持 thinking）"""
-    from config.api_config import ZHIPU_GLM_API_KEY, ZHIPU_GLM_BASE_URL
-    if not ZHIPU_GLM_API_KEY:
-        raise ValueError("智谱GLM API Key 未配置，请在 .env 中设置 ZHIPU_GLM_API_KEY")
-    cfg = _get_model_config("glm_5_2")
-    client = ZhipuAIClient(
-        api_key=ZHIPU_GLM_API_KEY,
-        base_url=ZHIPU_GLM_BASE_URL,
-        model=model or cfg.get("model_id", "glm-5.2"),
-        max_tokens=kwargs.pop("max_tokens", cfg.get("max_tokens", 8192)),
-        temperature=kwargs.pop("temperature", cfg.get("temperature", 0.7)),
-        **kwargs
-    )
-    return client.query(prompt)
-
-
-def query_qwen(prompt: str, model: str = None, **kwargs) -> str:
-    """调用阿里云百炼模型"""
-    from config.api_config import ALI_BAILIAN_API_KEY, ALI_BAILIAN_BASE_URL
-    if not ALI_BAILIAN_API_KEY:
-        raise ValueError("阿里云百炼 API Key 未配置，请在 .env 中设置 ALI_BAILIAN_API_KEY")
-    cfg = _get_model_config("qwen_plus")
-    client = OpenAIClient(
-        api_key=ALI_BAILIAN_API_KEY,
-        base_url=ALI_BAILIAN_BASE_URL,
-        model=model or cfg.get("model_id", "qwen-plus"),
-        max_tokens=kwargs.pop("max_tokens", cfg.get("max_tokens", 4096)),
-        temperature=kwargs.pop("temperature", cfg.get("temperature", 0.5)),
-        **kwargs
-    )
-    return client.query(prompt)
-
-
-def query_openai_compatible(prompt: str, api_key: str, base_url: str,
-                            model: str, **kwargs) -> str:
-    """通用OpenAI兼容调用"""
-    client = OpenAIClient(
-        api_key=api_key,
-        base_url=base_url,
-        model=model,
-        **kwargs
-    )
-    return client.query(prompt)
-
-
 # ========== 统一模型查询（字典驱动） ==========
 
 def query_model(prompt: str, alias: str, **kwargs) -> str:
@@ -614,6 +568,7 @@ def query_model(prompt: str, alias: str, **kwargs) -> str:
     max_tokens = kwargs.pop("max_tokens", cfg.get("max_tokens", 8192))
     temperature = kwargs.pop("temperature", cfg.get("temperature", 0.7))
     stream = kwargs.pop("stream", cfg.get("stream", False))
+    system_prompt = kwargs.pop("system_prompt", None)
     base_url = provider_config.get("base_url", "https://api.openai.com/v1")
 
     if cfg.get("non_openai"):
@@ -625,5 +580,5 @@ def query_model(prompt: str, alias: str, **kwargs) -> str:
     else:
         client = OpenAIClient(api_key=api_key, base_url=base_url, model=model_id,
                               max_tokens=max_tokens, temperature=temperature, stream=stream)
-    return client.query(prompt)
+    return client.query(prompt, system_prompt=system_prompt)
 

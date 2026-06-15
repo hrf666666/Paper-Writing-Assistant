@@ -170,11 +170,20 @@ TikZ 锚点用 PGF 标准：.north .south .west .east（不是 .top .bottom .lef
     tikz_code = tikz_code.strip()
     
     # 验证TikZ代码基本结构
-    if "\\begin{tikzpicture}" not in tikz_code or "\\end{tikzpicture}" not in tikz_code:
-        logger.warning("TikZ代码缺少tikzpicture环境，尝试修复...")
-        if "\\begin{tikzpicture}" not in tikz_code:
+    has_begin = "\\begin{tikzpicture}" in tikz_code
+    has_end = "\\end{tikzpicture}" in tikz_code
+    if not has_begin or not has_end:
+        # 区分“漏标签的合法 TikZ”与“LLM 思考过程文本”
+        # 合法 TikZ 体应含 \\node/\\draw/\\path 等命令；否则判定为无效输出
+        has_tikz_cmd = any(cmd in tikz_code for cmd in
+                           ("\\node", "\\draw", "\\path", "\\coordinate", "\\fill"))
+        if not has_tikz_cmd:
+            logger.warning("TikZ输出不含 tikzpicture 环境且无 TikZ 命令（疑为 LLM 思考过程），判废返回空")
+            return ""
+        logger.warning("TikZ代码缺少tikzpicture环境，补全标签...")
+        if not has_begin:
             tikz_code = "\\begin{tikzpicture}\n" + tikz_code
-        if "\\end{tikzpicture}" not in tikz_code:
+        if not has_end:
             tikz_code = tikz_code + "\n\\end{tikzpicture}"
 
     # ── PGF 锚点自动修正 ──
@@ -356,12 +365,15 @@ Output ONLY the fixed tikzpicture code:"""
             error_msg = result2.stdout[-600:] if result2.stdout else "still failing"
             logger.warning(f"[TikZ] LLM 修复后仍编译失败: {error_msg[:200]}")
 
-        logger.warning("[TikZ] 编译验证失败，使用原始代码（可能包含错误）")
-        return tikz_code
+        # 编译失败 = tikz_code 是垃圾（可能是 LLM 的思考过程而非代码）
+        # 返回空字符串，避免垃圾代码泄漏进 main.tex 导致 xelatex 崩溃
+        logger.warning("[TikZ] 编译验证失败，丢弃无效代码（返回空，避免污染 main.tex）")
+        return ""
 
     except subprocess.TimeoutExpired:
-        logger.warning("[TikZ] 编译验证超时，使用原始代码")
-        return tikz_code
+        # 超时时无法确认代码是否合法，保守返回空
+        logger.warning("[TikZ] 编译验证超时，丢弃代码（返回空）")
+        return ""
     except FileNotFoundError:
         logger.info("[TikZ] pdflatex 不可用，跳过编译验证")
         return tikz_code
