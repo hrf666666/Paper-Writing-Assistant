@@ -107,6 +107,9 @@ class ResearchLoop:
         # v13 PR4: 统一问题总线（audit/constraint/quality/cross_chapter 协作中枢）
         from agent.core.finding import FindingBus
         self._findings = FindingBus()
+        # v13 接线 P0: 图清单（文图联动单一真相源，替代裸字符串）
+        from agent.core.figure_manifest import FigureManifest
+        self._figure_manifest = FigureManifest()
         self.checkpoint = CheckpointManager(OUTPUT_DIR)
         self.quality_gate = QualityGate(self.api_client)
         self.directive_mgr = DirectiveManager(OUTPUT_DIR)
@@ -689,11 +692,22 @@ Respond with just the strategy, no explanation:"""
         except Exception:
             _brief = ""
 
-        return self.quality_gate.evaluate_and_revise(
+        _result = self.quality_gate.evaluate_and_revise(
             chapter_name, content,
             style_guide, chapter_org, previous_content,
             extra_findings_brief=_brief,
         )
+        # v13 接线 P0-c: QualityGate 评估结果录入 FindingBus（补 quality 类 findings）
+        try:
+            _final_report = _result[1] if isinstance(_result, tuple) else None
+            if _final_report is not None and getattr(_final_report, "issues", None):
+                from agent.core.finding import quality_issues_to_findings as _q2f, Severity
+                _ch_loc = self._ch_name_to_loc(chapter_name)
+                self._findings.clear(source="quality")  # 只留最新一轮
+                self._findings.record_many(_q2f(_final_report.issues, chapter_hint=_ch_loc))
+        except Exception:
+            pass
+        return _result
 
     @staticmethod
     def _ch_name_to_loc(name):
@@ -1403,6 +1417,10 @@ Respond with just the strategy, no explanation:"""
                     self._project_data, self._ref_data
                 )
                 results[f"chapter{num}_audit"] = report.to_dict()
+                # v13 接线: auditor 审计结果录入 FindingBus（供 QualityLoop 修订回流）
+                from agent.core.finding import audit_report_to_findings as _a2f
+                _ch_loc = f"ch{num}"
+                self._findings.record_many(_a2f(report, chapter_hint=_ch_loc))
 
                 # 打印审计摘要
                 critical = sum(1 for i in report.issues if i.severity == "critical")
@@ -1588,22 +1606,25 @@ Respond with just the strategy, no explanation:"""
                 if os.path.exists(tex_path):
                     with open(tex_path, "r", encoding="utf-8") as f:
                         tex_content = f.read()
-                    if arch_pdf_path:
-                        remaining_figures = figure_latex_snippets
-                    else:
-                        fig_match = re.search(
-                            r'\\begin\{figure\*?\}.*?\\end\{figure\*?\}',
-                            figure_latex_snippets, re.DOTALL,
-                        )
-                        remaining_figures = figure_latex_snippets
-                        if fig_match:
-                            remaining_figures = figure_latex_snippets.replace(
-                                fig_match.group(0), '', 1
-                            ).strip()
-                    if remaining_figures and "\\bibliographystyle" in tex_content:
+# v13 接线 P0-e: 从 FigureManifest 派生 remaining_figures，消除双重注入 bug
+                    # 旧 bug: arch_pdf 存在时 remaining = 全量 snippets（架构图被注入两次）
+                    # 新: 架构图已由 run_latex_converter 注入 ch3，remaining 只取非架构图
+                    from agent.core.figure_manifest import FigType
+                    _non_arch = [e for e in self._figure_manifest.all()
+                                 if e.fig_type != FigType.ARCHITECTURE
+                                 and e in self._figure_manifest.usable_for_injection()]
+                    remaining_figures = ""
+                    for e in _non_arch:
+                        remaining_figures += self._figure_manifest._single_figure(e) + "\n\n"
+                    remaining_figures = remaining_figures.strip()
+                    # 文图对账：正文 \ref{fig:X} 都该有 manifest 条目
+                    _missing_refs = self._figure_manifest.validate_linkage(tex_content)
+                    if _missing_refs:
+                        logger.warning(f"[Phase 7.3] 文图对账: {len(_missing_refs)} 个 \ref{{fig:}} 无对应图: {_missing_refs[:5]}")
+                    if remaining_figures and "\bibliographystyle" in tex_content:
                         tex_content = tex_content.replace(
-                            "\\bibliographystyle",
-                            remaining_figures + "\n\n\\bibliographystyle",
+                            "\bibliographystyle",
+                            remaining_figures + "\n\n\bibliographystyle",
                         )
                     elif remaining_figures:
                         tex_content += "\n\n" + remaining_figures
@@ -1706,6 +1727,11 @@ Respond with just the strategy, no explanation:"""
                                    f"{constraint_result['critical_count']} critical, "
                                    f"{constraint_result['warning_count']} warnings")
                     results["constraint_audit"] = constraint_result
+                    # v13 接线: LaTeX 约束违规录入 FindingBus
+                    from agent.core.finding import violations_to_findings as _v2f
+                    _violations = constraint_result.get("violations", [])
+                    if _violations:
+                        self._findings.record_many(_v2f(_violations))
                 else:
                     logger.info("[Phase 7.9] 约束预检通过")
 
@@ -1870,29 +1896,37 @@ Respond with just the strategy, no explanation:"""
                                       if isinstance(self._project_data, dict) else None),
                     )
                     if fig_result and fig_result.get("pdf_path"):
-                        fig_id = fp.get("fig_id", "fig")
-                        size_type = fp.get("size_type", "double")
-                        env = "figure*" if size_type in ("double", "teaser") else "figure"
-                        width_cmd = "\\textwidth" if env == "figure*" else "\\columnwidth"
-                        caption = fp.get("caption", fp.get("title", fig_id))
+                        # v13 接线 P0-d: 录入 FigureManifest（结构化，替代裸字符串拼接）
+                        from agent.core.figure_manifest import FigureEntry, FigType, FigStatus
+                        _fig_id = fp.get("fig_id", "fig")
+                        _size_type = fp.get("size_type", "double")
+                        _caption = fp.get("caption", fp.get("title", _fig_id))
                         _fig_filename = os.path.basename(fig_result["pdf_path"])
                         _fig_tex_path = f"figures/{_fig_filename}"
-                        figure_latex_snippets += (
-                            f"\\begin{{{env}}}[!t]\n"
-                            f"\\centering\n"
-                            f"\\includegraphics[width={width_cmd}]{{{_fig_tex_path}}}\n"
-                            f"\\caption{{{caption}}}\n"
-                            f"\\label{{fig:{fig_id}}}\n"
-                            f"\\end{{{env}}}\n\n"
-                        )
+                        _type_map = {"teaser": FigType.TEASER, "architecture": FigType.ARCHITECTURE,
+                                     "ablation": FigType.ABLATION, "comparison": FigType.COMPARISON,
+                                     "qualitative": FigType.QUALITATIVE}
+                        self._figure_manifest.add(FigureEntry(
+                            fig_id=_fig_id,
+                            fig_type=_type_map.get(fp.get("fig_type", ""), FigType.MODULE_DETAIL),
+                            source_pdf=_fig_tex_path,
+                            caption=_caption,
+                            supports_claim=fp.get("claim", _caption[:40]),
+                            status=FigStatus.RENDERED,
+                            size_type=_size_type,
+                        ))
                 except Exception as fe:
                     logger.warning(f"[Phase 7.28] 图表 {fp.get('fig_id', '?')} 生成失败: {fe}")
-            _n_ok = figure_latex_snippets.count("\\begin{figure")
+            # v13 接线 P0: 从 manifest 生成 LaTeX（经筛选规则，替代裸字符串）
+            figure_latex_snippets = self._figure_manifest.to_latex_snippets()
+            _n_ok = len(self._figure_manifest.usable_for_injection())
+            _n_total = len(fig_plans)
             if _n_ok:
-                logger.info(f"[Phase 7.28] 图表生成完成: {_n_ok}/{len(fig_plans)} 成功")
+                logger.info(f"[Phase 7.28] 图表生成完成: {_n_ok}/{_n_total} 可注入")
                 results["figures"] = figure_latex_snippets
+                results["figure_manifest"] = self._figure_manifest.summary()
             else:
-                logger.error(f"[Phase 7.28] {len(fig_plans)} 个图表全部失败（0 产出）")
+                logger.error(f"[Phase 7.28] {_n_total} 个图表全部失败（0 可注入）")
                 results["figures_failed"] = True
         except Exception as e:
             from agent.core.errors import classify as _cls_err

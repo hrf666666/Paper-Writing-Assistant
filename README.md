@@ -60,6 +60,19 @@
 
 **保留原则**：核实为活依赖的不删——`figure/style_templates.py`（data_visualizer 3 处 import）、`figure/layout_engine.py`+`layout_templates.py`（测试引用）、`run_with_log.py`（文档化运行入口）。清理后 **263 个 pytest 测试 0 error**。
 
+### v13.1 接线（P0 完成）：消掉"建了不接"的死接线
+
+v13.0 内核接线率审计发现 6 块契约里 5 块仅 0-20% 接线（"徒增代码不涨性能"）。v13.1 不建新模块，**纯接线**：
+
+| 接线项 | v13.0 状态 | v13.1 接通 |
+|--------|-----------|-----------|
+| **FindingBus 写入源** | 仅 cross_chapter 1 源 | ✅ +auditor +constraint +quality（4 类合并回流修订）|
+| **FigureManifest 注入** | 0% 接线，裸字符串 | ✅ 实例化 + `_generate_figures` 录入 + `to_latex_snippets()` 输出 |
+| **双重注入 bug** | 架构图注入两次 | ✅ 修复（remaining 派生排除架构图）|
+| **文图对账** | 无 | ✅ `validate_linkage()` 正文↔图 label 对账 |
+
+预期收益（待 pipeline 实跑验证）：修订简报从 1 类问题变 4 类合并；架构图不再重复；正文 \ref 有对账。
+
 ---
 
 ## v12.3 里程碑：架构净化 — PipelineContext + 依赖注入 + ch5 统一

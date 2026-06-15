@@ -30,6 +30,15 @@ agent/core/
 **设计原则**：收敛到少数契约，而非新增更多模块。7 套 issue → 1 套 Finding；
 3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 
+> **v13.1 接线状态（P0 完成）**：审计后实测 v13.0 内核接线率仅 ~20%（5/6 块空转，
+> 属"建了契约但下游不消费"的死接线）。v13.1 纯接线、零新模块：
+> FindingBus 补 auditor/constraint/quality 3 个写入源（4 类问题合并回流修订）；
+> FigureManifest 实例化并接通 `_generate_figures`/`_generate_latex_output`，
+> 修复架构图双重注入 bug + 加 `validate_linkage` 文图对账。
+> 待接线（P1/P2）：FactBase 接 auditor/verifier 读取端、LayeredMemory.assemble 接章节生成、
+> audit_with_autofix 复活。7 套 issue → 1 套 Finding；
+3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
+
 ---
 
 ## 1. 系统总览
