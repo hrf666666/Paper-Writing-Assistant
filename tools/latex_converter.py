@@ -539,6 +539,10 @@ def _replace_multline(latex_code: str) -> str:
     def _fix(m):
         body = m.group(1).strip()
         body = re.sub(r'\n\s*\n', '\n', body)
+        # 守卫：若 body 含内部环境，matrix/array/cases 等），其内部的 \\ 是行分隔符，
+        # 不能用 split('\\\\') 切，否则破坏矩阵。直接转单 equation 保留原样。
+        if re.search(r'\\begin\{(matrix|pmatrix|bmatrix|Bmatrix|vmatrix|Vmatrix|array|cases|aligned|gathered|smallmatrix)\}', body):
+            return f'\\begin{{equation}}\n{body}\n\\end{{equation}}'
         lines = [l.strip() for l in body.split('\\\\') if l.strip()]
         if len(lines) <= 1:
             single = lines[0] if lines else body

@@ -18,9 +18,6 @@ Agent 模块 - 自主循环架构核心组件
   motivation_engine.py    - v7.0 动机驱动写作
   exemplar_learner.py     - v7.0 深度范例学习
   rationale_matrix.py     - v7.0 写作理由矩阵
-  closed_book_rewriter.py - v7.0 闭卷重写
-  seven_anchor_test.py    - v7.0 七锚测试
-  multi_reviewer.py       - v7.0 多代理审阅
   skill_orchestrators/    - 多步编排器（替代旧 skills/*.py）
 """
 

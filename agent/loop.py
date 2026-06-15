@@ -2326,6 +2326,7 @@ Respond with just the strategy, no explanation:"""
                             break
                     if is_dup:
                         removed += 1
+                        logger.debug(f"[dedup] removed cross-chapter dup: {para[:80]!r}")
                     else:
                         deduped_paras.append(para)
                         seen_fingerprints[fp] = ch_key
@@ -2457,8 +2458,14 @@ Respond with just the strategy, no explanation:"""
 
         # 保存阶段检查点（同时触发持久化到磁盘）
         quality = -1.0
-        if task.quality_report and isinstance(task.quality_report, dict):
-            quality = task.quality_report.get("overall_score", -1.0)
+        # 兼容 dict / SimpleNamespace / None：quality_report 可能是
+        # dispatcher.to_dict() 后的 dict，也可能是 except 分支留下的 SimpleNamespace
+        qr = task.quality_report
+        if qr:
+            if isinstance(qr, dict):
+                quality = qr.get("overall_score", -1.0)
+            else:
+                quality = getattr(qr, "overall_score", -1.0)
 
         self.checkpoint.save_checkpoint(
             task.phase_name, task.phase_name.replace("phase", ""),
