@@ -319,25 +319,74 @@ def render_with_visual_review(topology: Dict, output_pdf: str,
         logger.info("[arch_renderer] 无 api_client，跳过视觉评价")
         return result
 
-    # 视觉评价循环
+    # v13 PR6: 视觉评价 + 真重渲循环（替代旧 TODO 死代码）
+    # 缺陷→结构修改 规则映射（确定性，非 LLM 臆测）
     for round_num in range(max_rounds):
         if not os.path.exists(output_png):
             break
         try:
             score, defects = _visual_evaluate(output_png, api_client)
-            logger.info(f"[arch_renderer] 视觉评价 round {round_num+1}: {score}/10, {len(defects)} 缺陷")
+            logger.info(f"[arch_renderer] 视觉评价 round {round_num+1}: "
+                        f"{score}/10, {len(defects)} 缺陷")
             if score >= 8:
                 logger.info(f"[arch_renderer] 视觉评价通过（{score}/10）")
                 break
-            # 尝试修复（当前：仅日志记录，因多数缺陷需改拓扑而非样式）
-            if defects:
-                logger.info(f"[arch_renderer] 缺陷: {'; '.join(defects[:3])}")
-                # TODO: 根据缺陷类型调整样式参数或拓扑，然后重渲
+            if not defects:
+                break
+            logger.info(f"[arch_renderer] 缺陷: {'; '.join(defects[:4])}")
+            # 缺陷→修改 规则表
+            modified = _apply_defect_fixes(topology, defects, round_num)
+            if not modified:
+                logger.info("[arch_renderer] 缺陷无可自动修复项，停止迭代")
+                break
+            # 真重渲（旧 TODO 在这里补上）
+            new_result = render_architecture(topology, output_pdf, output_png)
+            if new_result:
+                result = new_result
+                logger.info(f"[arch_renderer] 已据缺陷重渲 round {round_num+1}")
+            else:
+                logger.warning("[arch_renderer] 重渲失败，保留上一版")
+                break
         except Exception as e:
             logger.debug(f"[arch_renderer] 视觉评价失败（不阻塞）: {e}")
             break
 
     return result
+
+
+def _apply_defect_fixes(topology: Dict, defects: List[str], round_num: int) -> bool:
+    """根据视觉缺陷确定性修改拓扑/标签，返回是否做了修改。
+
+    缺陷→修改 规则表（v13 PR6）：
+      overlap/重叠      → 缩短超长 label（>12 字符截断）+ 标记需要更大间距
+      text overflow/溢出 → 截断长 label 到 12 字符
+      clutter/dense     → 删除 ops 子项（减少框内元素）
+      unreadable/小到看不清 → 跳过（需改 figsize，超出本函数范围）
+    多轮仍不收敛时降级：截断更激进。
+    """
+    import re as _re
+    modified = False
+    max_label = 12 if round_num == 0 else 8   # 后续轮更激进
+    defect_text = " ".join(defects).lower()
+
+    modules = topology.get("modules", [])
+    for m in modules:
+        label = m.get("label", "")
+        # overlap / overflow → 截断长 label
+        if any(k in defect_text for k in ("overlap", "重叠", "overflow", "溢出",
+                                            "collide", "拥挤")):
+            if len(label) > max_label:
+                short = label[:max_label].rstrip() + ("…" if len(label) > max_label else "")
+                m["label"] = short
+                modified = True
+        # clutter → 删 ops（减少框内子元素，降低高度）
+        if any(k in defect_text for k in ("clutter", "dense", "too many", "杂乱", "过多")):
+            if m.get("ops") and len(m["ops"]) > 2:
+                m["ops"] = m["ops"][:2]
+                modified = True
+    if modified:
+        logger.info(f"[arch_renderer] 应用缺陷修复: 截断长label/删ops (round {round_num+1})")
+    return modified
 
 
 def _visual_evaluate(png_path: str, api_client) -> Tuple[int, List[str]]:

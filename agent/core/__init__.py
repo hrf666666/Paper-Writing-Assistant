@@ -38,6 +38,9 @@ from agent.core.finding import (
     audit_report_to_findings, cross_chapter_issues_to_findings,
     violations_to_findings, quality_issues_to_findings,
 )
+from agent.core.figure_manifest import (
+    FigureManifest, FigureEntry, FigType, FigStatus,
+)
 
 __all__ = [
     # errors
@@ -54,4 +57,6 @@ __all__ = [
     "Finding", "FindingBus", "Severity", "Location", "FixAction",
     "audit_report_to_findings", "cross_chapter_issues_to_findings",
     "violations_to_findings", "quality_issues_to_findings",
+    # figure
+    "FigureManifest", "FigureEntry", "FigType", "FigStatus",
 ]
