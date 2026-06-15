@@ -32,6 +32,7 @@ from agent.core.factbase import (
     load as load_factbase,
     exists as factbase_exists,
 )
+from agent.core.memory import LayeredMemory
 
 __all__ = [
     # errors
@@ -42,4 +43,6 @@ __all__ = [
     # factbase
     "FactBase", "build_factbase", "save_factbase",
     "load_factbase", "factbase_exists",
+    # memory
+    "LayeredMemory",
 ]

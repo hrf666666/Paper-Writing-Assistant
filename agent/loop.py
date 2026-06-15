@@ -101,6 +101,9 @@ class ResearchLoop:
 
         self.api_client = api_client or get_api_client()
         self.memory = MemoryManager(OUTPUT_DIR)
+        # v13 PR3: 分层记忆（上下文治理：缓存重文本 + 检索式组装）
+        from agent.core.memory import LayeredMemory
+        self._memory = LayeredMemory()
         self.checkpoint = CheckpointManager(OUTPUT_DIR)
         self.quality_gate = QualityGate(self.api_client)
         self.directive_mgr = DirectiveManager(OUTPUT_DIR)
@@ -1004,6 +1007,19 @@ Respond with just the strategy, no explanation:"""
         return paper_context
 
     def _build_citation_context(self) -> str:
+        """v13 PR3: 经 LayeredMemory 缓存的引用上下文。
+
+        旧版每章重算（7 次 ×10-30KB）；现依赖指纹不变则命中缓存。
+        citation_bank / cite_key_map 变更时自动失效重算。
+        """
+        return self._memory.get_or_compute(
+            "citation_context",
+            depends=[self._citation_bank, getattr(self, '_cite_key_map', None),
+                     getattr(self, '_paper_context', None)],
+            compute=self._build_citation_context_uncached,
+        )
+
+    def _build_citation_context_uncached(self) -> str:
         """
         v11.6: 构建引用上下文字符串，注入章节 prompt
         v11.2: 同时注入 PaperContext 事实约束
