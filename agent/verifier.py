@@ -165,63 +165,50 @@ class ContentVerifier:
 
     def _check_citation_integrity(self, full_text: str,
                                    bibliography: str) -> Dict:
-        """
-        检查 [N] 引用是否完整：
-        - 正文中的 [N] 编号是否在参考文献中有对应条目
-        - 引用编号是否连续（无跳号）
-        """
-        # 提取正文中的引用编号
-        refs_in_text = re.findall(r'\[(\d+)\]', full_text)
+        """v14: 检查 \\cite{key} 引用格式完整性。
 
-        # 检查 [?] 未解析引用（无论是否有 [N] 格式引用）
+        v14 LLM 直出 \\cite{key}，不再有 [N] 编号。此检查改为：
+        - 检测空 key \\cite{} （严重缺陷）
+        - 检测残留 [?] / [N] 标记（v14 不应出现）
+        - 统计 \\cite{} 数量（论文应有足够引用）
+        注：\\cite{key} 是否在 references.bib 可解析由 Phase 7.8 保证。
+        bibliography 参数保留兼容但 v14 不再使用。
+        """
+        # 统计 \cite{} 引用
+        cite_matches = re.findall(r'\\cite\{([^}]*)\}', full_text)
+        total_cites = len(cite_matches)
+        empty_cites = sum(1 for c in cite_matches if not c.strip())
+
+        # 检测残留标记
         unresolved = full_text.count("[?]")
-
-        if not refs_in_text:
-            if unresolved > 0:
-                return {
-                    "passed": False, "score": 0,
-                    "details": f"存在 {unresolved} 个 [?] 未解析引用，无有效 [N] 引用",
-                    "fix_hint": "运行 CitationManager 解析所有引用标记",
-                }
-            return {
-                "passed": True, "score": 100,
-                "details": "无 [N] 格式引用（可能尚未解析）",
-            }
-
-        ref_nums = sorted(set(int(n) for n in refs_in_text))
-        max_ref = max(ref_nums)
-
-        # 检查参考文献列表中的编号
-        bib_refs = set()
-        if bibliography:
-            bib_nums = re.findall(r'^\[(\d+)\]', bibliography, re.MULTILINE)
-            bib_refs = set(int(n) for n in bib_nums)
-
-        # 计算：正文引用中，有多少在bibliography里有对应
-        matched = sum(1 for n in ref_nums if n in bib_refs) if bib_refs else 0
-        coverage = matched / len(ref_nums) if ref_nums else 1.0
-
-        # 检查跳号
-        expected = set(range(1, max_ref + 1))
-        missing = expected - set(ref_nums)
-        gap_penalty = len(missing) * 5
-
-        score = max(0, min(100, coverage * 100 - gap_penalty - unresolved * 20))
-        passed = unresolved == 0 and coverage >= 0.9 and len(missing) <= 2
+        legacy_numeric = len(re.findall(r'\[(\d+)\]', full_text))
 
         details_parts = []
+        score = 100.0
+        passed = True
+
+        if empty_cites > 0:
+            score -= empty_cites * 20
+            passed = False
+            details_parts.append(f"{empty_cites} 个空 \\cite{{}}")
         if unresolved > 0:
-            details_parts.append(f"{unresolved} 个 [?] 未解析引用")
-        if missing:
-            details_parts.append(f"引用跳号: 缺 {sorted(missing)}")
-        if coverage < 1.0 and bib_refs:
-            details_parts.append(f"引用覆盖率 {coverage:.0%}")
+            score -= unresolved * 15
+            passed = False
+            details_parts.append(f"{unresolved} 个 [?] 未解析")
+        if legacy_numeric > 0:
+            score -= min(legacy_numeric * 5, 20)
+            details_parts.append(f"{legacy_numeric} 个旧式 [N] 引用")
+        if total_cites == 0:
+            score = 50
+            details_parts.append("无 \\cite{} 引用")
+
+        score = max(0, min(100, score))
 
         return {
             "passed": passed,
             "score": round(score, 1),
-            "details": "; ".join(details_parts) if details_parts else "引用完整性检查通过",
-            "fix_hint": "运行 CitationManager 解析引用，确保每个 [N] 都有对应参考文献条目" if not passed else "",
+            "details": "; ".join(details_parts) if details_parts else f"引用完整性通过（{total_cites} 个 \\cite{{}}）",
+            "fix_hint": "检查 LLM 输出，确保引用为 \\cite{key} 格式且 key 非空" if not passed else "",
         }
 
     # ──────────── V2: 数据一致性 ────────────

@@ -230,39 +230,46 @@ class CrossChapterChecker:
             })
 
     def _check_citation_continuity(self, chapters: Dict[int, str]):
-        """检查引用编号是否连续"""
+        """v14: 检查 \cite{key} 引用的格式完整性。
+
+        v14 LLM 直出 \cite{key}，不再有 [N] 编号。此检查改为：
+        1. 检测空 key \cite{} 或格式异常的引用
+        2. 检测残留的 [?] / [N] 标记（v14 不应出现）
+        注：\cite{key} 是否在 references.bib 中可解析，由 Phase 7.8 的
+        _ensure_bib_has_all_cited_keys 保证，此处不重复检查。
+        """
         valid_chapters = {k: v for k, v in chapters.items() if v}
         if not valid_chapters:
             return
         full_text = "\n".join(valid_chapters.values())
 
-        # 检查 [n] 引用编号
-        numeric_refs = re.findall(r'\[(\d+)\]', full_text)
-        if not numeric_refs:
-            return
-
-        ref_nums = sorted(set(int(n) for n in numeric_refs))
-        max_ref = max(ref_nums)
-
-        # 检查是否有跳号
-        expected = set(range(1, max_ref + 1))
-        missing = expected - set(ref_nums)
-
-        if missing:
+        # 1. 检测空 key \cite{} （LLM 输出缺陷）
+        empty_cites = len(re.findall(r'\\cite\{\s*\}', full_text))
+        if empty_cites > 0:
             self.issues.append({
-                "severity": "warning",
-                "type": "citation_gap",
-                "description": f"引用编号存在跳号: 缺少 {sorted(missing)}",
-                "location": "全文引用",
+                "severity": "critical",
+                "type": "empty_citation",
+                "description": f"存在 {empty_cites} 个空引用 \\cite{{}}（key 缺失）",
+                "location": "全文",
             })
 
-        # 检查 [?] 标记（未解析的引用）
+        # 2. 检测残留的 [?] 标记
         unresolved = full_text.count("[?]")
         if unresolved > 0:
             self.issues.append({
                 "severity": "critical",
                 "type": "unresolved_citations",
                 "description": f"存在 {unresolved} 个未解析的引用标记 [?]",
+                "location": "全文",
+            })
+
+        # 3. 检测残留的 [N] 数字引用（v14 应全部为 \cite{}）
+        numeric_refs = re.findall(r'\[(\d+)\]', full_text)
+        if numeric_refs:
+            self.issues.append({
+                "severity": "warning",
+                "type": "legacy_numeric_ref",
+                "description": f"存在 {len(numeric_refs)} 个旧式 [N] 数字引用（v14 应为 \\cite{{key}}）",
                 "location": "全文",
             })
 

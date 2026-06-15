@@ -82,9 +82,6 @@ class ResearchLoop:
         from agent.cross_chapter_checker import CrossChapterChecker
         self.cross_chapter_checker = CrossChapterChecker()  # v11.2: paper_context 通过 set_paper_context() 注入
 
-        # v5.5: 引用管理器
-        from agent.citation_manager import CitationManager
-        self.citation_manager = CitationManager(self.api_client)
 
         # v5.5: 参考文献池
         self._reference_pool = []
@@ -1462,44 +1459,6 @@ Respond with just the strategy, no explanation:"""
         except Exception as e:
             logger.warning(f"[Phase 7.0] 全局打磨失败: {e}")
 
-        # ====== Phase 7.1: 引用解析（v11.2: 按章节独立处理，无 join-then-split） ======
-        logger.info("[Phase 7.1] 解析引用标记...")
-        try:
-            from agent.citation_manager import run_citation_manager_for_chapters
-
-            # v11.2: 如果 reference_pool 为空，从离线数据包兜底
-            ref_pool_for_cite = self._reference_pool
-            if not ref_pool_for_cite:
-                logger.warning("[Phase 7.1] reference_pool 为空，从离线数据包兜底...")
-                try:
-                    from tools.reference_pack_manager import get_offline_reference_pool
-                    ref_pool_for_cite = get_offline_reference_pool()
-                    if ref_pool_for_cite:
-                        self._reference_pool = ref_pool_for_cite
-                        logger.info(f"[Phase 7.1] 离线数据包兜底成功: {len(ref_pool_for_cite)} 篇")
-                except Exception as e:
-                    logger.warning(f"[Phase 7.1] 离线数据包兜底失败: {e}")
-
-            # v11.2: 直接传 chapters dict，按章节独立处理引用
-            updated_chapters, bibliography, cite_stats = run_citation_manager_for_chapters(
-                self._chapters, self.api_client, ref_pool_for_cite
-            )
-            self._chapters = updated_chapters
-
-            logger.info(f"[Phase 7.1] 引用解析: {cite_stats['total_citations']} 个引用, "
-                  f"{cite_stats.get('unverified_count', 0)} 个未验证, "
-                  f"{cite_stats.get('total_ref_entries', 0)} 篇参考文献")
-
-            results["bibliography"] = bibliography
-            results["citation_stats"] = cite_stats
-
-            # 保存参考文献
-            with open(f"{OUTPUT_DIR}/references.md", 'w', encoding='utf-8') as f:
-                f.write(bibliography)
-
-        except Exception as e:
-            logger.warning(f"引用解析失败（不影响输出）: {e}")
-
         # ====== Phase 7.15: v8.0 有序门控流水线 ======
         logger.info("[Phase 7.15] v8.0 有序门控流水线（VERIFY + 质量综合评估）...")
         try:
@@ -1827,54 +1786,11 @@ Respond with just the strategy, no explanation:"""
             full_md = strip_formula_tags(full_md)
         except Exception as e:
             logger.debug(f"公式标记清理失败: {e}")
-        # 清理残留的 <citation> 标记 — v11.3: 同时处理配对和自闭合
-        last_cite_num = 0
-        for m in re.finditer(r'\[(\d+)\]', full_md):
-            try:
-                last_cite_num = max(last_cite_num, int(m.group(1)))
-            except ValueError:
-                pass
-        fallback_cite = f'[{last_cite_num}]' if last_cite_num > 0 else ''
-        full_md = re.sub(r'<citation>(.*?)</citation>', fallback_cite, full_md, flags=re.DOTALL)
-        # v11.3: 也清理自闭合 <citation> 标记
-        full_md = re.sub(r'<citation>', fallback_cite, full_md)
+        # v14: LLM 直出 \cite{key}，无需清理 <citation> 标记
         
         with open(f"{OUTPUT_DIR}/full_paper.md", 'w', encoding='utf-8') as f:
             f.write(full_md)
         results["markdown"] = f"{OUTPUT_DIR}/full_paper.md"
-
-        # ====== Phase 7.35: v11.2 tex 后 citation 残留清理 ======
-        # Phase 7.1 在 md 层面做了引用解析，但 Phase 7.3 的 LLM review 可能往 tex 里
-        # 塞了新的 <citation> 标记。此 pass 作为最终兜底。
-        try:
-            tex_cleanup_path = f"{OUTPUT_DIR}/latex/main.tex"
-            if os.path.exists(tex_cleanup_path):
-                with open(tex_cleanup_path, "r", encoding="utf-8") as f:
-                    tex_content_735 = f.read()
-                citation_count_before = len(re.findall(r'<citation>', tex_content_735))
-                if citation_count_before > 0:
-                    logger.info(f"[Phase 7.35] 发现 {citation_count_before} 个残留 <citation> 标记，开始清理...")
-                    # 找最后一个有效 [N] 编号作为 fallback
-                    last_num = 0
-                    for m in re.finditer(r'\[(\d+)\]', tex_content_735):
-                        try:
-                            last_num = max(last_num, int(m.group(1)))
-                        except ValueError:
-                            pass
-                    fallback = f'[{last_num}]' if last_num > 0 else ''
-                    # 清理配对 <citation>...</citation>
-                    tex_content_735 = re.sub(
-                        r'<citation>(.*?)</citation>', fallback, tex_content_735, flags=re.DOTALL
-                    )
-                    # 清理自闭合 <citation>
-                    tex_content_735 = re.sub(r'<citation>', fallback, tex_content_735)
-                    with open(tex_cleanup_path, "w", encoding="utf-8") as f:
-                        f.write(tex_content_735)
-                    logger.info(f"[Phase 7.35] 清理完成，{citation_count_before} 个 <citation> 已替换")
-                else:
-                    logger.info("[Phase 7.35] tex 无残留 <citation> 标记")
-        except Exception as e:
-            logger.warning(f"[Phase 7.35] citation 残留清理失败（不阻塞）: {e}")
 
         # ====== Phase 7.8: BibTeX 引用生成 ======
         try:
@@ -1882,30 +1798,27 @@ Respond with just the strategy, no explanation:"""
             from tools.bibtex_builder import BibTeXBuilder
             builder = BibTeXBuilder(OUTPUT_DIR)
 
-            # v14: 优先用 _cite_key_map（单一真相源）构建 BibTeX
+            # v14: _cite_key_map 是单一真相源，直接构建 BibTeX
             cite_key_map = getattr(self, '_cite_key_map', {})
             if cite_key_map:
                 bib_content, citation_map = builder.build_from_cite_key_map(cite_key_map)
-                logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(cite_key_map)} key")
+                logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(citation_map)} 条引用")
             else:
-                # 降级：走旧路径
-                from tools.bibtex_builder import run_bibtex_builder
-                bib_content, citation_map = run_bibtex_builder(OUTPUT_DIR)
-                logger.info("[Phase 7.8] 降级走独立构建路径")
+                bib_content, citation_map = "", {}
+                logger.warning("[Phase 7.8] _cite_key_map 为空，跳过 BibTeX 生成")
 
             results["bibtex"] = f"{OUTPUT_DIR}/latex/references.bib"
             results["citation_map"] = len(citation_map)
 
-            # 替换 LaTeX 中的 [N] 为 \cite{}
-            if citation_map and OUTPUT_LATEX:
-                builder._citation_map = citation_map
+            # v14: LLM 直出 \cite{key}，无需 [N]→\cite 替换。
+            # 仅处理 thebibliography→\bibliography 改写 + 确保 bib 完整性。
+            if OUTPUT_LATEX:
                 tex_path = f"{OUTPUT_DIR}/latex/main.tex"
                 if os.path.exists(tex_path):
                     with open(tex_path, "r", encoding="utf-8") as f:
                         tex_content = f.read()
-                    tex_content = builder.replace_numeric_with_cite(tex_content)
 
-                    # 同时将 \begin{thebibliography}...\end{thebibliography} 替换为
+                    # 将 \begin{thebibliography}...\end{thebibliography} 替换为
                     # \bibliography{references}，让 BibTeX 接管参考文献
                     bib_pattern = re.compile(
                         r'\\begin\{thebibliography\}.*?\\end\{thebibliography\}',
@@ -1918,13 +1831,8 @@ Respond with just the strategy, no explanation:"""
                         )
                         logger.info("[Phase 7.8] thebibliography → \\bibliography{references}")
 
-                    # v11.8: 逐个解析 [?] → 最近的 [N]（非全部替换为同一编号）
-                    if '[?]' in tex_content:
-                        tex_content = self._resolve_unknown_citations(tex_content)
-
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
-                    logger.info(f"[Phase 7.8] LaTeX 引用替换完成: {len(citation_map)} 条")
 
                     # v13.0: 扫描 tex 中所有 \cite{key}，确保 bib 中有对应条目
                     self._ensure_bib_has_all_cited_keys(tex_path)
@@ -2412,14 +2320,7 @@ Respond with just the strategy, no explanation:"""
                 except Exception as e:
                     logger.debug(f"公式清理修复失败: {e}")
 
-            # 修复 citation 标记
-            if "citation_manager" in hint_lower or "citation" in hint_lower:
-                for ch_key in list(self._chapters.keys()):
-                    content = self._chapters[ch_key]
-                    cleaned = _re.sub(r'<citation>(.*?)</citation>', r'[ref]', content, flags=_re.DOTALL)
-                    if cleaned != content:
-                        self._chapters[ch_key] = cleaned
-                        fixed += 1
+            # v14: LLM 直出 \cite{key}，<citation> 标记已废弃
 
             # v11.8: 逐个修复 [?] → 最近的 [N]（非全部用同一编号）
             if "引用" in hint_lower or "[?]" in hint_lower:
