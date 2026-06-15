@@ -152,8 +152,10 @@ def render_architecture(topology: Dict, output_pdf: str,
     fig, ax = plt.subplots(1, 1, figsize=(fig_w, 3.8), dpi=300)
 
     x_coords = [p[0] for p in pos.values()]
-    ax.set_xlim(min(x_coords) - 1.2, max(x_coords) + 1.5)
-    ax.set_ylim(-0.3, 4.2)
+    # v14: ylim 自适应节点数量，避免多层时裁剪
+    y_coords = [p[1] for p in pos.values()]
+    ax.set_xlim(min(x_coords) - 1.5, max(x_coords) + 2.0)
+    ax.set_ylim(min(y_coords) - 1.2, max(y_coords) + 1.5)
     ax.set_aspect("equal")
     ax.axis("off")
 
@@ -371,10 +373,11 @@ Check for: overlapping elements, unreadable text, arrow issues, spacing problems
             text_prompt=prompt,
             image_base64_list=[img_b64],
         )
-        # 解析 JSON
+        # 解析 JSON（统一 fence-stripping）
         response = response.strip()
         if response.startswith("```"):
-            response = "\n".join(response.split("\n")[1:-1])
+            lines = response.split("\n")
+            response = "\n".join(lines[1:-1] if lines[-1].strip().startswith("```") else lines[1:])
         result = json.loads(response)
         score = int(result.get("score", 5))
         defects = result.get("defects", [])
@@ -454,7 +457,23 @@ Output the JSON only, no explanation."""
             logger.warning("[arch_renderer] LLM 拓扑提取结果无 modules")
             return None
 
-        logger.info(f"[arch_renderer] LLM 提取拓扑: {len(topology['modules'])} 模块, {len(topology.get('edges', []))} 边")
+        # 校验：每个 module 必须有 id/label，每条 edge 引用存在的 id
+        valid_ids = set()
+        valid_modules = []
+        for m in topology["modules"]:
+            if isinstance(m, dict) and m.get("id") and m.get("label"):
+                valid_ids.add(m["id"])
+                valid_modules.append(m)
+        topology["modules"] = valid_modules
+        valid_edges = []
+        for e in topology.get("edges", []):
+            if isinstance(e, dict) and e.get("from") in valid_ids and e.get("to") in valid_ids:
+                valid_edges.append(e)
+        topology["edges"] = valid_edges
+        if not valid_modules:
+            logger.warning("[arch_renderer] 拓扑校验失败：无有效模块")
+            return None
+        logger.info(f"[arch_renderer] LLM 提取拓扑: {len(valid_modules)} 模块, {len(valid_edges)} 边")
         return topology
     except (json.JSONDecodeError, Exception) as e:
         logger.warning(f"[arch_renderer] 拓扑提取失败: {e}")

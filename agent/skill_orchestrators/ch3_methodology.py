@@ -34,7 +34,7 @@ def generate_architecture_diagram(model_architecture, figure_style, paper_title,
     arch_png = f"{OUTPUT_DIR}/chapter3/architecture_figure.png"
 
     # LLM 提取结构化拓扑（语义任务）
-    topology = extract_topology_from_architecture(model_architecture, _orch.api_client)
+    topology = extract_topology_from_architecture(model_architecture, _orch.api)
     if not topology:
         return "", "Architecture diagram generation failed."
 

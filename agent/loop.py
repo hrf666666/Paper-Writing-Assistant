@@ -1694,12 +1694,12 @@ Respond with just the strategy, no explanation:"""
                     chapter_list.append(extra_content)
             
             # Fix B1: 将架构图注入到 chapter 3 (Methodology)
-            # 优先使用 Phase 3 的 TikZ 架构图（tikz_code），不使用 figure_latex_snippets 的架构图
-            # 防止源A（Phase 3 TikZ）和源B（Phase 7.28 figure_planner）重复插入架构图
+            # v14: 优先使用 Phase 3 的架构图 PDF（arch_pdf_path），不使用 figure_latex_snippets 的架构图
+            # 防止源A（Phase 3 PDF）和源B（Phase 7.28 figure_planner）重复插入架构图
             if figure_latex_snippets and len(chapter_list) >= 3:
                 chapter3_content = chapter_list[2]  # index 2 = chapter 3
                 if '\\subsection{' in chapter3_content:
-                    # 如果已有 TikZ 架构图（源A），就不从 figure_latex_snippets（源B）再插入架构图
+                    # 如果已有架构图 PDF（源A），就不从 figure_latex_snippets（源B）再插入架构图
                     if not arch_pdf_path:
                         # 没有源A → 从源B取架构图注入 chapter 3
                         fig_match = re.search(
@@ -1718,7 +1718,7 @@ Respond with just the strategy, no explanation:"""
                             logger.info("[Phase 7.3] 架构图(源B)已注入 chapter 3")
                     else:
                         # 有源A → 源B全部放在参考文献前，不注入 chapter 3
-                        logger.info("[Phase 7.3] 已有 TikZ 架构图(源A)，跳过源B架构图注入 chapter 3")
+                        logger.info("[Phase 7.3] 已有架构图 PDF(源A)，跳过源B架构图注入 chapter 3")
             
             latex_paper = run_latex_converter(chapter_list, arch_pdf_path, abstract, keywords)
             results["latex"] = f"{OUTPUT_DIR}/latex/main.tex"
@@ -1762,10 +1762,18 @@ Respond with just the strategy, no explanation:"""
             # 确保 figures/ 目录在 latex/ 下也可访问
             figures_src = os.path.join(OUTPUT_DIR, "figures")
             figures_dst = os.path.join(OUTPUT_DIR, "latex", "figures")
-            if os.path.exists(figures_src) and not os.path.exists(figures_dst):
+            if os.path.exists(figures_src):
+                # v14: 用逐文件复制替代 copytree（因 latex/figures/ 可能已被 arch PDF 创建）
                 try:
                     import shutil as _shutil
-                    _shutil.copytree(figures_src, figures_dst)
+                    os.makedirs(figures_dst, exist_ok=True)
+                    for _f in os.listdir(figures_src):
+                        _src_f = os.path.join(figures_src, _f)
+                        if os.path.isfile(_src_f):
+                            _shutil.copy2(_src_f, os.path.join(figures_dst, _f))
+                    logger.info(f"[Phase 7.3] 数据图已复制到 {figures_dst}")
+                except Exception as _e:
+                    logger.warning(f"[Phase 7.3] 复制数据图失败: {_e}")
                 except Exception as e:
                     logger.debug(f"图表目录复制失败: {e}")
         else:
