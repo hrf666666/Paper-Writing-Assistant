@@ -1319,7 +1319,7 @@ Respond with just the strategy, no explanation:"""
                 pc = getattr(self, '_paper_context', None)
                 if pc:
                     self.cross_chapter_checker.set_paper_context(pc)
-                issues, _ = self.cross_chapter_checker.check_all(
+                issues, _, _ = self.cross_chapter_checker.check_all(
                     self._chapters, self._abstract
                 )
                 critical_issues = [i for i in issues if i.get("severity") == "critical"]
@@ -1518,12 +1518,14 @@ Respond with just the strategy, no explanation:"""
             pc = getattr(self, '_paper_context', None)
             if pc:
                 self.cross_chapter_checker.set_paper_context(pc)
-            issues, fixed_chapters = self.cross_chapter_checker.check_all(
+            issues, fixed_chapters, fixed_abstract = self.cross_chapter_checker.check_all(
                 self._chapters, self._abstract
             )
-            # v11.2: 如果有自动修复，更新 chapters
+            # v14: 如果有自动修复，更新 chapters 和 abstract
             if self.cross_chapter_checker._fixes_applied:
                 self._chapters = fixed_chapters
+                if fixed_abstract != self._abstract:
+                    self._abstract = fixed_abstract
                 logger.info(f"[Phase 7.2] 已应用 {len(self.cross_chapter_checker._fixes_applied)} 处自动修复")
 
             critical = [i for i in issues if i.get("severity") == "critical"]

@@ -35,19 +35,19 @@ class CrossChapterChecker:
         """设置/更新 PaperContext"""
         self._paper_context = paper_context or {}
 
-    def check_all(self, chapters: Dict[int, str], abstract: str = "") -> Tuple[List[Dict], Dict[int, str]]:
+    def check_all(self, chapters: Dict[int, str], abstract: str = "") -> Tuple[List[Dict], Dict[int, str], str]:
         """
         执行全部跨章节一致性检查
 
-        v11.2: 返回 (issues, fixed_chapters)。
-        如果有 paper_context，数值矛盾会被自动修复到 fixed_chapters 中。
+        v14: 返回 (issues, fixed_chapters, fixed_abstract)。
+        如果有 paper_context，数值矛盾会被自动修复到 fixed_chapters/fixed_abstract 中。
 
         Args:
             chapters: {chapter_num: content}
             abstract: 摘要内容
 
         Returns:
-            (一致性问题列表, 修复后的 chapters dict)
+            (一致性问题列表, 修复后的 chapters dict, 修复后的 abstract)
         """
         self.issues = []
         self._fixes_applied = []
@@ -55,17 +55,21 @@ class CrossChapterChecker:
         # 深拷贝 chapters 以避免修改原始数据
         import copy
         fixed_chapters = copy.deepcopy(chapters)
+        fixed_abstract = abstract  # str 不可变，用变量承接修复结果
 
         checks = [
             ("section_references", lambda: self._check_section_references(fixed_chapters)),
-            ("numerical_consistency", lambda: self._check_numerical_consistency(fixed_chapters, abstract)),
+            ("numerical_consistency", lambda: self._fix_numerical_consistency(fixed_chapters, fixed_abstract)),
             ("format_consistency", lambda: self._check_format_consistency(fixed_chapters)),
             ("citation_continuity", lambda: self._check_citation_continuity(fixed_chapters)),
         ]
 
         for name, check_fn in checks:
             try:
-                check_fn()
+                result = check_fn()
+                # numerical_consistency 返回修复后的 abstract
+                if name == "numerical_consistency" and isinstance(result, str):
+                    fixed_abstract = result
             except Exception as e:
                 logger.error(f"检查 {name} 失败: {e}")
                 self.issues.append({
@@ -85,7 +89,7 @@ class CrossChapterChecker:
             for fix in self._fixes_applied:
                 logger.info(f"  Fix: {fix.get('description', '')[:100]}")
 
-        return self.issues, fixed_chapters
+        return self.issues, fixed_chapters, fixed_abstract
 
     def _check_section_references(self, chapters: Dict[int, str]):
         """检查 Introduction 中提到的 Section 引用是否与实际章节对应"""
@@ -123,41 +127,42 @@ class CrossChapterChecker:
                         "location": f"Introduction → Section {ref}",
                     })
 
-    def _check_numerical_consistency(self, chapters: Dict[int, str], abstract: str):
+    def _fix_numerical_consistency(self, chapters: Dict[int, str], abstract: str) -> str:
         """
-        检查数值在不同章节之间的一致性。
+        检查并修复数值在不同章节之间的一致性。
 
-        v11.2: 如果有 PaperContext，用其中的 metrics 作为权威数值源，
-        自动替换不一致的数值。
+        v14: 真正执行替换（原 v11.2 只记录不应用）。
+        用 PaperContext metrics 作为权威数值源，替换不一致的数值。
+        返回修复后的 abstract（chapters 直接 mutate fixed_chapters）。
         """
+        fixed_abstract = abstract
+
         # 提取 Experiments 中的关键数值
         experiments = chapters.get(4, "")
         if not experiments:
-            return
+            return fixed_abstract
 
         # 从 Experiments 提取 "Ours" 行的所有数值
         ours_values = {}
-        # 匹配包含 "Ours" 的行中的所有浮点数
         for line in experiments.split('\n'):
             if re.search(r'[Oo]urs', line):
                 for num_match in re.finditer(r'(\d+\.\d+)', line):
                     val = num_match.group(1)
                     ours_values[val] = ours_values.get(val, 0) + 1
 
-        # 检查 Abstract 中是否提到了 Experiments 中不存在的数值
-        if abstract:
-            abstract_numbers = re.findall(r'(\d+\.\d+)', abstract)
+        # 检查并修复 Abstract 中的不一致数值
+        if fixed_abstract:
+            abstract_numbers = re.findall(r'(\d+\.\d+)', fixed_abstract)
             for num in abstract_numbers:
-                # 允许近似匹配
                 try:
                     found = any(abs(float(num) - float(v)) < 0.01 for v in ours_values)
                 except (ValueError, TypeError):
                     found = False
                 if not found and ours_values:
-                    # v11.2: 如果有 PaperContext metrics，尝试自动修复
                     canonical = self._find_canonical_value(num, ours_values)
                     if canonical and canonical != num:
-                        # 在 abstract 中替换（由调用方 fixed_chapters 处理）
+                        # v14: 真正执行替换（原来只记录）
+                        fixed_abstract = fixed_abstract.replace(num, canonical)
                         self._fixes_applied.append({
                             "type": "numerical_fix",
                             "description": f"Abstract 数值 {num} → {canonical}（PaperContext 修正）",
@@ -173,17 +178,41 @@ class CrossChapterChecker:
                             "location": f"Abstract → {num}",
                         })
 
-        # v11.2: 检查所有章节的数值是否与 PaperContext metrics 一致
+        # v14: 检查并修复所有章节的数值（原来 body 为空）
         pc_metrics = self._paper_context.get("metrics", {})
         if pc_metrics:
             for ch_key, content in chapters.items():
                 if not content:
                     continue
+                fixed_content = content
                 for metric_name, canonical_val in pc_metrics.items():
                     canonical_str = str(canonical_val)
-                    # 如果章节中包含这个数值，检查是否一致
-                    # 只检查明确的不一致（数值出现但与 canonical 不同）
-                    # 此处仅报告，不自动修复（因为上下文可能不同）
+                    try:
+                        canonical_num = float(canonical_val)
+                    except (ValueError, TypeError):
+                        continue
+                    # 找章节中与 canonical 近似但不一致的数值
+                    for num_match in re.finditer(r'(\d+\.\d+)', fixed_content):
+                        wrong = num_match.group(1)
+                        try:
+                            wrong_num = float(wrong)
+                        except ValueError:
+                            continue
+                        # 差值在 20% 内但不一致 → 替换
+                        if (abs(wrong_num - canonical_num) / max(abs(canonical_num), 0.001) < 0.2
+                                and abs(wrong_num - canonical_num) > 0.001):
+                            fixed_content = fixed_content.replace(wrong, canonical_str)
+                            self._fixes_applied.append({
+                                "type": "numerical_fix",
+                                "description": f"Ch{ch_key} 数值 {wrong} → {canonical_str}（{metric_name}）",
+                                "old": wrong,
+                                "new": canonical_str,
+                                "location": f"Chapter {ch_key}",
+                            })
+                if fixed_content != content:
+                    chapters[ch_key] = fixed_content  # mutate fixed_chapters
+
+        return fixed_abstract
 
     def _find_canonical_value(self, wrong_val: str, ours_values: Dict) -> Optional[str]:
         """
