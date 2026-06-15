@@ -1487,8 +1487,11 @@ Respond with just the strategy, no explanation:"""
                 )
                 abstract = self.api_client.call_generation(abstract_prompt)
             except Exception as e:
-                logger.debug(f"摘要生成失败: {e}")
-                abstract = "Abstract to be generated."
+                from agent.core.errors import classify as _cls_abs
+                _lvl, _, _ = _cls_abs(e)
+                logger.error(f"[摘要] 生成失败 [{_lvl}]: {e}")
+                abstract = "[DEGRADED: 摘要生成失败，需人工补写]"
+                results["abstract_failed"] = True
 
         keywords = ""
         if "Keywords:" in abstract or "keywords:" in abstract:
@@ -1500,8 +1503,11 @@ Respond with just the strategy, no explanation:"""
                 keywords_prompt = f'请为论文"{PAPER_TITLE}"生成5-8个英文关键词，用逗号分隔：'
                 keywords = self.api_client.call_light(keywords_prompt)
             except Exception as e:
-                logger.debug(f"关键词生成失败: {e}")
-                keywords = "deep learning, light field, depth estimation"
+                from agent.core.errors import classify as _cls_kw
+                _lvl, _, _ = _cls_kw(e)
+                logger.error(f"[关键词] 生成失败 [{_lvl}]: {e}")
+                keywords = "[DEGRADED: 关键词生成失败]"
+                results["keywords_failed"] = True
 
         # ── LaTeX / DOCX 输出 ──
         if OUTPUT_LATEX:
@@ -1609,13 +1615,21 @@ Respond with just the strategy, no explanation:"""
             from tools.bibtex_builder import BibTeXBuilder
             builder = BibTeXBuilder(OUTPUT_DIR)
             cite_key_map = getattr(self, '_cite_key_map', {})
+            citation_map = {}  # v13: 预初始化，防止 build 抛异常时 UnboundLocalError
             if cite_key_map:
-                _, citation_map = builder.build_from_cite_key_map(cite_key_map)
-                logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(citation_map)} 条引用")
+                try:
+                    _, citation_map = builder.build_from_cite_key_map(cite_key_map)
+                    logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(citation_map)} 条引用")
+                except Exception as be:
+                    from agent.core.errors import classify as _cls_bib
+                    _lvl, _, _ = _cls_bib(be)
+                    logger.error(f"[Phase 7.8] BibTeX 构建失败 [{_lvl}]: {be}")
+                    results["bibtex_failed"] = True
             else:
                 logger.warning("[Phase 7.8] _cite_key_map 为空，跳过 BibTeX 生成")
+                results["bibtex_failed"] = True
             results["bibtex"] = f"{OUTPUT_DIR}/latex/references.bib"
-            results["citation_map"] = len(citation_map) if cite_key_map else 0
+            results["citation_map"] = len(citation_map) if citation_map else 0
 
             if OUTPUT_LATEX:
                 tex_path = f"{OUTPUT_DIR}/latex/main.tex"
@@ -1811,7 +1825,7 @@ Respond with just the strategy, no explanation:"""
                 try:
                     fig_result = generate_figure_from_plan(
                         fp, figures_dir, venue=venue_name,
-                        project_path=(getattr(self._project_data, 'project_path', None)
+                        project_path=(self._project_data.get('project_path')
                                       if isinstance(self._project_data, dict) else None),
                     )
                     if fig_result and fig_result.get("pdf_path"):
@@ -1832,11 +1846,18 @@ Respond with just the strategy, no explanation:"""
                         )
                 except Exception as fe:
                     logger.warning(f"[Phase 7.28] 图表 {fp.get('fig_id', '?')} 生成失败: {fe}")
-            if figure_latex_snippets:
-                logger.info(f"[Phase 7.28] 图表生成完成，{len(fig_plans)} 个")
+            _n_ok = figure_latex_snippets.count("\\begin{figure")
+            if _n_ok:
+                logger.info(f"[Phase 7.28] 图表生成完成: {_n_ok}/{len(fig_plans)} 成功")
                 results["figures"] = figure_latex_snippets
+            else:
+                logger.error(f"[Phase 7.28] {len(fig_plans)} 个图表全部失败（0 产出）")
+                results["figures_failed"] = True
         except Exception as e:
-            logger.warning(f"[Phase 7.28] 图表生成失败: {e}")
+            from agent.core.errors import classify as _cls_err
+            _lvl, _, _ = _cls_err(e)
+            logger.error(f"[Phase 7.28] 图表生成失败 [{_lvl}]: {e}")
+            results["figures_failed"] = True
         return figure_latex_snippets
 
     def _run_table_fallback(self):
@@ -2358,7 +2379,13 @@ Respond with just the strategy, no explanation:"""
             self._outline = {}
 
         self.checkpoint.save_state("reference_pool", self._reference_pool)
-        self.checkpoint.save_checkpoint("phase0_5", 0.5, status="completed")
+        _p0_5_ok = bool(self._reference_pool) or bool(self._outline)
+        self.checkpoint.save_checkpoint(
+            "phase0_5", 0.5,
+            status="completed" if _p0_5_ok else "partial"
+        )
+        if not _p0_5_ok:
+            logger.error("[Phase 0.5] reference_pool + outline 均失败，标记 partial")
 
     def _run_motivation_phase(self) -> dict:
         """Phase 0.6: 动机确认子流程"""
@@ -2596,9 +2623,21 @@ Venue style: {self.venue_adapter.profile.writing_style.get('tone', 'formal')}.
 
 Write in English, LaTeX-compatible Markdown format. Do NOT include a top-level section title, just start with the content. Use $$...$$ for display math and $...$ for inline math:
 """
-        content = self.api_client.call_generation(prompt)
+        content = ""
+        try:
+            content = self.api_client.call_generation(prompt)
+        except Exception as ge:
+            from agent.core.errors import classify as _cls_ge
+            _lvl, _, _ = _cls_ge(ge)
+            logger.error(f"额外章节 '{chapter_name}' 生成失败 [{_lvl}]: {ge}")
         if not content:
-            content = f"[To be generated]"
+            from agent.core.errors import DegradedResult
+            logger.error(f"额外章节 '{chapter_name}' 生成失败 → DegradedResult（不进最终 PDF）")
+            return DegradedResult(
+                content=f"[DEGRADED: {chapter_name} 生成失败]",
+                reason="LLM 生成返回空或异常",
+                source=f"extra_chapter:{chapter_name}",
+            )
 
         # 质量检查
         content, _ = self._quality_ensure(chapter_name, content)
