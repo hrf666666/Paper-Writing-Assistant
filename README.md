@@ -1,6 +1,47 @@
-# 论文范文写作助手 v12.3 (Paper Writing Assistant)
+# 论文范文写作助手 v13.0 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → REFLECT** 自主循环架构，融合 **通用写作纪律层(P0)、PaperContext 共享事实源、引用管线修复、Web Search API + LLM 提取、OpenAlex 学术搜索、境内网络自适应、期刊风格学习、LaTeX 直出生成、5层溢出自愈闭环、动机驱动写作、多代理审阅** 等先进机制，能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v13.0 引入内核契约层**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v13.0 里程碑：内核重建 — 恢复 agent 设计初心
+
+> **v13.0 核心突破**——系统性地治愈旧版的三大架构病灶：错误吞噬（42 处 `except Exception` 静默降级）、状态分裂（7 套不兼容 issue 结构 + 写读路径不一致）、上下文浪费（citation_context 每章重注 7 次）。方案是**收敛到少数契约**，而非新增更多模块。
+
+### v13.0 内核契约层（`agent/core/`）
+
+| 契约 | 文件 | 解决的旧病 |
+|------|------|-----------|
+| **错误分级** | `errors.py` | `TransientError`/`PermanentError`/`DegradedResult` + `classify()` 闸口；429 配额不再静默吞为"0图/0引用"；占位符不再进 PDF |
+| **FactBase 单一事实源** | `factbase.py` | 替代 PaperContext 写读分裂；auditor/verifier/cross_chapter 读同一 `factbase.json`，消除数值分歧 |
+| **分层记忆** | `memory.py` | `LayeredMemory` 三层（WORKING/EPISODIC/SEMANTIC）+ `get_or_compute()` 缓存重文本，消除 citation_context 7× 重算；`assemble(intent,budget)` 检索式组装 |
+| **Finding 统一问题总线** | `finding.py` | `Finding`/`FindingBus` 统一 7 套 issue 结构；4 个适配器接入旧子系统；`as_revision_brief()` 回流到修订 |
+| **QualityLoop 真闭环** | `quality_gate.py` + `loop._quality_ensure` | 章节修订不再只看 QualityGate 自身维度，同时修复 cross_chapter/auditor 发现的问题（一次修订修多类） |
+| **FigureManifest 文图联动** | `figure_manifest.py` | 图的结构化清单（替代裸字符串拼接）；确定性筛选（排除失败/占位/低质）；`validate_linkage()` 正文↔图对账 |
+
+### v13.0 关键修复（对照旧版病灶）
+
+| 旧版病灶 | v13.0 修复 |
+|---------|-----------|
+| ch5 f-string `\begin{X}` NameError → 2 词占位 | 错误分级：降级产物标记 `DegradedResult`，不进 PDF |
+| figure_planner 遇 429 → 静默 0 图 | `classify()` 识别配额错误 + `results["figures_failed"]` 失败标记 |
+| `getattr(dict,'project_path')` 永远 None | 改 `.get()` |
+| 按计划数报告"生成完成 N 个"（实际全失败） | 按实际产出数 `_n_ok = snippets.count("\\begin{figure")` |
+| citation_map UnboundLocalError → BibTeX 静默失败 | 预初始化 `citation_map = {}` + `bibtex_failed` 标记 |
+| abstract/keywords 硬编码占位串 | DEGRADED 标记 + `*_failed` 标志 |
+| `[To be generated]` stub 进 PDF | `DegradedResult`（`__bool__=False`，下游必识别） |
+| Phase 0.5 失败仍标 completed | `_p0_5_ok` 判断 → 失败标 `partial` |
+| PaperContext 写 checkpoint、验收器读 output | FactBase 保证双文件（`factbase.json` + 兼容 `paper_context.json`）都落盘 |
+| `render_with_visual_review` 死 TODO（只记日志不重渲） | `_apply_defect_fixes()` 缺陷→修改规则表 + 真重渲闭环 |
+
+### v13.0 架构原则（恢复四条初心）
+
+| 初心 | v13.0 实现 |
+|------|-----------|
+| 代码=裁判 | 7 套 issue → 1 套 `Finding`；子系统通过 FindingBus 互读 |
+| 零信任 | 错误分级：transient→重试 / permanent→失败标记 / 禁止"空值+completed" |
+| 恒定上下文 | LayeredMemory 缓存 + `assemble(intent,budget)` 检索式组装 |
+| THINK→EXECUTE→VERIFY→REFLECT 闭环 | FindingBus 简报回流到 `evaluate_and_revise` 修订 prompt |
+
+---
 
 ## v12.3 里程碑：架构净化 — PipelineContext + 依赖注入 + ch5 统一
 

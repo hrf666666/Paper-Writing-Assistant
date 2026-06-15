@@ -1,6 +1,34 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v12.3 | 更新: 2026-06-15
+> 版本: v13.0 | 更新: 2026-06-16
+
+---
+
+## 0. v13.0 内核契约层（新增）
+
+v13.0 在 `agent/core/` 新增**契约层**，是 audit/constraint/guidance/eval/iteration/memory
+协作的共同语言。旧模块通过适配器接入，不改内部逻辑。本层自身不依赖 agent 其他模块（零循环依赖）。
+
+```
+agent/core/
+├── errors.py            # 错误分级 (Transient/Permanent/DegradedResult) + classify() 闸口
+├── factbase.py          # FactBase 单一事实源（替代 PaperContext 写读分裂）
+├── memory.py            # LayeredMemory 三层记忆 + get_or_compute() 缓存 + assemble(intent)
+├── finding.py           # Finding 统一问题 + FindingBus 收集/查询/回流 + 4 适配器
+└── figure_manifest.py   # FigureManifest 图清单（文图联动单一真相源）
+```
+
+| 契约 | 解决的旧病 | 接入点 |
+|------|-----------|--------|
+| errors | 42 处 except 静默降级 → 429 吞为 0图/0引用 | api_client._call_with_fallback + loop 8 处 |
+| FactBase | auditor/verifier 各自从 project_data 重推导 → 数值分歧 | loop._build_paper_context + hierarchical_planner |
+| LayeredMemory | citation_context 每章重注 7 次（10-30KB×7） | loop._build_citation_context 缓存包装 |
+| Finding | 7 套不兼容 issue 结构（category/name/dimension/type/rule） | loop Phase 7.2 + quality_gate 修订链 |
+| QualityLoop | QualityGate 内循环自封闭、不消费其他子系统 | loop._quality_ensure 注入 FindingBus 简报 |
+| FigureManifest | 裸字符串拼接 + 无文图对账 + 占位图进正文 | （PR6 基础，注入迁移待 PR7） |
+
+**设计原则**：收敛到少数契约，而非新增更多模块。7 套 issue → 1 套 Finding；
+3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 
 ---
 
