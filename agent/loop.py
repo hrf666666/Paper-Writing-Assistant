@@ -967,6 +967,8 @@ Respond with just the strategy, no explanation:"""
                 elif isinstance(ip, str):
                     inn_names.append(ip)
 
+        # v13 PR2: 经 FactBase 单一事实源构建 + 持久化（保证落盘，替代旧松散 dict）
+        from agent.core.factbase import FactBase, save as _fb_save
         paper_context = {
             "hardware": hardware,
             "training_params": training_params,
@@ -976,25 +978,22 @@ Respond with just the strategy, no explanation:"""
             "model_name": model_name,
             "innovation_names": inn_names,
         }
-
-        # 注入到 project_data（各 generator 从这里读取）
+        _factbase = FactBase.from_dict(paper_context)
+        # 注入到 project_data（各 generator 从这里读取）+ self（CrossChapterChecker 用）
         if not isinstance(self._project_data, dict):
             self._project_data = {}
         self._project_data["paper_context"] = paper_context
-
-        # 同时保存一份到 self，供 CrossChapterChecker 使用
         self._paper_context = paper_context
-
-        # v12.2: 持久化到磁盘，使 ValidationEngine 的 _read_paper_context_exists 通过
+        self._factbase = _factbase
+        # 持久化：FactBase 保证 factbase.json + 兼容 paper_context.json 都落盘
         try:
-            pc_path = os.path.join(OUTPUT_DIR, "paper_context.json")
-            with open(pc_path, "w", encoding="utf-8") as f:
-                json.dump(paper_context, f, ensure_ascii=False, indent=2)
-            logger.info(f"[PaperContext] 已持久化: {pc_path}")
-        except Exception as e:
-            logger.warning(f"[PaperContext] 持久化失败: {e}")
+            _fb_save(_factbase, OUTPUT_DIR)
+        except OSError as e:
+            logger.error(f"[FactBase] 持久化失败 [{e}] — 验收器将无法读到事实源")
+            # 不静默降级：抛出由上层 Phase 0.98 决定（但当前 _build_paper_context 被
+            # try/except 包住，所以这里至少 error 级别记录 + 不返回空 dict）
 
-        logger.info(f"[PaperContext] 构建完成: "
+        logger.info(f"[FactBase] 构建完成: "
                      f"hardware={hardware[:50] if hardware else 'N/A'}, "
                      f"training_params={list(training_params.keys())}, "
                      f"loss_terms={len(loss_terms)}, "

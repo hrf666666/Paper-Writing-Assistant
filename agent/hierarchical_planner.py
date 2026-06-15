@@ -485,12 +485,17 @@ class ValidationEngine:
         return 999
 
     def _read_paper_context_exists(self) -> int:
-        """返回 1=paper_context 存在且非空, 0=不存在"""
-        # 直接文件
-        pc_path = os.path.join(self.output_dir, "paper_context.json")
-        if os.path.exists(pc_path) and os.path.getsize(pc_path) > 10:
-            return 1
-        # 从 project_data.json 中查找
+        """返回 1=事实源存在且非空, 0=不存在
+
+        v13 PR2: 优先读 FactBase (factbase.json)，兼容旧 paper_context.json，
+        再降级 project_data.json。任一非空即返回 1。
+        """
+        # 1. FactBase（新权威源）
+        for fn in ("factbase.json", "paper_context.json"):
+            pc_path = os.path.join(self.output_dir, fn)
+            if os.path.exists(pc_path) and os.path.getsize(pc_path) > 10:
+                return 1
+        # 2. 从 project_data.json 中查找
         pd_path = os.path.join(self.output_dir, "project_data.json")
         if os.path.exists(pd_path):
             try:

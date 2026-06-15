@@ -25,6 +25,13 @@ from agent.core.errors import (
     is_transient,
     should_retry,
 )
+from agent.core.factbase import (
+    FactBase,
+    build_from_project_data as build_factbase,
+    save as save_factbase,
+    load as load_factbase,
+    exists as factbase_exists,
+)
 
 __all__ = [
     # errors
@@ -32,4 +39,7 @@ __all__ = [
     "DegradedResult",
     "classify", "to_transient", "to_permanent",
     "is_transient", "should_retry",
+    # factbase
+    "FactBase", "build_factbase", "save_factbase",
+    "load_factbase", "factbase_exists",
 ]
