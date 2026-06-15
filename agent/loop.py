@@ -107,9 +107,8 @@ class ResearchLoop:
         from agent.chapter_state_machine import PaperStateMachine
         self.paper_sm = PaperStateMachine()
 
-        # 5. ToolTrace 反捏造
-        from agent.tool_trace import ToolTrace
-        self.tool_trace = ToolTrace()
+        # v14: ToolTrace 已移除（record_citation 从不调用，verify_claims 恒空）
+
 
         # v12.0: 分层验收引擎
         self.validation_engine = ValidationEngine(output_dir=OUTPUT_DIR)
@@ -1498,18 +1497,8 @@ Respond with just the strategy, no explanation:"""
         except Exception as e:
             logger.warning(f"有序门控流水线失败（不影响输出）: {e}")
 
-        # ====== Phase 7.18: v8.0 ToolTrace 报告 ======
-        logger.info("[Phase 7.18] ToolTrace 反捏造报告...")
-        try:
-            trace_report = self.tool_trace.verify_claims(self._chapters)
-            logger.info(
-                f"[Phase 7.18] 引用验证: "
-                f"{trace_report['verified_citations']}/{trace_report['total_citations']} 已验证"
-            )
-            with open(f"{OUTPUT_DIR}/tool_trace_report.json", 'w', encoding='utf-8') as f:
-                json.dump(trace_report, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.warning(f"ToolTrace 报告失败（不影响输出）: {e}")
+        # Phase 7.18 (ToolTrace) 已移除：record_citation 从不被调用，
+        # verify_claims 恒报 0% 验证率（死功能）。反捏造由 auditor 网络验证承担。
 
         # ====== Phase 7.2: 跨章节一致性检查（v11.2: 含 PaperContext 自动修复） ======
         logger.info("[Phase 7.2] 跨章节一致性检查...")
