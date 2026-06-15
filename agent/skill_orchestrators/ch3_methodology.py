@@ -22,18 +22,41 @@ logger = logging.getLogger(__name__)
 _orch = BaseOrchestrator(output_dir=OUTPUT_DIR)
 
 
-def generate_tikz_architecture(model_architecture, figure_style, paper_title,
-                                innovation_points=None, article_type_info=None):
-    """生成TikZ架构图代码 - 委托给tools/tikz_generator"""
-    from tools.tikz_generator import generate_tikz_from_architecture
-    
-    output_path = f"{OUTPUT_DIR}/chapter3/architecture_figure.tex"
-    tikz_code = generate_tikz_from_architecture(
-        model_architecture, figure_style, output_path,
-        innovation_points=innovation_points,
-        article_type_info=article_type_info,
+def generate_architecture_diagram(model_architecture, figure_style, paper_title,
+                                     innovation_points=None, article_type_info=None):
+    """生成架构图 PDF — v14: LLM提取拓扑 + networkx分层 + matplotlib渲染。
+    替代旧的 TikZ 文本生成路径（历史 10+ 版本因 LLM 算 2D 坐标失败）。
+    返回 (arch_pdf_path, arch_description) 供 prompt 对齐 + loop.py 注入。
+    """
+    from tools.arch_diagram_renderer import extract_topology_from_architecture, render_architecture
+
+    arch_pdf = f"{OUTPUT_DIR}/chapter3/architecture_figure.pdf"
+    arch_png = f"{OUTPUT_DIR}/chapter3/architecture_figure.png"
+
+    # LLM 提取结构化拓扑（语义任务）
+    topology = extract_topology_from_architecture(model_architecture, _orch.api_client)
+    if not topology:
+        return "", "Architecture diagram generation failed."
+
+    # networkx 分层 + matplotlib 渲染（几何任务，确定性）
+    result = render_architecture(topology, arch_pdf, arch_png)
+    if not result:
+        return "", "Architecture diagram rendering failed."
+
+    # 构造文字描述（供 prompt 对齐，替代旧的 tikz_code）
+    desc_parts = []
+    for m in topology.get("modules", []):
+        ops = ", ".join(m.get("ops", []))
+        ops_str = f" (ops: {ops})" if ops else ""
+        desc_parts.append(f"- {m['label']}: {m.get('subtitle','')}{ops_str}")
+    edges_desc = "; ".join(
+        f"{e['from']}→{e['to']}" + (" (skip)" if e.get("style")=="skip" else "")
+        for e in topology.get("edges", [])
     )
-    return tikz_code
+    arch_description = f"Modules:\n" + "\n".join(desc_parts) + f"\nConnections: {edges_desc}"
+
+    logger.info(f"[chapter3] 架构图已生成: {arch_pdf}")
+    return arch_pdf, arch_description
 
 
 def generate_methodology(project_data, ref_data, previous_chapters=None, citation_context=""):
@@ -67,15 +90,15 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
     # ==================== 3.1 总体架构概述 ====================
     logger.info("[chapter3] 生成 3.1 总体架构概述...")
 
-    # 生成TikZ架构图
-    logger.info("[chapter3] 生成TikZ架构图...")
+    # 生成架构图（v14: PDF 渲染替代 TikZ 文本）
+    logger.info("[chapter3] 生成架构图（matplotlib 渲染）...")
     try:
-        tikz_code = generate_tikz_architecture(model_architecture, figure_style, PAPER_TITLE,
-                                               innovation_points=innovation_points,
-                                               article_type_info=article_info)
+        arch_pdf_path, arch_description = generate_architecture_diagram(
+            model_architecture, figure_style, PAPER_TITLE,
+            innovation_points=innovation_points, article_type_info=article_info)
     except Exception as e:
-        logger.error(f"[chapter3] TikZ架构图生成失败: {e}")
-        tikz_code = "% TikZ architecture figure generation failed"
+        logger.error(f"[chapter3] 架构图生成失败: {e}")
+        arch_pdf_path, arch_description = "", "Architecture diagram generation failed."
 
     # 构建前序章节摘要块
     _prev_summary_block = ""
@@ -101,10 +124,10 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 {innovation_summary}
 </innovation_points>
 
-**架构图TikZ代码**（用于对齐描述）：
-<tikz_code>
-{tikz_code[:3000]}
-</tikz_code>
+**架构图结构**（用于对齐描述，图已自动渲染为 PDF）：
+<arch_structure>
+{arch_description}
+</arch_structure>
 
 {style_instruction}
 
@@ -256,7 +279,7 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
     
     full_chapter += f"\\subsection{{Training Objective}}\n\n{section_loss}\n"
     
-    return full_chapter, tikz_code
+    return full_chapter, arch_pdf_path
 
 def run_chapter3(project_data, ref_data, previous_chapters=None, citation_context=""):
     """主入口：生成第三章"""
@@ -264,22 +287,19 @@ def run_chapter3(project_data, ref_data, previous_chapters=None, citation_contex
     
     logger.info("[chapter3] 开始生成第三章 Methodology...")
     try:
-        chapter_content, tikz_code = generate_methodology(project_data, ref_data, previous_chapters,
+        chapter_content, arch_pdf_path = generate_methodology(project_data, ref_data, previous_chapters,
                                                             citation_context=citation_context)
     except Exception as e:
         logger.error(f"[chapter3] 第三章生成失败: {e}")
         chapter_content = "\\section{Methodology}\n\n(生成失败，请重新运行)\n"
-        tikz_code = ""
+        arch_pdf_path = ""
     
     try:
         _orch.save_output("chapter3_methodology.md", chapter_content, subdir="chapter3")
     except Exception as e:
         logger.error(f"[chapter3] 保存章节内容失败: {e}")
     
-    try:
-        _orch.save_output("architecture_figure.tex", tikz_code, subdir="chapter3")
-    except Exception as e:
-        logger.error(f"[chapter3] 保存TikZ文件失败: {e}")
+    # v14: 架构图 PDF 由渲染器直接写入 chapter3/architecture_figure.pdf
     
     logger.info("[chapter3] 第三章生成完成！")
     return chapter_content

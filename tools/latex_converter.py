@@ -561,7 +561,7 @@ def _replace_multline(latex_code: str) -> str:
     return result
 
 
-def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
+def assemble_latex_paper(chapters: List[str], arch_pdf_path: str = "",
                          abstract: str = "", keywords: str = "",
                          authors: str = None) -> str:
     """
@@ -597,11 +597,13 @@ def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
     body_parts = _deduplicate_sections(body_parts)
 
     # 插入 TikZ 架构图
-    if tikz_code:
+    if arch_pdf_path:
+        import os as _os
+        _fig_filename = _os.path.basename(arch_pdf_path)
         tikz_figure = f"""
 \\begin{{figure*}}[!t]
 \\centering
-{tikz_code}
+\\includegraphics[width=\\textwidth]{{figures/{_fig_filename}}}
 \\caption{{Overall architecture of the proposed method.}}
 \\label{{fig:architecture}}
 \\end{{figure*}}
@@ -677,7 +679,7 @@ def _clean_keywords(keywords: str) -> str:
     return text.strip()
 
 
-def run_latex_converter(chapters: List[str], tikz_code: str = "",
+def run_latex_converter(chapters: List[str], arch_pdf_path: str = "",
                        abstract: str = "", keywords: str = "",
                        authors: str = "Anonymous") -> str:
     """主入口：组装 LaTeX 论文"""
@@ -689,7 +691,7 @@ def run_latex_converter(chapters: List[str], tikz_code: str = "",
 
     logger.info("[latex_converter] 组装LaTeX论文（LLM直出模式）...")
     try:
-        latex_paper = assemble_latex_paper(chapters, tikz_code, abstract, keywords, authors)
+        latex_paper = assemble_latex_paper(chapters, arch_pdf_path, abstract, keywords, authors)
     except Exception as e:
         logger.error(f"LaTeX论文组装失败: {e}")
         raise
@@ -724,11 +726,9 @@ if __name__ == "__main__":
             with open(f, 'r', encoding='utf-8') as fh:
                 chapters.append(fh.read())
 
-    tikz_path = f"{OUTPUT_DIR}/chapter3/architecture_figure.tex"
-    tikz_code = ""
-    if os.path.exists(tikz_path):
-        with open(tikz_path, 'r', encoding='utf-8') as f:
-            tikz_code = f.read()
+    arch_pdf_path = f"{OUTPUT_DIR}/chapter3/architecture_figure.pdf"
+    if not os.path.exists(arch_pdf_path):
+        arch_pdf_path = ""
 
     if chapters:
-        run_latex_converter(chapters, tikz_code)
+        run_latex_converter(chapters, arch_pdf_path)

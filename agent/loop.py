@@ -1629,17 +1629,27 @@ Respond with just the strategy, no explanation:"""
         # ====== Phase 7.3: 生成最终输出 ======
         logger.info("[Phase 7.3] 生成输出文件...")
 
-        # 读取TikZ架构图
-        tikz_code = ""
-        tikz_path = f"{OUTPUT_DIR}/chapter3/architecture_figure.tex"
-        if os.path.exists(tikz_path):
-            with open(tikz_path, 'r', encoding='utf-8') as f:
-                tikz_code = f.read()
-            # 防御性校验：只有含 \begin{tikzpicture} 的合法 TikZ 才注入
-            # 避免 LLM 的思考过程文本泄漏进 figure 环境（导致 xelatex 崩溃）
-            if tikz_code and "\\begin{tikzpicture}" not in tikz_code:
-                logger.warning(f"[Phase 7.3] architecture_figure.tex 不含 tikzpicture 环境，判定为无效输出，丢弃")
-                tikz_code = ""
+        # v14: 读取架构图 PDF（matplotlib 渲染，替代旧的 TikZ 文本）
+        arch_pdf_path = ""
+        _arch_pdf = f"{OUTPUT_DIR}/chapter3/architecture_figure.pdf"
+        if os.path.exists(_arch_pdf):
+            arch_pdf_path = _arch_pdf
+            logger.info(f"[Phase 7.3] 使用架构图 PDF: {_arch_pdf}")
+        else:
+            logger.warning("[Phase 7.3] architecture_figure.pdf 不存在，跳过架构图注入")
+
+        # 确保架构图 PDF 在 latex/figures/ 下（编译目录可访问）
+        if arch_pdf_path:
+            import shutil as _shutil2
+            _latex_figures = f"{OUTPUT_DIR}/latex/figures"
+            os.makedirs(_latex_figures, exist_ok=True)
+            _arch_dst = os.path.join(_latex_figures, os.path.basename(arch_pdf_path))
+            if arch_pdf_path != _arch_dst:
+                try:
+                    _shutil2.copy2(arch_pdf_path, _arch_dst)
+                    logger.info(f"[Phase 7.3] 架构图已复制到 {_arch_dst}")
+                except Exception as _e:
+                    logger.warning(f"[Phase 7.3] 复制架构图失败: {_e}")
 
         # 使用已生成的Abstract（由phase5_5生成）
         abstract = getattr(self, '_abstract', '')
@@ -1690,7 +1700,7 @@ Respond with just the strategy, no explanation:"""
                 chapter3_content = chapter_list[2]  # index 2 = chapter 3
                 if '\\subsection{' in chapter3_content:
                     # 如果已有 TikZ 架构图（源A），就不从 figure_latex_snippets（源B）再插入架构图
-                    if not tikz_code:
+                    if not arch_pdf_path:
                         # 没有源A → 从源B取架构图注入 chapter 3
                         fig_match = re.search(
                             r'(\\begin\{figure\*?\}.*?\\end\{figure\*?\})',
@@ -1710,7 +1720,7 @@ Respond with just the strategy, no explanation:"""
                         # 有源A → 源B全部放在参考文献前，不注入 chapter 3
                         logger.info("[Phase 7.3] 已有 TikZ 架构图(源A)，跳过源B架构图注入 chapter 3")
             
-            latex_paper = run_latex_converter(chapter_list, tikz_code, abstract, keywords)
+            latex_paper = run_latex_converter(chapter_list, arch_pdf_path, abstract, keywords)
             results["latex"] = f"{OUTPUT_DIR}/latex/main.tex"
 
             # 注入其他图表 LaTeX 代码到 main.tex（放在参考文献之前）
@@ -1723,7 +1733,7 @@ Respond with just the strategy, no explanation:"""
                     
                     # 如果有源A，源B全部放在参考文献前（因为上面没注入 chapter 3）
                     # 如果没有源A，源B第一个图已注入 chapter 3，剩余的放参考文献前
-                    if tikz_code:
+                    if arch_pdf_path:
                         # 源B全部放参考文献前
                         remaining_figures = figure_latex_snippets
                     else:
