@@ -51,3 +51,20 @@ build/
 
 # Generated images
 generated-images/
+
+# Development docs & reports (kept locally, not committed)
+# 历史报告/计划文档，本地保留但不入库
+*.md
+!README.md
+!architecture.md
+!SECURITY_AUDIT.md
+idea_report.pdf
+*.pdf
+
+# Temporary test scripts (regenerable)
+test_*.py
+test_batch*.py
+
+# Deprecated/legacy run scripts
+run_pipeline_v9_3.sh
+monitor_*.sh

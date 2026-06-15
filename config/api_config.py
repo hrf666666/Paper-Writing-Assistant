@@ -1,28 +1,32 @@
 import os
+import logging
 from dotenv import load_dotenv
 
-# 加载环境变量
+logger = logging.getLogger(__name__)
+
+# 加载环境变量（优先 .env 文件，再回退到父进程环境变量）
 load_dotenv()
 
 # ==================== 国内API（优先） ====================
 
 # ==================== 智谱GLM（Coding Plan 端点） ====================
 # 所有 key 只能走 coding plan 端点：/api/coding/paas/v4
-# 回退链：环境变量 → 硬编码备用 key
-_ZHIPU_KEY_FALLBACKS = [
-    "bfc33baabb0b49e98b1ff761114c73e1.TMP1ebbMVpquZ7fE",
-    "7371dbde757a43d89d2364e302ee1446.nHp3f0Y61LbGKIim",
-]
-ZHIPU_GLM_API_KEY = (
+# 仅从环境变量读取，不再有硬编码兜底 key（旧 key 已废弃，避免误用失效 key）
+# 若进程未读到 .bashrc 里的 export（非交互式 shell 会被 .bashrc 头部的
+# `return` 拦截），请在项目根创建 .env 文件，由上面的 load_dotenv() 加载。
+GLM_CODING_PLAN_API_KEY = (
     os.getenv("GLM_CODING_PLAN_API_KEY", "")
     or os.getenv("ZHIPU_GLM_API_KEY", "")
     or os.getenv("ZHIPU_CODING_API_KEY", "")
-    or next((k for k in _ZHIPU_KEY_FALLBACKS if k), "")
 )
+if not GLM_CODING_PLAN_API_KEY:
+    logger.error(
+        "智谱 GLM API Key 未配置：请在项目根 .env 文件中设置 "
+        "GLM_CODING_PLAN_API_KEY=xxx，或 export 该环境变量。"
+        "（注意：.bashrc 中的 export 在非交互式 shell 不会生效）"
+    )
+ZHIPU_GLM_API_KEY = GLM_CODING_PLAN_API_KEY
 ZHIPU_GLM_BASE_URL = "https://open.bigmodel.cn/api/coding/paas/v4"
-
-# 智谱 GLM Coding Plan MCP 服务密钥（web-search-prime, web-reader, zread）
-GLM_CODING_PLAN_API_KEY = os.getenv("GLM_CODING_PLAN_API_KEY", "")
 
 # ==================== 阿里云百炼 ====================
 # 仅使用 Token Plan key，不使用百炼直连 key
@@ -66,6 +70,14 @@ PROVIDERS = {
         "api_key_env": "ZHIPU_GLM_API_KEY",
         "base_url": ZHIPU_GLM_BASE_URL,
         "models": {
+            "glm_5_2": {
+                "model_id": "glm-5.2",
+                "type": "generation",
+                "max_tokens": 8192,
+                "temperature": 0.7,
+                "stream": True,
+                "use_zai": True,
+            },
             "glm_5_1": {
                 "model_id": "glm-5.1",
                 "type": "generation",

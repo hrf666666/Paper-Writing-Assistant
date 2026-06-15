@@ -37,7 +37,7 @@ def run_pgei_pipeline(
     plan: Optional[Dict] = None,
     enable_critic: bool = True,
     max_iterations: int = MAX_ITERATIONS,
-    text_model_alias: str = "glm_5_1",
+    text_model_alias: str = "glm_5_2",
     vision_model_alias: str = "glm_4_6v",
     project_path: Optional[str] = None,
     content_brief: Optional[Dict] = None,

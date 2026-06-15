@@ -415,6 +415,8 @@ def generate_experiments(project_data, ref_data, previous_chapters=None, citatio
 4. 使用表格汇总所有数据集的关键信息
 
 请使用学术英语撰写。请直接输出LaTeX代码。表格使用 \\begin{{table*}}...\\end{{table*}} 包裹，内部用 tabular + booktabs (\\toprule/\\midrule/\\bottomrule)，整体用 \\resizebox{{\\columnwidth}}{{!}}{{...}} 缩放。
+**LANGUAGE**: Write in English ONLY. No Chinese characters anywhere.
+**LATEX SYNTAX**: Every \\begin{{X}} must have a matching \\end{{X}}. Tabular column count must match & count per row.
 **重要**：不要输出 \\section 或 \\subsection 标题，标题由系统自动添加。直接从正文开始，只输出LaTeX代码：
 """
     

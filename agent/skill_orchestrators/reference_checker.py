@@ -125,12 +125,14 @@ def _titles_similar(title, ref_content):
     return overlap > 0.4
 
 
-def run_reference_checker(full_paper_content):
+def run_reference_checker(full_paper_content, cite_key_map=None):
     """
     主入口：运行参考文献审查。
 
+    v14.0: 接受 cite_key_map（全局映射），不再独立生成 key。
+
     1. 提取所有 \cite{key} 引用
-    2. 与 ReferenceStore 中的论文匹配
+    2. 与 cite_key_map / ReferenceStore 中的论文匹配
     3. 标记未匹配的引用为待验证
     4. 返回审查报告
     """
@@ -166,9 +168,13 @@ def run_reference_checker(full_paper_content):
     verified = []
     unverified = []
 
-    # 从 ReferenceStore 中查找每个 cite key 对应的论文
+    # v14: 优先使用传入的 cite_key_map（单一真相源）
     pool_by_key = {}
-    if store:
+    if cite_key_map:
+        pool_by_key = {k: v for k, v in cite_key_map.items()}
+        logger.info(f"[reference_checker] 使用 cite_key_map: {len(pool_by_key)} 个 key")
+    elif store:
+        # 降级：独立构建（不同模块可能产生不一致的 key）
         try:
             pool = store.get_all_papers(limit=200)
             from tools.text_utils import generate_bib_key
@@ -176,7 +182,7 @@ def run_reference_checker(full_paper_content):
                 authors = paper.get("authors", [])
                 year = paper.get("year", "")
                 title = paper.get("title", "")
-                key = generate_bib_key(authors, year, title, idx)
+                key = generate_bib_key(authors, year, title)
                 pool_by_key[key] = paper
         except Exception as e:
             logger.debug(f"[reference_checker] 构建 pool_by_key 失败: {e}")

@@ -35,7 +35,7 @@ def generate_figure_from_plan(
     venue: str = "IEEE TCSVT",
     feedback: Optional[List[Dict]] = None,
     project_path: Optional[str] = None,
-    text_model_alias: str = "glm_5_1",
+    text_model_alias: str = "glm_5_2",
     previous_tikz: Optional[str] = None,
 ) -> Dict:
     """

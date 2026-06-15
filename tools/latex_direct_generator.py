@@ -654,12 +654,11 @@ def _ensure_tikz_fits(latex_code: str) -> str:
 
 def _fix_long_equations(latex_code: str) -> str:
     """
-    后处理：将可能溢出的长 equation 环境转为 multline 环境，并在合适位置拆行。
+    后处理：将可能溢出的长 equation 环境拆行。
 
-    关键处理：
-    1. \\left/\\right 不能跨行 → 替换为 \\Big/\\Big（按行分别替换）
-    2. 在 + 或 = 处拆行
-    3. 只处理真正长（>80字符）且没有多行结构的公式
+    使用 equation + split 而非 multline，因为 multline 在 IEEEtran 中
+    容易因空行导致 "Paragraph ended before \\multline was complete" 错误。
+    split 在 equation 内部拆行是 IEEEtran 推荐的做法。
     """
     def _fix_one_eq(match):
         content = match.group(1)
@@ -671,8 +670,7 @@ def _fix_long_equations(latex_code: str) -> str:
         if len(body) < 80:
             return match.group(0)
 
-        # 已有多行结构不处理 —— 但排除内部环境（bmatrix/pmatrix/vmatrix/cases）的 \\
-        # 这些环境的 \\ 是矩阵行分隔，不是 equation 的多行拆分
+        # 已有多行结构不处理
         inner_envs = ['bmatrix', 'pmatrix', 'vmatrix', 'Vmatrix', 'cases', 'array',
                       'matrix', 'Bmatrix', 'smallmatrix', 'aligned', 'alignedat',
                       'gathered', 'split', 'subarray']
@@ -690,7 +688,6 @@ def _fix_long_equations(latex_code: str) -> str:
             return match.group(0)
 
         # 在 "+ " 处拆分（找最接近中间的 + 号）
-        # 备选：在 "= " 处拆分（等号赋值）
         plus_positions = [m.start() for m in re.finditer(r'\+ ', body)]
         eq_positions = [m.start() for m in re.finditer(r'= ', body)]
 
@@ -698,7 +695,6 @@ def _fix_long_equations(latex_code: str) -> str:
             mid_pos = len(body) // 2
             best_split = min(plus_positions, key=lambda p: abs(p - mid_pos))
         elif eq_positions:
-            # 在第二个 = 处拆分（第一个通常是定义符 J = ...）
             if len(eq_positions) > 1:
                 best_split = eq_positions[1]
             else:
@@ -709,14 +705,13 @@ def _fix_long_equations(latex_code: str) -> str:
         line1 = body[:best_split].rstrip()
         line2 = body[best_split:].lstrip()
 
-        # 处理 \left/\right 跨行不匹配问题
-        # 拆行后，\left 和 \right 可能被分到不同行，导致 LaTeX 编译错误
-        # 解决方案：将 \left → \Bigl, \right → \Bigr（不需要跨行配对）
+        # 处理 \left/\right 跨行不匹配
         line1 = _fix_left_right_for_line(line1)
         line2 = _fix_left_right_for_line(line2)
 
-        result = f'\\begin{{multline}}\n{label}\n{line1} \\\\\n{line2}\n\\end{{multline}}'
-        logger.info("[fix_long_equations] equation -> multline")
+        # 用 equation+split 替代 multline — IEEEtran 安全
+        result = f'\\begin{{equation}}\n{label}\n\\begin{{split}}\n{line1} \\\\\n&\\quad {line2}\n\\end{{split}}\n\\end{{equation}}'
+        logger.info("[fix_long_equations] equation -> equation+split")
         return result
 
     latex_code = re.sub(

@@ -34,10 +34,20 @@ class ZhipuAIClient:
     """
 
     def __init__(self, api_key: str, model: str,
-                 base_url: str = None,
+                 base_url: str,
                  max_tokens: int = 8192, temperature: float = 0.7,
                  stream: bool = False, timeout: int = 300):
         from zai._client import ZhipuAiClient as _ZhipuAiClient
+
+        # fail-fast：Coding Plan 模式下 base_url 必须显式指定，
+        # 否则 zai SDK 默认走标准 PAAS 端点 (api/paas/v4)，
+        # 而 Coding Plan 的 key 在标准端点上无效（401）。
+        if not base_url:
+            raise ValueError(
+                "ZhipuAIClient 必须显式传入 base_url（Coding Plan 端点）。"
+                "用 api_config.ZHIPU_GLM_BASE_URL，"
+                "禁止依赖 zai SDK 的默认标准 PAAS 端点。"
+            )
 
         self.model = model
         self.max_tokens = max_tokens
@@ -45,14 +55,11 @@ class ZhipuAIClient:
         self.stream = stream
         self.timeout = timeout
 
-        kwargs = {
-            "api_key": api_key,
-            "timeout": timeout,
-        }
-        if base_url:
-            kwargs["base_url"] = base_url
-
-        self._client = _ZhipuAiClient(**kwargs)
+        self._client = _ZhipuAiClient(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+        )
 
     def query(self, prompt: str, system_prompt: str = None,
               temperature: float = None, max_tokens: int = None) -> str:
@@ -200,7 +207,7 @@ class ZhipuAIClient:
 
     def _is_thinking_model(self) -> bool:
         """GLM 系列中支持思考的模型"""
-        thinking_models = ["glm-5", "glm-4.7", "glm-4.8"]
+        thinking_models = ["glm-5.2", "glm-5.1", "glm-5", "glm-4.7", "glm-4.8"]
         model_lower = self.model.lower()
         return any(m in model_lower for m in thinking_models)
 
@@ -545,11 +552,11 @@ def query_glm(prompt: str, model: str = None, **kwargs) -> str:
     from config.api_config import ZHIPU_GLM_API_KEY, ZHIPU_GLM_BASE_URL
     if not ZHIPU_GLM_API_KEY:
         raise ValueError("智谱GLM API Key 未配置，请在 .env 中设置 ZHIPU_GLM_API_KEY")
-    cfg = _get_model_config("glm_5_1")
+    cfg = _get_model_config("glm_5_2")
     client = ZhipuAIClient(
         api_key=ZHIPU_GLM_API_KEY,
         base_url=ZHIPU_GLM_BASE_URL,
-        model=model or cfg.get("model_id", "glm-5.1"),
+        model=model or cfg.get("model_id", "glm-5.2"),
         max_tokens=kwargs.pop("max_tokens", cfg.get("max_tokens", 8192)),
         temperature=kwargs.pop("temperature", cfg.get("temperature", 0.7)),
         **kwargs

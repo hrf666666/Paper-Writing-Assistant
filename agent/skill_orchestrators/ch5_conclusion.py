@@ -119,7 +119,10 @@ def generate_conclusion(project_data, ref_data, previous_chapters_summary,
 - 局限性要诚实但不过分贬低，未来工作要自然承接局限性
 - 仿照参考论文的结论写法
 
-请使用学术英语撰写。请直接输出LaTeX代码。不要输出 \section 标题。只输出LaTeX正文代码：
+请使用学术英语撰写。请直接输出LaTeX代码。不要输出 \section 标题。只输出LaTeX正文代码。
+**LANGUAGE**: Write in English ONLY. No Chinese characters anywhere.
+**LATEX SYNTAX**: Every \begin{X} must have a matching \end{X}.
+**STRUCTURE**: Paragraph 1 = summarize key contributions. Do NOT start with experimental results.
 """
     
     logger.info("[chapter5] 生成第五章 Conclusion...")

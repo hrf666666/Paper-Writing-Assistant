@@ -138,6 +138,8 @@ class ResearchLoop:
         self._citation_bank = {}
         self._rationale_matrix = {}
         self._ablation_results = {}
+        self._cite_key_map = {}      # v14: key→paper 全局映射（单一真相源）
+        self._title_to_key = {}      # v14: title_lower→key 反查
 
         # 注入 API 客户端到 tools 层（解耦反向依赖）
         from tools.base_tool import setup_tool_api
@@ -1127,37 +1129,58 @@ Respond with just the strategy, no explanation:"""
 
     def _build_cite_key_list(self) -> str:
         """
-        v13.0: 从 reference_pool 生成精确 cite key 列表。
-        让 LLM 直接用 \\cite{key} 写引用，绕过模糊的 <citation> 匹配。
+        v14.0: 构建统一的 cite key → paper 映射（单一真相源）。
+        - generate_bib_key 不含位置后缀，纯确定性
+        - 冲突时追加 _2, _3... 后缀
+        - 映射缓存到 self._cite_key_map，所有下游模块共享
         """
         from tools.text_utils import generate_bib_key
-        entries = {}  # key -> "title (year, venue)"
 
-        # 1. 从 reference_pool (优先，经过验证的真实论文)
-        if self._reference_pool:
-            for idx, p in enumerate(self._reference_pool[:60]):
-                title = p.get("title", "")
-                if not title:
-                    continue
-                authors = p.get("authors", [])
-                year = str(p.get("year", ""))
-                venue = p.get("venue_abbr", "") or p.get("venue", "")
-                key = generate_bib_key(authors, year, title, idx + 1)
-                if key not in entries:
-                    venue_str = f", {venue}" if venue else ""
-                    entries[key] = f"{title[:80]} ({year}{venue_str})"
+        self._cite_key_map = {}   # key → paper_info
+        self._title_to_key = {}   # title_lower → key
+        entries = {}              # key → display string
 
-        # 2. 从 citation_bank claims 补充
+        # 去重合并：reference_pool（主） + citation_bank claims（补）
+        seen_titles = set()
+        all_sources = []
+        for p in (self._reference_pool or []):
+            t = p.get("title", "").lower().strip()
+            if t and t not in seen_titles:
+                all_sources.append(p)
+                seen_titles.add(t)
         if self._citation_bank and self._citation_bank.get("claims"):
-            for idx, c in enumerate(self._citation_bank.get("claims", [])):
-                title = c.get("title", "")
-                if not title:
-                    continue
-                authors = c.get("authors", [])
-                year = str(c.get("year", ""))
-                key = generate_bib_key(authors, year, title, len(entries) + idx + 1)
-                if key not in entries:
-                    entries[key] = f"{title[:80]} ({year})"
+            for c in self._citation_bank["claims"]:
+                t = c.get("title", "").lower().strip()
+                if t and t not in seen_titles:
+                    all_sources.append(c)
+                    seen_titles.add(t)
+
+        # 生成 key + 冲突消解
+        for p in all_sources:
+            title = p.get("title", "")
+            if not title:
+                continue
+            authors = p.get("authors", [])
+            year = str(p.get("year", ""))
+            base_key = generate_bib_key(authors, year, title)
+
+            key = base_key
+            suffix = 2
+            while key in self._cite_key_map:
+                existing = self._cite_key_map[key]
+                if existing.get("title", "").lower().strip() == title.lower().strip():
+                    break  # 同一篇论文，复用已有 key
+                key = f"{base_key}_{suffix}"
+                suffix += 1
+
+            if key not in self._cite_key_map:
+                venue = p.get("venue_abbr", "") or p.get("venue", "")
+                if isinstance(venue, dict):
+                    venue = venue.get("raw", "")
+                venue_str = f", {venue}" if venue else ""
+                entries[key] = f"{title[:80]} ({year}{venue_str})"
+                self._cite_key_map[key] = p
+                self._title_to_key[title.lower().strip()] = key
 
         if not entries:
             return ""
@@ -1171,8 +1194,8 @@ Respond with just the strategy, no explanation:"""
 
     def _ensure_bib_has_all_cited_keys(self, tex_path: str):
         """
-        v13.0: 扫描 main.tex 中所有 \\cite{key}，确保 references.bib 中有对应条目。
-        缺失的 key 从 reference_pool / refs.db / citation_bank 中查找并补充。
+        v14.0: 扫描 main.tex 中 \\cite{key}，确保 references.bib 有对应条目。
+        使用缓存的 _cite_key_map（单一真相源），不再独立生成 key。
         """
         import re as _re
         if not os.path.exists(tex_path):
@@ -1183,7 +1206,6 @@ Respond with just the strategy, no explanation:"""
 
         # 提取所有 cite key
         cited_keys = set(_re.findall(r'\\cite\{([^}]+)\}', tex_content))
-        # Flatten: \cite{a,b} → {a, b}
         flat_keys = set()
         for k in cited_keys:
             for part in k.split(","):
@@ -1205,54 +1227,28 @@ Respond with just the strategy, no explanation:"""
 
         logger.info(f"[Phase 7.8b] 补充 {len(missing)} 个缺失 bib 条目: {missing}")
 
-        # 从 reference_pool / citation_bank / refs.db 查找并补充
-        from tools.text_utils import generate_bib_key
-        from tools.bibtex_builder import BibTeXBuilder
+        # v14: 直接使用缓存的 _cite_key_map（不再独立重建）
+        key_map = getattr(self, '_cite_key_map', {})
+        if not key_map:
+            logger.warning("[Phase 7.8b] _cite_key_map 为空，跳过补充")
+            return
 
+        from tools.bibtex_builder import BibTeXBuilder
         builder = BibTeXBuilder(os.path.dirname(os.path.dirname(tex_path)))
         new_entries = []
-
-        # 构建查找源，同时建立 key → paper 的映射（用与 prompt 阶段相同的 idx 生成 key）
-        all_sources = list(self._reference_pool or [])
-        if self._citation_bank and self._citation_bank.get("claims"):
-            all_sources.extend(self._citation_bank["claims"])
-
-        # 预计算：对每个 source，用与 _build_cite_key_list 相同的 idx 生成 key
-        key_to_source = {}
-        for idx, p in enumerate(all_sources):
-            title = p.get("title", "")
-            if not title:
-                continue
-            authors = p.get("authors", [])
-            year = str(p.get("year", ""))
-            key = generate_bib_key(authors, year, title, idx + 1)
-            if key not in key_to_source:
-                key_to_source[key] = p
-
         removed_keys = []
-        for missing_key in missing:
-            # 精确匹配：直接用预计算的 key 映射
-            best_match = key_to_source.get(missing_key)
-            if not best_match:
-                # 降级：用 title 模糊匹配
-                for p in all_sources:
-                    title = p.get("title", "")
-                    year = str(p.get("year", ""))
-                    if year and year in missing_key:
-                        title_words = title.lower().split()[:3]
-                        if any(w in missing_key.lower() for w in title_words if len(w) > 3):
-                            best_match = p
-                            break
 
-            if best_match:
-                entry = builder._create_bib_entry_with_doi(best_match, missing_key)
+        for missing_key in missing:
+            paper = key_map.get(missing_key)
+            if paper:
+                entry = builder._create_bib_entry_with_doi(paper, missing_key)
                 if not entry:
-                    entry = builder._create_bib_entry(best_match, missing_key)
+                    entry = builder._create_bib_entry(paper, missing_key)
                 if entry:
                     new_entries.append(entry)
             else:
-                # 找不到对应论文 → 移除无效引用而非生成假条目
-                logger.warning(f"[Phase 7.8b] 无法为 cite key '{missing_key}' 找到真实论文，移除该引用")
+                # 未知 key（LLM 编造的）→ 移除
+                logger.warning(f"[Phase 7.8b] 未知 cite key '{missing_key}'，移除该引用")
                 tex_content = _re.sub(
                     r'\\cite\{[^}]*' + _re.escape(missing_key) + r'[^}]*\}',
                     '', tex_content
@@ -1394,7 +1390,10 @@ Respond with just the strategy, no explanation:"""
 
             full_content = "\n\n".join(self._chapters.values())
             from agent.skill_orchestrators.reference_checker import run_reference_checker
-            verification = run_reference_checker(full_content)
+            verification = run_reference_checker(
+                full_content,
+                cite_key_map=getattr(self, '_cite_key_map', None),
+            )
             results["reference_verification"] = verification
 
             with open(f"{OUTPUT_DIR}/reference_verification_final.json", 'w', encoding='utf-8') as f:
@@ -1610,17 +1609,22 @@ Respond with just the strategy, no explanation:"""
         try:
             from tools.formula_processor import process_formulas, strip_formula_tags, reset_formula_counter
             import re as _re
+            reset_formula_counter()  # 每篇论文重新编号
+            total_formulas = 0
             for ch_key in list(self._chapters.keys()):
                 content = self._chapters[ch_key]
                 if '<formula>' in content:
-                    processed, stats = process_formulas(content), {}
+                    # process_formulas 只返回 str，把 <formula>...</formula> 转为 $...$ / $$...$$
+                    processed = process_formulas(content)
+                    before = content.count('<formula>')
                     remaining = len(_re.findall(r'<formula>', processed))
                     if remaining > 0:
                         processed = strip_formula_tags(processed)
+                    total_formulas += (before - remaining)
                     self._chapters[ch_key] = processed
             if self._abstract and '<formula>' in self._abstract:
                 self._abstract = strip_formula_tags(self._abstract)
-            logger.info("[Phase 7.25] 公式处理完成")
+            logger.info(f"[Phase 7.25] 公式处理完成: {total_formulas} 个公式标记已转换")
         except Exception as e:
             logger.warning(f"公式处理失败（不影响输出）: {e}")
 
@@ -1886,15 +1890,25 @@ Respond with just the strategy, no explanation:"""
         # ====== Phase 7.8: BibTeX 引用生成 ======
         try:
             logger.info("[Phase 7.8] 生成 BibTeX 引用...")
-            from tools.bibtex_builder import run_bibtex_builder
-            bib_content, citation_map = run_bibtex_builder(OUTPUT_DIR)
+            from tools.bibtex_builder import BibTeXBuilder
+            builder = BibTeXBuilder(OUTPUT_DIR)
+
+            # v14: 优先用 _cite_key_map（单一真相源）构建 BibTeX
+            cite_key_map = getattr(self, '_cite_key_map', {})
+            if cite_key_map:
+                bib_content, citation_map = builder.build_from_cite_key_map(cite_key_map)
+                logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(cite_key_map)} key")
+            else:
+                # 降级：走旧路径
+                from tools.bibtex_builder import run_bibtex_builder
+                bib_content, citation_map = run_bibtex_builder(OUTPUT_DIR)
+                logger.info("[Phase 7.8] 降级走独立构建路径")
+
             results["bibtex"] = f"{OUTPUT_DIR}/latex/references.bib"
             results["citation_map"] = len(citation_map)
 
             # 替换 LaTeX 中的 [N] 为 \cite{}
             if citation_map and OUTPUT_LATEX:
-                from tools.bibtex_builder import BibTeXBuilder
-                builder = BibTeXBuilder(OUTPUT_DIR)
                 builder._citation_map = citation_map
                 tex_path = f"{OUTPUT_DIR}/latex/main.tex"
                 if os.path.exists(tex_path):
@@ -2769,6 +2783,8 @@ Venue style: {self.venue_adapter.profile.writing_style.get('tone', 'formal')}.
 {citation_context}
 
 **关键约束**：不要重复 Conclusion 章节中已经提到的内容。提供新的分析和见解。
+**LANGUAGE**: Write in English ONLY. No Chinese characters anywhere.
+**NO NEW EQUATIONS**: This section analyzes existing results. Do NOT introduce new mathematical formulations.
 
 Write in English, LaTeX-compatible Markdown format. Do NOT include a top-level section title, just start with the content. Use $$...$$ for display math and $...$ for inline math:
 """

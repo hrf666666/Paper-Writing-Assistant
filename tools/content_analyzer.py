@@ -141,7 +141,7 @@ Rules:
 
 def analyze_paper_content(
     paper_content: Dict,
-    model_alias: str = "glm_5_1",
+    model_alias: str = "glm_5_2",
 ) -> ContentBrief:
     """
     深度分析论文内容，提取图表所需信息。
@@ -196,7 +196,7 @@ def analyze_paper_content(
     return brief
 
 
-def analyze_from_tex(tex_path: str, model_alias: str = "glm_5_1") -> ContentBrief:
+def analyze_from_tex(tex_path: str, model_alias: str = "glm_5_2") -> ContentBrief:
     """从 LaTeX 文件分析论文内容"""
     paper_content = _extract_from_tex(tex_path)
     return analyze_paper_content(paper_content, model_alias)

@@ -116,6 +116,8 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 
 请使用学术英语撰写。请直接输出LaTeX代码。行内公式用 $...$，行间公式用 \\begin{{equation}}...\\end{{equation}}。
 架构图引用使用 "Fig.~\\ref{{fig:architecture}}" 或 "As illustrated in Fig.~\\ref{{fig:architecture}}"。
+**LANGUAGE**: Write in English ONLY. No Chinese characters anywhere.
+**LATEX SYNTAX**: Every \\begin{{X}} must have a matching \\end{{X}}.
 **重要**：不要输出 \\section 或 \\subsection 标题。直接从正文开始，只输出LaTeX代码：
 """
     

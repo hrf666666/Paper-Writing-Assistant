@@ -15,7 +15,7 @@ Tool: LaTeX转换器 v12.0 — LLM 直出 + 审查修复循环
 import os
 import re
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from config.project_config import (
     PAPER_TITLE, OUTPUT_DIR, LATEX_TEMPLATE, ARTICLE_TYPE, get_article_type_info,
@@ -162,86 +162,289 @@ def _safe_llm_replace(original: str, candidate: str, label: str,
         )
         return original
 
+    # v15.2: 公式守卫 — equation/align 数量不应大幅减少
+    orig_eqs = len(re.findall(r'\\begin\{equation\}|\\begin\{align\}', original))
+    cand_eqs = len(re.findall(r'\\begin\{equation\}|\\begin\{align\}', candidate))
+    if orig_eqs >= 3 and cand_eqs < orig_eqs * 0.5:
+        logger.warning(
+            f"[latex_converter] {label}: 公式守卫触发 — "
+            f"equation/align 从 {orig_eqs} 减少到 {cand_eqs}，保留原文"
+        )
+        return original
+
+    # v15.2: cite 守卫 — 引用数量不应大幅减少
+    orig_cites = len(re.findall(r'\\cite\{|<citation', original))
+    cand_cites = len(re.findall(r'\\cite\{|<citation', candidate))
+    if orig_cites >= 3 and cand_cites < orig_cites * 0.5:
+        logger.warning(
+            f"[latex_converter] {label}: 引用守卫触发 — "
+            f"cite 从 {orig_cites} 减少到 {cand_cites}，保留原文"
+        )
+        return original
+
     return candidate
 
 
-def _review_latex(latex_content: str, chapter_num: int) -> Tuple[str, List[str]]:
+def _lint_latex(latex: str) -> str:
     """
-    LLM 审查 LaTeX 内容，返回 (修复后内容, 问题列表)。
-    v12.1: 添加长度/结构守卫，防止 LLM 截断/压缩内容。
+    v15.2: 纯正则清理 — 只删除明确不该存在的东西，不做任何风格转换。
+    替代 _review_latex 的格式修复职责，零 LLM 调用，零幻觉风险。
+    """
+    # Markdown 残留 (LLM 偶尔泄漏)
+    latex = re.sub(r'^#{1,6}\s+', '', latex, flags=re.MULTILINE)
+    latex = re.sub(r'\*\*(.+?)\*\*', r'\1', latex)
+    latex = re.sub(r'(?<!\S)\*(.+?)\*(?!\S)', r'\1', latex)  # 不碰 $a*b$
+    # [?] 引用占位符
+    latex = re.sub(r'\[\?\]', '', latex)
+    # multline → equation+split (IEEEtran 兼容, 复用已有函数)
+    latex = _replace_multline(latex)
+    return latex
+
+
+def _find_pdflatex_binary() -> Optional[str]:
+    """查找 pdflatex 可执行文件路径"""
+    import shutil as _shutil
+    found = _shutil.which("pdflatex")
+    if found:
+        return found
+    for candidate in [
+        "/usr/local/texlive/2026/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2025/bin/x86_64-linux/pdflatex",
+        "/usr/local/texlive/2024/bin/x86_64-linux/pdflatex",
+        "/usr/bin/pdflatex",
+    ]:
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def _extract_errors_from_log(tmp_dir: str, result) -> str:
+    """从 pdflatex 运行结果提取错误信息。优先读 .log 文件。"""
+    log_path = os.path.join(tmp_dir, "verify.log")
+    log_content = ""
+    if os.path.exists(log_path):
+        with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
+            log_content = f.read()
+    if not log_content:
+        log_content = (result.stdout or "") + "\n" + (result.stderr or "")
+    # 提取以 ! 开头的错误行 + 后续 3 行上下文
+    errors = []
+    lines = log_content.split("\n")
+    for i, line in enumerate(lines):
+        if line.startswith("!"):
+            context = lines[i:i + 4]
+            errors.append("\n".join(context))
+    return "\n\n".join(errors[:10]) if errors else log_content[-1500:]
+
+
+# IEEEtran standalone preamble (与 main.tex 同款)
+_STANDALONE_PREAMBLE = (
+    "\\documentclass[lettersize,journal]{IEEEtran}\n"
+    "\\usepackage{amsmath,amssymb,amsfonts}\n"
+    "\\usepackage{algorithmic}\n"
+    "\\usepackage{algorithm}\n"
+    "\\usepackage{array}\n"
+    "\\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}\n"
+    "\\usepackage{textcomp}\n"
+    "\\usepackage{stfloats}\n"
+    "\\usepackage{url}\n"
+    "\\usepackage{graphicx}\n"
+    "\\usepackage{xcolor}\n"
+    "\\usepackage{tikz}\n"
+    "\\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit}\n"
+    "\\usepackage{booktabs}\n"
+    "\\usepackage{multirow}\n"
+    "\\usepackage{hyperref}\n"
+    "\\usepackage{cite}\n"
+    "\\hyphenation{op-tical net-works semi-conduc-tor}\n"
+    "\\begin{document}\n"
+)
+
+
+def _fix_chapter_latex(chapter_latex: str, error_log: str,
+                       chapter_num: int) -> str:
+    """
+    v15.2: 基于编译器报错日志修复单章 LaTeX。
+    与 _fix_compile_errors 的区别: 输入是单章(不截断), 错误来自 standalone dry-compile。
     """
     api = _get_tool_api()
     if not api:
-        return latex_content, []
+        return chapter_latex
 
-    prompt = f"""你是一名 IEEE Transactions (IEEEtran 格式) 的 LaTeX 审查专家。
-请审查以下 LaTeX 章节代码，只修复格式问题。
+    prompt = f"""Fix the LaTeX compilation errors in this chapter section.
 
-**CRITICAL: 保持所有原始内容不变！不要删除、总结或压缩任何文字段落。只修复格式错误。**
+**COMPILATION ERRORS** (from pdflatex):
+{error_log[:3000]}
 
-**检查清单**:
-1. 花括号 {{ }} 是否正确配对
-2. 每个 \\begin{{X}} 是否有对应的 \\end{{X}}（equation, align, table, figure, itemize 等）
-3. 是否有 Markdown 残留（##, **, - 列表项不在 itemize 中）
-4. 表格使用 \\toprule/\\midrule/\\bottomrule（不要用 \\hline）
-5. 表格用 \\resizebox{{\\columnwidth}}{{!}}{{}} 或 \\resizebox{{\\textwidth}}{{!}}{{}} 包裹
-6. 行间公式使用 \\begin{{equation}} 或 \\begin{{align}}（不要用 $$...$$）
-7. 无中文字符
-8. 所有 <citation> 标记保持不变（不要删除或修改）
-9. 文本中使用 \\&（不要在 tabular 外使用裸 &）
-10. 不重复输出已有的 \\section/\\subsection 标题
+**RULES**:
+1. Fix ONLY the errors listed above
+2. Preserve ALL text content, equations, tables, and \\cite{{}} commands
+3. Do NOT delete paragraphs, sections, or equations
+4. If a table has structural errors, fix the structure — don't delete the table
+5. If an equation has syntax errors, fix the syntax — don't delete the equation
+6. Output the COMPLETE corrected chapter LaTeX (same content, errors fixed)
 
-**输出完整的修正后 LaTeX 代码，包含所有原始文字内容。如果没有格式问题，原样输出。**
-
-待审查的 LaTeX:
+**Chapter LaTeX**:
+```latex
+{chapter_latex}
 ```
-{latex_content}
-```"""
+
+Output ONLY the corrected LaTeX (no markdown fences, no explanations):"""
 
     try:
         result = api.call_generation(prompt)
-        if result:
-            # 清理 markdown 包裹
-            result = result.strip()
-            if result.startswith("```"):
-                lines = result.split("\n")
-                result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-            # v12.1: 安全替换守卫（50% 长度阈值 + 结构完整性检查）
-            safe_result = _safe_llm_replace(
-                latex_content, result.strip(),
-                f"章节{chapter_num}审查", min_ratio=0.5
-            )
-            # 检测修复了哪些问题
-            issues = []
-            if safe_result != latex_content:
-                issues.append(f"章节{chapter_num}: LLM审查修复了格式问题")
-            return safe_result, issues
-    except Exception as e:
-        logger.warning(f"[latex_converter] 章节 {chapter_num} LLM审查失败: {e}")
+        if not result or len(result.strip()) < 50:
+            return chapter_latex
 
-    return latex_content, []
+        result = result.strip()
+        if result.startswith("```"):
+            lines = result.split("\n")
+            result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+
+        # 安全守卫: 修复后不能比原文短太多
+        orig_len = len(chapter_latex)
+        fixed_len = len(result)
+        if orig_len > 500 and fixed_len < orig_len * 0.5:
+            logger.warning(
+                f"[Chapter {chapter_num}] 修复后长度 {fixed_len} < 原文 {orig_len} 的 50%, 拒绝替换"
+            )
+            return chapter_latex
+
+        # 公式守卫
+        orig_eqs = len(re.findall(r'\\begin\{equation\}|\\begin\{align\}', chapter_latex))
+        fixed_eqs = len(re.findall(r'\\begin\{equation\}|\\begin\{align\}', result))
+        if orig_eqs >= 3 and fixed_eqs < orig_eqs * 0.5:
+            logger.warning(
+                f"[Chapter {chapter_num}] 公式数 {orig_eqs}→{fixed_eqs}, 拒绝替换"
+            )
+            return chapter_latex
+
+        # cite 守卫
+        orig_cites = len(re.findall(r'\\cite\{', chapter_latex))
+        fixed_cites = len(re.findall(r'\\cite\{', result))
+        if orig_cites >= 3 and fixed_cites < orig_cites * 0.5:
+            logger.warning(
+                f"[Chapter {chapter_num}] cite 数 {orig_cites}→{fixed_cites}, 拒绝替换"
+            )
+            return chapter_latex
+
+        return result
+
+    except Exception as e:
+        logger.warning(f"[Chapter {chapter_num}] LLM 修复失败: {e}")
+        return chapter_latex
+
+
+def _dry_compile_chapter(chapter_latex: str, chapter_num: int,
+                         max_retries: int = 2) -> str:
+    """
+    v15.2: 逐章 standalone 编译验证 + LLM 自愈。
+    策略与 tikz_generator._compile_verify_and_fix 一致:
+    1. 包裹 standalone 文档 → pdflatex 编译
+    2. 成功 → 返回原样
+    3. 失败 → 解析错误 → 喂给 LLM 修复 → 重编译
+    4. 最多 max_retries 轮，失败则返回原文
+    """
+    import subprocess
+    import tempfile
+    import shutil as _shutil
+
+    pdflatex = _find_pdflatex_binary()
+    if not pdflatex:
+        logger.info(f"[Chapter {chapter_num}] pdflatex 不可用, 跳过 dry-compile")
+        return chapter_latex
+
+    tmp_dir = tempfile.mkdtemp(prefix=f"chapter{chapter_num}_")
+    try:
+        tex_path = os.path.join(tmp_dir, "verify.tex")
+
+        def _write_and_compile(content: str):
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(_STANDALONE_PREAMBLE + content + "\n\\end{document}\n")
+            r = subprocess.run(
+                [pdflatex, "-interaction=nonstopmode", "-halt-on-error", "verify.tex"],
+                cwd=tmp_dir, capture_output=True, text=True, timeout=30,
+            )
+            pdf_path = os.path.join(tmp_dir, "verify.pdf")
+            if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 500:
+                return True, ""
+            return False, _extract_errors_from_log(tmp_dir, r)
+
+        # 第一次编译
+        success, error_log = _write_and_compile(chapter_latex)
+        if success:
+            logger.info(f"[Chapter {chapter_num}] dry-compile 通过")
+            return chapter_latex
+
+        logger.warning(
+            f"[Chapter {chapter_num}] dry-compile 失败, 错误: {error_log[:200]}"
+        )
+
+        # LLM 修复循环
+        current = chapter_latex
+        for attempt in range(max_retries):
+            logger.info(
+                f"[Chapter {chapter_num}] LLM 修复 (attempt {attempt + 1}/{max_retries})"
+            )
+            fixed = _fix_chapter_latex(current, error_log, chapter_num)
+
+            if fixed == current:
+                logger.warning(f"[Chapter {chapter_num}] LLM 未做出修改, 停止重试")
+                return current
+
+            success, error_log = _write_and_compile(fixed)
+            if success:
+                logger.info(
+                    f"[Chapter {chapter_num}] LLM 修复后编译通过 (attempt {attempt + 1})"
+                )
+                return fixed
+
+            current = fixed
+
+        logger.warning(
+            f"[Chapter {chapter_num}] dry-compile 失败 ({max_retries} 轮后仍失败), 使用原文"
+        )
+        return chapter_latex
+
+    except subprocess.TimeoutExpired:
+        logger.warning(f"[Chapter {chapter_num}] dry-compile 超时, 使用原文")
+        return chapter_latex
+    except FileNotFoundError:
+        logger.info(f"[Chapter {chapter_num}] pdflatex 不可用, 跳过")
+        return chapter_latex
+    except Exception as e:
+        logger.warning(f"[Chapter {chapter_num}] dry-compile 异常: {e}")
+        return chapter_latex
+    finally:
+        _shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def _fix_compile_errors(latex_content: str, errors: str) -> str:
     """
-    将编译错误反馈给 LLM，让其修复
+    全量编译修复 — 基于编译器报错日志修复整篇 LaTeX (兜底用)。
     """
     api = _get_tool_api()
     if not api:
         return latex_content
 
-    prompt = f"""The following LaTeX code has compilation errors.
-Fix ALL errors. Output ONLY the corrected LaTeX code.
+    prompt = f"""Fix the LaTeX compilation errors. Fix ONLY the errors listed below.
 
-**COMPILATION ERRORS**:
+**COMPILATION ERRORS** (fix these specific issues only):
 {errors[:2000]}
+
+**RULES**:
+1. Only modify lines that cause the errors
+2. Preserve ALL text content, equations, tables, and citations
+3. Do NOT delete paragraphs or sections to "fix" errors
+4. If an error is in a table, fix the table structure — don't delete the table
+5. If an error is in an equation, fix the syntax — don't delete the equation
 
 **LaTeX code**:
 ```
 {latex_content[:16000]}
 ```
 
-Fix the errors and output the corrected LaTeX:"""
+Output ONLY the corrected LaTeX:"""
 
     try:
         result = api.call_generation(prompt)
@@ -250,7 +453,6 @@ Fix the errors and output the corrected LaTeX:"""
             if result.startswith("```"):
                 lines = result.split("\n")
                 result = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-            # v12.1: 安全替换守卫（编译修复允许更激进，30% 阈值）
             safe_result = _safe_llm_replace(
                 latex_content, result.strip(),
                 "编译修复", min_ratio=0.3
@@ -303,9 +505,56 @@ def _minimal_cleanup(latex: str) -> str:
     latex = re.sub(r'\\subsection\{\s*\}', '', latex)
     # 清理残余 Markdown 标题（以防 prompt 指令被忽略）
     latex = re.sub(r'^#{1,6}\s+', '', latex, flags=re.MULTILINE)
-    # v11.2: 清理中文字符（不应出现在英文论文 LaTeX 中）
+
+    # v14: 处理 section/subsection 标题中的中文字符
+    # LLM 可能生成 \subsection{中文标题 (English Title)}
+    # 策略：保留括号内英文，删除中文；无括号则删除整个中文串
+    def _clean_section_title(m):
+        cmd = m.group(1)   # \subsection
+        full_title = m.group(2)
+        # 如果包含括号内的英文，保留括号内部分
+        paren_match = re.search(r'\(([^)]+)\)', full_title)
+        if paren_match:
+            return f'{cmd}{{{paren_match.group(1).strip()}}}'
+        # 否则删除中文字符
+        cleaned = re.sub(r'[\u4e00-\u9fff]+', '', full_title)
+        cleaned = re.sub(r'[（）、，：；！？]+', '', cleaned).strip()
+        return f'{cmd}{{{cleaned}}}' if cleaned else m.group(0)
+
+    latex = re.sub(r'(\\(?:sub)?section)\{([^}]*[\u4e00-\u9fff][^}]*)\}', _clean_section_title, latex)
+
+    # 清理正文中残留的中文字符（section 标题已单独处理）
     latex = re.sub(r'[\u4e00-\u9fff]+', '', latex)
+    # v15.2: 清理中文剥离后留下的空括号和空 \text{}
+    latex = re.sub(r'\(\s*\)', '', latex)
+    latex = re.sub(r'\\text\{\s*\}', '', latex)
     return latex
+
+
+def _replace_multline(latex_code: str) -> str:
+    """
+    兜底：将 LLM 生成的 \\begin{multline}...\\end{multline} 替换为 equation+split。
+    multline 在 IEEEtran 中因空行问题频繁导致编译错误。
+    """
+    def _fix(m):
+        body = m.group(1).strip()
+        body = re.sub(r'\n\s*\n', '\n', body)
+        lines = [l.strip() for l in body.split('\\\\') if l.strip()]
+        if len(lines) <= 1:
+            single = lines[0] if lines else body
+            return f'\\begin{{equation}}\n{single}\n\\end{{equation}}'
+        first = lines[0]
+        rest = ' \\\\\n&\\quad '.join(lines[1:])
+        return f'\\begin{{equation}}\n\\begin{{split}}\n{first} \\\\\n&\\quad {rest}\n\\end{{split}}\n\\end{{equation}}'
+
+    result = re.sub(
+        r'\\begin\{multline\}(.*?)\\end\{multline\}',
+        _fix, latex_code, flags=re.DOTALL,
+    )
+    count = len(re.findall(r'\\begin\{multline\}', latex_code))
+    if count:
+        logger.info(f"[latex_converter] multline → equation+split: {count} 处")
+    return result
 
 
 def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
@@ -331,13 +580,12 @@ def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
         if not chapter or not chapter.strip():
             continue
 
-        # v12.0: chapter prompt 直接输出 LaTeX，只需最小清理
+        # v15.2: chapter prompt 直接输出 LaTeX，只需最小清理
         latex_chapter = _minimal_cleanup(chapter.strip())
 
-        # LLM 审查修复（1 轮）
-        latex_chapter, issues = _review_latex(latex_chapter, i + 1)
-        if issues:
-            logger.info(f"[latex_converter] 章节 {i+1} 审查修复了 {len(issues)} 个问题")
+        # v15.2: 纯正则清理 + 逐章编译验证（替代 _review_latex LLM 审查）
+        latex_chapter = _lint_latex(latex_chapter)
+        latex_chapter = _dry_compile_chapter(latex_chapter, i + 1)
 
         body_parts.append(latex_chapter)
 
@@ -394,7 +642,9 @@ def assemble_latex_paper(chapters: List[str], tikz_code: str = "",
         latex_paper = _ensure_tikz_fits(latex_paper)
         latex_paper = _validate_float_sizing(latex_paper)
         latex_paper = _fix_long_equations(latex_paper)
-        logger.info("[latex_converter] 后处理修复链完成 (5 步)")
+        # 兜底：LLM 自行生成的 multline → equation+split（IEEEtran 安全）
+        latex_paper = _replace_multline(latex_paper)
+        logger.info("[latex_converter] 后处理修复链完成 (6 步)")
     except Exception as e:
         logger.warning(f"[latex_converter] 后处理修复链失败（不阻塞）: {e}")
 

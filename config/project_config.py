@@ -104,14 +104,15 @@ API_CALL_INTERVAL = 3.0
 # 模型别名对应 api_config.MODEL_ALIASES 中的条目
 # 按优先级排序：国内API优先，国际API作为备选
 
-# 生成模型优先级（Token Plan 优先，跨 provider 降级）
+# 生成模型优先级（GLM 5.2 thinking 优先，跨 provider 降级）
 GENERATION_MODELS = [
-    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主力）
-    "glm_5_1",           # 智谱 GLM-5.1（Coding Plan key, zai SDK）
-    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, 支持 thinking）
+    "glm_5_2",           # 智谱 GLM-5.2（Coding Plan key, zai SDK, thinking）
+    "glm_5_1",           # 智谱 GLM-5.1（zai SDK, thinking）
+    "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max（跨 provider 降级）
+    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max
+    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking）
     "tp_deepseek_v4_pro",# 阿里 Token Plan DeepSeek-V4-Pro
     "tp_qwen3_6_plus",   # 阿里 Token Plan Qwen3.6-Plus
-    "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max（备选）
     "glm_5",             # 智谱 GLM-5（zai SDK）
     "tp_deepseek_v4_flash",# 阿里 Token Plan DeepSeek-V4-Flash
     "tp_qwen3_6_flash",  # 阿里 Token Plan Qwen3.6-Flash
@@ -123,10 +124,12 @@ GENERATION_MODELS = [
     "gpt_5_3",           # GPT-5.3（需代理）
 ]
 
-# 推理/决策模型（Token Plan 优先）
+# 推理/决策模型（GLM thinking 优先，跨 provider 降级）
 REASONING_MODELS = [
-    "tp_qwen3_7_max",    # Token Plan Qwen3.7-Max
+    "glm_5_2",           # 智谱 GLM-5.2（zai SDK, thinking）
     "glm_5_1",           # 智谱 GLM-5.1（zai SDK, thinking）
+    "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max（跨 provider 降级）
+    "tp_qwen3_7_max",    # Token Plan Qwen3.7-Max
     "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking）
     "tp_deepseek_v4_pro",# DeepSeek-V4-Pro（推理强）
     "gpt_5_5",           # GPT-5.5（需代理）
@@ -143,10 +146,10 @@ LIGHT_MODELS = [
 # 核心原则：评价模型必须与执行模型来自不同 provider（避免"自我审查"盲区）
 #
 # 策略映射（基于 GENERATION_MODELS 中第一个可用模型）：
-#   qwen3.7-max 执行 → glm_5_1 评价（跨 provider）
-#   glm_5.1 执行    → qwen3_7_max 评价（跨 provider）
+#   glm_5.2 执行     → qwen3_7_max 评价（跨 provider）
+#   qwen3.7-max 执行 → glm_5_2 评价（跨 provider）
+#   仅 GLM 可用     → glm_5.2 执行, glm_5_1 评价（同 provider 降级）
 #   仅 Qwen 可用    → qwen3.7-max 执行, qwen3.6-plus 评价（同 provider 降级）
-#   仅 GLM 可用     → glm_5.1 执行, glm_5 评价（同 provider 降级）
 #   仅 Token Plan   → tp_qwen3_7_max 执行, tp_deepseek_v4_pro 评价（不同模型）
 
 # 评价模型优先级（运行时根据执行模型动态选择，见 resolve_eval_models()）

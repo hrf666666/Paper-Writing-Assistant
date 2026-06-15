@@ -104,7 +104,13 @@ class CrossChapterChecker:
             "4": "Experiments", "IV": "Experiments",
             "5": "Conclusion", "V": "Conclusion",
         }
-        max_chapter = max(int(k) for k in chapters.keys()) if chapters else 0
+        # 只统计整数章节号；忽略扩展章节的 str 键（如 "5_1"、"5_2"），
+        # 因为 Python 的 int("5_1") 会忽略下划线返回 51，污染最大章号判断。
+        chapter_nums = [
+            int(k) for k in chapters.keys()
+            if isinstance(k, int) or (isinstance(k, str) and k.isdigit())
+        ]
+        max_chapter = max(chapter_nums) if chapter_nums else 0
 
         for ref in section_refs:
             if ref.isdigit():

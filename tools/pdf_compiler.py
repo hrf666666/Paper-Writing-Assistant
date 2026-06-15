@@ -167,8 +167,48 @@ class PDFCompiler:
                               encoding="utf-8", errors="ignore") as lf:
                         log_content = lf.read()
                 errors = self._parse_latex_errors(log_content)
-                return {"success": False, "engine": engine_name,
-                        "error": f"编译失败: {errors[:800]}"}
+
+                # v15.2: LLM 编译修复兜底（1 轮 — 逐章验证已排除大部分错误）
+                logger.warning(f"[PDFCompiler] 全量编译失败, 尝试 LLM 修复 (1 轮)")
+                try:
+                    tex_path = os.path.join(self.latex_dir, "main.tex")
+                    with open(tex_path, "r", encoding="utf-8") as f:
+                        current_tex = f.read()
+
+                    from tools.latex_converter import _fix_compile_errors
+                    fixed_tex = _fix_compile_errors(current_tex, errors)
+
+                    if fixed_tex != current_tex:
+                        with open(tex_path, "w", encoding="utf-8") as f:
+                            f.write(fixed_tex)
+
+                        # 重编译 3 遍
+                        for _ in range(3):
+                            subprocess.run(
+                                [engine_bin, "-interaction=nonstopmode", "main.tex"],
+                                capture_output=True, text=True, timeout=180,
+                                cwd=self.latex_dir, env=env,
+                            )
+
+                        if os.path.exists(compiled_pdf):
+                            logger.info("[PDFCompiler] LLM 修复后编译成功")
+                        else:
+                            # 更新错误信息
+                            if os.path.exists(os.path.join(self.latex_dir, "main.log")):
+                                with open(os.path.join(self.latex_dir, "main.log"), "r",
+                                          encoding="utf-8", errors="ignore") as lf:
+                                    log_content = lf.read()
+                                errors = self._parse_latex_errors(log_content)
+                            return {"success": False, "engine": engine_name,
+                                    "error": f"编译失败 (LLM修复后仍失败): {errors[:800]}"}
+                    else:
+                        logger.warning("[PDFCompiler] LLM 未做出修改")
+                        return {"success": False, "engine": engine_name,
+                                "error": f"编译失败: {errors[:800]}"}
+                except Exception as fix_err:
+                    logger.warning(f"[PDFCompiler] LLM 修复异常: {fix_err}")
+                    return {"success": False, "engine": engine_name,
+                            "error": f"编译失败: {errors[:800]}"}
 
             # 复制到目标路径
             shutil.copy2(compiled_pdf, pdf_path)

@@ -47,11 +47,17 @@ class CitationManager:
         """
         从全文中收集所有 <citation> 标记
 
+        v14.0: 如果内容已使用 \\cite{key} 格式，跳过处理。
         v11.2: 同时匹配 <citation>...</citation> 和自闭合 <citation> 标记
 
         Returns:
             List of {"raw": "<citation>...</citation>", "keywords": "..."}
         """
+        # v14.0: 内容已是 \cite{key} 格式 → 无需处理
+        if re.search(r'\\cite\{[^}]+\}', full_text):
+            logger.info("[CitationManager] 检测到 \\cite{key} 格式，跳过 <citation> 处理")
+            return []
+
         citations = []
         paired_positions = set()
 

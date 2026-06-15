@@ -119,7 +119,7 @@ def plan_figures(
     paper_content: Dict,
     venue: str = "IEEE TCSVT",
     experiment_data: Optional[Dict] = None,
-    model_alias: str = "glm_5_1",
+    model_alias: str = "glm_5_2",
     content_brief: Optional[Dict] = None,
 ) -> Dict:
     """
@@ -204,7 +204,7 @@ def plan_figures(
 def plan_figures_with_content_analysis(
     tex_path: str,
     venue: str = "IEEE TCSVT",
-    text_model_alias: str = "glm_5_1",
+    text_model_alias: str = "glm_5_2",
 ) -> Dict:
     """
     v9.2 完整流程：从 LaTeX 提取 → 内容分析 → 图表规划。

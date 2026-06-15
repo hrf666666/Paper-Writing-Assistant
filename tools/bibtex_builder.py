@@ -143,6 +143,51 @@ class BibTeXBuilder:
 
         return bib_content, self._citation_map
 
+    def build_from_cite_key_map(self, cite_key_map: Dict[str, Dict]) -> Tuple[str, Dict[int, str]]:
+        """
+        v14.0: 从全局 _cite_key_map 构建 BibTeX（单一真相源）。
+        确保生成的 bib entry key 与 prompt 注入的 key 完全一致。
+        """
+        bib_entries = []
+        citation_num_map = {}  # int → key（仅用于 [N] → \cite{key} 兼容替换）
+
+        for num, (key, paper) in enumerate(cite_key_map.items(), 1):
+            entry = self._create_bib_entry_with_doi(paper, key)
+            if not entry:
+                entry = self._create_bib_entry(paper, key)
+            if entry:
+                self._bib_entries[key] = entry
+                citation_num_map[num] = key
+                bib_entries.append(entry)
+
+        # 过滤：只保留 tex 中实际 \cite{key} 引用的条目
+        cited_keys = self._extract_cited_keys()
+        if cited_keys:
+            before = len(bib_entries)
+            bib_entries = [e for e in bib_entries
+                           if any(k in e for k in cited_keys)]
+            self._bib_entries = {k: v for k, v in self._bib_entries.items()
+                                 if k in cited_keys}
+            citation_num_map = {n: k for n, k in citation_num_map.items()
+                                if k in cited_keys}
+            logger.info(f"[BibTeXBuilder] BibTeX 过滤: {before} → {len(bib_entries)} 条")
+
+        bib_content = "\n\n".join(bib_entries)
+
+        # 保存
+        os.makedirs(self.latex_dir, exist_ok=True)
+        bib_path = os.path.join(self.latex_dir, "references.bib")
+        with open(bib_path, "w", encoding="utf-8") as f:
+            f.write(bib_content + "\n")
+
+        map_path = os.path.join(self.output_dir, "citation_map.json")
+        with open(map_path, "w", encoding="utf-8") as f:
+            json.dump(citation_num_map, f, ensure_ascii=False, indent=2)
+
+        self._citation_map = citation_num_map
+        logger.info(f"[BibTeXBuilder] key_map 构建: {len(bib_entries)} 条 BibTeX")
+        return bib_content, citation_num_map
+
     def replace_numeric_with_cite(self, text: str) -> str:
         """
         将 [1], [2,3], [1-3] 或 \\cite{1} 替换为 \\cite{key}
@@ -210,119 +255,7 @@ class BibTeXBuilder:
         for i, v in enumerate(_math_store):
             text_protected = text_protected.replace(f'__MATHREF_{i}__', v)
 
-        # v11.3: 处理 LLM 编造的 \cite{key} 格式（非数字 key）
-        # 将未在 bib 中找到的 cite key 映射到 citation_map 中最接近的 bib key
-        text_protected = self._remap_unknown_cite_keys(text_protected)
-
         return text_protected
-
-    def _remap_unknown_cite_keys(self, text: str) -> str:
-        """
-        v11.3: 将 LLM 编造的 \\cite{key} 中不在 bib 里的 key，
-        映射到 citation_map 中最接近的 bib key。
-        例如 \\cite{shin2018epinet} → \\cite{heber2018} (如果 heber2018 是 EPINet 相关)
-        """
-        # 收集所有 bib 中的有效 key
-        valid_keys = set(self._citation_map.values()) if self._citation_map else set()
-        if not valid_keys:
-            return text
-
-        # 从 bib 文件中收集所有有效 key
-        bib_path = os.path.join(self.latex_dir, "references.bib")
-        bib_content = ""
-        if os.path.exists(bib_path):
-            with open(bib_path, "r", encoding="utf-8") as f:
-                bib_content = f.read()
-            for m in re.finditer(r'@\w+\{(\w+)', bib_content):
-                valid_keys.add(m.group(1))
-
-        # 构建 key → title 映射用于模糊匹配
-        key_titles = {}
-        if bib_content:
-            for m in re.finditer(r'@\w+\{(\w+)[^@]*?title\s*=\s*\{([^}]*)\}', bib_content, re.DOTALL):
-                key_titles[m.group(1)] = m.group(2).lower()
-
-        # 收集 citation_map 中 key → paper_info（正确：外层 citation_map，内层 ref_pool 匹配）
-        pool_by_key = {}
-        ref_pool = self._load_reference_pool()
-        for idx, bib_key in self._citation_map.items():
-            if idx <= len(ref_pool):
-                paper = ref_pool[idx - 1] if idx >= 1 else None
-                if paper:
-                    pool_by_key[bib_key] = {
-                        "title": paper.get("title", "").lower().strip(),
-                        "doi": paper.get("doi", ""),
-                    }
-
-        def _remap_cite(match):
-            keys_str = match.group(1)
-            keys = [k.strip() for k in keys_str.split(",")]
-            remapped = []
-            for key in keys:
-                if key in valid_keys:
-                    remapped.append(key)
-                else:
-                    # 尝试从 key 中提取关键词
-                    best_key = self._find_closest_bib_key(key, key_titles, pool_by_key)
-                    if best_key:
-                        remapped.append(best_key)
-                        logger.debug(f"[BibTeXBuilder] 映射 \\cite{{{key}}} → \\cite{{{best_key}}}")
-                    # else: 丢弃这个引用（避免 undefined citation）
-            if remapped:
-                return f"\\cite{{{','.join(remapped)}}}"
-            return ""  # 无匹配则删除引用标记
-
-        # 匹配 \cite{xxx} 其中 xxx 不全是数字（数字格式已在上面处理）
-        text = re.sub(
-            r'\\cite\{([^}]+)\}',
-            _remap_cite,
-            text,
-        )
-        return text
-
-    def _find_closest_bib_key(self, unknown_key: str, key_titles: Dict[str, str],
-                               pool_by_key: Dict[str, Dict]) -> Optional[str]:
-        """从有效 bib key 中找到最接近的匹配"""
-        # 从 unknown_key 提取关键词 (如 shin2018epinet → ["shin", "epinet"])
-        parts = re.findall(r'[a-z]+', unknown_key.lower())
-        # 提取年份
-        year_match = re.search(r'(20\d{2}|19\d{2})', unknown_key)
-        year = year_match.group(1) if year_match else None
-
-        if not parts:
-            return None
-
-        best_key = None
-        best_score = 0
-
-        for bib_key, title in key_titles.items():
-            score = 0
-            for part in parts:
-                if len(part) >= 3 and part in title:
-                    score += 3
-                elif len(part) >= 3 and part in bib_key.lower():
-                    score += 1
-            # 年份匹配加分
-            if year and year in bib_key:
-                score += 2
-            if score > best_score:
-                best_score = score
-                best_key = bib_key
-
-        # 也尝试匹配 pool_by_key
-        for bib_key, info in pool_by_key.items():
-            title = info.get("title", "").lower()
-            score = 0
-            for part in parts:
-                if len(part) >= 3 and part in title:
-                    score += 3
-            if year and year in bib_key:
-                score += 2
-            if score > best_score:
-                best_score = score
-                best_key = bib_key
-
-        return best_key if best_score >= 2 else None
 
     def _load_verified_citations(self) -> List[Dict]:
         """加载已验证的引用"""
@@ -483,6 +416,18 @@ class BibTeXBuilder:
                 logger.info(f"[BibTeXBuilder] 离线池补充: +{len(bib_entries) - len(ref_entries)} 条"
                             f" (共 {len(bib_entries)} 条)")
 
+        # 过滤：只保留被 tex 中 \cite{key} 引用的条目
+        cited_keys = self._extract_cited_keys()
+        if cited_keys:
+            before = len(bib_entries)
+            bib_entries = [e for e in bib_entries
+                           if any(key in e for key in cited_keys)]
+            self._bib_entries = {k: v for k, v in self._bib_entries.items()
+                                 if k in cited_keys}
+            citation_map = {n: k for n, k in citation_map.items()
+                            if k in cited_keys}
+            logger.info(f"[BibTeXBuilder] BibTeX 过滤: {before} → {len(bib_entries)} 条")
+
         bib_content = "\n\n".join(bib_entries)
 
         # 保存
@@ -509,6 +454,22 @@ class BibTeXBuilder:
         if key in self._bib_entries:
             key += f"_{num}"
         return key or f"ref{num}"
+
+    def _extract_cited_keys(self) -> set:
+        """从 tex 文件中提取所有 \\cite{key} 引用的 key 集合"""
+        cited = set()
+        tex_path = os.path.join(self.latex_dir, "main.tex")
+        if not os.path.exists(tex_path):
+            return cited
+        try:
+            with open(tex_path, "r", encoding="utf-8") as f:
+                tex = f.read()
+            for m in re.finditer(r'\\cite\{([^}]+)\}', tex):
+                for key in m.group(1).split(','):
+                    cited.add(key.strip())
+        except Exception as e:
+            logger.debug(f"[BibTeXBuilder] 读取 tex 失败: {e}")
+        return cited
 
     def _create_bib_entry(self, cite_info: Dict, key: str) -> Optional[str]:
         """创建 BibTeX 条目（v11.1: 补全 volume/number/pages/doi）"""
