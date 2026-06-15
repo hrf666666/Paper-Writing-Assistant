@@ -63,15 +63,12 @@ agent/core/
 ```
 paper-writing-assistant/
 ├── pipeline.py                  # 主入口
-├── run_with_log.py              # 日志 Tee 包装器
+├── run_with_log.py              # 日志 Tee 包装器（文档化运行入口，保留）
 │
 ├── config/                      # 配置层
 │   ├── project_config.py        # 项目配置（标题、模型列表、阈值）
 │   ├── api_config.py            # API 密钥 + Provider 配置 + 模型别名
 │   ├── venue_profiles/          # 11 个期刊/会议场景配置
-│   │   ├── ieee_tcsvt.py        # IEEE TCSVT（默认）
-│   │   ├── ieee_tip.py          # IEEE TIP
-│   │   └── ...
 │   └── ieee_trans_style_profile.py  # IEEE Trans 写作风格硬规则
 │
 ├── api/                         # API 客户端层
@@ -79,50 +76,62 @@ paper-writing-assistant/
 │   └── paper_search.py          # 论文检索（S2 语义搜索）
 │
 ├── agent/                       # Agent 核心层
-│   ├── loop.py                  # 自主循环引擎（系统心脏, v12.2: _CHAPTER_CONFIGS 统一分发 + 子方法提取）
-│   ├── api_client.py            # 统一 API 客户端（降级链管理）
+│   ├── core/                    # 🆕 v13 内核契约层（6 块契约，零循环依赖）
+│   │   ├── errors.py            #   错误分级 (Transient/Permanent/DegradedResult) + classify()
+│   │   ├── factbase.py          #   FactBase 单一事实源（替代 PaperContext 写读分裂）
+│   │   ├── memory.py            #   LayeredMemory 三层记忆 + citation_context 缓存
+│   │   ├── finding.py           #   Finding 统一问题 + FindingBus + 4 适配器
+│   │   └── figure_manifest.py   #   FigureManifest 文图联动单一真相源
+│   ├── loop.py                  # 自主循环引擎（系统心脏, v13: classify 闸口 + 8 处致命 except 分级）
+│   ├── api_client.py            # 统一 API 客户端 (v13: classify 错误分级 + prompt 计数)
 │   ├── dispatcher.py            # Leader-Worker 分层调度
 │   ├── base_orchestrator.py     # LLM 调用基类 + 公共工具函数
-│   │
-│   ├── skill_orchestrators/     # 章节编排器（每章一个文件）
-│   │   ├── project_analyzer.py  # Phase 0.1: 工程代码分析
-│   │   ├── ref_pdf_analyzer.py  # Phase 0.2: 参考论文分析
-│   │   ├── structure_planner.py # Phase 0.5: 全局大纲规划
-│   │   ├── ch1_introduction.py  # Phase 1: Introduction
-│   │   ├── ch2_related_work.py  # Phase 2: Related Work
-│   │   ├── ch3_methodology.py   # Phase 3: Methodology
-│   │   ├── ch4_experiments.py   # Phase 4: Experiments
-│   │   ├── ch5_conclusion.py    # Phase 5: Conclusion
-│   │   └── ...                  # 审查、引用池、范例学习等
-│   │
-│   ├── venue_adapter.py         # 期刊适配器（v12.2: 类级风格共享，消除实例断裂）
-│   ├── style_manager.py         # 统一风格管理 (v12.0: P0 通用写作纪律层)
-│   ├── quality_gate.py          # 质量门控 + 反馈循环 (v12.2: 修复 should_retry 覆盖)
+│   ├── skill_orchestrators/     # 章节编排器（project_analyzer/ref_pdf/structure/ch1-5/...）
+│   ├── venue_adapter.py         # 期刊适配器
+│   ├── style_manager.py         # 统一风格管理 (P0 通用写作纪律层)
+│   ├── quality_gate.py          # 质量门控 (v13: QualityLoop 接 FindingBus 简报)
 │   ├── auditor.py               # 反幻觉审计引擎
-│   ├── citation_manager.py      # 引用去重、编号 (v12.0: chapters dict 接口)
-│   ├── cross_chapter_checker.py # 跨章节一致性检查 (v12.2: PaperContext + ours_values 双路修复)
-│   ├── hierarchical_planner.py  # 分层任务规划 (v12.0: phase0_98 PaperContext)
-│   ├── memory.py                # 双层记忆系统
+│   ├── citation_manager.py      # 引用去重、编号
+│   ├── cross_chapter_checker.py # 跨章节一致性检查 (读 FactBase 权威数值)
+│   ├── hierarchical_planner.py  # 分层任务规划 (v13: 优先读 factbase.json)
+│   ├── memory.py                # 双层记忆系统（旧，仅 THINK；生成走 core/memory.py）
 │   ├── checkpoint.py            # 断点恢复
-│   └── ...                      # 20+ 辅助模块
+│   └── ...                      # 辅助模块
 │
 ├── skills/
 │   └── academic_writing_style/
-│       ├── writing_discipline.md # 🆕 P0 跨期刊通用写作纪律 (10条规则)
+│       ├── writing_discipline.md # P0 跨期刊通用写作纪律 (10条规则)
 │       └── style_guide.md        # P3 IEEE 特有写作规范
 │
 ├── tools/                       # 工具层
-│   ├── latex_converter.py       # LaTeX 组装 + LLM 审查修复 + 中文字符过滤 (v12.0)
+│   ├── latex_converter.py       # LaTeX 组装 + LLM 审查修复 + 中文字符过滤
 │   ├── latex_constraint_checker.py  # 编译前结构合规审计
 │   ├── bibtex_builder.py        # BibTeX 生成（模板组装）
+│   ├── arch_diagram_renderer.py # 架构图渲染 (v13: 视觉评价真重渲闭环)
+│   ├── figure_planner.py        # 图表规划
+│   ├── figure_generator.py      # TikZ 图表生成 (LLM 产规格 + 自愈编译)
+│   ├── result_visualizer.py     # 实验结果可视化
 │   ├── output_evaluator.py      # L1/L2/L3 三层评价
 │   ├── pdf_compiler.py          # XeLaTeX 编译
 │   ├── pdf_validator.py         # PDF 验证 + 溢出修复
 │   └── ...
 │
+├── figure/                      # 图表模板（v13 清理后仅保留活依赖）
+│   ├── style_templates.py       #   期刊风格模板（data_visualizer 3 处 import）
+│   ├── layout_engine.py         #   TikZ 布局引擎（测试引用）
+│   └── layout_templates.py      #   管道/分支模板（测试引用）
+│
+├── test/                        # pytest 测试（v13 清理后 7 个有效模块，263 测试 0 error）
+│   ├── conftest.py              #   pytest 配置
+│   ├── test_systemic_upgrade.py #   (39) / test_v10_1_smoke.py (26)
+│   ├── test_citation_multisource.py  # (24) / test_v9_2_figure_system.py (6)
+│   ├── stage_targeted_test.py   #   (4) / test_pdf_validator.py (4) / test_phase85_quick.py (1)
+│
 └── data/                        # 离线数据
-    └── reference_packs/         # 光场+CV 基础 32 篇离线论文
+    └── reference_packs/         # 离线论文
 ```
+
+> **v13.0 清理记录**：两轮保守删除共 15 个死代码/废弃测试（每点 grep 验证 0 引用）。删 4 个废弃 figure 渲染器（architecture_renderer/ablation_plotter/comparison_plotter/teaser_designer）、3 个根级废弃脚本（test_batch1/test_v9_2/test_v9_3）、8 个废弃测试（2 坏 + 6 一次性 `__main__` 脚本）。活依赖（style_templates/layout_engine/layout_templates/run_with_log）保留。
 
 ---
 

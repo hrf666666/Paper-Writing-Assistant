@@ -41,6 +41,25 @@
 | 恒定上下文 | LayeredMemory 缓存 + `assemble(intent,budget)` 检索式组装 |
 | THINK→EXECUTE→VERIFY→REFLECT 闭环 | FindingBus 简报回流到 `evaluate_and_revise` 修订 prompt |
 
+### v13.0 验证（pipeline 实跑，96 分钟）
+
+| 指标 | v12 旧版 | v13 新版 |
+|------|---------|---------|
+| Grade | A（虚高，含静默失败）| **B**（L1=100 L2=100 L3=50，诚实）|
+| Traceback/致命错误 | 有（被吞）| **0** |
+| 429 配额静默 | 3 次（吞为 0 图）| **0** |
+| 图数 | 1（严重重叠）| **2**（架构图 7/10 + fig1 TikZ 自愈）|
+| 跨章一致性误报 | 3（永久）| **0**（FactBase 生效）|
+| 耗时 | ~150 分钟 | **96 分钟**（↓36%）|
+
+### v13.0 保守清理（两轮，每个删除点 grep 验证 0 引用）
+
+**第一轮（7 个死代码）**：`figure/{architecture_renderer,ablation_plotter,comparison_plotter,teaser_designer}.py`（4 个废弃渲染器）+ `test_batch1.py`/`test_v9_2.py`/`test_v9_3.py`（3 个废弃脚本）。
+
+**第二轮（8 个废弃测试）**：`test_latex_direct.py`/`test_v9_1_figure_pgei.py`（2 个引用已删模块的坏测试）+ `test_v10_full.py`/`test_v10_llm_tikz.py`/`test_v10_quick.py`/`quick_pdf.py`/`test_quick_gen.py`/`test_quick_test.py`（6 个一次性 `__main__` 脚本，非 pytest）。
+
+**保留原则**：核实为活依赖的不删——`figure/style_templates.py`（data_visualizer 3 处 import）、`figure/layout_engine.py`+`layout_templates.py`（测试引用）、`run_with_log.py`（文档化运行入口）。清理后 **263 个 pytest 测试 0 error**。
+
 ---
 
 ## v12.3 里程碑：架构净化 — PipelineContext + 依赖注入 + ch5 统一
@@ -509,50 +528,66 @@ L3: 学术质量 (LLM 评价)
 ```
 paper-writing-assistant/
 ├── agent/                        # 自主循环架构核心
-│   ├── loop.py                   #   Pipeline 引擎 (v12.2: _CHAPTER_CONFIGS 统一分发 + 子方法提取 + PaperContext 持久化)
-│   ├── citation_manager.py       #   引用管理 (v12.0: chapters dict 接口 + 全局编号)
-│   ├── api_client.py             #   统一 API 客户端 (zai/openai/anthropic)
+│   ├── core/                     #   🆕 v13 内核契约层（6 块契约，零循环依赖）
+│   │   ├── errors.py             #     错误分级 (Transient/Permanent/DegradedResult) + classify()
+│   │   ├── factbase.py           #     FactBase 单一事实源（替代 PaperContext 写读分裂）
+│   │   ├── memory.py             #     LayeredMemory 三层记忆 + citation_context 缓存
+│   │   ├── finding.py            #     Finding 统一问题 + FindingBus + 4 适配器
+│   │   └── figure_manifest.py    #     FigureManifest 文图联动单一真相源
+│   ├── loop.py                   #   Pipeline 引擎 (v13: classify 闸口 + 8 处致命 except 分级)
+│   ├── citation_manager.py       #   引用管理
+│   ├── api_client.py             #   统一 API 客户端 (v13: classify 错误分级 + prompt 计数闸口)
 │   ├── dispatcher.py             #   任务调度器
-│   ├── quality_gate.py           #   质量门控
+│   ├── quality_gate.py           #   质量门控 (v13: QualityLoop 接 FindingBus 简报)
 │   ├── auditor.py                #   反幻觉审计
-│   ├── cross_chapter_checker.py  #   跨章节一致性检查 (v12.0: PaperContext 自动修复)
+│   ├── cross_chapter_checker.py  #   跨章节一致性检查 (读 FactBase 权威数值)
 │   ├── motivation_engine.py      #   动机确认引擎
-│   ├── style_manager.py          #   统一风格管理 (v12.0: P0通用写作纪律层)
-│   ├── hierarchical_planner.py   #   分层任务规划 (v12.0: phase0_98 PaperContext)
+│   ├── style_manager.py          #   统一风格管理 (P0 通用写作纪律层)
+│   ├── hierarchical_planner.py   #   分层任务规划 (v13: 优先读 factbase.json)
 │   ├── content_strategist.py     #   内容策略规划
-│   └── skill_orchestrators/      #   章节编排器
-│       ├── ch1_introduction.py   #     (含 PaperContext + citation_context 注入)
-│       ├── ch2_related_work.py
-│       ├── ch3_methodology.py
-│       ├── ch4_experiments.py
-│       ├── ch5_conclusion.py
-│       ├── reference_pool_builder.py  # 离线+OpenAlex
-│       └── reference_checker.py       # 离线验证模式
+│   └── skill_orchestrators/      #   章节编排器 (ch1-ch5 + reference_pool/checker)
 ├── api/
 │   ├── openai_compatible.py      #   三合一统一客户端
 │   ├── mcp_http_client.py        #   MCP StreamableHTTP 客户端
-│   ├── web_search_api.py         #   智谱 Web Search API + LLM 提取 (v11.9)
+│   ├── web_search_api.py         #   智谱 Web Search API + LLM 提取
 │   └── paper_search.py           #   MCP → Web Search API → OpenAlex 降级搜索
 ├── tools/
 │   ├── academic_search.py        #   多源搜索 (offline + Web Search API + OpenAlex)
-│   ├── bibtex_builder.py         #   BibTeX 构建 (metadata模板 + 离线池补充≥25)
-│   ├── doi2bib.py                #   DOIToBib (境内已禁用，metadata兜底)
-│   ├── latex_converter.py        #   LaTeX 组装 + 中文字符过滤 (v12.0)
-│   ├── latex_direct_generator.py #   LaTeX 直出 + 溢出自愈
-│   ├── figure_generator.py       #   图表生成 (TikZ)
+│   ├── bibtex_builder.py         #   BibTeX 构建
+│   ├── latex_converter.py        #   LaTeX 组装 + 中文字符过滤
+│   ├── arch_diagram_renderer.py  #   架构图渲染 (v13: 视觉评价真重渲闭环)
+│   ├── figure_planner.py         #   图表规划
+│   ├── figure_generator.py       #   TikZ 图表生成 (LLM 产规格 + 自愈编译)
+│   ├── result_visualizer.py      #   实验结果可视化
+│   ├── pdf_compiler.py           #   XeLaTeX 编译
+│   ├── pdf_validator.py          #   PDF 验证 (Overfull/结构)
+│   ├── latex_constraint_checker.py #  LaTeX 结构约束预审
 │   ├── output_evaluator.py       #   L1/L2/L3 评价
 │   └── reference_pack_manager.py #   离线数据包管理器
+├── figure/                       #   图表模板 (v13 清理后仅保留活依赖)
+│   ├── style_templates.py        #     期刊风格模板 (data_visualizer 依赖)
+│   ├── layout_engine.py          #     TikZ 布局引擎
+│   └── layout_templates.py       #     管道/分支模板
 ├── skills/
 │   └── academic_writing_style/
-│       ├── writing_discipline.md #   🆕 跨期刊通用写作纪律 (P0, 10条规则)
+│       ├── writing_discipline.md #   跨期刊通用写作纪律 (P0, 10条规则)
 │       └── style_guide.md        #   IEEE 特有写作规范 (P3)
 ├── config/
 │   ├── api_config.py             #   Provider 配置
 │   ├── project_config.py         #   模型降级链 + 论文配置
 │   └── venue_profiles/           #   期刊配置 (TCSVT/TIP/TPAMI/CVPR...)
+├── test/                         #   pytest 测试 (v13 清理后 7 个有效模块，263 测试)
+│   ├── conftest.py               #   pytest 配置
+│   ├── test_systemic_upgrade.py  #   系统升级测试 (39)
+│   ├── test_v10_1_smoke.py       #   冒烟测试 (26)
+│   ├── test_citation_multisource.py # 引用多源测试 (24)
+│   ├── test_v9_2_figure_system.py #  图表系统测试 (6)
+│   ├── stage_targeted_test.py    #   分阶段测试 (4)
+│   ├── test_pdf_validator.py     #   PDF 验证测试 (4)
+│   └── test_phase85_quick.py     #   Phase 8.5 测试 (1)
 ├── data/
-│   └── reference_packs/          #   离线参考文献 (32篇)
-├── pipeline.py                   #   主入口 (默认 SKIP_ONLINE_VERIFICATION=1)
+│   └── reference_packs/          #   离线参考文献
+├── pipeline.py                   #   主入口
 └── requirements.txt
 ```
 
