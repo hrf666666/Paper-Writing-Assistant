@@ -302,14 +302,19 @@ class QualityGate:
         return report.should_retry and not report.passed
 
     def get_revision_prompt(self, chapter_name: str, chapter_content: str,
-                           report: QualityReport) -> str:
+                           report: QualityReport,
+                           extra_findings_brief: str = "") -> str:
         """
         根据质量报告生成修改指令
+
+        v13 PR5: 接受 extra_findings_brief（来自 FindingBus 的跨子系统问题简报，
+        如 cross_chapter 数值矛盾、auditor 引用问题），让修订同时修复一致性问题。
 
         Args:
             chapter_name: 章节名
             chapter_content: 原始内容
             report: 质量报告
+            extra_findings_brief: FindingBus.as_revision_brief() 的输出（可选）
 
         Returns:
             str: 修改指令prompt
@@ -332,6 +337,7 @@ class QualityGate:
 
 **发现的问题**:
 {issues_summary}
+{extra_findings_brief}
 
 **修改建议**:
 {suggestions_text}
@@ -354,7 +360,7 @@ class QualityGate:
         return prompt
 
     def revise(self, chapter_name: str, chapter_content: str,
-               report: QualityReport) -> str:
+               report: QualityReport, extra_findings_brief: str = "") -> str:
         """
         根据质量报告执行修改，返回修改后的内容
 
@@ -362,11 +368,13 @@ class QualityGate:
             chapter_name: 章节名
             chapter_content: 原始内容
             report: 质量报告
+            extra_findings_brief: FindingBus 跨子系统问题简报（可选）
 
         Returns:
             str: 修改后的章节内容
         """
-        prompt = self.get_revision_prompt(chapter_name, chapter_content, report)
+        prompt = self.get_revision_prompt(chapter_name, chapter_content, report,
+                                          extra_findings_brief)
         try:
             revised = self.api_client.call_generation(prompt)
             logger.info(f"章节 '{chapter_name}' 修改完成")
@@ -378,7 +386,8 @@ class QualityGate:
     def evaluate_and_revise(self, chapter_name: str, chapter_content: str,
                             style_guide: Dict = None, chapter_org: Dict = None,
                             previous_content: str = "",
-                            max_rounds: int = None) -> Tuple[str, QualityReport]:
+                            max_rounds: int = None,
+                            extra_findings_brief: str = "") -> Tuple[str, QualityReport]:
         """
         评估-修改循环：评估质量，不达标则自动修改后重新评估
 
@@ -413,7 +422,8 @@ class QualityGate:
             if round_num < max_rounds:
                 # 执行修改
                 logger.info(f"[质量门控] '{chapter_name}' 根据评估结果修改内容...")
-                current_content = self.revise(chapter_name, current_content, report)
+                current_content = self.revise(chapter_name, current_content, report,
+                                              extra_findings_brief)
 
         return current_content, report
 

@@ -670,6 +670,10 @@ Respond with just the strategy, no explanation:"""
         """
         对章节内容进行质量评估和自动修改
 
+        v13 PR5: QualityLoop 真闭环 — 修订时不仅看 QualityGate 自身维度，
+        还把 FindingBus 里跨子系统问题（cross_chapter 数值矛盾、auditor 引用等）
+        注入修订 prompt，让一次修订同时修复多类问题。
+
         Returns:
             Tuple[str, QualityReport]: (最终内容, 质量报告)
         """
@@ -678,11 +682,25 @@ Respond with just the strategy, no explanation:"""
         previous_content = "\n".join(
             self._chapters.get(i, "")[:500] for i in sorted(self._chapters, key=str)
         )
+        # v13 PR5: 从 FindingBus 取该章的跨子系统问题简报
+        _brief = ""
+        try:
+            _brief = self._findings.as_revision_brief(_ch_name_to_loc(chapter_name), max_chars=1200)
+        except Exception:
+            _brief = ""
 
         return self.quality_gate.evaluate_and_revise(
             chapter_name, content,
-            style_guide, chapter_org, previous_content
+            style_guide, chapter_org, previous_content,
+            extra_findings_brief=_brief,
         )
+
+    @staticmethod
+    def _ch_name_to_loc(name):
+        """章节英文名 → FindingBus location.chapter (chN)。"""
+        m = {"introduction": "ch1", "related work": "ch2", "methodology": "ch3",
+             "experiments": "ch4", "conclusion": "ch5"}
+        return m.get((name or "").strip().lower(), "")
 
     # ── 章节生成统一入口（消除 phase1–phase5 的重复模式） ──
     _CHAPTER_CONFIGS = {
