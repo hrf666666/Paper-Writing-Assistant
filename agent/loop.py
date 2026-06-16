@@ -746,9 +746,10 @@ Respond with just the strategy, no explanation:"""
             self._project_data['content_strategy'] = self._content_strategy
         if hasattr(self, '_motivation_thread') and self._motivation_thread:
             self._project_data['motivation_thread'] = self._motivation_thread
-        # v14 龙骨: outline 注入 project_data（planning_block 读它生成章节契约）
+        # v14 龙骨: outline 注入 project_data（剥包装层，planning_block 读章节契约）
         if hasattr(self, '_outline') and self._outline:
-            self._project_data['outline'] = self._outline
+            _ol = self._outline.get("outline", self._outline) if isinstance(self._outline, dict) else {}
+            self._project_data['outline'] = _ol
         # v14: rationale_matrix/exemplar_learner 已删（0消费空转）
 
         kwargs = {"citation_context": self._build_citation_context(),

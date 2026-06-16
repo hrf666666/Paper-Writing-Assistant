@@ -130,12 +130,15 @@ class ChapterContext:
         blocks = []
         if self.motivation_thread:
             blocks.append(f"<motivation_thread>\n{self.motivation_thread[:2000]}\n</motivation_thread>")
-        # outline 的该章契约（若有）
-        ch_outline = self.outline.get(str(self._chapter_num()), {})
+        # outline 的该章契约（v14: 用英文名查，读 content_checklist）
+        ch_outline = self.outline.get(self.chapter_name, {})
         if ch_outline and isinstance(ch_outline, dict):
-            must_include = ch_outline.get("must_include", [])
-            if must_include:
-                blocks.append(f"<chapter_focus>必须覆盖: {', '.join(must_include[:5])}</chapter_focus>")
+            checklist = ch_outline.get("content_checklist", [])
+            if checklist:
+                # content_checklist 是 list[str]，取前 5 条作章节焦点
+                items = [str(c).strip() for c in checklist[:5] if c]
+                if items:
+                    blocks.append(f"<chapter_focus>本章应覆盖: {'; '.join(items)}</chapter_focus>")
         # content_strategy 的该章策略
         ch_strategy = self.content_strategy.get(str(self._chapter_num()))
         if ch_strategy and isinstance(ch_strategy, dict):
