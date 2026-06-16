@@ -1,0 +1,425 @@
+{
+  "outline": {
+    "Introduction": {
+      "subsections": [
+        {
+          "title": "1.1 Background and Motivation",
+          "description": "研究背景与问题重要性"
+        },
+        {
+          "title": "1.2 Limitations of Existing Methods",
+          "description": "现有方法的局限性"
+        },
+        {
+          "title": "1.3 Proposed Method and Contributions",
+          "description": "本文方法与贡献"
+        }
+      ],
+      "key_arguments": [
+        "Contribution: 双掩码物理建模与类MRI角度频率分析框架 - 打破了传统EPI（对极平面图像）方法在非朗伯区域因违背视角一致性假设而失效的瓶颈。通过引入严密的物理先验（从麦克斯韦方程到BRDF），为复杂材质的反射类型识别提供了极强的物理可解释性，为后续分量感知的深度估计奠定了决定性的理论基础。",
+        "Contribution: 基于GCD与SAM引导的自适应双模态能量图优化策略 - 巧妙解决了传统纯EPI方法无法区分真实深度信号与光滑伪影的难题。该策略能够自适应地大幅提高非朗伯区域与朗伯区域的对比度（NL/L能量比），有效滤除背景纹理干扰，为高精度的深度估计提供了极为纯净和鲁棒的特征输入。",
+        "Contribution: 全视角代价卷与多尺度不确定性感知网络 - 从网络架构底层解决了EPI范式在朗伯场景精度天花板（MAE停留在0.28-0.34）以及非朗伯场景纹理复制失效的问题。100%全视角的几何线索融合与多尺度感受野，大幅增强了对光照不均、复杂反射和遮挡的鲁棒性。"
+      ],
+      "content_checklist": [
+        "研究背景与问题重要性（宏观→微观）",
+        "现有方法的系统性局限分析（按类别）",
+        "本文方法的核心思路概述",
+        "3-4条具体贡献（每条含：提出了什么、解决了什么、带来了什么提升）",
+        "论文组织结构概述（各章节概述）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "背景描述段（领域总体引用）",
+        "现有方法分析段（各方法类别引用）",
+        "贡献段（本文相关技术引用）"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "研究背景与重要性",
+          "核心任务": "阐述本领域研究的宏观背景，明确指出当前研究中具有核心地位的关键问题或需求（如：长距离依赖建模）。"
+        },
+        {
+          "子节名称": "现有方法及其局限性",
+          "核心任务": "回顾解决上述问题的现有主流方法，并深入剖析它们在机制或效率上的固有缺陷与痛点。"
+        },
+        {
+          "子节名称": "本文提出的解决方案",
+          "核心任务": "引出本文提出的创新方法或架构，阐述其核心概念、工作原理以及如何克服前述的局限性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Real-world non-Lambertian dominance and EPI limits",
+          "Physical priors vs pure data-driven limits",
+          "Proposed MACVO-Net and physical frameworks"
+        ],
+        "depth_map": {
+          "Background and Problem Hook": "moderate",
+          "Limitations of Existing Methods": "moderate",
+          "Contributions and Novelty Claims": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention",
+          "创新点3": "mention"
+        },
+        "must_include": [
+          "Clear gap statement regarding EPI failure on non-Lambertian surfaces (violates view-consistency)",
+          "Bulleted list of 3 distinct contributions mapping exactly to the 3 innovations",
+          "Quantitative hook data (e.g., MAE ceiling of 0.28-0.34 in traditional EPI)",
+          "[动机锚点] Establish the problem of Real-world environments are dominated by non-Lambertian surfaces, yet tradi",
+          "[动机锚点] Enumerate contributions: 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络, with q"
+        ],
+        "should_avoid": [
+          "Detailed mathematical formulations of the dual-mask or energy map",
+          "Extensive citations (>10 per paragraph)",
+          "Separate paragraph detailing paper structure"
+        ],
+        "target_emphasis": "Establish the critical bottleneck of non-Lambertian surfaces in light field depth estimation and explicitly introduce the three core physical and network-level contributions."
+      }
+    },
+    "Related Work": {
+      "subsections": [
+        {
+          "title": "2.1 Category A Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.2 Category B Methods",
+          "description": "按技术路线分类综述"
+        },
+        {
+          "title": "2.3 Summary",
+          "description": "总结现有工作不足"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "按技术路线分类的系统性综述",
+        "每类方法的核心思想和代表工作",
+        "每类方法的关键不足（引出本文的必要性）",
+        "与本文方法的差异化说明",
+        "章节小结（总结现有工作不足，引出本文方法）"
+      ],
+      "length_budget": {
+        "min": 800,
+        "max": 1500,
+        "target": 1200
+      },
+      "expected_citations": [
+        "每类方法的代表工作（2-3 篇/类）",
+        "与本文方法对比的引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "基础背景与相关工作回顾",
+          "核心任务": "梳理领域内基础架构（如CNN或RNN）的演进，说明长距离依赖建模或视觉特征提取的传统解决思路，建立宏观研究背景。"
+        },
+        {
+          "子节名称": "现有方法的局限性分析",
+          "核心任务": "指出现有主流方法（如传统卷积操作的局部性、标准Transformer的高计算复杂度）在处理特定任务（如高分辨率图像）时存在的固有缺陷。"
+        },
+        {
+          "子节名称": "本文方法的引入与对比",
+          "核心任务": "提出本文的解决方案，并将其与已有方法进行对比，凸显本文方法在计算效率、特征提取能力等方面的优势。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Traditional EPI-based Light Field Depth Estimation",
+          "Learning-based Cost Volume Methods",
+          "Physical and Material Modeling in Vision"
+        ],
+        "depth_map": {
+          "EPI and Traditional Methods": "moderate",
+          "Learning-based Multi-view Stereo": "moderate",
+          "Material and BRDF Modeling in Reconstruction": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting",
+          "创新点3": "supporting"
+        },
+        "must_include": [
+          "Bridge the gap: existing methods lack robustness to non-Lambertian reflections",
+          "Critique integrated within organizational approach (e.g., EPI rigidly relies on limited 1D directions)",
+          "Citation of recent state-of-the-art baselines for later comparison",
+          "[动机锚点] Show existing methods lack Real-world environments are dominated by non-Lambertian surf, bridging to"
+        ],
+        "should_avoid": [
+          "Detailed critique of specific loss functions",
+          "Repeating the proposed MACVO-Net architecture",
+          "Excessive historical background unrelated to the core problem"
+        ],
+        "target_emphasis": "Bridge the gap in existing literature by showing how current EPI and learning methods fail to explicitly model non-Lambertian physics and lack all-view geometric aggregation."
+      }
+    },
+    "Methodology": {
+      "subsections": [
+        {
+          "title": "3.1 Overall Architecture",
+          "description": "总体架构概述"
+        },
+        {
+          "title": "3.2 FeatureEncoder (特征编码器)",
+          "description": "对中心视角进行初步的特征提取，捕获空间纹理和结构信息。"
+        },
+        {
+          "title": "3.3 CostVolumeBuilder (代价体构建器)",
+          "description": "遍历每一个视差假设 d，利用空间变换将80个非中心视角根据当前视差 d 扭曲并与中心视角对齐，计算它们之间的光度绝对值误差并求平均。"
+        },
+        {
+          "title": "3.4 Feature Concatenation (特征拼接)",
+          "description": "沿通道维度将两者拼接，结合几何代价与外观特征。"
+        },
+        {
+          "title": "3.5 U-Net Encoder (多尺度编码器)",
+          "description": "通过3个下采样阶段逐层提取抽象的高维特征，扩大感受野，捕获场景级别的上下文信息，以处理遮挡和复杂几何结构。"
+        },
+        {
+          "title": "3.6 U-Net Decoder (多尺度解码器)",
+          "description": "通过上采样逐步恢复空间分辨率，并与编码器对应层的特征拼接（跳跃连接），整合局部细节与全局上下文，输出最终的视差回归结果。"
+        },
+        {
+          "title": "3.7 Training Objective",
+          "description": "损失函数与训练策略"
+        }
+      ],
+      "key_arguments": [
+        "Module motivation and design: 提出介质掩码与角度方向掩码双重物理建模，基于像素级粗糙度量化光-物质作用类型（如菲涅尔镜面或余弦漫反射）及波矢偏折变化。; 创新性地将MRI的k-space频域分析引入光场成像，利用光场9×9角点坐标的天然编码特性，通过2D-DFT将不同材质转换为不同的角度频谱响应。; 建立基于频域特征的材质识别机制：利用低频、高频展宽和中频特征分别反向解析漫反射、镜面反射和散射像素，并通过约束最小二乘法实现物理层面的BRDF参数（漫反射、镜面、散射权重）估计。",
+        "Module motivation and design: 提出多视角几何一致性描述子（GCD），通过计算像素子块均值的离散程度，精准量化表面粗糙度与深度突变响应。; 设计双减法策略：当GCD与能量图E反向（如L>NL）时采用全局减法 $M = E - \\alpha \\times norm(G)$；当两者同向（如NL>L）时，采用逐像素自适应参数 $\\alpha_{local} = \\alpha_{global} \\times (G / G.mean())$ 实现局部增强。; 引入SAM（Segment Anything Model）提取场景三元Mask先验，结合物理双掩码对粗糙朗伯、光滑朗伯和光滑非朗伯区域实施差异化能量压制或增强（如对光滑朗伯区域强烈压制85%，对光滑非朗伯区域增强50%）。",
+        "Module motivation and design: 彻底摒弃仅利用28/81视角且方向刚化的EPI架构，提出MACVO-Net，利用所有81个视角构建显式的多视差假设代价卷。; 引入U-Net多尺度编解码架构处理生成的代价卷与中心视图特征，以捕获更丰富的场景级上下文信息。; 利用非朗伯区域不存在低视差成本（即匹配代价卷平坦）的物理现象，将其作为天然的显式不确定性信号，指导U-Net解码器在镜面或散射区域通过邻域传播补全深度。"
+      ],
+      "content_checklist": [
+        "总体架构概述（含输入→模块→特征→处理→输出的完整数据流）",
+        "各模块详细描述（设计动机、输入输出维度、数学公式推导、与前后模块的衔接）",
+        "损失函数完整定义（总损失、各分量、权重设置、物理含义）",
+        "训练策略细节（优化器、学习率、训练epoch、数据增强）",
+        "推理流程说明",
+        "计算复杂度分析（可选）",
+        "架构图（TikZ）与正文的一致性"
+      ],
+      "length_budget": {
+        "min": 1500,
+        "max": 3000,
+        "target": 2500
+      },
+      "expected_citations": [
+        "各模块相关的技术引用",
+        "公式来源引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Overall Architecture (整体架构)",
+          "核心任务": "从宏观视角描述模型的端到端框架，介绍主要的组件构成、数据流向以及与其他经典架构（如ResNet、ViT）的宏观对比。"
+        },
+        {
+          "子节名称": "Core Module / Operation (核心模块或操作)",
+          "核心任务": "详细剖析本文提出的核心创新点（如Shifted Window机制、Non-local操作），包括其数学定义、公式推导、具体计算流程和图示解释。"
+        },
+        {
+          "子节名称": "Architecture Variants / Implementation Details (网络变体与实现细节)",
+          "核心任务": "说明如何将核心模块组装成不同规模的模型（如Swin-T/S/B），列举关键的超参数配置、归一化方法和特殊的工程实现技巧。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Overall MACVO-Net Architecture",
+          "Dual-mask Physical Modeling & MRI-like Frequency Analysis",
+          "GCD & SAM Guided Energy Optimization",
+          "All-view Cost Volume & Uncertainty Network"
+        ],
+        "depth_map": {
+          "System Overview": "brief",
+          "IP1: Physical Modeling & Frequency": "deep",
+          "IP2: Energy Map Optimization": "deep",
+          "IP3: MACVO-Net & Uncertainty": "deep"
+        },
+        "innovation_allocation": {
+          "创新点1": "primary",
+          "创新点2": "primary",
+          "创新点3": "primary"
+        },
+        "must_include": [
+          "Overview figure with detailed boxes and heavy annotations",
+          "Key formulas for BRDF estimation, GCD, and adaptive subtraction",
+          "Justification of each module connecting to the physical motivation (e.g., flat cost volume as uncertainty signal)",
+          "Explicit data flow from 9x9 angular patches to cost volume",
+          "[动机锚点] Justify each module (双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络) by connect"
+        ],
+        "should_avoid": [
+          "Lengthy basic Maxwell equations or trivial network layer descriptions",
+          "Omitting implementation details required for TCSVT",
+          "Deep theoretical proofs without empirical design rationale"
+        ],
+        "target_emphasis": "Detail the technical formulation of the three innovations, explicitly connecting the physical priors to the network architecture."
+      }
+    },
+    "Experiments": {
+      "subsections": [
+        {
+          "title": "4.1 Experimental Setup",
+          "description": "数据集、评价指标、实现细节"
+        },
+        {
+          "title": "4.2 Comparison with State-of-the-art",
+          "description": "SOTA 定量对比"
+        },
+        {
+          "title": "4.3 Ablation Study",
+          "description": "消融实验"
+        },
+        {
+          "title": "4.4 Qualitative Analysis",
+          "description": "定性分析与可视化"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "实验设置（硬件、软件、超参数）",
+        "数据集描述（规模、属性、预处理方式）",
+        "评价指标定义",
+        "与 SOTA 的定量对比（表格 + 分析）",
+        "消融实验（逐模块验证有效性）",
+        "定性分析（可视化对比）",
+        "效率分析（运行时间、参数量）"
+      ],
+      "length_budget": {
+        "min": 1000,
+        "max": 2500,
+        "target": 1800
+      },
+      "expected_citations": [
+        "数据集引用",
+        "baselines 引用",
+        "评价指标引用"
+      ],
+      "ref_structure": [
+        {
+          "子节名称": "Implementation Details (实验设置/实现细节)",
+          "核心任务": "说明实验所用的数据集、网络超参数（如学习率、优化器、训练轮数）、硬件环境等，确保实验具备可复现性。"
+        },
+        {
+          "子节名称": "Ablation Study (消融实验)",
+          "核心任务": "通过控制变量法，逐一移除或替换模型中的关键创新组件（如Shifted Window、Patch Merging），验证各独立模块对最终性能的实际贡献。"
+        },
+        {
+          "子节名称": "Comparison with State-of-the-Art (与最新技术的对比)",
+          "核心任务": "在标准基准数据集（如ImageNet-1K, COCO, ADE20K）上，将本文模型与当前主流（SOTA）模型进行全面对比，证明整体优越性。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Quantitative SOTA Comparisons",
+          "Comprehensive Ablation Studies of the 3 IPs",
+          "Qualitative Visualizations of Masks and Depth Maps"
+        ],
+        "depth_map": {
+          "Datasets and Implementation Details": "brief",
+          "Quantitative Comparisons": "deep",
+          "Ablation Studies": "deep",
+          "Qualitative Analysis": "moderate"
+        },
+        "innovation_allocation": {
+          "创新点1": "supporting",
+          "创新点2": "supporting",
+          "创新点3": "supporting"
+        },
+        "must_include": [
+          "Table comparing with recent SOTA baselines on standard benchmarks using PSNR/SSIM/MAE",
+          "Ablation table validating the individual and combined effects of Dual-Mask, GCD/SAM, and MACVO-Net",
+          "Training/testing splits, hyperparameters (like suppression/enhancement rates), and critical implementation details",
+          "Visual comparison showing filtered specularity and accurate depth reconstruction",
+          "[动机锚点] Design experiments validating 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络 vi"
+        ],
+        "should_avoid": [
+          "Single dataset evaluation without cross-task generalization",
+          "Hiding negative results or failure analysis context",
+          "Overly boastful language without empirical backing"
+        ],
+        "target_emphasis": "Provide comprehensive empirical validation on standard benchmarks, clearly demonstrating that the proposed physical modeling and MACVO-Net outperform SOTA baselines."
+      }
+    },
+    "Conclusion": {
+      "subsections": [
+        {
+          "title": "5.1 Summary of Contributions",
+          "description": "核心贡献总结"
+        },
+        {
+          "title": "5.2 Limitations and Future Work",
+          "description": "局限性与未来方向"
+        }
+      ],
+      "key_arguments": [],
+      "content_checklist": [
+        "核心贡献总结",
+        "关键实验结论",
+        "局限性讨论",
+        "未来工作方向（具体技术路线）"
+      ],
+      "length_budget": {
+        "min": 400,
+        "max": 800,
+        "target": 600
+      },
+      "expected_citations": [],
+      "ref_structure": [
+        {
+          "子节名称": "核心贡献重申",
+          "核心任务": "简明扼要地总结本文提出的核心方法、架构或理念，呼应引言中提出的问题。"
+        },
+        {
+          "子节名称": "实验结论与优势验证",
+          "核心任务": "提炼最关键的实验结果，强调该方法在特定任务或数据集上取得的突破（SOTA）与优势。"
+        },
+        {
+          "子节名称": "方法泛化性与影响",
+          "核心任务": "声明该方法对更广泛领域、其他架构的适用性及开源情况，指明未来可能的研究方向。"
+        }
+      ],
+      "content_strategy": {
+        "focus_areas": [
+          "Summary of Contributions",
+          "Final Impact on Non-Lambertian Problem"
+        ],
+        "depth_map": {
+          "Summary of Methodology and Results": "brief",
+          "Future Work": "brief"
+        },
+        "innovation_allocation": {
+          "创新点1": "mention",
+          "创新点2": "mention",
+          "创新点3": "mention"
+        },
+        "must_include": [
+          "Echo of the motivation thread: successfully addressing non-Lambertian surface depth estimation",
+          "Concise restatement of the three core innovations (Physical modeling, Energy optimization, MACVO-Net)",
+          "[动机锚点] Echo how 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络 successfully addresses "
+        ],
+        "should_avoid": [
+          "Introducing new concepts or citations",
+          "Repeating specific numerical results",
+          "Exaggerated claims not supported by the experiments"
+        ],
+        "target_emphasis": "Concisely conclude how the integration of physical priors and all-view geometry successfully solves the targeted non-Lambertian depth estimation problem."
+      }
+    }
+  },
+  "global_constraints": {
+    "total_word_target": 7300,
+    "figure_budget": 5,
+    "table_budget": 4,
+    "prohibited_terms": [
+      "curriculum learning",
+      "pedagogical",
+      "teaching",
+      "student-teacher"
+    ],
+    "format": "LaTeX（IEEE Transactions IEEEtran 格式）"
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 58.0,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 18,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 70,
+      "tex_has_citations": true,
+      "tex_table_count": 3,
+      "tex_has_tables": true,
+      "tex_figure_count": 2,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 24,
+      "bib_min_entries": false,
+      "pdf_exists": true,
+      "pdf_size_kb": 200.4,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 2,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 0,
+      "compile_success": true
+    },
+    "score": 100,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 7834,
+      "word_count_ok": true,
+      "citation_count": 70,
+      "citations_min": true,
+      "formula_count": 18,
+      "formulas_min": true,
+      "table_count": 3,
+      "tables_min": true,
+      "figure_count": 2,
+      "figures_min": false,
+      "ablation_mentions": 2,
+      "ablations_min": false,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 100,
+    "sections_found": 5,
+    "total_words": 7834,
+    "total_citations": 70
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 55,
+      "narrative_progression": 42,
+      "methodological_rigor": 45,
+      "experimental_sufficiency": 38,
+      "citation_quality": 45,
+      "writing_style": 60,
+      "data_consistency": 52,
+      "format_compliance": 62
+    },
+    "overall_score": 50,
+    "strengths": [
+      "Ambitious and physically-motivated problem formulation addressing the non-Lambertian bottleneck in light field depth estimation, with MRI-inspired k-space frequency analysis as a creative conceptual framing",
+      "Lightweight architecture (~0.21M params) processing the full 9×9 angular view, which is practically relevant for real deployment scenarios",
+      "Honest discussion of computational limitations and angular aliasing constraints in the Conclusion, showing scientific maturity regarding the method's boundary conditions"
+    ],
+    "weaknesses": [
+      "Critical disconnect between claimed innovations and actual methodology: the abstract/intro promise dual-mask BRDF modeling, k-space analysis, and SAM-guided optimization, but the Methodology section only formalizes a standard L1 photometric cost volume with a U-Net decoder—none of the headline contributions are mathematically instantiated",
+      "Experimental section contains only setup details (datasets, hyperparameters, loss formulation) with no visible quantitative results tables, SOTA comparison numbers, ablation studies, or visual depth map figures—the claimed MAE=0.089 and 38.5% improvement appear only in the Conclusion with no supporting evidence in the Experiments section",
+      "Baseline MAE values are inconsistent across sections: Introduction cites 0.081 (Lambertian) and 0.411 (non-Lambertian), while Conclusion cites a plateau of 0.28–0.34—these cannot refer to the same experimental conditions without clarification"
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "TCSVT requires complete experimental validation with quantitative comparison tables against ≥5 SOTA methods across multiple benchmarks with BadPix, MSE, and MAE metrics—this paper's Experiments section contains only implementation details and no results",
+      "The core methodological formalization is missing: no equations for the k-space angular frequency transform, constrained least-squares BRDF estimation, dual-mask construction, GCD computation, or SAM-guided energy optimization—all of which are claimed as primary contributions",
+      "Citation count (~25-28 unique references) is below the expected threshold for a TCSVT paper; Related Work section uses generic <citation> placeholders rather than proper \\cite{} commands for several key prior works (Jeon, Shin, Zhu)"
+    ]
+  },
+  "overall": {
+    "L1_score": 100,
+    "L2_score": 100,
+    "L3_score": 50,
+    "L1_passed": true,
+    "overall_grade": "B",
+    "hierarchical_alignment": {
+      "goal_vs_L_checks": [
+        {
+          "goal": "G2 (参考文献体系)",
+          "goal_passed": true,
+          "L2_citations_min": true,
+          "consistent": true
+        },
+        {
+          "goal": "G5 (学术输出)",
+          "goal_passed": true,
+          "L1_tex_exists": true,
+          "L1_pdf_exists": true,
+          "consistent": true
+        },
+        {
+          "goal": "G4 (章节生成)",
+          "goal_passed": false,
+          "L2_sections_complete": true,
+          "consistent": false
+        }
+      ],
+      "consistent": false
+    }
+  }
+}

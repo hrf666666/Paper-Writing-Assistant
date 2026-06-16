@@ -1,0 +1,391 @@
+[
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781544271.8626924,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '双掩码物理建模与类MRI角度频率分析框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '双掩码物理建模与类MRI角度频率分析框架'",
+        "suggestion": "在章节中补充对 '双掩码物理建模与类MRI角度频率分析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于GCD与SAM引导的自适应双模态能量图优化策略' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于GCD与SAM引导的自适应双模态能量图优化策略'",
+        "suggestion": "在章节中补充对 '基于GCD与SAM引导的自适应双模态能量图优化策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '全视角代价卷与多尺度不确定性感知网络' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '全视角代价卷与多尺度不确定性感知网络'",
+        "suggestion": "在章节中补充对 '全视角代价卷与多尺度不确定性感知网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781544426.2999275,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: \\\\cite\\{",
+        "location": "Related Work",
+        "evidence": "正则模式 '\\\\cite\\{' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781545004.043155,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '双掩码物理建模与类MRI角度频率分析框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '双掩码物理建模与类MRI角度频率分析框架'",
+        "suggestion": "在章节中补充对 '双掩码物理建模与类MRI角度频率分析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于GCD与SAM引导的自适应双模态能量图优化策略' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于GCD与SAM引导的自适应双模态能量图优化策略'",
+        "suggestion": "在章节中补充对 '基于GCD与SAM引导的自适应双模态能量图优化策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '全视角代价卷与多尺度不确定性感知网络' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '全视角代价卷与多尺度不确定性感知网络'",
+        "suggestion": "在章节中补充对 '全视角代价卷与多尺度不确定性感知网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781545948.0199926,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781546073.3794703,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'future'",
+        "location": "Conclusion",
+        "evidence": "在章节中未找到 'future' 相关内容",
+        "suggestion": "确保章节包含与 'future' 相关的论述"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_1",
+    "timestamp": 1781546171.2752647,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase5_2",
+    "timestamp": 1781546261.732341,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781546336.0395474,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '双掩码物理建模与类MRI角度频率分析框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '双掩码物理建模与类MRI角度频率分析框架'",
+        "suggestion": "在章节中补充对 '双掩码物理建模与类MRI角度频率分析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于GCD与SAM引导的自适应双模态能量图优化策略' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于GCD与SAM引导的自适应双模态能量图优化策略'",
+        "suggestion": "在章节中补充对 '基于GCD与SAM引导的自适应双模态能量图优化策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '全视角代价卷与多尺度不确定性感知网络' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '全视角代价卷与多尺度不确定性感知网络'",
+        "suggestion": "在章节中补充对 '全视角代价卷与多尺度不确定性感知网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781546336.0402584,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: \\\\cite\\{",
+        "location": "Related Work",
+        "evidence": "正则模式 '\\\\cite\\{' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781546336.0407696,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '双掩码物理建模与类MRI角度频率分析框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '双掩码物理建模与类MRI角度频率分析框架'",
+        "suggestion": "在章节中补充对 '双掩码物理建模与类MRI角度频率分析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于GCD与SAM引导的自适应双模态能量图优化策略' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于GCD与SAM引导的自适应双模态能量图优化策略'",
+        "suggestion": "在章节中补充对 '基于GCD与SAM引导的自适应双模态能量图优化策略' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '全视角代价卷与多尺度不确定性感知网络' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '全视角代价卷与多尺度不确定性感知网络'",
+        "suggestion": "在章节中补充对 '全视角代价卷与多尺度不确定性感知网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781546336.0435512,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781546336.044145,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'future'",
+        "location": "Conclusion",
+        "evidence": "在章节中未找到 'future' 相关内容",
+        "suggestion": "确保章节包含与 'future' 相关的论述"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_5",
+    "timestamp": 1781546336.044344,
+    "passed": true,
+    "summary": "摘要审计完成: 5 个问题 (0 严重, 5 警告)",
+    "issue_count": 5,
+    "critical_count": 0,
+    "warning_count": 5,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 利用medium and angular direction masks（介质和角方向掩膜）从数学上解耦材料反射类型",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文第5章仅提到了应用类MRI的角频率分析来分离漫反射和镜面反射，未明确提及“medium and angular direction masks”。建议在正文方法部分补充双掩膜的具体定义和公式推导，确保与摘要表述一致。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 开发了一种自适应双模态能量优化策略，受几何一致性描述符 (GCD) 和 Segment Anything Model (SAM) 指导",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文内容中完全没有提及GCD、SAM以及这种自适应双模态能量优化策略。建议在正文的方法论部分增加相应的详细阐述。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 构建了显式的全视角 (81-view) 代价体积",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文第3章仅提到构建“all available angular views（所有可用视角）”的代价体积，未明确提及具体的数字“81-view”。建议在正文实验设置或网络架构细节中补充该视角数量的说明。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 将平坦的代价响应 (flat cost responses) 视为显式的不确定性先验来指导训练过程中的深度传播",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文中未提及这一网络训练机制的具体细节，建议在正文第3章（Methodology）中补充说明如何提取并利用平坦代价响应作为不确定性先验。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 在镜面区域内的局部纹理能量对比度实现了高达 320% 的提升",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文摘录中没有出现任何关于“320%”或“局部纹理能量对比度”的量化指标描述。建议在正文第4章（Experiments）中补充相关的定量实验结果、对比表格或具体分析，以支撑该关键数值声明。"
+      }
+    ]
+  }
+]

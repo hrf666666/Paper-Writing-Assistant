@@ -84,10 +84,8 @@ class ResearchLoop:
     _reference_pool = _ctx_property('reference_pool')
     _outline = _ctx_property('outline')
     _motivation_thread = _ctx_property('motivation_thread')
-    _exemplar_dossier = _ctx_property('exemplar_dossier')
     _style_profile = _ctx_property('style_profile')
     _citation_bank = _ctx_property('citation_bank')
-    _rationale_matrix = _ctx_property('rationale_matrix')
     _ablation_results = _ctx_property('ablation_results')
     _journal_style = _ctx_property('journal_style')
     _content_strategy = _ctx_property('content_strategy')
@@ -576,7 +574,7 @@ Respond with just the strategy, no explanation:"""
 
             elif phase == "phase0_7":
                 # v7.0: 范例学习
-                result = self._run_exemplar_phase()
+                result = {}  # v14: exemplar_learner 已删（0消费空转）
 
             elif phase == "phase0_65":
                 # v10.1: 期刊风格学习 + 内容策略规划
@@ -588,7 +586,7 @@ Respond with just the strategy, no explanation:"""
 
             elif phase == "phase0_9":
                 # v7.0: 写作理由矩阵
-                result = self._run_rationale_matrix_phase()
+                result = {}  # v14: rationale_matrix 已删（0消费空转）
 
             elif phase == "phase0_95":
                 # v7.0: 消融实验自动化
@@ -748,7 +746,7 @@ Respond with just the strategy, no explanation:"""
             self._project_data['content_strategy'] = self._content_strategy
         if hasattr(self, '_motivation_thread') and self._motivation_thread:
             self._project_data['motivation_thread'] = self._motivation_thread
-        # 注：rationale_matrix/exemplar_dossier 暂不注入（ch1-5 无消费者，注入=死代码）
+        # v14: rationale_matrix/exemplar_learner 已删（0消费空转）
 
         kwargs = {"citation_context": self._build_citation_context(),
                   "venue_adapter": self.venue_adapter}
@@ -2465,10 +2463,8 @@ Respond with just the strategy, no explanation:"""
         self.checkpoint.save_state("reference_pool", self._reference_pool)
         self.checkpoint.save_state("outline", self._outline)
         self.checkpoint.save_state("motivation_thread", self._motivation_thread)
-        self.checkpoint.save_state("exemplar_dossier", self._exemplar_dossier)
         self.checkpoint.save_state("style_profile", self._style_profile)
         self.checkpoint.save_state("citation_bank", self._citation_bank)
-        self.checkpoint.save_state("rationale_matrix", self._rationale_matrix)
         self.checkpoint.save_state("abstract", self._abstract)
         self.checkpoint.save_state("ablation_results", self._ablation_results)
 
@@ -2599,29 +2595,6 @@ Respond with just the strategy, no explanation:"""
             self._motivation_thread = ""
             return {"status": "skipped", "reason": str(e)}
 
-    def _run_exemplar_phase(self) -> dict:
-        """Phase 0.7: 深度范例学习"""
-        logger.info("\n" + "=" * 60)
-        logger.info("  Phase 0.7: 深度范例学习（6层阅读协议）")
-        logger.info("=" * 60)
-
-        try:
-            from agent.exemplar_learner import ExemplarLearner
-            learner = ExemplarLearner(self.api_client)
-            result = learner.run(
-                self._ref_data, REF_PDF_PATH, OUTPUT_DIR
-            )
-            self._exemplar_dossier = result.get("dossier", {})
-            self._style_profile = result.get("style_profile", {})
-            self.checkpoint.save_state("exemplar_dossier", self._exemplar_dossier)
-            self.checkpoint.save_state("style_profile", self._style_profile)
-            return result
-        except Exception as e:
-            logger.warning(f"范例学习失败（不阻塞）: {e}")
-            self._exemplar_dossier = {}
-            self._style_profile = {}
-            return {"status": "skipped", "reason": str(e)}
-
     def _run_journal_style_and_content_strategy_phase(self) -> dict:
         """Phase 0.65: v10.1 期刊风格学习 + 内容策略规划"""
         logger.info("\n" + "=" * 60)
@@ -2729,30 +2702,6 @@ Respond with just the strategy, no explanation:"""
             self._citation_bank = {}
             return {"status": "skipped", "reason": str(e)}
 
-    def _run_rationale_matrix_phase(self) -> dict:
-        """Phase 0.9: 写作理由矩阵"""
-        logger.info("\n" + "=" * 60)
-        logger.info("  Phase 0.9: 写作理由矩阵（事前规划型）")
-        logger.info("=" * 60)
-
-        try:
-            from agent.rationale_matrix import RationaleMatrix
-            matrix_gen = RationaleMatrix(self.api_client)
-            result = matrix_gen.run(
-                self._project_data, self._ref_data,
-                self._motivation_thread if hasattr(self, '_motivation_thread') else "",
-                self._exemplar_dossier if hasattr(self, '_exemplar_dossier') else {},
-                OUTPUT_DIR,
-            )
-            self._rationale_matrix = result
-            self.checkpoint.save_state("rationale_matrix", result)
-            logger.info(f"[Phase 0.9] 写作矩阵: {len(result.get('rows', []))} 行")
-            return result
-        except Exception as e:
-            logger.warning(f"写作矩阵生成失败（不阻塞）: {e}")
-            self._rationale_matrix = {}
-            return {"status": "skipped", "reason": str(e)}
-
     def _run_ablation_phase(self) -> dict:
         """Phase 0.95: 消融实验自动化"""
         logger.info("\n" + "=" * 60)
@@ -2782,7 +2731,7 @@ Respond with just the strategy, no explanation:"""
         budget = self.venue_adapter.get_section_word_budget(chapter_name)
         previous_summary = self._build_previous_summary()
         motivation = getattr(self, '_motivation_thread', '')
-        matrix = getattr(self, '_rationale_matrix', {})
+        matrix = {}  # v14: rationale_matrix 已删
         citation_context = self._build_citation_context()
 
         # 传入 Conclusion 摘要，避免重复内容

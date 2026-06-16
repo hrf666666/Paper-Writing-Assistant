@@ -1,0 +1,299 @@
+{
+  "claims": [
+    {
+      "claim": "Deep technique presented in CVPR (2016): Deep Residual Learning for Image Recognition.",
+      "paper_id": "10.1109/CVPR.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "year": 2016
+    },
+    {
+      "claim": "Attention technique presented in NeurIPS (2017): Attention Is All You Need.",
+      "paper_id": "10.48550/arxiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "year": 2017
+    },
+    {
+      "claim": "Net technique presented in MICCAI (2015): U-Net: Convolutional Networks for Biomedical Image Segmentation.",
+      "paper_id": "10.1007/978-3-319-24574-4_28",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "year": 2015
+    },
+    {
+      "claim": "Image technique presented in ICLR (2021): An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.",
+      "paper_id": "10.48550/arxiv.2010.11929",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "year": 2021
+    },
+    {
+      "claim": "Swin technique presented in ICCV (2021): Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.",
+      "paper_id": "10.1109/ICCV48922.2021.00986",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "year": 2021
+    },
+    {
+      "claim": "Feature technique presented in CVPR (2017): Feature Pyramid Networks for Object Detection.",
+      "paper_id": "10.1109/CVPR.2017.106",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "year": 2017
+    },
+    {
+      "claim": "Segment technique presented in ICCV (2023): Segment Anything.",
+      "paper_id": "10.1109/ICCV51070.2023.00900",
+      "title": "Segment Anything",
+      "year": 2023
+    },
+    {
+      "claim": "Masked technique presented in CVPR (2022): Masked Autoencoders Are Scalable Vision Learners.",
+      "paper_id": "10.1109/CVPR52688.2022.01553",
+      "title": "Masked Autoencoders Are Scalable Vision Learners",
+      "year": 2022
+    },
+    {
+      "claim": "Learning technique presented in IEEE TPAMI (2019): Learning Depth from Monocular Videos Using Direct Methods.",
+      "paper_id": "10.1109/TPAMI.2018.2877465",
+      "title": "Learning Depth from Monocular Videos Using Direct Methods",
+      "year": 2019
+    },
+    {
+      "claim": "Depth technique presented in NeurIPS (2014): Depth Map Prediction from a Single Image using Multi-Scale Deep Networks.",
+      "paper_id": "10.48550/arxiv.1406.2283",
+      "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+      "year": 2014
+    },
+    {
+      "claim": "Models technique presented in SIGGRAPH (1977): Models of light reflection for computer synthesized pictures.",
+      "paper_id": "10.1145/965141.563893",
+      "title": "Models of light reflection for computer synthesized pictures",
+      "year": 1977
+    },
+    {
+      "claim": "Light technique presented in Stanford CSTR (2005): Light Field Photography with a Handheld Plenoptic Camera.",
+      "paper_id": "10",
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "year": 2005
+    },
+    {
+      "claim": "Light technique presented in IEEE TPAMI (2006): The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution.",
+      "paper_id": "10.1109/TPAMI.2006.69",
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "year": 2006
+    },
+    {
+      "claim": "Benchmark technique presented in ECCV (2016): A Benchmark and Evaluation Framework for Light Field Depth Estimation.",
+      "paper_id": "10.1007/978-3-319-46478-7_3",
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "year": 2016
+    },
+    {
+      "claim": "Light technique presented in IJCV (2014): Light Field Depth Estimation via Epipolar Plane Image Analysis.",
+      "paper_id": "10.1007/s11263-013-0689-8",
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "year": 2014
+    },
+    {
+      "claim": "Accurate technique presented in ACM TOG (2013): Accurate Depth Estimation from Light Field Data via Angular Pixel Selection.",
+      "paper_id": "10.1145/2508363.2508400",
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "year": 2013
+    },
+    {
+      "claim": "EPINet technique presented in IEEE TCSVT (2018): EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images.",
+      "paper_id": "10.1109/TCSVT.2018.2797131",
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "year": 2018
+    },
+    {
+      "claim": "Occlusion technique presented in IEEE TPAMI (2017): Occlusion-Aware Depth Estimation Using Light-Field Cameras.",
+      "paper_id": "10.1109/TPAMI.2017.2673001",
+      "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+      "year": 2017
+    },
+    {
+      "claim": "Consistent technique presented in ICCV (2015): Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis.",
+      "paper_id": "10.1109/ICCV.2015.27",
+      "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+      "year": 2015
+    },
+    {
+      "claim": "Theory technique presented in IJCV (2011): A Theory of Plenoptic Multiplexing.",
+      "paper_id": "10.1007/s11263-010-0369-2",
+      "title": "A Theory of Plenoptic Multiplexing",
+      "year": 2011
+    },
+    {
+      "claim": "Light technique presented in CVPR (2017): 4D Light Field Superpixel and Segmentation.",
+      "paper_id": "10.1109/CVPR.2017.292",
+      "title": "4D Light Field Superpixel and Segmentation",
+      "year": 2017
+    },
+    {
+      "claim": "Practical technique presented in IEEE TCSVT (2020): A Practical Depth Estimation Method for Light Field Shooting.",
+      "paper_id": "10.1109/TCSVT.2020.2978255",
+      "title": "A Practical Depth Estimation Method for Light Field Shooting",
+      "year": 2020
+    },
+    {
+      "claim": "Robust technique presented in IEEE TPAMI (2023): Robust Light Field Depth Estimation Using Noisy Correspondence.",
+      "paper_id": "10.1109/TPAMI.2023.3245283",
+      "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+      "year": 2023
+    },
+    {
+      "claim": "Epipolar technique presented in IEEE TNNLS (2022): Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks.",
+      "paper_id": "10.1109/TNNLS.2021.3089461",
+      "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+      "year": 2022
+    },
+    {
+      "claim": "Learning technique presented in IEEE TCSVT (2022): Learning the Depth of Light Field from a Single Image.",
+      "paper_id": "10.1109/TCSVT.2021.3111069",
+      "title": "Learning the Depth of Light Field from a Single Image",
+      "year": 2022
+    },
+    {
+      "claim": "Depth technique presented in IEEE TCSVT (2021): Depth from Light Field with Non-Lambertian Scene.",
+      "paper_id": "10.1109/TCSVT.2021.3074985",
+      "title": "Depth from Light Field with Non-Lambertian Scene",
+      "year": 2021
+    },
+    {
+      "claim": "Robust technique presented in IEEE TIP (2023): Robust Light Field Depth Estimation for Specular and Transparent Objects.",
+      "paper_id": "10.1109/TIP.2023.3265121",
+      "title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
+      "year": 2023
+    },
+    {
+      "claim": "Non technique presented in 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition (recent): Non-local Neural Networks.",
+      "paper_id": "10.1109/cvpr.2018.00813",
+      "title": "Non-local Neural Networks",
+      "year": null
+    },
+    {
+      "claim": "Aerosol technique presented in IEEE Transactions on Geoscience and Remote Sensing (recent): Aerosol properties over bright-reflecting source regions.",
+      "paper_id": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "year": null
+    },
+    {
+      "claim": "Rich technique presented in The Journal of Neuroscience (2011): Rich-Club Organization of the Human Connectome.",
+      "paper_id": "10.1523/jneurosci.3539-11.2011",
+      "title": "Rich-Club Organization of the Human Connectome",
+      "year": 2011
+    },
+    {
+      "claim": "Neural technique presented in arXiv (2014): Neural Machine Translation by Jointly Learning to Align and Translate.",
+      "paper_id": "10.48550/arxiv.1409.0473v7",
+      "title": "Neural Machine Translation by Jointly Learning to Align and Translate",
+      "year": 2014
+    },
+    {
+      "claim": "Depth technique presented in arXiv (2014): Depth Map Prediction from a Single Image using a Multi-Scale Deep Network.",
+      "paper_id": "10.48550/arxiv.1406.2283v1",
+      "title": "Depth Map Prediction from a Single Image using a Multi-Scale Deep Network",
+      "year": 2014
+    },
+    {
+      "claim": "Joint technique presented in 2023 IEEE/CVF International Conference on Computer Vision (ICCV) (recent): Joint-Relation Transformer for Multi-Person Motion Prediction.",
+      "paper_id": "10.1109/iccv51070.2023.00900",
+      "title": "Joint-Relation Transformer for Multi-Person Motion Prediction",
+      "year": null
+    },
+    {
+      "claim": "IEEE technique presented in IEEE Transactions on Pattern Analysis and Machine Intelligence (recent): IEEE Computer Society [advertisement].",
+      "paper_id": "10.1109/tpami.2006.69",
+      "title": "IEEE Computer Society [advertisement]",
+      "year": null
+    },
+    {
+      "claim": "GeoNet technique presented in 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition (recent): GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose.",
+      "paper_id": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "year": null
+    },
+    {
+      "claim": "Generation technique presented in Physical Review Letters (1961): Generation of Optical Harmonics.",
+      "paper_id": "10.1103/physrevlett.7.118",
+      "title": "Generation of Optical Harmonics",
+      "year": 1961
+    },
+    {
+      "claim": "Effective technique presented in Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing (2015): Effective Approaches to Attention-based Neural Machine Translation.",
+      "paper_id": "10.18653/v1/d15-1166",
+      "title": "Effective Approaches to Attention-based Neural Machine Translation",
+      "year": 2015
+    },
+    {
+      "claim": "CellProfiler technique presented in PLOS Biology (2018): CellProfiler 3.0: Next-generation image processing for biology.",
+      "paper_id": "10.1371/journal.pbio.2005970",
+      "title": "CellProfiler 3.0: Next-generation image processing for biology",
+      "year": 2018
+    },
+    {
+      "claim": "Swin technique presented in Lecture Notes in Computer Science (2023): Swin-Unet: Unet-Like Pure Transformer for Medical Image Segmentation.",
+      "paper_id": "10.1007/978-3-031-25066-8_9",
+      "title": "Swin-Unet: Unet-Like Pure Transformer for Medical Image Segmentation",
+      "year": 2023
+    },
+    {
+      "claim": "automated technique presented in Journal of High Energy Physics (2014): The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations.",
+      "paper_id": "10.1007/jhep07(2014)079",
+      "title": "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations",
+      "year": 2014
+    },
+    {
+      "claim": "Stochastic technique presented in Reviews of Modern Physics (1998): Stochastic resonance.",
+      "paper_id": "10.1103/revmodphys.70.223",
+      "title": "Stochastic resonance",
+      "year": 1998
+    },
+    {
+      "claim": "CHARMM technique presented in Journal of Computational Chemistry (2009): CHARMM: The biomolecular simulation program.",
+      "paper_id": "10.1002/jcc.21287",
+      "title": "CHARMM: The biomolecular simulation program",
+      "year": 2009
+    },
+    {
+      "claim": "Deep technique presented in 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR) (2017): Deep Network Flow for Multi-object Tracking.",
+      "paper_id": "10.1109/cvpr.2017.292",
+      "title": "Deep Network Flow for Multi-object Tracking",
+      "year": 2017
+    },
+    {
+      "claim": "SWISS technique presented in Nucleic Acids Research (2018): SWISS-MODEL: homology modelling of protein structures and complexes.",
+      "paper_id": "10.1093/nar/gky427",
+      "title": "SWISS-MODEL: homology modelling of protein structures and complexes",
+      "year": 2018
+    },
+    {
+      "claim": "Explainable technique presented in Information Fusion (2020): Explainable Artificial Intelligence (XAI): Concepts, taxonomies, opportunities and challenges toward responsible AI.",
+      "paper_id": "10.1016/j.inffus.2019.12.012",
+      "title": "Explainable Artificial Intelligence (XAI): Concepts, taxonomies, opportunities and challenges toward responsible AI",
+      "year": 2020
+    },
+    {
+      "claim": "What technique presented in IEEE Journal on Selected Areas in Communications (recent): What Will 5G Be?.",
+      "paper_id": "10.1109/jsac.2014.2328098",
+      "title": "What Will 5G Be?",
+      "year": null
+    },
+    {
+      "claim": "Cluster technique presented in 2015 IEEE International Conference on Computer Vision (ICCV) (recent): Cluster-Based Point Set Saliency.",
+      "paper_id": "10.1109/iccv.2015.27",
+      "title": "Cluster-Based Point Set Saliency",
+      "year": null
+    },
+    {
+      "claim": "Attosecond technique presented in Reviews of Modern Physics (2009): Attosecond physics.",
+      "paper_id": "10.1103/revmodphys.81.163",
+      "title": "Attosecond physics",
+      "year": 2009
+    },
+    {
+      "claim": "Weyl technique presented in Reviews of Modern Physics (2018): Weyl and Dirac semimetals in three-dimensional solids.",
+      "paper_id": "10.1103/revmodphys.90.015001",
+      "title": "Weyl and Dirac semimetals in three-dimensional solids",
+      "year": 2018
+    }
+  ],
+  "pool_size": 55
+}

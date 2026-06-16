@@ -1,0 +1,92 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Effect of Full BRDF Physical Modeling vs. Pure Lambertian",
+      "target_module": "BRDF物理模型",
+      "hypothesis": "显式建立包含菲涅尔镜面反射项的Cook-Torrance物理模型，是处理非朗伯区域并获得高精度深度图的核心前提；若退化为纯朗伯模型，网络将无法解析高频展宽的伪影信号，导致非朗伯区域深度估计出现大面积失效。",
+      "modification": "在实现BRDF物理拟合的代码段中，强制将镜面反射权重系数和镜面项（即ρ_s相关项或D项输出）置为0（ρ_s=0），使得整个光场9×9角点坐标的物理映射仅保留漫反射分量（ρ_d）。代价卷的构建或掩码的生成将基于纯漫反射假设。",
+      "expected_result": "在包含显著非朗伯区域（如反光、透明材质）的测试场景中，深度图的MSE（均方误差）和MAE（平均绝对误差）将大幅上升，特别是在光滑非朗伯区域会出现严重的深度断裂或纹理复制伪影。",
+      "comparison_with": "替换为纯朗伯模型"
+    },
+    {
+      "experiment_name": "Effect of Micro-Facet Normal Distribution Function Selection",
+      "target_module": "Beckmann法线分布函数",
+      "hypothesis": "Beckmann分布能更准确地拟合光场成像中表面粗糙度引起的波矢偏折变化（即中高频的角度频谱响应），相比于GGX或简单高斯近似，能为后续的材质识别机制提供更精确的物理先验。",
+      "modification": "定位计算法线分布D项的函数，将Beckmann等式替换为GGX (Trowbridge-Reitz) 等式：将原代码 `D = exp(-tan^2(theta) / m^2) / (pi * m^2 * cos^4(theta))` 修改为 `D = alpha^2 / (pi * cos^4(theta) * (alpha^2 + tan^2(theta))^2)`，其中 `alpha = m^2`。保持参数拟合优化器（Levenberg-Marquardt）不变。",
+      "expected_result": "虽然GGX也能处理多频率反射，但模型在粗糙度量化（粗糙朗伯与光滑非朗伯的边界划分）上的精度会略有下降，导致SAM三元Mask的分割边缘出现误判，整体深度估计指标（如PSNR/Bad Pixel Rate）出现小幅退化。",
+      "comparison_with": "替换为GGX (Trowbridge-Reitz) 分布"
+    },
+    {
+      "experiment_name": "Effect of Physics-Driven Parameter Fitting vs. Direct Deep Regression",
+      "target_module": "参数拟合优化器",
+      "hypothesis": "利用约束最小二乘法（Levenberg-Marquardt算法）针对每个像素的81个角域采样点求解物理参数（3个未知BRDF参数），相比于黑盒深度学习直接回归，能保证物理层面的强可解释性，避免过拟合，并严格遵守麦克斯韦方程的波矢解析。",
+      "modification": "移除代码中的Levenberg-Marquardt非线性最小二乘循环求解器。构建一个轻量级的CNN或MLP网络分支，直接输入9x9角域切片或能量图特征，经过几层卷积操作后，直接回归输出稠密的(ρ_d, ρ_s, m)参数图。将此端到端预测的特征接入后续流程。",
+      "expected_result": "模型在已知材质上的泛化能力下降。虽然在训练集上可能取得相近的拟合效果，但在跨域或复杂未见材质的测试集上，由于缺乏严格的81方程求解物理约束，预测的物理参数图会出现异常分布，导致深度估计鲁棒性显著降低。",
+      "comparison_with": "替换为深度学习CNN/MLP直接回归"
+    },
+    {
+      "experiment_name": "Effect of Dual-Modality Energy Optimization with SAM Prior",
+      "target_module": "SAM引导与自适应双模态能量图优化策略",
+      "hypothesis": "引入SAM提取场景三元Mask先验，并基于GCD指示进行双减法策略（全局压制与局部增强），是大幅提高非朗伯区域与朗伯区域对比度、滤除背景干扰的决定性步骤。若不使用此策略，网络将难以区分真实深度信号与光滑伪影。",
+      "modification": "在数据流前处理阶段，跳过SAM模型的三元Mask提取逻辑，并禁用GCD的自适应切换（即不计算 α_local）。将原始计算得到的能量图 E 直接与中心视角特征拼接，不进行任何针对朗伯/非朗伯区域差异化的能量压制（如85%压制）或增强（如50%增强）操作。",
+      "expected_result": "由于失去了对光滑朗伯区域的强压制和对非朗伯区域的增强，NL/L（非朗伯/朗伯）能量比急剧下降。网络在处理如Apple或Teddy等高反光场景时，深度图将出现严重的镜面高光穿透或深度平滑（糊成一片），如PROJECT_BRIEF中记录的巨大ratio提升（如495.8%）将完全消失，精度大幅倒退。",
+      "comparison_with": "移除SAM先验与双减法策略，直接使用原始能量图"
+    },
+    {
+      "experiment_name": "Effect of Full-View Cost Volume vs. Limited EPI Architecture",
+      "target_module": "CostVolumeBuilder (全视角代价体构建器)",
+      "hypothesis": "利用所有81个视角的几何线索构建多视差假设代价卷，相比于仅利用部分视角（如十字或网格交叉视角）的传统EPI架构，能够提供更密集的物理约束，是突破传统EPI在朗伯场景精度天花板的关键。",
+      "modification": "修改 `CostVolumeBuilder` 模块的输入参数和扭曲逻辑。从输入张量 (B, 81, C_in, H, W) 中，仅抽取索引为水平方向和垂直方向的共17个视角（形成标准的正交EPI），将扭曲求差的分母从 `1/80` 改为 `1/16`。生成的代价体通道维度和后续融合逻辑保持不变。",
+      "expected_result": "由于视角利用率的断崖式下降，模型对遮挡区域和复杂几何结构的感知能力显著变弱。代价卷在非朗伯区域变得极其平坦且缺乏上下文支持，导致网络整体深度估计的MAE回升至0.28-0.34的传统EPI水平。",
+      "comparison_with": "替换为仅利用部分视角的传统正交EPI架构"
+    },
+    {
+      "experiment_name": "Effect of Multi-Scale Uncertainty-Aware U-Net Architecture",
+      "target_module": "U-Net Encoder & Decoder (多尺度编解码器)",
+      "hypothesis": "带有跳跃连接的U-Net多尺度架构，对于有效整合局部细节与全局上下文、并利用平坦代价卷在解码器中进行邻域传播（补全深度）至关重要。单尺度或缺乏跳跃连接的网络将无法处理光照不均和复杂反射。",
+      "modification": "重构 `U-Net Encoder` 和 `U-Net Decoder`。移除3个下采样阶段和对应的上采样跳跃连接，将其替换为保持原始空间分辨率（H, W）的连续5层普通残差卷积块或3层全卷积网络，确保参数量大致相等。最终直接接1x1卷积输出视差图。",
+      "expected_result": "网络将失去大感受野带来的场景级理解能力。在非朗伯区域，由于缺乏多尺度上下文，网络无法将平坦代价卷作为不确定性信号进行邻域借值，导致镜面或散射区域出现大量空洞或随机深度噪声，边界处的深度不连续性（edge accuracy）显著恶化。",
+      "comparison_with": "替换为单尺度全分辨率CNN网络"
+    },
+    {
+      "experiment_name": "Effect of Color Space Reduction Strategy",
+      "target_module": "颜色空间降维模块",
+      "hypothesis": "通过加权平均将多视角RGB图像转换为单通道灰度图，不仅有效降低计算复杂度，其提取的明暗分布信息也足以支撑物理模型的精确参数拟合。独立通道处理或使用HSV可能会引入冗余噪声或色度干扰。",
+      "modification": "修改预处理代码。在输入给参数拟合优化器或CostVolumeBuilder之前，不执行加权平均降维操作。保留原始的3通道RGB数据结构，修改后续接收层的输入通道数 `C_in` 从 1 变为 3（或将R、G、B三通道分别独立送入BRDF拟合，最后再做均值融合）。",
+      "expected_result": "网络参数量和显存开销将显著增加。由于不同颜色通道在镜面高光处的反射率响应差异可能导致物理拟合求解器（81个方程）出现数值不稳定或局部最优解冲突，虽然拟合时间增加，但最终深度估计精度可能持平甚至因色度干扰而轻微下降，证明了加权灰度降维的充分性与高效性。",
+      "comparison_with": "替换为RGB独立通道提取处理"
+    }
+  ],
+  "_model_analysis": {
+    "modules": [
+      {
+        "module_name": "BRDF物理模型",
+        "code_location": "tools/brdf_modeling.py -> simplified_brdf_model",
+        "core_function": "定义了简化的Cook-Torrance物理方程，将观测到的角域强度分解为漫反射分量(ρ_d)和镜面反射分量(ρ_s与法线分布的乘积)。",
+        "ablation_replacement": "1. 纯朗伯模型：移除镜面反射项(令ρ_s=0)，仅保留ρ_d；2. 纯镜面反射模型：移除漫反射项(令ρ_d=0)；3. 端到端深度学习模块：用多层感知机(MLP)或CNN直接回归特征，替换显式的物理公式。",
+        "expected_impact": "若退化为纯朗伯模型，将完全丧失对高光（非朗伯特性）的拟合能力，导致镜面反射区域的误差急剧上升；若替换为纯深度学习结构，虽然可能提升拟合上限，但会丧失物理可解释性，且容易在稀疏角度下过拟合。"
+      },
+      {
+        "module_name": "Beckmann法线分布函数",
+        "code_location": "tools/brdf_modeling.py -> beckmann_distribution",
+        "core_function": "计算微观法线分布(D项)，用于控制镜面反射高光的形状和集中程度，物理上由粗糙度参数m决定。",
+        "ablation_replacement": "1. GGX (Trowbridge-Reitz) 分布：替换为 D(θ)=α²/(π*cos⁴(θ)*(α²+tan²(θ))²)；2. Gaussian分布：使用常规高斯函数近似。",
+        "expected_impact": "GGX分布通常具有更自然的“长尾”特性，替换后可能会让边缘的过渡更平滑，提升对金属或复杂粗糙表面高光拖尾的拟合精度，略微降低粗糙表面的MSE。"
+      },
+      {
+        "module_name": "参数拟合优化器",
+        "code_location": "tools/brdf_modeling.py -> fit_brdf_to_patch (内部调用的 curve_fit)",
+        "core_function": "使用非线性最小二乘法(Levenberg-Marquardt算法)，针对每个空间像素的9x9角域切片，求解最佳的(ρ_d, ρ_s, m)物理参数。",
+        "ablation_replacement": "1. 网格搜索：暴力遍历参数空间寻找最优解；2. 随机优化算法：如粒子群优化(PSO)或遗传算法；3. 深度学习回归：用ResNet/UNet直接从特征图回归出稠密的参数图。",
+        "expected_impact": "若替换为深度学习回归，将极大提升推理速度(将逐像素循环变为矩阵化前向传播)，并减少局部最优解导致的噪点(如代码中try-except捕获的拟合失败情况)，但需要依赖大量高质量的Ground Truth进行训练。"
+      },
+      {
+        "module_name": "颜色空间降维模块",
+        "code_location": "tools/brdf_modeling.py -> load_scene (g = 0.299*R + 0.587*G + 0.114*B)",
+        "core_function": "对多视角RGB图像进行预处理，通过加权平均将其转换为单通道灰度图，从而将计算复杂度降低至1/3。",
+        "ablation_replacement": "独立通道提取：分别对R、G、B三通道独立进行BRDF拟合；或使用HSV空间提取V通道(明度)。",
+        "expected_impact": "改为独立通道提取后，计算开销增加，但能捕捉到材质的色彩反射差异（如金属的各向异性反射色彩），能显著提升有偏色高光或彩色互反射场景下的参数解耦精度。"
+      }
+    ]
+  }
+}

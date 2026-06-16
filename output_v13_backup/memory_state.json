@@ -1,0 +1,307 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 双掩码物理建模与类MRI角度频率分析框架: 打破了传统EPI（对极平面图像）方法在非朗伯区域因违背视角一致性假设而失效的瓶颈。通过引入严密的物理先验（从麦克斯韦方程到BRDF），为复杂材质的反射类型识别提供了极强的物理可解释性，为后续分量感知的深度估计奠定了决定性的理论基础。\n  2. 基于GCD与SAM引导的自适应双模态能量图优化策略: 巧妙解决了传统纯EPI方法无法区分真实深度信号与光滑伪影的难题。该策略能够自适应地大幅提高非朗伯区域与朗伯区域的对比度（NL/L能量比），有效滤除背景纹理干扰，为高精度的深度估计提供了极为纯净和鲁棒的特征输入。\n  3. 全视角代价卷与多尺度不确定性感知网络: 从网络架构底层解决了EPI范式在朗伯场景精度天花板（MAE停留在0.28-0.34）以及非朗伯场景纹理复制失效的问题。100%全视角的几何线索融合与多尺度感受野，大幅增强了对光照不均、复杂反射和遮挡的鲁棒性。\n\n模型架构: MACVO-Net（多尺度角向代价体网络）的总体架构以显式的代价体构建为核心，取代了传统的隐式EPI特征提取。模型接收9×9（共81个）视角的光场图像作为输入。首先，提取中心视角图像的多尺度特征；同时，针对32个预设的视差假设，将所有80个非中心视角图像扭曲至中心视角并计算光度误差，构建出4D代价体。随后，将代价体与中心视角特征在通道维度拼接。融合后的特征送入带有跳跃连接的U-Net编解码器中，进行多尺度的上下文特征提取与精细化处理，利用代价体在非朗伯体区域表现出的平坦特性（不确定性信号）来优化深度推断。最终，模型输出与中心视角空间分辨率一致的单通道稠密视差图（深度图）。",
+  "log_entries": [
+    {
+      "timestamp": 1781544426.3008053,
+      "category": "log",
+      "content": "EXECUTE: Ch2 Related Work 完成, 耗时 138s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781544426.301183,
+      "category": "quality",
+      "content": "Related Work 最终质量: 95.0/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781544426.3011982,
+      "category": "quality",
+      "content": "VERIFY phase2: 66.2/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781544426.3012106,
+      "category": "log",
+      "content": "任务完成: generate_chapter2, 质量: 95.025",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781544439.0468273,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch3 Methodology\nLLM策略建议: Detail a computational framework that leverages epipolar plane images (EPIs) and explicit angular gradients to extract depth, ensuring strict alignment with the determin",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781544439.0468323,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter3 - Ch3 Methodology",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545004.0457716,
+      "category": "log",
+      "content": "EXECUTE: Ch3 Methodology 完成, 耗时 565s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545004.0472617,
+      "category": "quality",
+      "content": "Methodology 最终质量: 87.4/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545004.0478275,
+      "category": "quality",
+      "content": "VERIFY phase3: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545004.0478406,
+      "category": "log",
+      "content": "任务完成: generate_chapter3, 质量: 87.39999999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545021.269088,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch4 Experiments\nLLM策略建议: Design the experimental evaluation to quantitatively benchmark depth estimation accuracy and EPI disparity matching on standard light field datasets, ensuring continuity",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545021.2690985,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter4 - Ch4 Experiments",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545948.0213687,
+      "category": "log",
+      "content": "EXECUTE: Ch4 Experiments 完成, 耗时 927s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545948.0225556,
+      "category": "quality",
+      "content": "Experiments 最终质量: 91.2/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545948.0237293,
+      "category": "quality",
+      "content": "VERIFY phase4: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545948.023769,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 91.19999999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545968.5196428,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch5 Conclusion\nLLM策略建议: Summarize how the proposed methodology resolves the real-world, non-Lambertian photo-consistency limitations introduced in Chapter 1 to achieve robust disparity matching ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781545968.519659,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Ch5 Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546073.3799229,
+      "category": "log",
+      "content": "EXECUTE: Ch5 Conclusion 完成, 耗时 105s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546073.380311,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 96.5/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546073.3814642,
+      "category": "quality",
+      "content": "VERIFY phase5: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546073.381529,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 96.52499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546089.3880148,
+      "category": "log",
+      "content": "THINK: 首次执行: Extra: Discussion\nLLM策略建议: Synthesize your core findings by reiterating how your proposed methodology successfully overcomes the real-world limitations of the photo-consistency assumption introd",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546089.3880231,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Extra: Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546171.27554,
+      "category": "log",
+      "content": "EXECUTE: Extra: Discussion 完成, 耗时 82s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546171.276349,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546171.2763624,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546184.5811412,
+      "category": "log",
+      "content": "THINK: 首次执行: Extra: Limitations and Future Work\nLLM策略建议: Begin by reiterating the foundational value of light field angular gradients and EPI-based disparity matching for robust depth estimation to maintain ",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546184.5811474,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Extra: Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546261.7325456,
+      "category": "log",
+      "content": "EXECUTE: Extra: Limitations and Future Work 完成, 耗时 77s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546261.7333243,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546261.7333324,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546273.1611948,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Begin by summarizing how the proposed methodology successfully leveraged deterministic light field angular gradients to overcome the real-world limitations of the id",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546273.1612005,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.9482253,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 63s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.948383,
+      "category": "quality",
+      "content": "abstract 最终质量: 84.3/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.9488757,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 100.0/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.9488869,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: 84.27499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.977401,
+      "category": "log",
+      "content": "THINK: 首次执行: 参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.9774055,
+      "category": "log",
+      "content": "开始执行任务: review_content - 参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.997358,
+      "category": "log",
+      "content": "EXECUTE: 参考文献审查 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546335.9978797,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546336.039485,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546336.039489,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546374.2819722,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计 完成, 耗时 38s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546374.2826405,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546374.3109064,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/PDF输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546374.3109126,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/PDF输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546938.2144356,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/PDF输出 完成, 耗时 564s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781546938.2151542,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

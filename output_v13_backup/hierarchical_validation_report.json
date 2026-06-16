@@ -1,0 +1,219 @@
+{
+  "timestamp": 1781546714.145363,
+  "step_results": [
+    {
+      "step_id": "G1-S1",
+      "passed": true,
+      "reason": "innovation_points: 3 >= 1 → PASS",
+      "actual": 3,
+      "expected": 1
+    },
+    {
+      "step_id": "G1-S2",
+      "passed": true,
+      "reason": "ref_pool_size: 55 >= 15 → PASS",
+      "actual": 55,
+      "expected": 15
+    },
+    {
+      "step_id": "G2-S1",
+      "passed": true,
+      "reason": "claims_count: 49 >= 5 → PASS",
+      "actual": 49,
+      "expected": 5
+    },
+    {
+      "step_id": "G3-S1",
+      "passed": true,
+      "reason": "motivation: 1 >= 1 → PASS",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "step_id": "G3-S2",
+      "passed": true,
+      "reason": "style_profile: 1 >= 1 → PASS",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "step_id": "G3-S3",
+      "passed": true,
+      "reason": "style_profile: 1 >= 1 → PASS",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "step_id": "G3-S4",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    },
+    {
+      "step_id": "G3-S6",
+      "passed": true,
+      "reason": "paper_context_exists: 1 == True → PASS",
+      "actual": 1,
+      "expected": true
+    },
+    {
+      "step_id": "G4-S1",
+      "passed": true,
+      "reason": "chapter_words_1: 1141 >= 500 → PASS",
+      "actual": 1141,
+      "expected": 500
+    },
+    {
+      "step_id": "G4-S2",
+      "passed": false,
+      "reason": "chapter_words_2: 3 >= 500 → FAIL",
+      "actual": 3,
+      "expected": 500
+    },
+    {
+      "step_id": "G4-S3",
+      "passed": true,
+      "reason": "chapter_words_3: 3320 >= 500 → PASS",
+      "actual": 3320,
+      "expected": 500
+    },
+    {
+      "step_id": "G4-S4",
+      "passed": true,
+      "reason": "chapter_words_4: 2547 >= 500 → PASS",
+      "actual": 2547,
+      "expected": 500
+    },
+    {
+      "step_id": "G4-S5",
+      "passed": false,
+      "reason": "chapter_words_5: 331 >= 500 → FAIL",
+      "actual": 331,
+      "expected": 500
+    },
+    {
+      "step_id": "G4-S6",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    },
+    {
+      "step_id": "G4-S7",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    },
+    {
+      "step_id": "G4-S9",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    },
+    {
+      "step_id": "G5-S1",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    },
+    {
+      "step_id": "G5-S2",
+      "passed": true,
+      "reason": "无验收指标，默认通过",
+      "actual": null,
+      "expected": null
+    }
+  ],
+  "goal_results": [
+    {
+      "goal_id": "G1",
+      "description": "项目分析",
+      "passed": true,
+      "status": "complete",
+      "steps_total": 2,
+      "steps_passed": 2,
+      "steps_failed": 0,
+      "steps_pending": 0,
+      "goal_criteria": {
+        "metric": "innovation_points",
+        "actual": 3,
+        "expected": 1,
+        "passed": true
+      }
+    },
+    {
+      "goal_id": "G2",
+      "description": "参考文献体系",
+      "passed": true,
+      "status": "complete",
+      "steps_total": 1,
+      "steps_passed": 1,
+      "steps_failed": 0,
+      "steps_pending": 0,
+      "goal_criteria": {
+        "metric": "bib_entries",
+        "actual": 24,
+        "expected": 10,
+        "passed": true
+      }
+    },
+    {
+      "goal_id": "G3",
+      "description": "写作准备",
+      "passed": true,
+      "status": "complete",
+      "steps_total": 5,
+      "steps_passed": 5,
+      "steps_failed": 0,
+      "steps_pending": 0,
+      "goal_criteria": {
+        "metric": "style_profile",
+        "actual": 1,
+        "expected": 1,
+        "passed": true
+      }
+    },
+    {
+      "goal_id": "G4",
+      "description": "章节生成",
+      "passed": false,
+      "status": "partial",
+      "steps_total": 8,
+      "steps_passed": 6,
+      "steps_failed": 2,
+      "steps_pending": 0,
+      "goal_criteria": null
+    },
+    {
+      "goal_id": "G5",
+      "description": "学术输出",
+      "passed": true,
+      "status": "complete",
+      "steps_total": 3,
+      "steps_passed": 2,
+      "steps_failed": 0,
+      "steps_pending": 1,
+      "goal_criteria": {
+        "metric": "pdf_exists",
+        "actual": 1,
+        "expected": 1,
+        "passed": true
+      }
+    }
+  ],
+  "overall": {
+    "total_goals": 5,
+    "passed_goals": 4,
+    "partial_goals": 1,
+    "failed_goals": 0,
+    "pass_rate": 80.0
+  },
+  "failed_goals": [
+    "G4"
+  ],
+  "retry_phases": []
+}

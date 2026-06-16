@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "design_decision": "Introduce MRI-inspired k-space angle frequency analysis and dual physical masking (medium and angular direction) to model light-matter interactions.",
+      "motivation": "Traditional Epipolar Plane Image (EPI) methods fail catastrophically on non-Lambertian surfaces because specular and scattered reflections violate the viewpoint consistency assumption, creating parallax errors that are falsely interpreted as depth.",
+      "sota_gap": "Moves beyond treating reflections as noise to be filtered; instead, it leverages them as physical priors by mapping reflections via 2D-DFT into angle frequency spectra (low freq = diffuse, high freq = specular, mid freq = scattering), explicitly solving Maxwell's equations and BRDF parameters.",
+      "scenario": "Scenes with complex, mixed-material objects causing severe multi-path reflections and scattering, where standard EPI depth estimation completely fails.",
+      "evidence": "Theoretical derivation of solving 3 unknown BRDF weights using 81 angle samples via constrained least squares, successfully decoupling physical reflection types.",
+      "section": "Methodology: Physical Modeling and Frequency Analysis",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Implement an adaptive dual-modal energy map optimization strategy driven by Geometric Consistency Descriptors (GCD) and global/local subtraction rules.",
+      "motivation": "Pure EPI-based architectures cannot distinguish between true depth discontinuities and high-energy specular artifacts, resulting in background texture copying and depth blurring at object boundaries.",
+      "sota_gap": "Replaces static thresholding with dynamic pixel-level adaptivity: uses $\\alpha_{local} = \\alpha_{global} \\times (G / G.mean())$ for localized contrast enhancement when GCD and energy maps are co-directional, massively amplifying the Non-Lambertian to Lambertian (NL/L) energy ratio.",
+      "scenario": "Highly textured backgrounds adjacent to transparent, highly reflective, or glossy non-Lambertian foreground objects.",
+      "evidence": "Quantitative energy ratio improvements documented in project brief breakthroughs: 320% ratio increase for the 'Apple' scene and 111% increase for the 'Teddy' scene.",
+      "section": "Methodology: Adaptive Energy Optimization",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Integrate Segment Anything Model (SAM) to extract ternary scene masks for differentiated energy suppression and enhancement.",
+      "motivation": "Uniformly applying energy subtraction risks eroding weak but true depth signals in rough Lambertian areas while inadequately suppressing strong smooth Lambertian glare.",
+      "sota_gap": "Combines foundational vision models (SAM) with physical light field priors to categorize regions into rough Lambertian, smooth Lambertian, and smooth non-Lambertian, applying surgical energy adjustments (e.g., 85% suppression for smooth Lambertian, 50% enhancement for non-Lambertian).",
+      "scenario": "Complex real-world environments with ambiguous material boundaries, requiring semantic-level understanding to guide physical depth calculations.",
+      "evidence": "Project brief Breakthrough 3 shows the SAM-guided adaptive switching strategy causes a massive 495.8% ratio explosion in the 'Apple' scene, providing extremely pure features.",
+      "section": "Methodology: SAM-Guided Prior Integration",
+      "priority": "should"
+    },
+    {
+      "design_decision": "Construct a 4D cost volume utilizing 100% of the available 81 viewpoints (MACVO-Net) instead of the standard rigid 28-viewpoint EPI structure.",
+      "motivation": "Relying on sparse, directionally rigid EPIs caps the geometric information available to the network, creating an accuracy ceiling (MAE stagnating at 0.28-0.34) and losing spatial context.",
+      "sota_gap": "Completely discards implicit EPI feature extraction. By warping all 80 non-central views across 32 disparity hypotheses and calculating photometric errors, it builds an explicit, geometry-complete 4D cost volume that captures holistic scene structure.",
+      "scenario": "Occluded edges and highly textured Lambertian regions where multi-view parallax cues must be maximized to achieve sub-pixel depth accuracy.",
+      "evidence": "Network architectural design processing the explicit 4D cost volume, effectively bypassing the 0.28-0.34 MAE accuracy ceiling inherent to 28-view EPI networks.",
+      "section": "Network Architecture: MACVO-Net",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Use the naturally flat cost volume response in non-Lambertian regions as an explicit uncertainty signal to guide a U-Net multi-scale decoder.",
+      "motivation": "Specular and scattering surfaces lack low-disparity matching costs, causing standard depth regression networks to hallucinate random depths (texture copying) due to uniform feature distributions.",
+      "sota_gap": "Transforms a fundamental weakness (flat cost volume) into an explicit mathematical uncertainty prior. The U-Net decoder uses multi-scale skip connections to actively propagate depth from confident neighboring Lambertian pixels, rather than forcing a false estimation.",
+      "scenario": "Large contiguous non-Lambertian surface areas (e.g., mirrors, glossy metal, glass) where internal depth features are entirely unobservable.",
+      "evidence": "Successful mitigation of texture-copying artifacts in non-Lambertian zones, demonstrating mathematically sound depth completion via neighborhood propagation.",
+      "section": "Network Architecture: Uncertainty-Aware Decoding",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Design ablation studies isolating the physical energy optimization (GCD/SAM) from the network architectural changes (MACVO-Net).",
+      "motivation": "We must prove that the physical pre-processing (raising NL/L ratio) and the deep learning architecture (handling flat cost volumes) provide independent, synergistic benefits, rather than masking each other's failures.",
+      "sota_gap": "Disentangles the traditional end-to-end black box by providing explicit modular evaluation, proving that physical priors feed cleaner data while the network maximizes the utility of that clean data.",
+      "scenario": "Evaluation across standard light field benchmarks (e.g., HCI 4D Light Field Benchmark) containing both strict Lambertian and mixed-material scenes.",
+      "evidence": "Metrics will compare Baseline vs. +GCD/Energy Map vs. +SAM vs. MACVO-Net, measuring BadPix (BPR) and Mean Absolute Error (MAE) to isolate the exact contribution of each innovation point.",
+      "section": "Experiments: Ablation Studies",
+      "priority": "must"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| Introduce MRI-inspired k-space angle fre | Traditional Epipolar Plane Image (EPI) methods fai | Moves beyond treating reflections as noise to be f | Scenes with complex, mixed-material obje | Theoretical derivation of solving 3 unkn | Methodology: Physical Modeling and Frequency Analysis | must |\n| Implement an adaptive dual-modal energy  | Pure EPI-based architectures cannot distinguish be | Replaces static thresholding with dynamic pixel-le | Highly textured backgrounds adjacent to  | Quantitative energy ratio improvements d | Methodology: Adaptive Energy Optimization | must |\n| Integrate Segment Anything Model (SAM) t | Uniformly applying energy subtraction risks erodin | Combines foundational vision models (SAM) with phy | Complex real-world environments with amb | Project brief Breakthrough 3 shows the S | Methodology: SAM-Guided Prior Integration | should |\n| Construct a 4D cost volume utilizing 100 | Relying on sparse, directionally rigid EPIs caps t | Completely discards implicit EPI feature extractio | Occluded edges and highly textured Lambe | Network architectural design processing  | Network Architecture: MACVO-Net | must |\n| Use the naturally flat cost volume respo | Specular and scattering surfaces lack low-disparit | Transforms a fundamental weakness (flat cost volum | Large contiguous non-Lambertian surface  | Successful mitigation of texture-copying | Network Architecture: Uncertainty-Aware Decoding | must |\n| Design ablation studies isolating the ph | We must prove that the physical pre-processing (ra | Disentangles the traditional end-to-end black box  | Evaluation across standard light field b | Metrics will compare Baseline vs. +GCD/E | Experiments: Ablation Studies | must |",
+  "quality": {
+    "total_rows": 6,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

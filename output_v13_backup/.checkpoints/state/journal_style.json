@@ -1,0 +1,54 @@
+{
+  "content_patterns": {
+    "Introduction": {
+      "opening_style": "problem_motivation",
+      "contribution_format": "bulleted_list",
+      "contribution_count": 3,
+      "has_paper_structure_paragraph": false
+    },
+    "Related Work": {
+      "organization": "by_approach",
+      "critique_style": "integrated",
+      "comparison_depth": "moderate"
+    },
+    "Methodology": {
+      "starts_with": "overview",
+      "derivation_style": "moderate",
+      "has_algorithm_box": false,
+      "subsection_count": 4
+    },
+    "Experiments": {
+      "dataset_description": "mixed",
+      "ablation_style": "table",
+      "comparison_style": "mixed",
+      "has_failure_analysis": false
+    }
+  },
+  "argument_rhythm": {
+    "data_placement": "mixed",
+    "figure_density": "moderate",
+    "citation_density": "high",
+    "paragraph_length": "medium(5-7)"
+  },
+  "depth_gradients": {
+    "Methodology": "key_formulas_only",
+    "Experiments": "comprehensive"
+  },
+  "figure_preferences": {
+    "architecture_style": "detailed_boxes",
+    "color_scheme": "colorful",
+    "annotation_level": "heavy",
+    "preferred_layout": "mixed"
+  },
+  "content_emphasis": {
+    "primary_focus": "mixed",
+    "novelty_presentation": "explicit_claims"
+  },
+  "journal_red_flags": [
+    "Purely theoretical derivations or network science proposals without empirical validation on standard video/image benchmarks",
+    "Evaluations limited to a single dataset without cross-task generalization or missing standard quantitative metrics (e.g., PSNR, SSIM, BD-rate)",
+    "Lack of direct quantitative comparison with recent state-of-the-art baselines",
+    "Methodology sections lacking clear system architectures, mathematical formulation, or algorithmic pseudocode",
+    "Superficial experimental setups that omit critical implementation details, training/testing splits, or hyperparameters"
+  ]
+}

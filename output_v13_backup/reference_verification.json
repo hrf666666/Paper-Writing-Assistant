@@ -1,0 +1,188 @@
+{
+  "cite_keys": [
+    "blinn1977",
+    "bolles1987epipolar",
+    "chen2017",
+    "eigen2014",
+    "godard2019",
+    "he2016",
+    "heber2018",
+    "honauer2016",
+    "honauer2017benchmark",
+    "kingma2014adam",
+    "kirillov2023",
+    "li2021",
+    "lin2017",
+    "liu2021",
+    "lyu2022",
+    "ng2005",
+    "ng2006",
+    "ng2022",
+    "peng2022",
+    "ronneberger2015",
+    "shiNone",
+    "tao2013",
+    "vaswani2017",
+    "wang2015",
+    "wang2023",
+    "wanner2012globally",
+    "wanner2014",
+    "zhang2023",
+    "zhenglong_dataset"
+  ],
+  "verified": [
+    {
+      "key": "blinn1977",
+      "title": "Models of light reflection for computer synthesized pictures",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "chen2017",
+      "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "eigen2014",
+      "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "godard2019",
+      "title": "Learning Depth from Monocular Videos Using Direct Methods",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "he2016",
+      "title": "Deep Residual Learning for Image Recognition",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "heber2018",
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "honauer2016",
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "kirillov2023",
+      "title": "Segment Anything",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "li2021",
+      "title": "Depth from Light Field with Non-Lambertian Scene",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "lin2017",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "liu2021",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "lyu2022",
+      "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "ng2005",
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "ng2006",
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "ng2022",
+      "title": "NeRF",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "peng2022",
+      "title": "Learning the Depth of Light Field from a Single Image",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "ronneberger2015",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "shiNone",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "tao2013",
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "vaswani2017",
+      "title": "Attention Is All You Need",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "wang2015",
+      "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "wang2023",
+      "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "wanner2014",
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "verified": true,
+      "source": "reference_store"
+    },
+    {
+      "key": "zhang2023",
+      "title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
+      "verified": true,
+      "source": "reference_store"
+    }
+  ],
+  "unverified": [
+    "bolles1987epipolar",
+    "honauer2017benchmark",
+    "kingma2014adam",
+    "wanner2012globally",
+    "zhenglong_dataset"
+  ],
+  "total": 29,
+  "verified_count": 24
+}

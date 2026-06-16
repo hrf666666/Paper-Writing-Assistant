@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "CORE_NARRATIVE: Real-world environments are dominated by non-Lambertian surfaces, yet traditional light field depth estimation remains fundamentally paralyzed by the Lambertian assumption, creating dangerous blind spots for autonomous systems. Rather than treating specular and scattered reflections as noise to be ignored, we translate these complex light-matter interactions into physical priors (via k-space frequency analysis) and explicit uncertainty signals (via flat cost volumes). By routing these physically-modeled uncertainty regions through neighborhood propagation, we break the traditional accuracy ceiling and enable robust light field depth estimation in complex, real-world scenes.\n\nINTRO_HOOK: Open by highlighting the paradox of modern light field cameras: despite their theoretical superiority in capturing directional light, their practical deployment in robotics and autonomous navigation is crippled because traditional EPI analysis assumes perfect Lambertian diffusion, causing catastrophic depth estimation failures on ubiquitous mirrors and glass. \n\nGAP_BRIDGE: Transition from related work by emphasizing that previous methods attempt to mathematically brute-force or smooth over non-Lambertian artifacts, completely missing the underlying physics. State that to cross this chasm, the field must shift from blind noise-filtering to explicit material classification, bridging electromagnetic theory (Maxwell to BRDF) with deep learning architecture design.\n\nMETHOD_JUSTIFY: Frame the network architecture not as an arbitrary choice, but as a physical necessity: the dual-mask and MRI-like k-space are required to mathematically decouple diffuse, specular, and scattered frequency signatures, while the GCD and SAM-guided energy optimization acts as a physical filter to isolate true depth from specular artifacts. The U-Net's use of flat cost volume responses must be justified as a deliberate, physics-informed trigger to abandon flawed EPI consistency and instead infer depth via trusted neighborhood propagation.\n\nEXPERIMENT_VALIDATE: Design the evaluation metrics and datasets specifically to punish the \"Lambertian ceiling,\" prioritizing quantitative and visual results on highly specular and transparent scenes. Experiments must explicitly demonstrate a high contrast in the NL/L (Non-Lambertian to Lambertian) energy ratio, proving that the model successfully decouples true depth from complex light-matter interactions where traditional EPI methods fail entirely.\n\nCONCLUSION_ECHO: Conclude by returning to the deployment bottleneck, stating that by translating physical light-matter interactions into frequency-domain features and cost-volume uncertainty, this work fundamentally resolves the blind spots that have historically restricted light field cameras to controlled, matte environments. \n\n***\n\n**Key Phrases to Embed in Each Section (Actionable Cheat Sheet):**\n*   **Introduction:** \"complex light-matter interactions\", \"violates view-consistency\", \"dangerous deployment blind spots\"\n*   **Gap/Bridge:** \"shift from mathematical smoothing to physical modeling\", \"explicit Lambertian vs. non-Lambertian classification\"\n*   **Method:** \"MRI-like k-space angular frequency\", \"frequency-domain signatures\", \"flat cost volumes as explicit uncertainty signals\"\n*   **Experiments:** \"breaking the Lambertian accuracy ceiling\", \"decoupling true depth from specular artifacts\", \"robustness on scattering/specular regions\"\n*   **Conclusion:** \"physical priors\", \"elevating light field deployment to real-world complexity\"",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "Establish the problem of Real-world environments are dominated by non-Lambertian surfaces, yet traditiona, motivating the need for 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Enumerate contributions: 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络, with quantitative evidence",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Show existing methods lack Real-world environments are dominated by non-Lambertian surf, bridging to our 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Justify each module (双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络) by connecting to: Real-world environments are dominated by non-Lambertian surf",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments validating 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络 via ablation and SOTA comparison",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo how 双掩码物理建模与类MRI角度频率分析框架, 基于GCD与SAM引导的自适应双模态能量图优化策略, 全视角代价卷与多尺度不确定性感知网络 successfully addresses Real-world environments are dominated by non-Lambertian surf",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Overcoming the Lambertian Assumption Limitation in Light Field Depth Estimation\n**Problem**: Traditional light field depth estimation methods relying on Epipolar Plane Image (EPI) analysis fundamentally fail on non-Lambertian surfaces (e.g., mirrors, glass) because these materials violate the view-consistency assumption due to complex light-matter interactions.\n**Significance**: Real-world environments are filled with non-Lambertian materials. The inability to accurately capture d",
+  "candidates": [
+    {
+      "direction": "Overcoming the Lambertian Assumption Limitation in Light Field Depth Estimation",
+      "problem": "Traditional light field depth estimation methods relying on Epipolar Plane Image (EPI) analysis fundamentally fail on non-Lambertian surfaces (e.g., mirrors, glass) because these materials violate the view-consistency assumption due to complex light-matter interactions.",
+      "significance": "Real-world environments are filled with non-Lambertian materials. The inability to accurately capture depth on these surfaces creates massive blind spots, severely limiting the deployment of light field cameras in robotics, autonomous navigation, and advanced 3D reconstruction.",
+      "approach": "The project introduces a dual-mask physical modeling framework with MRI-like k-space angular frequency analysis to explicitly classify material properties (Lambertian vs. non-Lambertian). It uses these physical priors alongside a U-Net architecture that treats flat cost volume responses in specular/scattered regions as explicit uncertainty signals, allowing depth to be inferred via neighborhood propagation.",
+      "key_claim": "By translating physical light-matter interactions into frequency-domain features and explicit cost volume uncertainty, this project breaks the traditional accuracy ceiling for depth estimation on complex, non-Lambertian materials."
+    },
+    {
+      "direction": "Artifact Suppression and Signal Isolation in Complex Geometries",
+      "problem": "Purely geometric or EPI-based methods struggle to distinguish between actual depth discontinuities and false signals caused by specular highlights or background textures, leading to severe texture-copying artifacts and noisy depth maps.",
+      "significance": "Feature purity is the most critical bottleneck for high-fidelity 3D reconstruction; if a model cannot separate true geometric edges from lighting artifacts, the resulting depth maps are useless for precision tasks like industrial inspection or high-resolution AR rendering.",
+      "approach": "The project proposes an adaptive dual-modal energy map optimization strategy that combines a Geometric Consistency Descriptor (GCD) with SAM-extracted semantic priors to dynamically evaluate surface roughness. It applies differentiated energy suppression (up to 85% for smooth Lambertian areas) and enhancement (50% for non-Lambertian areas) to effectively filter out interference.",
+      "key_claim": "Integrating semantic foundation models with geometric consistency descriptors enables unprecedented feature purity by surgically isolating true depth signals from specular and textural artifacts."
+    },
+    {
+      "direction": "Exhaustive Angular Exploitation via Explicit 4D Cost Volumes",
+      "problem": "Existing EPI-based neural network paradigms rigidly sample only a fraction of available angular views (e.g., 28 out of 81 views) to construct 2D slices, resulting in massive information loss and an inherent geometric accuracy bottleneck.",
+      "significance": "Sub-optimal use of angular data caps the maximum achievable precision of light field cameras and limits a model's ability to understand complex scene topologies, wasting the fundamental advantage of plenoptic imaging hardware.",
+      "approach": "The MACVO-Net discards rigid EPI structures and constructs an explicit 4D cost volume using 100% of the 81 available viewpoints across 32 disparity hypotheses. This rich volumetric data is fused with multi-scale center-view features in a U-Net architecture, capturing comprehensive global context and fine details simultaneously.",
+      "key_claim": "By replacing partial-view EPI extraction with a full 81-view explicit cost volume, the architecture maximally exploits angular data to fundamentally push the boundaries of light field geometric precision."
+    }
+  ]
+}

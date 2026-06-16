@@ -34,10 +34,8 @@ class PipelineContext:
     reference_pool: List[Any] = field(default_factory=list)
     outline: Dict[str, Any] = field(default_factory=dict)
     motivation_thread: str = ""
-    exemplar_dossier: Dict[str, Any] = field(default_factory=dict)
     style_profile: Dict[str, Any] = field(default_factory=dict)
     citation_bank: Dict[str, Any] = field(default_factory=dict)
-    rationale_matrix: Dict[str, Any] = field(default_factory=dict)
     ablation_results: Dict[str, Any] = field(default_factory=dict)
 
     # --- 学习到的风格 (Phase 0.6-0.65) ---

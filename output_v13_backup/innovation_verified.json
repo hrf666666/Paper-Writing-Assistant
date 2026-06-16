@@ -1,0 +1,110 @@
+{
+  "innovation_points": [
+    {
+      "创新点名称": "双掩码物理建模与类MRI角度频率分析框架",
+      "创新点工作内容": [
+        "提出介质掩码与角度方向掩码双重物理建模，基于像素级粗糙度量化光-物质作用类型（如菲涅尔镜面或余弦漫反射）及波矢偏折变化。",
+        "创新性地将MRI的k-space频域分析引入光场成像，利用光场9×9角点坐标的天然编码特性，通过2D-DFT将不同材质转换为不同的角度频谱响应。",
+        "建立基于频域特征的材质识别机制：利用低频、高频展宽和中频特征分别反向解析漫反射、镜面反射和散射像素，并通过约束最小二乘法实现物理层面的BRDF参数（漫反射、镜面、散射权重）估计。"
+      ],
+      "创新点价值": "打破了传统EPI（对极平面图像）方法在非朗伯区域因违背视角一致性假设而失效的瓶颈。通过引入严密的物理先验（从麦克斯韦方程到BRDF），为复杂材质的反射类型识别提供了极强的物理可解释性，为后续分量感知的深度估计奠定了决定性的理论基础。",
+      "支撑证据": "PROJECT_BRIEF中的物理假设与类MRI分析映射表；通过81个角度采样计算出漫反射低频主导、镜面高频展宽、散射中频为主的理论设定；以及反向波矢解析三层递进方案（包含81方程求解3个未知BRDF参数）。"
+    },
+    {
+      "创新点名称": "基于GCD与SAM引导的自适应双模态能量图优化策略",
+      "创新点工作内容": [
+        "提出多视角几何一致性描述子（GCD），通过计算像素子块均值的离散程度，精准量化表面粗糙度与深度突变响应。",
+        "设计双减法策略：当GCD与能量图E反向（如L>NL）时采用全局减法 $M = E - \\alpha \\times norm(G)$；当两者同向（如NL>L）时，采用逐像素自适应参数 $\\alpha_{local} = \\alpha_{global} \\times (G / G.mean())$ 实现局部增强。",
+        "引入SAM（Segment Anything Model）提取场景三元Mask先验，结合物理双掩码对粗糙朗伯、光滑朗伯和光滑非朗伯区域实施差异化能量压制或增强（如对光滑朗伯区域强烈压制85%，对光滑非朗伯区域增强50%）。"
+      ],
+      "创新点价值": "巧妙解决了传统纯EPI方法无法区分真实深度信号与光滑伪影的难题。该策略能够自适应地大幅提高非朗伯区域与朗伯区域的对比度（NL/L能量比），有效滤除背景纹理干扰，为高精度的深度估计提供了极为纯净和鲁棒的特征输入。",
+      "支撑证据": "PROJECT_BRIEF中的突破1与突破2记录了GCD在多个场景下的显著提升（如Apple ratio提升320%，Teddy提升111%）；突破3记录了自适应切换策略和SAM三元Mask的能量调整比例，带来Apple场景ratio高达495.8%的暴涨。"
+    },
+    {
+      "创新点名称": "全视角代价卷与多尺度不确定性感知网络",
+      "创新点工作内容": [
+        "彻底摒弃仅利用28/81视角且方向刚化的EPI架构，提出MACVO-Net，利用所有81个视角构建显式的多视差假设代价卷。",
+        "引入U-Net多尺度编解码架构处理生成的代价卷与中心视图特征，以捕获更丰富的场景级上下文信息。",
+        "利用非朗伯区域不存在低视差成本（即匹配代价卷平坦）的物理现象，将其作为天然的显式不确定性信号，指导U-Net解码器在镜面或散射区域通过邻域传播补全深度。"
+      ],
+      "创新点价值": "从网络架构底层解决了EPI范式在朗伯场景精度天花板（MAE停留在0.28-0.34）以及非朗伯场景纹理复制失效的问题。100%全视角的几何线索融合与多尺度感受野，大幅增强了对光照不均、复杂反射和遮挡的鲁棒性。",
+      "支撑证据": "ARCHITECTURE_SWITCH.md中的对比表格明确指出EPI因视角利用不足和缺乏多尺度导致性能停滞；记录了MACVO-Net架构设计（FeatureEncoder -> CostVolumeBuilder -> U-Net），并从机理上论证了平坦代价卷处理非朗伯不确定性的可行性。"
+    }
+  ],
+  "novelty_scores": [
+    {
+      "index": 0,
+      "name": "双掩码物理建模与类MRI角度频率分析框架",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 1,
+      "name": "基于GCD与SAM引导的自适应双模态能量图优化策略",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    },
+    {
+      "index": 2,
+      "name": "全视角代价卷与多尺度不确定性感知网络",
+      "score": 0.8,
+      "overlapping_works": [],
+      "verdict": "likely_novel"
+    }
+  ],
+  "progression": {
+    "type": "unknown",
+    "chain": [
+      {
+        "name": "双掩码物理建模与类MRI角度频率分析框架",
+        "role": "analysis",
+        "contribution": "This framework establishes a theoretical foundation by employing dual-mask physical modeling and MRI-like angular frequency decomposition to extract intrinsic data characteristics.",
+        "connects_to_next": "By revealing fundamental physical and frequency properties, it generates the initial energy maps that necessitate the subsequent adaptive optimization strategy to fully unlock their cross-modal potential."
+      },
+      {
+        "name": "基于GCD与SAM引导的自适应双模态能量图优化策略",
+        "role": "method",
+        "contribution": "This strategy leverages GCD and SAM to adaptively refine and align the dual-modality energy maps, ensuring high-fidelity and structurally consistent feature representation.",
+        "connects_to_next": "These optimized energy maps serve as the robust, high-quality inputs required to effectively construct the omni-directional cost volumes in the final learning architecture."
+      },
+      {
+        "name": "全视角代价卷与多尺度不确定性感知网络",
+        "role": "method",
+        "contribution": "This network integrates the optimized dual-modal features using omni-directional cost volumes and multi-scale uncertainty estimation to deliver robust, reliable final predictions.",
+        "connects_to_next": "N/A"
+      }
+    ],
+    "story_line": "We establish a dual-mask physical and frequency-based analysis framework to accurately decompose and represent complex dual-modality imaging characteristics. Building upon these adaptively optimized energy maps, we design an uncertainty-aware network with omni-directional cost volumes to seamlessly integrate the refined features and yield highly robust predictions.",
+    "contribution_statements": [
+      "We identify that extracting intrinsic physical and angular frequency characteristics is crucial for establishing a robust foundation for dual-modality energy map optimization.",
+      "We propose a comprehensive pipeline featuring GCD and SAM-guided adaptive energy map optimization, seamlessly integrated with an omni-directional cost volume and multi-scale uncertainty-aware network.",
+      "We demonstrate that coupling physical-frequency analysis with advanced uncertainty-aware deep architectures significantly enhances the accuracy, robustness, and reliability of the overall predictive framework."
+    ],
+    "progression_type": "C"
+  },
+  "anchor_map": {
+    "innovation_1": {
+      "related_work_section": "2.1 Traditional Methods",
+      "methodology_section": "3.2",
+      "experiment_section": "4.3",
+      "name": "双掩码物理建模与类MRI角度频率分析框架",
+      "contribution_statement": "We identify that extracting intrinsic physical and angular frequency characteristics is crucial for establishing a robust foundation for dual-modality energy map optimization."
+    },
+    "innovation_2": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.3",
+      "experiment_section": "4.4",
+      "name": "基于GCD与SAM引导的自适应双模态能量图优化策略",
+      "contribution_statement": "We propose a comprehensive pipeline featuring GCD and SAM-guided adaptive energy map optimization, seamlessly integrated with an omni-directional cost volume and multi-scale uncertainty-aware network."
+    },
+    "innovation_3": {
+      "related_work_section": "2.2 Deep Learning Methods",
+      "methodology_section": "3.4",
+      "experiment_section": "4.5",
+      "name": "全视角代价卷与多尺度不确定性感知网络",
+      "contribution_statement": "We demonstrate that coupling physical-frequency analysis with advanced uncertainty-aware deep architectures significantly enhances the accuracy, robustness, and reliability of the overall predictive framework."
+    }
+  }
+}
