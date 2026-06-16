@@ -97,6 +97,17 @@ class Auditor:
         self.api_client = api_client or get_api_client()
         self._reports: List[AuditReport] = []
         self._verified_refs: Dict[str, Dict] = {}  # 缓存已验证的参考文献
+        self._factbase = None  # v13 P1: 单一事实源
+
+    def set_factbase(self, factbase):
+        """注入 FactBase（优先于 project_data 重推导，消数值分歧）。"""
+        self._factbase = factbase
+
+    def _get_key_results(self, project_data):
+        """v13 P1: 优先 FactBase.metrics，降级 project_data."""
+        if self._factbase and getattr(self._factbase, 'metrics', None):
+            return dict(self._factbase.metrics)  # 保持 float 类型，不 str(v)
+        return (project_data or {}).get('experiment_design', {}).get('关键结果', {})
 
     def audit_chapter(self, phase_name: str, chapter_name: str,
                       chapter_content: str, project_data: Dict = None,
@@ -695,7 +706,7 @@ class Auditor:
         claims = re.findall(claim_pattern, content, re.IGNORECASE)
 
         if claims and chapter_name == "Experiments":
-            key_results = (project_data or {}).get("experiment_design", {}).get("关键结果", {})
+            key_results = self._get_key_results(project_data)
             if not key_results:
                 for match_val in claims[:3]:
                     report.add_issue(
@@ -723,7 +734,7 @@ class Auditor:
                     our_values.extend(nums)
 
             if our_values:
-                key_results = (project_data or {}).get("experiment_design", {}).get("关键结果", {})
+                key_results = self._get_key_results(project_data)
                 if not key_results:
                     report.add_issue(
                         "critical", "factuality",

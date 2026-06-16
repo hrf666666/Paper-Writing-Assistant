@@ -1,0 +1,8 @@
+# 统一行尾符，防止 CRLF/LF 抖动导致整文件重写
+*.py text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf

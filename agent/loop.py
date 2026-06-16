@@ -1024,6 +1024,9 @@ Respond with just the strategy, no explanation:"""
         self._project_data["paper_context"] = paper_context
         self._paper_context = paper_context
         self._factbase = _factbase
+        # v13 P1 接线: 把 FactBase 注入 auditor（消事实核查的数值分歧）
+        if hasattr(self, 'auditor') and self.auditor is not None:
+            self.auditor.set_factbase(_factbase)
         # 持久化：FactBase 保证 factbase.json + 兼容 paper_context.json 都落盘
         try:
             _fb_save(_factbase, OUTPUT_DIR)
@@ -1409,6 +1412,10 @@ Respond with just the strategy, no explanation:"""
             1: "Introduction", 2: "Related Work",
             3: "Methodology", 4: "Experiments", 5: "Conclusion"
         }
+        # v13 P1 兜底: 确保 auditor 已注入 FactBase（若 phase0_98 失败导致 _factbase 未注入）
+        if getattr(self, '_factbase', None) and not getattr(self.auditor, '_factbase', None):
+            self.auditor.set_factbase(self._factbase)
+
         for num, name in chapter_names.items():
             if num in self._chapters:
                 logger.info(f"[audit] 审计 {name}...")

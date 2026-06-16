@@ -161,8 +161,6 @@ class UnifiedAPIClient:
                         f"(本次 {prompt_chars}, 调用 #{self._prompt_calls_logged})"
                         + (" [超大prompt!]" if prompt_chars > 60000 else ""))
 
-        last_level = "unknown"
-
         for model_name in model_list:
             # 跳过不可用的模型
             if model_name not in self._available_models:
@@ -178,7 +176,6 @@ class UnifiedAPIClient:
                 except Exception as e:
                     self._record_stats(model_name, False)
                     level, retry_after, _ = classify(e)
-                    last_level = level
                     error_msg = f"{model_name} 第{attempt}次调用失败 [{level}]: {e}"
                     logger.warning(error_msg)
                     errors.append(error_msg)
@@ -213,7 +210,8 @@ class UnifiedAPIClient:
             f"所有模型调用失败:\n" + "\n".join(errors),
             model="all", attempt=max_retries
         )
-        all_exhausted.error_level = last_level  # type: ignore[attr-defined]
+        # v13 P1: error_level 死代码移除（loop 从不 except APIError、从不读 .error_level）。
+        # 分级信息已在每条 error_msg 的 [level] 标签里。
         raise all_exhausted
 
     def _get_client(self, model_name: str):
