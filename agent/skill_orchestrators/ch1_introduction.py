@@ -39,9 +39,6 @@ def generate_introduction(project_data, ref_data, citation_context="", venue_ada
     # v13.2 #3: 激活休眠能力 — motivation_thread（动机锚点，已生成却从未进 prompt）
     motivation_thread = project_data.get("motivation_thread", "")
     # v13.2 #3: 预计算 motivation 块（f-string 不能含反斜杠表达式）
-    _motivation_block = ""
-    if motivation_thread:
-        _motivation_block = "<motivation_thread>\n" + motivation_thread[:2000] + "\n</motivation_thread>\n"
     
     style_guide = ref_data.get("style_guide", {})
     chapter_org = ref_data.get("chapter_organizations", {}).get("Introduction", {})
@@ -81,7 +78,6 @@ def generate_introduction(project_data, ref_data, citation_context="", venue_ada
 <project_report>
 {project_info.get('report_content', '')[:4000]}
 </project_report>
-{_motivation_block}
 {_planning}{style_instruction}
 
 {citation_context}

@@ -2606,7 +2606,6 @@ Respond with just the strategy, no explanation:"""
         budget = self.venue_adapter.get_section_word_budget(chapter_name)
         previous_summary = self._build_previous_summary()
         motivation = getattr(self, '_motivation_thread', '')
-        matrix = {}  # v14: rationale_matrix 已删
         citation_context = self._build_citation_context()
 
         # 传入 Conclusion 摘要，避免重复内容

@@ -87,11 +87,11 @@ def _determine_subsections(innovation_points, experiment_design, ref_data):
     )
 
 
-def generate_related_work(project_data, ref_data, previous_chapters=None, citation_context=""):
+def generate_related_work(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """生成第二章 Related Work"""
     
     from agent.skill_orchestrators._chapter_common import ChapterContext
-    ctx = ChapterContext(project_data, ref_data, "Related Work", citation_context=citation_context)
+    ctx = ChapterContext(project_data, ref_data, "Related Work", venue_adapter=venue_adapter, citation_context=citation_context)
     _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     innovation_points = project_data.get("innovation_points", [])
     experiment_design = project_data.get("experiment_design", {})

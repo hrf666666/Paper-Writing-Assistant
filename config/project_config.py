@@ -89,10 +89,10 @@ ENABLE_CLOSED_BOOK_REWRITE = True
 ENABLE_MOTIVATION_ENGINE = True
 
 # v7.0: 写作理由矩阵（事前规划型）
-ENABLE_RATIONALE_MATRIX = True
+ENABLE_RATIONALE_MATRIX = False  # v14: rationale_matrix 已删
 
 # v7.0: 范例学习（从 ref_pdf 深度学习写作决策）
-ENABLE_EXEMPLAR_LEARNING = True
+ENABLE_EXEMPLAR_LEARNING = False  # v14: exemplar_learner 已删
 
 # 各章节是否独立生成（True则每章可单独运行，False则必须按顺序）
 INDEPENDENT_CHAPTERS = True

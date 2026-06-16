@@ -46,6 +46,7 @@ def generate_conclusion(project_data, ref_data, previous_chapters_summary,
     innovation_summary = ctx.innovation_summary  # v14: 统一格式（替代旧的贡献N格式）
     key_results = ctx.experiment_design.get("关键结果", {})
     chapter_org = ctx.chapter_org
+    style_guide = ctx.style_guide
     article_info = ctx.article_info
     _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     
