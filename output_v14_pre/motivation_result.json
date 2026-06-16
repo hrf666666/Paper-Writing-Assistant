@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "Here is the motivation thread designed to weave through your academic paper:\n\n**CORE_NARRATIVE:** \nCurrent light field depth estimation fails on ubiquitous non-Lambertian materials because data-driven models are fundamentally \"blind\" to specular and scattering reflections, resulting in severe texture copying and depth blurring. To cure this blindness, we introduce a physically interpretable framework that decodes light-material interactions via an MRI-like angular frequency analysis and a physical dual-mask model. By embedding these explicit physical priors into a material-aware deep fusion architecture, we resolve the breakdown of viewpoint consistency and restore reliable 3D perception in complex, real-world environments.\n\n**INTRO_HOOK:** \nOpen by highlighting the ubiquity of non-Lambertian materials (glass, metal) in the real world and the catastrophic failure of modern 3D vision systems in these scenarios due to an over-reliance on heuristic cues and purely data-driven features. Frame the central thesis immediately: achieving robust depth estimation requires moving beyond pattern recognition to explicitly decode the physics of light-material interactions.\n\n**GAP_BRIDGE:** \nTransition from related work by stating that while prior methods attempt to mask out non-Lambertian regions or use robust loss functions, they still fundamentally ignore the underlying physical reflection types, relying instead on broken viewpoint consistency assumptions. Bridge this gap by proposing a paradigm shift: formulating depth estimation as a physical reverse-engineering problem that explicitly maps angular light-field samples to distinct material properties.\n\n**METHOD_JUSTIFY:** \nState that every architectural choice is driven by physical optics, beginning with the MRI-like 2D-DFT on 81 angular samples to map Lambertian, specular, and scattering reflections into distinct low, high, and mid-frequency k-space signatures. Justify the MACVO-Net and dual-mask design by explaining that once a pixel's physical reflection type is classified, the network can leverage cost-volume flatness as a natural uncertainty signal, allowing the material-aware fusion module to intelligently weight geometric cues rather than blindly trusting broken EPI consistency.\n\n**EXPERIMENT_VALIDATE:** \nStructure the experiments to directly prove that physical interpretability cures \"blindness,\" demonstrating quantitatively (e.g., the 85%+ material classification accuracy and massive contrast improvements) that specular/scattering regions are actively decoded rather than smoothed over. Emphasize qualitative and quantitative reductions in \"texture copying\" and \"depth blurring\" on complex reflective scenes compared to state-of-the-art baselines, proving superior generalization to uncontrolled environments.\n\n**CONCLUSION_ECHO:** \nConclude by reiterating that embedding explicit physical dual-masking and k-space frequency analysis successfully cures the fundamental \"blindness\" of deep networks to non-Lambertian physics. End with a forward-looking statement: that anchoring data-driven models in Maxwell-equation-based physical priors is the critical pathway to deploying reliable 3D vision systems in highly complex, uncontrolled real-world settings.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "Establish the problem of **Direction**: Physical Interpretability in Non-Lambertian Depth\n**Problem**: Cu, motivating the need for 基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Enumerate contributions: 基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构, with quantitative evidence",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Show existing methods lack **Direction**: Physical Interpretability in Non-Lambertian D, bridging to our 基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Justify each module (基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构) by connecting to: **Direction**: Physical Interpretability in Non-Lambertian D",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments validating 基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构 via ablation and SOTA comparison",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo how 基于双掩码建模与类MRI角度频率分析的物理材质解析, 基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构 successfully addresses **Direction**: Physical Interpretability in Non-Lambertian D",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Physical Interpretability in Non-Lambertian Depth\n**Problem**: Current light field depth estimation methods heavily rely on purely data-driven features or heuristic cues, which fail under non-Lambertian (specular or scattering) reflections due to the breakdown of the viewpoint consistency assumption, leading to severe texture copying and depth blurring.\n**Significance**: Non-Lambertian materials are ubiquitous in real-world environments (e.g., glass, metal, glossy surfaces). The i",
+  "candidates": [
+    {
+      "direction": "Physical Interpretability in Non-Lambertian Depth",
+      "problem": "Current light field depth estimation methods heavily rely on purely data-driven features or heuristic cues, which fail under non-Lambertian (specular or scattering) reflections due to the breakdown of the viewpoint consistency assumption, leading to severe texture copying and depth blurring.",
+      "significance": "Non-Lambertian materials are ubiquitous in real-world environments (e.g., glass, metal, glossy surfaces). The inability of traditional models to physically distinguish these reflections from diffuse geometry fundamentally limits the reliability of 3D vision systems in complex, uncontrolled settings.",
+      "approach": "This project introduces a physical dual-mask model and an MRI-like angular frequency analysis to reverse-engineer pixel-level physical reflection types from 81 angular samples, embedding explicit, highly generalizable physical priors into the network.",
+      "key_claim": "By decoding light-material interactions through physical dual-masking and k-space frequency analysis, the framework cures the fundamental 'blindness' of data-driven models to specular and scattering reflections."
+    },
+    {
+      "direction": "Overcoming EPI Limitations via Explicit Cost Volumes",
+      "problem": "Traditional implicit Epipolar Plane Image (EPI) networks leverage only a fraction of the available angular views and apply rigid matching strategies, resulting in severe view under-sampling and catastrophic failure (e.g., extremely high error rates) in non-Lambertian regions.",
+      "significance": "Discarding the majority of angular data and relying on rigid, implicit geometry matching creates a structural bottleneck, causing models to confidently predict incorrect depths in highly reflective or textured scenes.",
+      "approach": "The project proposes the MACVO-Net architecture, which replaces implicit EPIs by explicitly utilizing all 81 views to construct a 4D multi-scale cost volume, while ingeniously leveraging the natural flatness of this cost volume as an uncertainty signal for non-Lambertian areas.",
+      "key_claim": "By reconstructing the angular matching process via an explicit 81-view cost volume, the model turns the 'matching failure' of non-Lambertian regions into a powerful, label-free uncertainty signal."
+    },
+    {
+      "direction": "Material-Aware Adaptive Deep Fusion",
+      "problem": "Existing depth estimation networks apply a uniform feature extraction and matching strategy across the entire image, ignoring the drastically different light-transport behaviors of mixed materials, which propagates matching errors across distinct spatial regions.",
+      "significance": "Real-world scenes are complex mixtures of diffuse, specular, and scattering materials. A one-size-fits-all geometric approach inevitably fails at material boundaries and reflective surfaces, capping the achievable accuracy of 3D reconstruction.",
+      "approach": "The architecture implements a material-component-aware depth fusion strategy that uses parsed BRDF weights to selectively apply geometric cost-volume matching in Lambertian areas and relies on multi-scale U-Net context propagation in non-Lambertian areas.",
+      "key_claim": "By dynamically fusing geometric matching and contextual propagation based on explicit material BRDF properties, the network applies the right depth estimation strategy to the right physical surface."
+    }
+  ]
+}

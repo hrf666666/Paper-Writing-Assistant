@@ -1,0 +1,17 @@
+{
+  "hardware": "",
+  "training_params": {},
+  "loss_terms": [],
+  "datasets": [],
+  "metrics": {
+    "特征工程突破": "GCD(多视角几何一致性描述子)与双减法策略成功扩大了不同反射类型区域的能量对比度（如Apple场景ratio提升495.8%，Teddy提升212.8%）。",
+    "当前阶段状态": "Phase 1验证尚未完全达标（当前准确率0.7648 < 0.85，AUC 0.557 < 0.90）。",
+    "最新训练日志趋势": "exp_v25_energy_preproc记录显示，在epoch 6时val_mae降至0.2408（Lambertian: 0.284, Non-Lambertian: 0.390, Urban: 0.231），仍需进一步优化以逼近目标值。"
+  },
+  "model_name": "",
+  "innovation_names": [
+    "基于双掩码建模与类MRI角度频率分析的物理材质解析",
+    "基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构"
+  ],
+  "paper_title": ""
+}

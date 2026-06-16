@@ -1,0 +1,495 @@
+[
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781580312.3365927,
+    "passed": true,
+    "summary": "审计完成: 3 个问题 (0 严重, 2 警告)",
+    "issue_count": 3,
+    "critical_count": 0,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理材质解析'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构'",
+        "suggestion": "在章节中补充对 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781580592.4958155,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: <citation>",
+        "location": "Related Work",
+        "evidence": "正则模式 '<citation>' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781581474.4656222,
+    "passed": true,
+    "summary": "审计完成: 6 个问题 (0 严重, 5 警告)",
+    "issue_count": 6,
+    "critical_count": 0,
+    "warning_count": 5,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'proposed'",
+        "location": "Methodology",
+        "evidence": "在章节中未找到 'proposed' 相关内容",
+        "suggestion": "确保章节包含与 'proposed' 相关的论述"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理材质解析'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构'",
+        "suggestion": "在章节中补充对 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '描述' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 描述",
+        "suggestion": "在实验章节中补充对 描述 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '详细划分' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 详细划分",
+        "suggestion": "在实验章节中补充对 详细划分 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781582677.7711117,
+    "passed": true,
+    "summary": "审计完成: 7 个问题 (0 严重, 2 警告)",
+    "issue_count": 7,
+    "critical_count": 0,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '描述' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 描述",
+        "suggestion": "在实验章节中补充对 描述 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '详细划分' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 详细划分",
+        "suggestion": "在实验章节中补充对 详细划分 的描述"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '核心指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 核心指标",
+        "suggestion": "在实验章节中补充对 核心指标 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '目标值' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 目标值",
+        "suggestion": "在实验章节中补充对 目标值 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '辅助评估指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 辅助评估指标",
+        "suggestion": "在实验章节中补充对 辅助评估指标 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '训练记录指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 训练记录指标",
+        "suggestion": "在实验章节中补充对 训练记录指标 的评估结果"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781582834.3351305,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_1",
+    "timestamp": 1781582998.6870468,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase5_2",
+    "timestamp": 1781583127.9152384,
+    "passed": true,
+    "summary": "审计完成: 0 个问题 (0 严重, 0 警告)",
+    "issue_count": 0,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781583283.4119253,
+    "passed": true,
+    "summary": "审计完成: 3 个问题 (0 严重, 2 警告)",
+    "issue_count": 3,
+    "critical_count": 0,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理材质解析'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构'",
+        "suggestion": "在章节中补充对 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781583283.4126642,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: <citation>",
+        "location": "Related Work",
+        "evidence": "正则模式 '<citation>' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781583283.4129477,
+    "passed": true,
+    "summary": "审计完成: 6 个问题 (0 严重, 5 警告)",
+    "issue_count": 6,
+    "critical_count": 0,
+    "warning_count": 5,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节缺少关键内容元素: 'proposed'",
+        "location": "Methodology",
+        "evidence": "在章节中未找到 'proposed' 相关内容",
+        "suggestion": "确保章节包含与 'proposed' 相关的论述"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理材质解析'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理材质解析' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 2 个创新点，此章节未覆盖 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构'",
+        "suggestion": "在章节中补充对 '基于多尺度角度代价体(MACVO-Net)与材质分量感知的深度融合架构' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '描述' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 描述",
+        "suggestion": "在实验章节中补充对 描述 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '详细划分' 在项目代码中被使用但未在章节中提及",
+        "location": "Methodology",
+        "evidence": "项目分析发现数据集: 详细划分",
+        "suggestion": "在实验章节中补充对 详细划分 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781583283.4150155,
+    "passed": true,
+    "summary": "审计完成: 7 个问题 (0 严重, 2 警告)",
+    "issue_count": 7,
+    "critical_count": 0,
+    "warning_count": 2,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '描述' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 描述",
+        "suggestion": "在实验章节中补充对 描述 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "数据集 '详细划分' 在项目代码中被使用但未在章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现数据集: 详细划分",
+        "suggestion": "在实验章节中补充对 详细划分 的描述"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '核心指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 核心指标",
+        "suggestion": "在实验章节中补充对 核心指标 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '目标值' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 目标值",
+        "suggestion": "在实验章节中补充对 目标值 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '辅助评估指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 辅助评估指标",
+        "suggestion": "在实验章节中补充对 辅助评估指标 的评估结果"
+      },
+      {
+        "severity": "info",
+        "category": "factuality",
+        "description": "评估指标 '训练记录指标' 在项目分析中被识别但未在实验章节中提及",
+        "location": "Experiments",
+        "evidence": "项目分析发现指标: 训练记录指标",
+        "suggestion": "在实验章节中补充对 训练记录指标 的评估结果"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781583283.4160664,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_5",
+    "timestamp": 1781583283.4162595,
+    "passed": true,
+    "summary": "摘要审计完成: 6 个问题 (0 严重, 6 警告)",
+    "issue_count": 6,
+    "critical_count": 0,
+    "warning_count": 6,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: Mean Absolute Error > 0.41",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文实验部分（Chapter 4）未提及该具体的MAE误差数值，建议在正文实验结果中明确补充支撑该数值的对比实验数据。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: reflective energy contrast ratio by up to 495.8%",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "提供的正文片段中未发现关于495.8%反射能量对比度提升的描述，建议在实验或结论部分补充具体实验结果以支撑该关键数值声明。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: map 81 angular samples into spectral distributions / exploit all 81 views",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文中未提及“81”个视角这一具体规模参数，建议在方法（Chapter 3）或实验设置部分明确说明使用的数据集视角数及映射过程。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: MRI-inspired 2-D discrete Fourier transform (2D-DFT)",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "摘要中提到的“受MRI启发的2D-DFT”方法在正文提供的方法论（Chapter 3）中未被提及，建议在正文相应部分详细描述该变换的原理与作用。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: Medium mask and angular-direction mask",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文中仅笼统提到了“Unified Dual-Mask Physical Model”，未具体说明这两个掩码（medium mask 和 angular-direction mask）的物理定义，建议在方法部分予以展开。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: physically derived Bidirectional Reflectance Distribution Function (BRDF) weights",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文片段未提及使用BRDF权重进行引导训练和组件感知融合，建议在方法论或训练策略部分增加相关说明。"
+      }
+    ]
+  }
+]

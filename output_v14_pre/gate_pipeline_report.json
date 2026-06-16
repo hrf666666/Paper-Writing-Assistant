@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "weighted_score": 98.6,
+  "total_time": 0.06,
+  "blocked_by": null,
+  "gates": [
+    {
+      "name": "gate0_format",
+      "priority": "P0_CRITICAL",
+      "passed": true,
+      "score": 100.0,
+      "details": "P0 格式检查全部通过",
+      "fix_hints": [],
+      "skipped": false,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate1_consistency",
+      "priority": "P1_HIGH",
+      "passed": true,
+      "score": 96.25,
+      "details": "P1 一致性检查通过",
+      "fix_hints": [
+        "将 Abstract 中的数值替换为 Experiments 表格中的实际数据"
+      ],
+      "skipped": false,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate2_quality",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "LLM质量评估已跳过",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    }
+  ]
+}

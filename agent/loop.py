@@ -2622,7 +2622,7 @@ Previous chapters summary:
 {conclusion_summary}
 {f'Motivation thread: {motivation[:500]}' if motivation else ''}
 
-{f'Key rationale points: {json.dumps(matrix.get("rows", [])[:3], ensure_ascii=False)[:800]}' if matrix else ''}
+  # v14: rationale_matrix 已删，此行不再输出
 
 Innovation points: {json.dumps(self._project_data.get('innovation_points', []), ensure_ascii=False)[:800]}
 

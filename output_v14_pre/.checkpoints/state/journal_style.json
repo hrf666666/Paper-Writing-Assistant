@@ -1,0 +1,54 @@
+{
+  "content_patterns": {
+    "Introduction": {
+      "opening_style": "problem_motivation",
+      "contribution_format": "paragraph",
+      "contribution_count": 2,
+      "has_paper_structure_paragraph": false
+    },
+    "Related Work": {
+      "organization": "by_approach",
+      "critique_style": "integrated",
+      "comparison_depth": "moderate"
+    },
+    "Methodology": {
+      "starts_with": "overview",
+      "derivation_style": "moderate",
+      "has_algorithm_box": false,
+      "subsection_count": 3
+    },
+    "Experiments": {
+      "dataset_description": "mixed",
+      "ablation_style": "table",
+      "comparison_style": "table",
+      "has_failure_analysis": false
+    }
+  },
+  "argument_rhythm": {
+    "data_placement": "after_each_claim",
+    "figure_density": "moderate",
+    "citation_density": "high",
+    "paragraph_length": "medium(5-7)"
+  },
+  "depth_gradients": {
+    "Methodology": "key_formulas_only",
+    "Experiments": "comprehensive"
+  },
+  "figure_preferences": {
+    "architecture_style": "detailed_boxes",
+    "color_scheme": "colorful",
+    "annotation_level": "heavy",
+    "preferred_layout": "horizontal_flow"
+  },
+  "content_emphasis": {
+    "primary_focus": "mixed",
+    "novelty_presentation": "explicit_claims"
+  },
+  "journal_red_flags": [
+    "Purely theoretical or abstract mathematical derivations without corresponding empirical validation",
+    "Lack of quantitative experimental validation on standard datasets or against state-of-the-art methods",
+    "Missing clear architectural diagrams or overly verbose text without supporting figures/tables",
+    "Shallow related work sections that fail to critique the limitations of preceding approaches",
+    "Vague novelty claims without specific baseline or dataset comparisons"
+  ]
+}

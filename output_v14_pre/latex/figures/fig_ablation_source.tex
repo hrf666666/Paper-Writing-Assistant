@@ -1,0 +1,41 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{pifont}
+\usepackage{multirow}
+
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{fullhl}{HTML}{EBF3FB}
+\definecolor{softgray}{HTML}{888888}
+\definecolor{gaingreen}{HTML}{2E7D32}
+
+\newcommand{\cmark}{\textcolor{accent}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{softgray!35}{\ding{55}}}
+
+\begin{document}
+\begin{minipage}{15cm}
+\centering
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{10pt}
+\begin{tabular}{l c c c c c c}
+\toprule
+\multirow{2}{*}{\textbf{Configuration}} & \multicolumn{3}{c}{\textbf{Proposed Components}} & \multicolumn{3}{c}{\textbf{Performance Metrics}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+ & SD & DMF & AGS & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ \\
+\midrule
+Baseline & \xmark & \xmark & \xmark & 27.84 & 0.871 & 0.198 \\
+\quad + Signal Decomp. & \cmark & \xmark & \xmark & 28.92 & 0.894 & 0.162 \\
+\quad + Dual-Mask Fusion & \cmark & \cmark & \xmark & 29.65 & 0.912 & 0.138 \\
+\rowcolor{fullhl}
+\textbf{Full Model (Ours)} & \cmark & \cmark & \cmark & \textbf{30.83} & \textbf{0.931} & \textbf{0.109} \\
+\bottomrule
+\end{tabular}
+
+\vspace{8pt}
+{\footnotesize\color{softgray}\textbf{SD}: Signal Decomposition \;\; \textbf{DMF}: Dual-Mask Fusion \;\; \textbf{AGS}: Angular Gradient Supervision}
+\end{minipage}
+\end{document}

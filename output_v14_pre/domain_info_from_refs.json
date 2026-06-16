@@ -1,0 +1,89 @@
+{
+  "数据集": [
+    {
+      "名称": "ImageNet-1K",
+      "描述": "大规模通用图像分类数据集",
+      "来源": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"
+    },
+    {
+      "名称": "COCO",
+      "描述": "包含目标检测、分割和人体姿态估计等密集预测任务的大型数据集",
+      "来源": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows / Non-local Neural Networks"
+    },
+    {
+      "名称": "ADE20K",
+      "描述": "用于语义分割的场景解析数据集",
+      "来源": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"
+    },
+    {
+      "名称": "Kinetics",
+      "描述": "用于视频动作分类的数据集",
+      "来源": "Non-local Neural Networks"
+    },
+    {
+      "名称": "Charades",
+      "描述": "用于视频分类的数据集",
+      "来源": "Non-local Neural Networks"
+    }
+  ],
+  "baseline方法": [
+    {
+      "名称": "Swin Transformer",
+      "年份": 2021,
+      "核心思路": "提出一种分层的视觉Transformer，通过Shifted Window机制将自注意力计算限制在不重叠的局部窗口内，同时允许跨窗口连接，从而实现多尺度建模且计算复杂度与图像大小呈线性关系。",
+      "性能": "在ImageNet-1K上达到87.3%的top-1准确率；在COCO上达到58.7 box AP和51.1 mask AP；在ADE20K上达到53.5 mIoU。"
+    },
+    {
+      "名称": "Non-local Neural Networks",
+      "年份": 2018,
+      "核心思路": "提出一种非局部(non-local)操作作为通用构建模块，通过计算图像中某一位置的响应作为所有位置特征的加权求和，直接捕捉长距离依赖关系。",
+      "性能": "在COCO上的目标检测/分割和姿态估计任务，以及Kinetics和Charades数据集上的视频分类任务中，均显著提升了性能并超越当时的竞争模型。"
+    },
+    {
+      "名称": "YOLOv4",
+      "年份": 2020,
+      "核心思路": "在目标检测中实现速度和准确性的最佳权衡 (作为参考文献被提及)",
+      "性能": "文中未列出具体数值"
+    },
+    {
+      "名称": "Cascade R-CNN",
+      "年份": 2018,
+      "核心思路": "解决目标检测中的高质量推断问题，通过级联结构逐步提升检测阈值 (作为参考文献被提及)",
+      "性能": "文中未列出具体数值"
+    },
+    {
+      "名称": "End-to-end object detection with transformers (DETR)",
+      "年份": 2020,
+      "核心思路": "利用Transformer架构实现端到端的目标检测，摒弃了传统的手工设计组件 (作为参考文献被提及)",
+      "性能": "文中未列出具体数值"
+    },
+    {
+      "名称": "Hybrid Task Cascade (HTC)",
+      "年份": 2019,
+      "核心思路": "用于实例分割的混合任务级联架构 (作为参考文献被提及)",
+      "性能": "文中未列出具体数值"
+    }
+  ],
+  "评估指标": [
+    {
+      "指标名称": "Top-1 Accuracy",
+      "定义": "模型预测的最高概率类别与真实标签相匹配的样本数占总样本数的百分比",
+      "典型值范围": "0% - 100% (文中典型值如 87.3%)"
+    },
+    {
+      "指标名称": "Box AP",
+      "定义": "目标检测任务中的平均精度，评估边界框的位置和类别预测准确性",
+      "典型值范围": "0 - 100 (文中典型值如 58.7)"
+    },
+    {
+      "指标名称": "Mask AP",
+      "定义": "实例分割任务中的平均精度，评估像素级掩码的预测准确性",
+      "典型值范围": "0 - 100 (文中典型值如 51.1)"
+    },
+    {
+      "指标名称": "mIoU (mean Intersection over Union)",
+      "定义": "平均交并比，计算预测掩码和真实掩码之间的重叠度均值，常用于语义分割评估",
+      "典型值范围": "0% - 100% (文中典型值如 53.5%)"
+    }
+  ]
+}

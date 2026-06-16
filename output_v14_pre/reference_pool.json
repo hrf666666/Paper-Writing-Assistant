@@ -1,0 +1,2319 @@
+{
+  "total": 55,
+  "papers": [
+    {
+      "id": 18,
+      "doi": "10.1109/CVPR.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "title_norm": "deep residual learning for image recognition",
+      "authors": [
+        {
+          "name": "Kaiming He"
+        },
+        {
+          "name": "Xiangyu Zhang"
+        },
+        {
+          "name": "Shaoqing Ren"
+        },
+        {
+          "name": "Jian Sun"
+        }
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "abstract": "",
+      "citation_count": 180000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Deep_Residual_Learning_for_Image_Recognition.md",
+      "token_estimate": 8224,
+      "fetched_at": "2026-06-16T10:52:12.168450",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/CVPR.2016.90",
+      "citationCount": 180000,
+      "externalIds": {
+        "DOI": "10.1109/CVPR.2016.90"
+      },
+      "markdown_path": "./ref_md/Deep_Residual_Learning_for_Image_Recognition.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 19,
+      "doi": "10.48550/arxiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "title_norm": "attention is all you need",
+      "authors": [
+        {
+          "name": "Ashish Vaswani"
+        },
+        {
+          "name": "Noam Shazeer"
+        },
+        {
+          "name": "Niki Parmar"
+        },
+        {
+          "name": "Jakob Uszkoreit"
+        },
+        {
+          "name": "Llion Jones"
+        },
+        {
+          "name": "Aidan N. Gomez"
+        },
+        {
+          "name": "Lukasz Kaiser"
+        },
+        {
+          "name": "Illia Polosukhin"
+        }
+      ],
+      "year": 2017,
+      "venue": "NeurIPS",
+      "abstract": "",
+      "citation_count": 120000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Attention_Is_All_You_Need.md",
+      "token_estimate": 10049,
+      "fetched_at": "2026-06-16T10:52:12.167997",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.48550/arxiv.1706.03762",
+      "citationCount": 120000,
+      "externalIds": {
+        "DOI": "10.48550/arxiv.1706.03762"
+      },
+      "markdown_path": "./ref_md/Attention_Is_All_You_Need.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 22,
+      "doi": "10.1007/978-3-319-24574-4_28",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "title_norm": "unet convolutional networks for biomedical image segmentation",
+      "authors": [
+        {
+          "name": "Olaf Ronneberger"
+        },
+        {
+          "name": "Philipp Fischer"
+        },
+        {
+          "name": "Thomas Brox"
+        }
+      ],
+      "year": 2015,
+      "venue": "MICCAI",
+      "abstract": "",
+      "citation_count": 90000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/U-Net__Convolutional_Networks_for_Biomedical_Image_Segmentat.md",
+      "token_estimate": 706,
+      "fetched_at": "2026-06-16T10:52:12.167224",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/978-3-319-24574-4_28",
+      "citationCount": 90000,
+      "externalIds": {
+        "DOI": "10.1007/978-3-319-24574-4_28"
+      },
+      "markdown_path": "./ref_md/U-Net__Convolutional_Networks_for_Biomedical_Image_Segmentat.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 20,
+      "doi": "10.48550/arxiv.2010.11929",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "title_norm": "an image is worth 16x16 words transformers for image recognition at scale",
+      "authors": [
+        {
+          "name": "Alexey Dosovitskiy"
+        },
+        {
+          "name": "Lucas Beyer"
+        },
+        {
+          "name": "Alexander Kolesnikov"
+        },
+        {
+          "name": "Dirk Weissenborn"
+        },
+        {
+          "name": "Xiaohua Zhai"
+        },
+        {
+          "name": "Thomas Unterthiner"
+        },
+        {
+          "name": "Mostafa Dehghani"
+        },
+        {
+          "name": "Matthias Minderer"
+        },
+        {
+          "name": "Georg Heigold"
+        },
+        {
+          "name": "Sylvain Gelly"
+        },
+        {
+          "name": "Jakob Uszkoreit"
+        },
+        {
+          "name": "Neil Houlsby"
+        }
+      ],
+      "year": 2021,
+      "venue": "ICLR",
+      "abstract": "",
+      "citation_count": 35000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/An_Image_is_Worth_16x16_Words__Transformers_for_Image_Recogn.md",
+      "token_estimate": 15113,
+      "fetched_at": "2026-06-16T10:52:12.169147",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.48550/arxiv.2010.11929",
+      "citationCount": 35000,
+      "externalIds": {
+        "DOI": "10.48550/arxiv.2010.11929"
+      },
+      "markdown_path": "./ref_md/An_Image_is_Worth_16x16_Words__Transformers_for_Image_Recogn.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 26,
+      "doi": "10.1109/ICCV48922.2021.00986",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "title_norm": "swin transformer hierarchical vision transformer using shifted windows",
+      "authors": [
+        {
+          "name": "Ze Liu"
+        },
+        {
+          "name": "Yutong Lin"
+        },
+        {
+          "name": "Yue Cao"
+        },
+        {
+          "name": "Han Hu"
+        },
+        {
+          "name": "Yixuan Wei"
+        },
+        {
+          "name": "Zheng Zhang"
+        },
+        {
+          "name": "Stephen Lin"
+        },
+        {
+          "name": "Baining Guo"
+        }
+      ],
+      "year": 2021,
+      "venue": "ICCV",
+      "abstract": "",
+      "citation_count": 25000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Swin_Transformer__Hierarchical_Vision_Transformer_using_Shif.md",
+      "token_estimate": 387,
+      "fetched_at": "2026-06-16T10:52:12.164658",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/ICCV48922.2021.00986",
+      "citationCount": 25000,
+      "externalIds": {
+        "DOI": "10.1109/ICCV48922.2021.00986"
+      },
+      "markdown_path": "./ref_md/Swin_Transformer__Hierarchical_Vision_Transformer_using_Shif.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 23,
+      "doi": "10.1109/CVPR.2017.106",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "title_norm": "feature pyramid networks for object detection",
+      "authors": [
+        {
+          "name": "Tsung-Yi Lin"
+        },
+        {
+          "name": "Piotr Dollar"
+        },
+        {
+          "name": "Ross Girshick"
+        },
+        {
+          "name": "Kaiming He"
+        },
+        {
+          "name": "Bharath Hariharan"
+        },
+        {
+          "name": "Serge Belongie"
+        }
+      ],
+      "year": 2017,
+      "venue": "CVPR",
+      "abstract": "",
+      "citation_count": 15000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Feature_Pyramid_Networks_for_Object_Detection.md",
+      "token_estimate": 284,
+      "fetched_at": "2026-06-16T10:52:12.166189",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/CVPR.2017.106",
+      "citationCount": 15000,
+      "externalIds": {
+        "DOI": "10.1109/CVPR.2017.106"
+      },
+      "markdown_path": "./ref_md/Feature_Pyramid_Networks_for_Object_Detection.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 27,
+      "doi": "10.1109/ICCV51070.2023.00900",
+      "title": "Segment Anything",
+      "title_norm": "segment anything",
+      "authors": [
+        {
+          "name": "Alexander Kirillov"
+        },
+        {
+          "name": "Eric Mintun"
+        },
+        {
+          "name": "Nikhila Ravi"
+        },
+        {
+          "name": "Hanzi Mao"
+        },
+        {
+          "name": "Chloe Rolland"
+        },
+        {
+          "name": "Laura Gustafson"
+        },
+        {
+          "name": "Tete Xiao"
+        },
+        {
+          "name": "Spencer Whitehead"
+        },
+        {
+          "name": "Alexander C. Berg"
+        },
+        {
+          "name": "Wan-Yen Lo"
+        },
+        {
+          "name": "Piotr Dollar"
+        },
+        {
+          "name": "Ross Girshick"
+        }
+      ],
+      "year": 2023,
+      "venue": "ICCV",
+      "abstract": "",
+      "citation_count": 12000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Joint-Relation_Transformer_for_Multi-Person_Motion_Predictio.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:53:57.300322",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/ICCV51070.2023.00900",
+      "citationCount": 12000,
+      "externalIds": {
+        "DOI": "10.1109/ICCV51070.2023.00900"
+      },
+      "markdown_path": "./ref_md/Joint-Relation_Transformer_for_Multi-Person_Motion_Predictio.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 21,
+      "doi": "10.1109/CVPR52688.2022.01553",
+      "title": "Masked Autoencoders Are Scalable Vision Learners",
+      "title_norm": "masked autoencoders are scalable vision learners",
+      "authors": [
+        {
+          "name": "Kaiming He"
+        },
+        {
+          "name": "Xinlei Chen"
+        },
+        {
+          "name": "Saining Xie"
+        },
+        {
+          "name": "Yanghao Li"
+        },
+        {
+          "name": "Piotr Dollar"
+        },
+        {
+          "name": "Ross Girshick"
+        }
+      ],
+      "year": 2022,
+      "venue": "CVPR",
+      "abstract": "",
+      "citation_count": 8000,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Masked_Autoencoders_Are_Scalable_Vision_Learners.md",
+      "token_estimate": 279,
+      "fetched_at": "2026-06-16T10:52:12.167444",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/CVPR52688.2022.01553",
+      "citationCount": 8000,
+      "externalIds": {
+        "DOI": "10.1109/CVPR52688.2022.01553"
+      },
+      "markdown_path": "./ref_md/Masked_Autoencoders_Are_Scalable_Vision_Learners.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 25,
+      "doi": "10.1109/TPAMI.2018.2877465",
+      "title": "Learning Depth from Monocular Videos Using Direct Methods",
+      "title_norm": "learning depth from monocular videos using direct methods",
+      "authors": [
+        {
+          "name": "C. Godard"
+        },
+        {
+          "name": "O. Mac Aodha"
+        },
+        {
+          "name": "G. J. Brostow"
+        }
+      ],
+      "year": 2019,
+      "venue": "IEEE TPAMI",
+      "abstract": "",
+      "citation_count": 4200,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tpami.2018.2877465.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:53:47.473758",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TPAMI.2018.2877465",
+      "citationCount": 4200,
+      "externalIds": {
+        "DOI": "10.1109/TPAMI.2018.2877465"
+      },
+      "markdown_path": "./ref_md/10.1109_tpami.2018.2877465.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 24,
+      "doi": "10.48550/arxiv.1406.2283",
+      "title": "Depth Map Prediction from a Single Image using Multi-Scale Deep Networks",
+      "title_norm": "depth map prediction from a single image using multiscale deep networks",
+      "authors": [
+        {
+          "name": "David Eigen"
+        },
+        {
+          "name": "Christian Puhrsch"
+        },
+        {
+          "name": "Rob Fergus"
+        }
+      ],
+      "year": 2014,
+      "venue": "NeurIPS",
+      "abstract": "",
+      "citation_count": 3500,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.48550_arxiv.1406.2283.md",
+      "token_estimate": 7768,
+      "fetched_at": "2026-06-16T10:56:34.612194",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.48550/arxiv.1406.2283",
+      "citationCount": 3500,
+      "externalIds": {
+        "DOI": "10.48550/arxiv.1406.2283"
+      },
+      "markdown_path": "./ref_md/10.48550_arxiv.1406.2283.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 15,
+      "doi": "10.1145/965141.563893",
+      "title": "Models of light reflection for computer synthesized pictures",
+      "title_norm": "a reflectance model for computer graphics",
+      "authors": [
+        {
+          "name": "James F. Blinn"
+        }
+      ],
+      "year": 1977,
+      "venue": "SIGGRAPH",
+      "abstract": "",
+      "citation_count": 2500,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Models_of_light_reflection_for_computer_synthesized_pictures.md",
+      "token_estimate": 253,
+      "fetched_at": "2026-06-16T10:52:12.169244",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1145/965141.563893",
+      "citationCount": 2500,
+      "externalIds": {
+        "DOI": "10.1145/965141.563893"
+      },
+      "markdown_path": "./ref_md/Models_of_light_reflection_for_computer_synthesized_pictures.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 10,
+      "doi": "",
+      "title": "Light Field Photography with a Handheld Plenoptic Camera",
+      "title_norm": "light field photography with a handheld plenoptic camera",
+      "authors": [
+        {
+          "name": "Ren Ng"
+        },
+        {
+          "name": "Marc Levoy"
+        },
+        {
+          "name": "Mathieu Bredif"
+        },
+        {
+          "name": "Gene Duval"
+        },
+        {
+          "name": "Mark Horowitz"
+        },
+        {
+          "name": "Pat Hanrahan"
+        }
+      ],
+      "year": 2005,
+      "venue": "Stanford CSTR",
+      "abstract": "",
+      "citation_count": 1200,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "failed",
+      "fulltext_path": null,
+      "token_estimate": 0,
+      "fetched_at": null,
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10",
+      "citationCount": 1200,
+      "externalIds": {},
+      "markdown_path": null,
+      "content_kind": "",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 11,
+      "doi": "10.1109/TPAMI.2006.69",
+      "title": "The Light Field Camera: Extended Depth of Field, Aliasing, and Superresolution",
+      "title_norm": "the light field camera extended depth of field aliasing and superresolution",
+      "authors": [
+        {
+          "name": "Ren Ng"
+        }
+      ],
+      "year": 2006,
+      "venue": "IEEE TPAMI",
+      "abstract": "",
+      "citation_count": 950,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/IEEE_Computer_Society_[advertisement].md",
+      "token_estimate": 2,
+      "fetched_at": "2026-06-16T10:59:08.403918",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TPAMI.2006.69",
+      "citationCount": 950,
+      "externalIds": {
+        "DOI": "10.1109/TPAMI.2006.69"
+      },
+      "markdown_path": "./ref_md/IEEE_Computer_Society_[advertisement].md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 7,
+      "doi": "10.1007/978-3-319-46478-7_3",
+      "title": "A Benchmark and Evaluation Framework for Light Field Depth Estimation",
+      "title_norm": "a benchmark and evaluation framework for light field depth estimation",
+      "authors": [
+        {
+          "name": "Katrin Honauer"
+        },
+        {
+          "name": "Lena Maier-Hein"
+        },
+        {
+          "name": "Daniel Kondermann"
+        }
+      ],
+      "year": 2016,
+      "venue": "ECCV",
+      "abstract": "",
+      "citation_count": 380,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Light_Field_Segmentation_Using_a_Ray-Based_Graph_Structure.md",
+      "token_estimate": 8696,
+      "fetched_at": "2026-06-16T10:52:12.166582",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/978-3-319-46478-7_3",
+      "citationCount": 380,
+      "externalIds": {
+        "DOI": "10.1007/978-3-319-46478-7_3"
+      },
+      "markdown_path": "./ref_md/Light_Field_Segmentation_Using_a_Ray-Based_Graph_Structure.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 3,
+      "doi": "10.1007/s11263-013-0689-8",
+      "title": "Light Field Depth Estimation via Epipolar Plane Image Analysis",
+      "title_norm": "light field depth estimation via epipolar plane image analysis",
+      "authors": [
+        {
+          "name": "S. Wanner"
+        },
+        {
+          "name": "B. Goldluecke"
+        }
+      ],
+      "year": 2014,
+      "venue": "IJCV",
+      "abstract": "",
+      "citation_count": 350,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1007_s11263-013-0689-8.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:53:49.078585",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/s11263-013-0689-8",
+      "citationCount": 350,
+      "externalIds": {
+        "DOI": "10.1007/s11263-013-0689-8"
+      },
+      "markdown_path": "./ref_md/10.1007_s11263-013-0689-8.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 6,
+      "doi": "10.1145/2508363.2508400",
+      "title": "Accurate Depth Estimation from Light Field Data via Angular Pixel Selection",
+      "title_norm": "accurate depth estimation from light field data via angular pixel selection",
+      "authors": [
+        {
+          "name": "M. W. Tao"
+        },
+        {
+          "name": "S. Hadap"
+        },
+        {
+          "name": "J. Malik"
+        },
+        {
+          "name": "R. Ramamoorthi"
+        }
+      ],
+      "year": 2013,
+      "venue": "ACM TOG",
+      "abstract": "",
+      "citation_count": 300,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Designing_and_fabricating_mechanical_automata_from_mocap_seq.md",
+      "token_estimate": 274,
+      "fetched_at": "2026-06-16T10:52:12.165760",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1145/2508363.2508400",
+      "citationCount": 300,
+      "externalIds": {
+        "DOI": "10.1145/2508363.2508400"
+      },
+      "markdown_path": "./ref_md/Designing_and_fabricating_mechanical_automata_from_mocap_seq.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 1,
+      "doi": "10.1109/TCSVT.2018.2797131",
+      "title": "EPINet: A Fully-Convolutional Neural Network Using Epipolar Geometry for Depth from Light Field Images",
+      "title_norm": "epinet a fullyconvolutional neural network using epipolar geometry for depth from light field images",
+      "authors": [
+        {
+          "name": "Stefan Heber"
+        },
+        {
+          "name": "Thomas Pock"
+        }
+      ],
+      "year": 2018,
+      "venue": "IEEE TCSVT",
+      "abstract": "",
+      "citation_count": 280,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tcsvt.2018.2797131.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:54:11.475528",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TCSVT.2018.2797131",
+      "citationCount": 280,
+      "externalIds": {
+        "DOI": "10.1109/TCSVT.2018.2797131"
+      },
+      "markdown_path": "./ref_md/10.1109_tcsvt.2018.2797131.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 4,
+      "doi": "10.1109/TPAMI.2017.2673001",
+      "title": "Occlusion-Aware Depth Estimation Using Light-Field Cameras",
+      "title_norm": "occlusionaware depth estimation using lightfield cameras",
+      "authors": [
+        {
+          "name": "Chen Chen"
+        },
+        {
+          "name": "Haiping Lin"
+        },
+        {
+          "name": "Zhan Yu"
+        },
+        {
+          "name": "Sing Bing Kang"
+        },
+        {
+          "name": "Jingyi Yu"
+        }
+      ],
+      "year": 2017,
+      "venue": "IEEE TPAMI",
+      "abstract": "",
+      "citation_count": 230,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tpami.2017.2673001.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:53:59.990008",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TPAMI.2017.2673001",
+      "citationCount": 230,
+      "externalIds": {
+        "DOI": "10.1109/TPAMI.2017.2673001"
+      },
+      "markdown_path": "./ref_md/10.1109_tpami.2017.2673001.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 12,
+      "doi": "10.1109/ICCV.2015.27",
+      "title": "Consistent Depth Estimation for Light Field Data via Epipolar Plane Analysis",
+      "title_norm": "consistent depth estimation for light field data via epipolar plane analysis",
+      "authors": [
+        {
+          "name": "T. C. Wang"
+        },
+        {
+          "name": "A. Efros"
+        },
+        {
+          "name": "R. Ramamoorthi"
+        }
+      ],
+      "year": 2015,
+      "venue": "ICCV",
+      "abstract": "",
+      "citation_count": 190,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Cluster-Based_Point_Set_Saliency.md",
+      "token_estimate": 214,
+      "fetched_at": "2026-06-16T11:06:16.898010",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/ICCV.2015.27",
+      "citationCount": 190,
+      "externalIds": {
+        "DOI": "10.1109/ICCV.2015.27"
+      },
+      "markdown_path": "./ref_md/Cluster-Based_Point_Set_Saliency.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 16,
+      "doi": "10.1007/s11263-010-0369-2",
+      "title": "A Theory of Plenoptic Multiplexing",
+      "title_norm": "a theory of plenoptic multiplexing",
+      "authors": [
+        {
+          "name": "A. Levin"
+        },
+        {
+          "name": "W. T. Freeman"
+        },
+        {
+          "name": "F. Durand"
+        }
+      ],
+      "year": 2011,
+      "venue": "IJCV",
+      "abstract": "",
+      "citation_count": 130,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1007_s11263-010-0369-2.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:54:13.118666",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/s11263-010-0369-2",
+      "citationCount": 130,
+      "externalIds": {
+        "DOI": "10.1007/s11263-010-0369-2"
+      },
+      "markdown_path": "./ref_md/10.1007_s11263-010-0369-2.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 14,
+      "doi": "10.1109/CVPR.2017.292",
+      "title": "4D Light Field Superpixel and Segmentation",
+      "title_norm": "4d light field superpixel and segmentation",
+      "authors": [
+        {
+          "name": "M. Hog"
+        },
+        {
+          "name": "R. Keriven"
+        },
+        {
+          "name": "R. Sabater"
+        },
+        {
+          "name": "M. Bredif"
+        }
+      ],
+      "year": 2017,
+      "venue": "CVPR",
+      "abstract": "",
+      "citation_count": 85,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Deep_Network_Flow_for_Multi-object_Tracking.md",
+      "token_estimate": 273,
+      "fetched_at": "2026-06-16T11:06:34.562569",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/CVPR.2017.292",
+      "citationCount": 85,
+      "externalIds": {
+        "DOI": "10.1109/CVPR.2017.292"
+      },
+      "markdown_path": "./ref_md/Deep_Network_Flow_for_Multi-object_Tracking.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 8,
+      "doi": "10.1109/TCSVT.2020.2978255",
+      "title": "A Practical Depth Estimation Method for Light Field Shooting",
+      "title_norm": "a practical depth estimation method for light field shooting",
+      "authors": [
+        {
+          "name": "Jinxiu Li"
+        },
+        {
+          "name": "Jingyi Yu"
+        }
+      ],
+      "year": 2020,
+      "venue": "IEEE TCSVT",
+      "abstract": "",
+      "citation_count": 55,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tcsvt.2020.2978255.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:56:36.316276",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TCSVT.2020.2978255",
+      "citationCount": 55,
+      "externalIds": {
+        "DOI": "10.1109/TCSVT.2020.2978255"
+      },
+      "markdown_path": "./ref_md/10.1109_tcsvt.2020.2978255.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 2,
+      "doi": "10.1109/TPAMI.2023.3245283",
+      "title": "Robust Light Field Depth Estimation Using Noisy Correspondence",
+      "title_norm": "robust light field depth estimation using noisy correspondence",
+      "authors": [
+        {
+          "name": "Yingqian Wang"
+        },
+        {
+          "name": "Jungang Yang"
+        },
+        {
+          "name": "Liang-Jian Deng"
+        },
+        {
+          "name": "Chao Xiao"
+        },
+        {
+          "name": "Xiao-Ping Zhang"
+        }
+      ],
+      "year": 2023,
+      "venue": "IEEE TPAMI",
+      "abstract": "",
+      "citation_count": 45,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tpami.2023.3245283.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:57:39.592923",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TPAMI.2023.3245283",
+      "citationCount": 45,
+      "externalIds": {
+        "DOI": "10.1109/TPAMI.2023.3245283"
+      },
+      "markdown_path": "./ref_md/10.1109_tpami.2023.3245283.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 17,
+      "doi": "10.1109/TNNLS.2021.3089461",
+      "title": "Epipolar Plane Image-Based Light Field Depth Estimation via Deep Convolutional Neural Networks",
+      "title_norm": "epipolar plane imagebased light field depth estimation via deep convolutional neural networks",
+      "authors": [
+        {
+          "name": "Y. Lyu"
+        },
+        {
+          "name": "Z. Wang"
+        },
+        {
+          "name": "J. Lu"
+        },
+        {
+          "name": "J. Jia"
+        }
+      ],
+      "year": 2022,
+      "venue": "IEEE TNNLS",
+      "abstract": "",
+      "citation_count": 42,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tnnls.2021.3089461.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:57:41.334238",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TNNLS.2021.3089461",
+      "citationCount": 42,
+      "externalIds": {
+        "DOI": "10.1109/TNNLS.2021.3089461"
+      },
+      "markdown_path": "./ref_md/10.1109_tnnls.2021.3089461.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 9,
+      "doi": "10.1109/TCSVT.2021.3111069",
+      "title": "Learning the Depth of Light Field from a Single Image",
+      "title_norm": "learning the depth of light field from a single image",
+      "authors": [
+        {
+          "name": "J. Peng"
+        },
+        {
+          "name": "Z. Xiong"
+        },
+        {
+          "name": "X. Huang"
+        },
+        {
+          "name": "Z. Ye"
+        },
+        {
+          "name": "D. Liu"
+        }
+      ],
+      "year": 2022,
+      "venue": "IEEE TCSVT",
+      "abstract": "",
+      "citation_count": 40,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/10.1109_tcsvt.2021.3111069.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:57:42.979070",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TCSVT.2021.3111069",
+      "citationCount": 40,
+      "externalIds": {
+        "DOI": "10.1109/TCSVT.2021.3111069"
+      },
+      "markdown_path": "./ref_md/10.1109_tcsvt.2021.3111069.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 5,
+      "doi": "10.1109/TCSVT.2021.3074985",
+      "title": "Depth from Light Field with Non-Lambertian Scene",
+      "title_norm": "depth from light field with nonlambertian scene",
+      "authors": [
+        {
+          "name": "Y. Li"
+        },
+        {
+          "name": "D. Wang"
+        },
+        {
+          "name": "J. Yu"
+        }
+      ],
+      "year": 2021,
+      "venue": "IEEE TCSVT",
+      "abstract": "",
+      "citation_count": 35,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "none",
+      "fulltext_path": null,
+      "token_estimate": 0,
+      "fetched_at": null,
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TCSVT.2021.3074985",
+      "citationCount": 35,
+      "externalIds": {
+        "DOI": "10.1109/TCSVT.2021.3074985"
+      },
+      "markdown_path": null,
+      "content_kind": "",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 13,
+      "doi": "10.1109/TIP.2023.3265121",
+      "title": "Robust Light Field Depth Estimation for Specular and Transparent Objects",
+      "title_norm": "robust light field depth estimation for specular and transparent objects",
+      "authors": [
+        {
+          "name": "S. Zhang"
+        },
+        {
+          "name": "H. Sheng"
+        },
+        {
+          "name": "C. Li"
+        },
+        {
+          "name": "Z. Xiong"
+        }
+      ],
+      "year": 2023,
+      "venue": "IEEE TIP",
+      "abstract": "",
+      "citation_count": 15,
+      "source": "pack",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "none",
+      "fulltext_path": null,
+      "token_estimate": 0,
+      "fetched_at": null,
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/TIP.2023.3265121",
+      "citationCount": 15,
+      "externalIds": {
+        "DOI": "10.1109/TIP.2023.3265121"
+      },
+      "markdown_path": null,
+      "content_kind": "",
+      "_relevance_score": 0.0,
+      "_source": "pack",
+      "group": ""
+    },
+    {
+      "id": 28,
+      "doi": "10.1109/cvpr.2018.00813",
+      "title": "Non-local Neural Networks",
+      "title_norm": "nonlocal neural networks",
+      "authors": [
+        {
+          "name": "Xiaolong Wang, Ross Girshick, Abhinav Gupta, Kaiming He"
+        }
+      ],
+      "year": null,
+      "venue": "2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Non-local_Neural_Networks.md",
+      "token_estimate": 9055,
+      "fetched_at": "2026-06-16T10:52:12.164824",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/cvpr.2018.00813",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/cvpr.2018.00813"
+      },
+      "markdown_path": "./ref_md/Non-local_Neural_Networks.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 29,
+      "doi": "10.1109/tgrs.2004.824067",
+      "title": "Aerosol properties over bright-reflecting source regions",
+      "title_norm": "aerosol properties over brightreflecting source regions",
+      "authors": [
+        {
+          "name": "N.C. Hsu, Si-Chee Tsay, M.D. King, J.R. Herman"
+        }
+      ],
+      "year": null,
+      "venue": "IEEE Transactions on Geoscience and Remote Sensing",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Aerosol_properties_over_bright-reflecting_source_regions.md",
+      "token_estimate": 11348,
+      "fetched_at": "2026-06-16T10:52:12.164988",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/tgrs.2004.824067",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/tgrs.2004.824067"
+      },
+      "markdown_path": "./ref_md/Aerosol_properties_over_bright-reflecting_source_regions.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 30,
+      "doi": "10.1523/jneurosci.3539-11.2011",
+      "title": "Rich-Club Organization of the Human Connectome",
+      "title_norm": "richclub organization of the human connectome",
+      "authors": [
+        {
+          "name": "Martijn P. van den Heuvel, Olaf Sporns"
+        }
+      ],
+      "year": 2011,
+      "venue": "The Journal of Neuroscience",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Rich-Club_Organization_of_the_Human_Connectome.md",
+      "token_estimate": 418,
+      "fetched_at": "2026-06-16T10:52:12.165111",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1523/jneurosci.3539-11.2011",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1523/jneurosci.3539-11.2011"
+      },
+      "markdown_path": "./ref_md/Rich-Club_Organization_of_the_Human_Connectome.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 31,
+      "doi": "10.48550/arxiv.1409.0473v7",
+      "title": "Neural Machine Translation by Jointly Learning to Align and Translate",
+      "title_norm": "neural machine translation by jointly learning to align and translate",
+      "authors": [
+        {
+          "name": "Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio"
+        }
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Neural_Machine_Translation_by_Jointly_Learning_to_Align_and.md",
+      "token_estimate": 11275,
+      "fetched_at": "2026-06-16T10:52:12.165224",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.48550/arxiv.1409.0473v7",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.48550/arxiv.1409.0473v7"
+      },
+      "markdown_path": "./ref_md/Neural_Machine_Translation_by_Jointly_Learning_to_Align_and.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 32,
+      "doi": "10.48550/arxiv.1406.2283v1",
+      "title": "Depth Map Prediction from a Single Image using a Multi-Scale Deep Network",
+      "title_norm": "depth map prediction from a single image using a multiscale deep network",
+      "authors": [
+        {
+          "name": "David Eigen, Christian Puhrsch, Rob Fergus"
+        }
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Depth_Map_Prediction_from_a_Single_Image_using_a_Multi-Scale.md",
+      "token_estimate": 8003,
+      "fetched_at": "2026-06-16T10:52:12.165376",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.48550/arxiv.1406.2283v1",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.48550/arxiv.1406.2283v1"
+      },
+      "markdown_path": "./ref_md/Depth_Map_Prediction_from_a_Single_Image_using_a_Multi-Scale.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 33,
+      "doi": "10.1109/iccv51070.2023.00900",
+      "title": "Joint-Relation Transformer for Multi-Person Motion Prediction",
+      "title_norm": "jointrelation transformer for multiperson motion prediction",
+      "authors": [
+        {
+          "name": "Qingyao Xu, Weibo Mao, Jingze Gong, Chenxin Xu, Siheng Chen, Weidi Xie, Ya Zhang, Yanfeng Wang"
+        }
+      ],
+      "year": null,
+      "venue": "2023 IEEE/CVF International Conference on Computer Vision (ICCV)",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Joint-Relation_Transformer_for_Multi-Person_Motion_Predictio.md",
+      "token_estimate": 282,
+      "fetched_at": "2026-06-16T10:52:12.165527",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/iccv51070.2023.00900",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/iccv51070.2023.00900"
+      },
+      "markdown_path": "./ref_md/Joint-Relation_Transformer_for_Multi-Person_Motion_Predictio.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 34,
+      "doi": "10.1109/tpami.2006.69",
+      "title": "IEEE Computer Society [advertisement]",
+      "title_norm": "ieee computer society advertisement",
+      "authors": [],
+      "year": null,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/IEEE_Computer_Society_[advertisement].md",
+      "token_estimate": 2,
+      "fetched_at": "2026-06-16T10:52:12.165666",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/tpami.2006.69",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/tpami.2006.69"
+      },
+      "markdown_path": "./ref_md/IEEE_Computer_Society_[advertisement].md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 35,
+      "doi": "10.1109/cvpr.2018.00212",
+      "title": "GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose",
+      "title_norm": "geonet unsupervised learning of dense depth optical flow and camera pose",
+      "authors": [
+        {
+          "name": "Zhichao Yin, Jianping Shi"
+        }
+      ],
+      "year": null,
+      "venue": "2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/GeoNet__Unsupervised_Learning_of_Dense_Depth,_Optical_Flow_a.md",
+      "token_estimate": 8595,
+      "fetched_at": "2026-06-16T10:52:12.165872",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/cvpr.2018.00212",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/cvpr.2018.00212"
+      },
+      "markdown_path": "./ref_md/GeoNet__Unsupervised_Learning_of_Dense_Depth,_Optical_Flow_a.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 36,
+      "doi": "10.1103/physrevlett.7.118",
+      "title": "Generation of Optical Harmonics",
+      "title_norm": "generation of optical harmonics",
+      "authors": [
+        {
+          "name": "P. A. Franken, A. E. Hill, C. W. Peters, G. Weinreich"
+        }
+      ],
+      "year": 1961,
+      "venue": "Physical Review Letters",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Generation_of_Optical_Harmonics.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.165981",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1103/physrevlett.7.118",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1103/physrevlett.7.118"
+      },
+      "markdown_path": "./ref_md/Generation_of_Optical_Harmonics.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 37,
+      "doi": "10.18653/v1/d15-1166",
+      "title": "Effective Approaches to Attention-based Neural Machine Translation",
+      "title_norm": "effective approaches to attentionbased neural machine translation",
+      "authors": [
+        {
+          "name": "Thang Luong, Hieu Pham, Christopher D. Manning"
+        }
+      ],
+      "year": 2015,
+      "venue": "Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Effective_Approaches_to_Attention-based_Neural_Machine_Trans.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.166088",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.18653/v1/d15-1166",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.18653/v1/d15-1166"
+      },
+      "markdown_path": "./ref_md/Effective_Approaches_to_Attention-based_Neural_Machine_Trans.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 38,
+      "doi": "10.1371/journal.pbio.2005970",
+      "title": "CellProfiler 3.0: Next-generation image processing for biology",
+      "title_norm": "cellprofiler 30 nextgeneration image processing for biology",
+      "authors": [
+        {
+          "name": "Claire McQuin, Allen Goodman, Vasiliy Chernyshev, Lee Kamentsky, Beth A. Cimini, Kyle W. Karhohs, Minh Doan, Liya Ding, Susanne M. Rafelski, Derek Thirstrup, Winfried Wiegraebe, Shantanu Singh, Tim Becker, Juan C. Caicedo, Anne E. Carpenter"
+        }
+      ],
+      "year": 2018,
+      "venue": "PLOS Biology",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/CellProfiler_3.0__Next-generation_image_processing_for_biolo.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.166327",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1371/journal.pbio.2005970",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1371/journal.pbio.2005970"
+      },
+      "markdown_path": "./ref_md/CellProfiler_3.0__Next-generation_image_processing_for_biolo.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 39,
+      "doi": "10.1145/3503250",
+      "title": "NeRF",
+      "title_norm": "nerf",
+      "authors": [
+        {
+          "name": "Ben Mildenhall, Pratul P. Srinivasan, Matthew Tancik, Jonathan T. Barron, Ravi Ramamoorthi, Ren Ng"
+        }
+      ],
+      "year": 2022,
+      "venue": "Communications of the ACM",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/NeRF.md",
+      "token_estimate": 268,
+      "fetched_at": "2026-06-16T10:52:12.166440",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1145/3503250",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1145/3503250"
+      },
+      "markdown_path": "./ref_md/NeRF.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 40,
+      "doi": "10.1007/978-3-031-25066-8_9",
+      "title": "Swin-Unet: Unet-Like Pure Transformer for Medical Image Segmentation",
+      "title_norm": "swinunet unetlike pure transformer for medical image segmentation",
+      "authors": [
+        {
+          "name": "Hu Cao, Yueyue Wang, Joy Chen, Dongsheng Jiang, Xiaopeng Zhang, Qi Tian, Manning Wang"
+        }
+      ],
+      "year": 2023,
+      "venue": "Lecture Notes in Computer Science",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Swin-Unet__Unet-Like_Pure_Transformer_for_Medical_Image_Segm.md",
+      "token_estimate": 8915,
+      "fetched_at": "2026-06-16T10:52:12.166757",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/978-3-031-25066-8_9",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1007/978-3-031-25066-8_9"
+      },
+      "markdown_path": "./ref_md/Swin-Unet__Unet-Like_Pure_Transformer_for_Medical_Image_Segm.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 41,
+      "doi": "10.1007/jhep07(2014)079",
+      "title": "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations",
+      "title_norm": "the automated computation of treelevel and nexttoleading order differential cross sections and their matching to parton shower simulations",
+      "authors": [
+        {
+          "name": "J. Alwall, R. Frederix, S. Frixione, V. Hirschi, F. Maltoni, O. Mattelaer, H.-S. Shao, T. Stelzer, P. Torrielli, M. Zaro"
+        }
+      ],
+      "year": 2014,
+      "venue": "Journal of High Energy Physics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/The_automated_computation_of_tree-level_and_next-to-leading.md",
+      "token_estimate": 258,
+      "fetched_at": "2026-06-16T10:52:12.166872",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/jhep07(2014)079",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1007/jhep07(2014)079"
+      },
+      "markdown_path": "./ref_md/The_automated_computation_of_tree-level_and_next-to-leading.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 42,
+      "doi": "10.1103/revmodphys.70.223",
+      "title": "Stochastic resonance",
+      "title_norm": "stochastic resonance",
+      "authors": [
+        {
+          "name": "Luca Gammaitoni, Peter Hänggi, Peter Jung, Fabio Marchesoni"
+        }
+      ],
+      "year": 1998,
+      "venue": "Reviews of Modern Physics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Stochastic_resonance.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.166985",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1103/revmodphys.70.223",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1103/revmodphys.70.223"
+      },
+      "markdown_path": "./ref_md/Stochastic_resonance.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 43,
+      "doi": "10.1002/jcc.21287",
+      "title": "CHARMM: The biomolecular simulation program",
+      "title_norm": "charmm the biomolecular simulation program",
+      "authors": [
+        {
+          "name": "B. R. Brooks, C. L. Brooks, A. D. Mackerell, L. Nilsson, R. J. Petrella, B. Roux, Y. Won, G. Archontis, C. Bartels, S. Boresch, A. Caflisch, L. Caves, Q. Cui, A. R. Dinner, M. Feig, S. Fischer, J. Gao, M. Hodoscek, W. Im, K. Kuczera, T. Lazaridis, J. Ma, V. Ovchinnikov, E. Paci, R. W. Pastor, C. B. Post, J. Z. Pu, M. Schaefer, B. Tidor, R. M. Venable, H. L. Woodcock, X. Wu, W. Yang, D. M. York, M. Karplus"
+        }
+      ],
+      "year": 2009,
+      "venue": "Journal of Computational Chemistry",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/CHARMM__The_biomolecular_simulation_program.md",
+      "token_estimate": 93865,
+      "fetched_at": "2026-06-16T10:52:12.167123",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1002/jcc.21287",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1002/jcc.21287"
+      },
+      "markdown_path": "./ref_md/CHARMM__The_biomolecular_simulation_program.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 44,
+      "doi": "10.1109/cvpr.2017.292",
+      "title": "Deep Network Flow for Multi-object Tracking",
+      "title_norm": "deep network flow for multiobject tracking",
+      "authors": [
+        {
+          "name": "Samuel Schulter, Paul Vernaza, Wongun Choi, Manmohan Chandraker"
+        }
+      ],
+      "year": 2017,
+      "venue": "2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Deep_Network_Flow_for_Multi-object_Tracking.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.167375",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/cvpr.2017.292",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/cvpr.2017.292"
+      },
+      "markdown_path": "./ref_md/Deep_Network_Flow_for_Multi-object_Tracking.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 45,
+      "doi": "10.1093/nar/gky427",
+      "title": "SWISS-MODEL: homology modelling of protein structures and complexes",
+      "title_norm": "swissmodel homology modelling of protein structures and complexes",
+      "authors": [
+        {
+          "name": "Andrew Waterhouse, Martino Bertoni, Stefan Bienert, Gabriel Studer, Gerardo Tauriello, Rafal Gumienny, Florian T Heer, Tjaart A P de Beer, Christine Rempfer, Lorenza Bordoli, Rosalba Lepore, Torsten Schwede"
+        }
+      ],
+      "year": 2018,
+      "venue": "Nucleic Acids Research",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/SWISS-MODEL__homology_modelling_of_protein_structures_and_co.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.167635",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1093/nar/gky427",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1093/nar/gky427"
+      },
+      "markdown_path": "./ref_md/SWISS-MODEL__homology_modelling_of_protein_structures_and_co.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 46,
+      "doi": "10.1016/j.inffus.2019.12.012",
+      "title": "Explainable Artificial Intelligence (XAI): Concepts, taxonomies, opportunities and challenges toward responsible AI",
+      "title_norm": "explainable artificial intelligence xai concepts taxonomies opportunities and challenges toward responsible ai",
+      "authors": [
+        {
+          "name": "Alejandro Barredo Arrieta, Natalia Díaz-Rodríguez, Javier Del Ser, Adrien Bennetot, Siham Tabik, Alberto Barbado, Salvador Garcia, Sergio Gil-Lopez, Daniel Molina, Richard Benjamins, Raja Chatila, Francisco Herrera"
+        }
+      ],
+      "year": 2020,
+      "venue": "Information Fusion",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Explainable_Artificial_Intelligence_(XAI)__Concepts,_taxonom.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.167750",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1016/j.inffus.2019.12.012",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1016/j.inffus.2019.12.012"
+      },
+      "markdown_path": "./ref_md/Explainable_Artificial_Intelligence_(XAI)__Concepts,_taxonom.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 47,
+      "doi": "10.1109/jsac.2014.2328098",
+      "title": "What Will 5G Be?",
+      "title_norm": "what will 5g be",
+      "authors": [
+        {
+          "name": "Jeffrey G. Andrews, Stefano Buzzi, Wan Choi, Stephen V. Hanly, Angel Lozano, Anthony C. K. Soong, Jianzhong Charlie Zhang"
+        }
+      ],
+      "year": null,
+      "venue": "IEEE Journal on Selected Areas in Communications",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/What_Will_5G_Be.md",
+      "token_estimate": 18963,
+      "fetched_at": "2026-06-16T10:52:12.167924",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/jsac.2014.2328098",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/jsac.2014.2328098"
+      },
+      "markdown_path": "./ref_md/What_Will_5G_Be.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 48,
+      "doi": "10.1109/iccv.2015.27",
+      "title": "Cluster-Based Point Set Saliency",
+      "title_norm": "clusterbased point set saliency",
+      "authors": [
+        {
+          "name": "Flora Ponjou Tasse, Jiri Kosinka, Neil Dodgson"
+        }
+      ],
+      "year": null,
+      "venue": "2015 IEEE International Conference on Computer Vision (ICCV)",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Cluster-Based_Point_Set_Saliency.md",
+      "token_estimate": 214,
+      "fetched_at": "2026-06-16T10:52:12.168145",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/iccv.2015.27",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/iccv.2015.27"
+      },
+      "markdown_path": "./ref_md/Cluster-Based_Point_Set_Saliency.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 49,
+      "doi": "10.1103/revmodphys.81.163",
+      "title": "Attosecond physics",
+      "title_norm": "attosecond physics",
+      "authors": [
+        {
+          "name": "Ferenc Krausz, Misha Ivanov"
+        }
+      ],
+      "year": 2009,
+      "venue": "Reviews of Modern Physics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Attosecond_physics.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.168262",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1103/revmodphys.81.163",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1103/revmodphys.81.163"
+      },
+      "markdown_path": "./ref_md/Attosecond_physics.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 50,
+      "doi": "10.1103/revmodphys.90.015001",
+      "title": "Weyl and Dirac semimetals in three-dimensional solids",
+      "title_norm": "weyl and dirac semimetals in threedimensional solids",
+      "authors": [
+        {
+          "name": "N. P. Armitage, E. J. Mele, Ashvin Vishwanath"
+        }
+      ],
+      "year": 2018,
+      "venue": "Reviews of Modern Physics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/Weyl_and_Dirac_semimetals_in_three-dimensional_solids.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.168378",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1103/revmodphys.90.015001",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1103/revmodphys.90.015001"
+      },
+      "markdown_path": "./ref_md/Weyl_and_Dirac_semimetals_in_three-dimensional_solids.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 51,
+      "doi": "10.1103/revmodphys.77.137",
+      "title": "The Kuramoto model: A simple paradigm for synchronization phenomena",
+      "title_norm": "the kuramoto model a simple paradigm for synchronization phenomena",
+      "authors": [
+        {
+          "name": "Juan A. Acebrón, L. L. Bonilla, Conrad J. Pérez Vicente, Félix Ritort, Renato Spigler"
+        }
+      ],
+      "year": 2005,
+      "venue": "Reviews of Modern Physics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/The_Kuramoto_model__A_simple_paradigm_for_synchronization_ph.md",
+      "token_estimate": 0,
+      "fetched_at": "2026-06-16T10:52:12.168563",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1103/revmodphys.77.137",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1103/revmodphys.77.137"
+      },
+      "markdown_path": "./ref_md/The_Kuramoto_model__A_simple_paradigm_for_synchronization_ph.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 52,
+      "doi": "10.1109/tro.2021.3075644",
+      "title": "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual–Inertial, and Multimap SLAM",
+      "title_norm": "orbslam3 an accurate opensource library for visual visualinertial and multimap slam",
+      "authors": [
+        {
+          "name": "Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M. M. Montiel, Juan D. Tardós"
+        }
+      ],
+      "year": null,
+      "venue": "IEEE Transactions on Robotics",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/ORB-SLAM3__An_Accurate_Open-Source_Library_for_Visual,_Visua.md",
+      "token_estimate": 16184,
+      "fetched_at": "2026-06-16T10:52:12.168719",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/tro.2021.3075644",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/tro.2021.3075644"
+      },
+      "markdown_path": "./ref_md/ORB-SLAM3__An_Accurate_Open-Source_Library_for_Visual,_Visua.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 53,
+      "doi": "10.1007/s11263-010-0390-2",
+      "title": "A Database and Evaluation Methodology for Optical Flow",
+      "title_norm": "a database and evaluation methodology for optical flow",
+      "authors": [
+        {
+          "name": "Simon Baker, Daniel Scharstein, J. P. Lewis, Stefan Roth, Michael J. Black, Richard Szeliski"
+        }
+      ],
+      "year": 2011,
+      "venue": "International Journal of Computer Vision",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/A_Database_and_Evaluation_Methodology_for_Optical_Flow.md",
+      "token_estimate": 409,
+      "fetched_at": "2026-06-16T10:52:12.168830",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1007/s11263-010-0390-2",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1007/s11263-010-0390-2"
+      },
+      "markdown_path": "./ref_md/A_Database_and_Evaluation_Methodology_for_Optical_Flow.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 54,
+      "doi": "10.1109/tim.2022.3178991",
+      "title": "DS-TransUNet: Dual Swin Transformer U-Net for Medical Image Segmentation",
+      "title_norm": "dstransunet dual swin transformer unet for medical image segmentation",
+      "authors": [
+        {
+          "name": "Ailiang Lin, Bingzhi Chen, Jiayu Xu, Zheng Zhang, Guangming Lu, David Zhang"
+        }
+      ],
+      "year": 2022,
+      "venue": "IEEE Transactions on Instrumentation and Measurement",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/DS-TransUNet__Dual_Swin_Transformer_U-Net_for_Medical_Image.md",
+      "token_estimate": 451,
+      "fetched_at": "2026-06-16T10:52:12.168961",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1109/tim.2022.3178991",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1109/tim.2022.3178991"
+      },
+      "markdown_path": "./ref_md/DS-TransUNet__Dual_Swin_Transformer_U-Net_for_Medical_Image.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    },
+    {
+      "id": 55,
+      "doi": "10.1373/clinchem.2008.112797",
+      "title": "The MIQE Guidelines: Minimum Information for Publication of Quantitative Real-Time PCR Experiments",
+      "title_norm": "the miqe guidelines minimum information for publication of quantitative realtime pcr experiments",
+      "authors": [
+        {
+          "name": "Stephen A Bustin, Vladimir Benes, Jeremy A Garson, Jan Hellemans, Jim Huggett, Mikael Kubista, Reinhold Mueller, Tania Nolan, Michael W Pfaffl, Gregory L Shipley, Jo Vandesompele, Carl T Wittwer"
+        }
+      ],
+      "year": 2009,
+      "venue": "Clinical Chemistry",
+      "abstract": "",
+      "citation_count": 0,
+      "source": "paper_fetch",
+      "search_query": "",
+      "group_name": "",
+      "relevance_score": 0.0,
+      "fulltext_status": "fetched",
+      "fulltext_path": "./ref_md/The_MIQE_Guidelines__Minimum_Information_for_Publication_of.md",
+      "token_estimate": 335,
+      "fetched_at": "2026-06-16T10:52:12.169075",
+      "claims_extracted": 0,
+      "verified": 0,
+      "used_in_paper": 0,
+      "created_at": "2026-06-16 02:52:12",
+      "paperId": "10.1373/clinchem.2008.112797",
+      "citationCount": 0,
+      "externalIds": {
+        "DOI": "10.1373/clinchem.2008.112797"
+      },
+      "markdown_path": "./ref_md/The_MIQE_Guidelines__Minimum_Information_for_Publication_of.md",
+      "content_kind": "fulltext",
+      "_relevance_score": 0.0,
+      "_source": "paper_fetch",
+      "group": ""
+    }
+  ]
+}

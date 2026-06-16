@@ -1,0 +1,66 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Too many commas in name 1 of "Xiaolong Wang, Ross Girshick, Abhinav Gupta, Kaiming He" for entry heNone
+while executing---line 2403 of file IEEEtran.bst
+Warning--empty year in heNone
+Too many commas in name 1 of "Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M. M. Montiel, Juan D. Tardós" for entry tardsNone
+while executing---line 2403 of file IEEEtran.bst
+Too many commas in name 1 of "Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M. M. Montiel, Juan D. Tardós" for entry tardsNone
+while executing---line 2403 of file IEEEtran.bst
+Warning--empty year in tardsNone
+Warning--empty year in shiNone
+
+Done.
+You've used 27 entries,
+            4087 wiz_defined-function locations,
+            934 strings with 11117 characters,
+and the built_in function-call counts, 12988 in all, are:
+= -- 888
+> -- 450
+< -- 0
++ -- 214
+- -- 107
+* -- 597
+:= -- 2116
+add.period$ -- 54
+call.type$ -- 27
+change.case$ -- 27
+chr.to.int$ -- 0
+cite$ -- 30
+duplicate$ -- 1106
+empty$ -- 1274
+format.name$ -- 129
+if$ -- 2955
+int.to.chr$ -- 0
+int.to.str$ -- 27
+missing$ -- 233
+newline$ -- 104
+num.names$ -- 27
+pop$ -- 673
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 977
+stack$ -- 0
+substring$ -- 27
+swap$ -- 617
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 27
+warning$ -- 3
+while$ -- 27
+width$ -- 29
+write$ -- 235
+(There were 3 error messages)

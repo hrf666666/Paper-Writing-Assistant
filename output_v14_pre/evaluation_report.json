@@ -1,0 +1,133 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 68.0,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 15,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 72,
+      "tex_has_citations": true,
+      "tex_table_count": 4,
+      "tex_has_tables": true,
+      "tex_figure_count": 3,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 27,
+      "bib_min_entries": true,
+      "pdf_exists": true,
+      "pdf_size_kb": 187.2,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 4,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 0,
+      "compile_success": true
+    },
+    "score": 100,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 9173,
+      "word_count_ok": true,
+      "citation_count": 72,
+      "citations_min": true,
+      "formula_count": 15,
+      "formulas_min": true,
+      "table_count": 4,
+      "tables_min": true,
+      "figure_count": 3,
+      "figures_min": true,
+      "ablation_mentions": 7,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 100,
+    "sections_found": 5,
+    "total_words": 9173,
+    "total_citations": 72
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 75,
+      "narrative_progression": 75,
+      "methodological_rigor": 70,
+      "experimental_sufficiency": 45,
+      "citation_quality": 40,
+      "writing_style": 70,
+      "data_consistency": 65,
+      "format_compliance": 40
+    },
+    "overall_score": 60,
+    "strengths": [
+      "Proposes a highly novel and physically interpretable framework (Unified Dual-Mask Physical Model) that successfully shifts away from standard Lambertian assumptions.",
+      "Provides a clear and logical narrative progression, effectively identifying the limitations of EPI viewpoint consistency in modern deep learning architectures.",
+      "Displays solid mathematical formalization in the methodology, specifically defining the 4D cost volume formulation and architectural progression."
+    ],
+    "weaknesses": [
+      "Contains fewer than 30 citations, demonstrating an insufficient review of related literature for a TCSVT submission.",
+      "Lacks essential visual evidence of actual figures (relying on textual placeholders), standard BadPix metrics, and detailed ablation studies, severely limiting experimental validation.",
+      "The proposed model's actual performance on non-Lambertian scenes (MAE 0.390) is only marginally better than the baseline failures it critiques (MAE 0.411), undermining the claimed paradigm shift.",
+      "Document formatting fails IEEE standards due to the presence of Markdown residuals (e.g., **, ##) instead of proper LaTeX environments."
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "Format Non-Compliance: The manuscript contains Markdown residuals and fails to demonstrate standard IEEEtran class formatting, markboth headers, and proper equation environments.",
+      "Insufficient Literature Context: With under 30 references, the paper lacks the comprehensive scholarly grounding expected in IEEE TCSVT, particularly missing recent state-of-the-art comparisons.",
+      "Experimental Rigor and Visuals: The paper lacks actual visual figures (only TikZ/text placeholders are implied), standard light field metrics like BadPix, and quantitative ablation studies required to validate the physical dual-mask model."
+    ]
+  },
+  "overall": {
+    "L1_score": 100,
+    "L2_score": 100,
+    "L3_score": 60,
+    "L1_passed": true,
+    "overall_grade": "B",
+    "hierarchical_alignment": {
+      "goal_vs_L_checks": [
+        {
+          "goal": "G2 (参考文献体系)",
+          "goal_passed": true,
+          "L2_citations_min": true,
+          "consistent": true
+        },
+        {
+          "goal": "G5 (学术输出)",
+          "goal_passed": true,
+          "L1_tex_exists": true,
+          "L1_pdf_exists": true,
+          "consistent": true
+        },
+        {
+          "goal": "G4 (章节生成)",
+          "goal_passed": false,
+          "L2_sections_complete": true,
+          "consistent": false
+        }
+      ],
+      "consistent": false
+    }
+  }
+}

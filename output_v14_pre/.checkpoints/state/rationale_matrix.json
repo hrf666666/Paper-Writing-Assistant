@@ -1,0 +1,75 @@
+{
+  "rows": [
+    {
+      "design_decision": "Introduce an MRI-like angular frequency analysis (using 2D-DFT on 9x9=81 angular samples) to decode material reflectance.",
+      "motivation": "Current data-driven light field models are fundamentally blind to specular and scattering reflections, breaking the view-consistency assumption and causing severe texture copying.",
+      "sota_gap": "Shifts from implicit, heuristic EPI feature extraction to an explicit physical mapping where Lambertian, specular, and scattering domains are identified by low, high, and mid-frequency dominance, respectively.",
+      "scenario": "Highly reflective or translucent materials in Non-Lambertian datasets where traditional view-consistency constraints completely fail.",
+      "evidence": "Achieves over 85% three-class material classification accuracy (Phase 1), enabling reliable downstream BRDF parameter estimation.",
+      "section": "Methodology - Physical Modelling and Angular Frequency Analysis",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Implement dual physical masks (medium mask M_med and angular mask M_ang) to model light-matter interactions.",
+      "motivation": "There is a critical need to decouple surface roughness quantization from wavevector deflection to accurately model how light interacts with different physical surfaces.",
+      "sota_gap": "Unlike baselines that estimate a single aggregated depth cost, this models light field propagation from a Maxwell-equation-inspired physical bottom-up, explicitly constraining BRDF weights.",
+      "scenario": "Complex 'Mixed' material regions composed of both Lambertian background and Non-Lambertian foreground objects.",
+      "evidence": "Validated by a 495.8% improvement in contrast ratio for the Apple scene when combined with SAM ternary masks, allowing for differentiated energy adjustments.",
+      "section": "Methodology - Dual-Mask Physical Hypothesis",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Replace traditional EPI networks with the MACVO-Net architecture to build explicit multi-scale cost volumes.",
+      "motivation": "Implicit EPI architectures suffer from severe view under-sampling and rigid directional matching (only utilizing 28/81 views), failing catastrophically on non-Lambertian reflections.",
+      "sota_gap": "Explicitly aggregates photometric errors across all 80 non-central views for 32 disparity hypotheses, overcoming the structural limitations of traditional EPI-based 4D light field processing.",
+      "scenario": "Non-Lambertian scenes where EPI-based methods yield completely invalid depth maps (MAE=0.411).",
+      "evidence": "Architecture switching logs confirm MACVO-Net successfully processes the 4D cost volume, eliminating the high MAE failures seen in implicit EPI methods.",
+      "section": "Architecture - Multi-scale Angular Cost Volume",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Utilize cost volume flatness as an unsupervised uncertainty signal for non-Lambertian regions.",
+      "motivation": "In specular or scattering regions, any single disparity hypothesis yields a high matching cost, naturally flattening the cost volume without the need for additional labels.",
+      "sota_gap": "Provides a self-adaptive, physics-driven uncertainty indicator, moving away from externally learned confidence estimators that struggle in complex optical domains.",
+      "scenario": "Purely specular or scattering surfaces where there is no geometrically correct matchable texture.",
+      "evidence": "Comparative experiments show EPI achieves good MAE (0.081) in Mixed domains but completely fails (texture copying) in NL domains, validating the necessity of flatness-based uncertainty.",
+      "section": "Architecture - Cost Volume Uncertainty Formulation",
+      "priority": "should"
+    },
+    {
+      "design_decision": "Adopt a material-aware depth fusion strategy formulated as D = w_d D_EPI + w_s D_specular + w_sc D_scatter.",
+      "motivation": "Networks must apply different depth estimation strategies adaptively: relying on geometric matching for Lambertian regions while suppressing confidence and propagating context for non-Lambertian regions.",
+      "sota_gap": "Transcends monolithic depth regression networks by tightly coupling physically parsed BRDF weights with geometric cost volumes, acting 'locally' based on material properties.",
+      "scenario": "Scenes with abrupt transitions between diffuse textures and high-frequency specular reflections.",
+      "evidence": "Integration of physical BRDF weights with the multi-scale U-Net successfully suppresses erroneous high-frequency textures, yielding continuous depth boundaries.",
+      "section": "Methodology - Material Component-aware Fusion",
+      "priority": "must"
+    },
+    {
+      "design_decision": "Process the concatenated 32+32 channel tensor (cost volume + central view features) via a 3-downsampling-stage U-Net architecture.",
+      "motivation": "Non-Lambertian regions lack reliable local cost volume peaks, requiring robust macro-contextual information to reconstruct depth boundaries.",
+      "sota_gap": "Direct CNN mapping often blurs depth edges; the U-Net with skip connections preserves fine spatial details from the central view while leveraging broad receptive fields for flat cost volume interpolation.",
+      "scenario": "High-resolution spatial dimensions (e.g., 256x256 inputs) with complex layered occlusions.",
+      "evidence": "Ablation studies on network depth show that 3-stage downsampling optimally balances macro context propagation for NL regions without losing spatial resolution.",
+      "section": "Implementation - Network Backbone Details",
+      "priority": "should"
+    },
+    {
+      "design_decision": "Implement domain-balanced sampling via WeightedRandomSampler and 2-98 percentile disparity normalization.",
+      "motivation": "There is a severe class imbalance across Lambertian, Non-Lambertian, and Mixed domains, and extreme disparity outliers disrupt network convergence.",
+      "sota_gap": "Standard uniform sampling biases the network towards Lambertian scenes (where EPI already works). Inverse frequency weighting ensures the model is forced to learn from the 'blind' NL domains.",
+      "scenario": "Unified training across diverse datasets (HCInew, HCI-Old, Wanner_HCI) with varying formats (pfm, h5_depth).",
+      "evidence": "Stabilized training convergence across all 209 scenes, ensuring the physical module learns generalized frequency distributions rather than overfitting Lambertian data.",
+      "section": "Experiments - Dataset Preparation",
+      "priority": "nice"
+    }
+  ],
+  "matrix_md": "# Writing Rationale Matrix\n\n| Design Decision | Motivation | SOTA Gap | Scenario | Evidence | Section | Priority |\n|---|---|---|---|---|---|---|\n| Introduce an MRI-like angular frequency  | Current data-driven light field models are fundame | Shifts from implicit, heuristic EPI feature extrac | Highly reflective or translucent materia | Achieves over 85% three-class material c | Methodology - Physical Modelling and Angular Frequency Analysis | must |\n| Implement dual physical masks (medium ma | There is a critical need to decouple surface rough | Unlike baselines that estimate a single aggregated | Complex 'Mixed' material regions compose | Validated by a 495.8% improvement in con | Methodology - Dual-Mask Physical Hypothesis | must |\n| Replace traditional EPI networks with th | Implicit EPI architectures suffer from severe view | Explicitly aggregates photometric errors across al | Non-Lambertian scenes where EPI-based me | Architecture switching logs confirm MACV | Architecture - Multi-scale Angular Cost Volume | must |\n| Utilize cost volume flatness as an unsup | In specular or scattering regions, any single disp | Provides a self-adaptive, physics-driven uncertain | Purely specular or scattering surfaces w | Comparative experiments show EPI achieve | Architecture - Cost Volume Uncertainty Formulation | should |\n| Adopt a material-aware depth fusion stra | Networks must apply different depth estimation str | Transcends monolithic depth regression networks by | Scenes with abrupt transitions between d | Integration of physical BRDF weights wit | Methodology - Material Component-aware Fusion | must |\n| Process the concatenated 32+32 channel t | Non-Lambertian regions lack reliable local cost vo | Direct CNN mapping often blurs depth edges; the U- | High-resolution spatial dimensions (e.g. | Ablation studies on network depth show t | Implementation - Network Backbone Details | should |\n| Implement domain-balanced sampling via W | There is a severe class imbalance across Lambertia | Standard uniform sampling biases the network towar | Unified training across diverse datasets | Stabilized training convergence across a | Experiments - Dataset Preparation | nice |",
+  "quality": {
+    "total_rows": 7,
+    "vague_rows": [],
+    "empty_cells": 0,
+    "score": 100,
+    "passed": true
+  }
+}

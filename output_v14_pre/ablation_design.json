@@ -1,0 +1,84 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "消融实验1：双掩码物理模型 vs 纯朗伯体假设",
+      "target_module": "简化 BRDF 物理模型",
+      "hypothesis": "若移除镜面反射项及双掩码物理建模，退化为纯朗伯体假设，模型将无法解析非朗伯区域的反射特性，导致在Non-Lambertian和Mixed场景中的深度估计精度大幅下降，证明物理双掩码建模的必要性。",
+      "modification": "在计算物理材质分量时，将原有的简化模型公式 `I(θ) = ρ_d + ρ_s * D(θ, m)` 修改为纯朗伯体模型 `I(θ) = ρ_d`。强制设定介质掩码 $M_{med}(x,y)$ 全为0（表示纯漫反射），忽略粗糙度计算与镜面能量，使得后续的材质分类与深度融合丢失非朗伯先验。",
+      "expected_result": "材质分类准确率大幅下降（或完全失效），Non-Lambertian 子集 MAE 发生灾难性恶化（远超目标值0.25），Mixed 子集 MAE 显著升高，Lambertian 子集 MAE 基本保持不变。",
+      "comparison_with": "纯朗伯体模型 (Pure Lambertian Model: `I(θ) = ρ_d`)"
+    },
+    {
+      "experiment_name": "消融实验2：类MRI角度频率分析 vs 空间域启发式特征",
+      "target_module": "类MRI的角度频率分析模块 (Phase 1)",
+      "hypothesis": "利用 2D-DFT 将 $9 \\times 9$ 角点采样转化为频谱分布，能够比直接使用原始空间域像素特征更精确地区分朗伯（低频）、镜面（高频）和散射（中频），若移除频域转换将导致材质分类置信度降低，进而影响深度融合的权重分配。",
+      "modification": "在材质分类阶段，不执行 2D-DFT 获取 k-space 频谱的操作。直接提取 $9 \\times 9$ 角度块在空间域的均值、方差和梯度等手工启发式特征，并将其送入轻量级分类器（如 MLP）进行三分类预测。",
+      "expected_result": "由于空间域特征缺乏对反射频率展宽的显式刻画，材质分类准确率将跌破 85% 的目标要求。下游依赖材质权重的深度融合产生错误的偏向，导致整体验证集 MAE 上升，特别是在包含复杂反射的 Mixed 子集中表现退化。",
+      "comparison_with": "基于空间域均值/方差统计的启发式材质分类"
+    },
+    {
+      "experiment_name": "消融实验3：Levenberg-Marquardt参数拟合 vs 极速启发式估计",
+      "target_module": "参数优化拟合器",
+      "hypothesis": "基于非线性最小二乘的 LM 算法能够精确拟合观测角域分布与 BRDF 物理模型，从而解算出高精度的介质掩码和角度方向掩码。若替换为简单的均值差估计，参数精度的下降将引发深度图边界模糊及深度模糊问题。",
+      "modification": "将代码中迭代寻找最佳物理参数的 Levenberg-Marquardt 算法替换为极速启发式估计：利用角度图像中心区域均值直接硬解为 $\\rho_d$，并利用中心与最外圈边缘的均值差直接硬解为 $\\rho_s$，彻底移除优化迭代过程。",
+      "expected_result": "参数拟合的迭代时间大幅减少，但 BRDF 权重 $(w_d, w_s, w_{sc})$ 的估计变得极具噪声且粗糙。深度估计结果在物体边缘处及高光反光区域出现严重的深度模糊和伪影，整体 MAE 指标劣化。",
+      "comparison_with": "基于中心与边缘均值差的极速启发式硬解估计器"
+    },
+    {
+      "experiment_name": "消融实验4：Beckmann法线分布 vs GGX法线分布",
+      "target_module": "Beckmann 法线分布函数 (D项)",
+      "hypothesis": "Beckmann 分布在拟合本方法所定义的中高频反射特征及物理约束时，相较于其他分布函数具有更好的匹配度与稳定性。替换为其他分布函数会改变非朗伯区域的掩码生成质量。",
+      "modification": "在 Cook-Torrance 的物理模型计算中，将代码库中计算法线分布概率的 Beckmann 公式，等价替换为 GGX (Trowbridge-Reitz) 分布公式：`1 / (π * m^2 * cos^4(θ) * (tan^2(θ)/m^2 + 1)^2)`。保持其他几何项与菲涅尔项（如有）不变。",
+      "expected_result": "由于 GGX 与 Beckmann 在高光尾部（long tail effect）的物理特性差异，模型对粗糙度材质的解析产生偏移。虽然 Lambertian MAE 保持一致，但在强调强镜面和特定粗糙度过渡的 Non-Lambertian 子集上，MAE 出现可观察到的上升。",
+      "comparison_with": "GGX (Trowbridge-Reitz) 分布函数"
+    },
+    {
+      "experiment_name": "消融实验5：多尺度代价体构建(MACVO-Net) vs 隐式EPI提取",
+      "target_module": "CostVolumeBuilder (代价卷积构建模块) 及 U-Net架构",
+      "hypothesis": "显式构建的 4D 代价卷积及其在非朗伯区域表现出的“自然平坦度”，是替代失效 EPI 方案并提供几何层级不确定性的核心机制。退化为隐式 EPI 网络会导致模型无法处理视角一致性问题，引发严重的纹理复制。",
+      "modification": "移除 `CostVolumeBuilder` 模块以及多尺度 U-Net 处理平坦代价区域的逻辑。改为构建传统隐式 EPI 特征提取网络：仅提取中心视角及相邻十字/对角线方向（如4方向，利用28个视角）的 EPI 结构特征，直接送入一系列普通卷积层（Conv2D）回归输出深度图。",
+      "expected_result": "在 Lambertian 子集上，由于几何结构简单，MAE 可能保持尚可；但在 Non-Lambertian 子集上，MAE 极速恶化并逼近 0.40+（发生严重的纹理复制现象），证明显式代价体对于非朗伯不确定性建模的不可替代性。",
+      "comparison_with": "EPINet4Dir V3 风格的传统隐式 EPI 多层卷积网络"
+    },
+    {
+      "experiment_name": "消融实验6：材质分量感知的深度融合 vs 无差别单路融合",
+      "target_module": "材质分量感知深度融合策略",
+      "hypothesis": "结合物理 BRDF 权重 $(w_d, w_s, w_{sc})$ 对朗伯、镜面和散射区域应用不同深度估计策略的机制，是突破非朗伯场景深度估计精度的关键。若丢弃该自适应加权机制，网络无法因地制宜地抑制高光错误信息。",
+      "modification": "在 U-Net Decoder 最后输出阶段，移除基于物理模块输出的权重 $(w_d, w_s, w_{sc})$ 进行深度融合的代码逻辑 `D = w_d D_{EPI} + w_s D_{specular} + w_{sc} D_{scatter}`。将其直接替换为一个无物理引导的 1x1 卷积层，让网络通过纯数据驱动的方式盲目拟合单通道深度图。",
+      "expected_result": "模型整体收敛变慢且存在明显的预测不稳定性。尽管参数量略微减少，但 Mixed 数据集的整体 val_MAE 将显著上升（突破0.22的目标范围边界），Apple场景等强非朗伯目标的对比度比例提升效果大打折扣。",
+      "comparison_with": "基于 1x1 卷积的无差别单通道数据驱动融合"
+    }
+  ],
+  "_model_analysis": {
+    "modules": [
+      {
+        "module_name": "Beckmann 法线分布函数",
+        "code_location": "tools/brdf_modeling.py -> 函数 beckmann_distribution",
+        "core_function": "作为 Cook-Torrance 模型中的法线分布函数(D项)，用于计算微观法线在半程向量方向上的分布概率，从而控制镜面反射的形状和粗糙度。",
+        "ablation_replacement": "GGX (Trowbridge-Reitz) 分布: `1 / (π * m^2 * cos^4(θ) * (tan^2(θ)/m^2 + 1)^2)`，或 Blinn-Phong 分布。",
+        "expected_impact": "替换为 GGX 通常会使高光的衰减更加平滑自然（具有更长的拖尾），拟合出的粗糙度参数 m 物理意义变化，预期对金属或粗糙表面的拟合误差(SSE)会降低。"
+      },
+      {
+        "module_name": "简化 BRDF 物理模型",
+        "code_location": "tools/brdf_modeling.py -> 函数 simplified_brdf_model",
+        "core_function": "构建观测强度与角度的物理映射关系，将角域分布近似为漫反射项与镜面反射项的线性叠加。模型公式为 `I(θ) = ρ_d + ρ_s * D(θ, m)`。",
+        "ablation_replacement": "1. 纯朗伯体模型：`I(θ) = ρ_d`；2. 完整 Cook-Torrance 模型（加入几何项 G 和菲涅尔项 F）。",
+        "expected_impact": "消融为纯朗伯体模型后，将完全无法捕捉非朗伯表面（如 Apple）的高光特征，导致高光区域的拟合残差急剧上升；升级为完整 Cook-Torrance 模型会提高拟合精度，但会增加 curve_fit 的计算时间。"
+      },
+      {
+        "module_name": "参数优化拟合器",
+        "code_location": "tools/brdf_modeling.py -> 函数 fit_brdf_to_patch (内部调用的 curve_fit)",
+        "core_function": "基于非线性最小二乘法(Levenberg-Marquardt算法)，在给定的参数边界和初始值下，迭代寻找使得模型预测与实际观测角域分布最接近的最佳物理参数。",
+        "ablation_replacement": "1. 极速启发式估计：利用中心与边缘的均值差直接硬解 ρ_d 和 ρ_s；2. 梯度下降优化器；3. 贝叶斯优化。",
+        "expected_impact": "替换为启发式估计会极大提升像素级的处理速度，但由于没有考虑整体分布的连续性，拟合出的参数图会充满噪点；替换为更鲁棒的优化器可减少 `except` 分支中拟合失败的情况，使 m_map 更平滑。"
+      },
+      {
+        "module_name": "角域坐标映射",
+        "code_location": "tools/brdf_modeling.py -> 函数 fit_brdf_to_patch (内部计算 angles 逻辑)",
+        "core_function": "将 9x9 图像的像素网格坐标转换为一维的物理角度 θ，通过简化的欧式距离将最大距离归一化映射到 [0, π/4] 区间。",
+        "ablation_replacement": "基于真实相机内外参的精确视角计算：计算 Observation 方向与 scene 表面法向量的夹角，或计算 Half-vector 与法线的夹角。",
+        "expected_impact": "简化的映射忽略了曲面物体的法线变化和透视投影，替换为真实法线计算的精确角度后，能纠正物体边缘的形变，预期会使提取出的材质参数边界更清晰，显著提升对复杂几何物体（如 David 雕像）的材质分离度(Ratio)。"
+      }
+    ]
+  }
+}
