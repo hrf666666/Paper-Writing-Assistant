@@ -1,6 +1,6 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v13.0 | 更新: 2026-06-16
+> 版本: v14.0 | 更新: 2026-06-16
 
 ---
 
@@ -94,7 +94,7 @@ paper-writing-assistant/
 │   └── paper_search.py          # 论文检索（S2 语义搜索）
 │
 ├── agent/                       # Agent 核心层
-│   ├── core/                    # 🆕 v13 内核契约层（6 块契约，零循环依赖）
+│   ├── core/                    # 🆕 v14 内核契约层（6 块契约，零循环依赖）
 │   │   ├── errors.py            #   错误分级 (Transient/Permanent/DegradedResult) + classify()
 │   │   ├── factbase.py          #   FactBase 单一事实源（替代 PaperContext 写读分裂）
 │   │   ├── memory.py            #   LayeredMemory 三层记忆 + citation_context 缓存
