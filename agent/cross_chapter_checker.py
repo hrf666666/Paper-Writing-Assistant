@@ -29,11 +29,16 @@ class CrossChapterChecker:
         """
         self.issues: List[Dict] = []
         self._paper_context = paper_context or {}
+        self._factbase = None  # v13 P2: FactBase（find_metric_value 用）
         self._fixes_applied: List[Dict] = []
 
     def set_paper_context(self, paper_context: Dict):
         """设置/更新 PaperContext"""
         self._paper_context = paper_context or {}
+
+    def set_factbase(self, factbase):
+        """v13 P2: 注入 FactBase（_find_canonical_value 用 find_metric_value）。"""
+        self._factbase = factbase
 
     def check_all(self, chapters: Dict[int, str], abstract: str = "") -> Tuple[List[Dict], Dict[int, str], str]:
         """
@@ -227,7 +232,14 @@ class CrossChapterChecker:
         except (ValueError, TypeError):
             return None
 
-        # 路径 1: PaperContext metrics
+        # v13 P2 路径 1: 优先用 FactBase.find_metric_value（dataclass 反查方法）
+        if self._factbase:
+            hit_name = self._factbase.find_metric_value(wrong_num, rel_tol=0.2)
+            if hit_name:
+                canonical_val = self._factbase.get_metric(hit_name)
+                if canonical_val is not None and abs(wrong_num - canonical_val) > 0.001:
+                    return str(canonical_val)
+        # 路径 1b（降级）: 旧 PaperContext metrics dict
         pc_metrics = self._paper_context.get("metrics", {})
         if pc_metrics:
             for name, canonical in pc_metrics.items():

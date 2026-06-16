@@ -107,6 +107,11 @@ class ContentVerifier:
 
     def __init__(self, reference_pool: List[Dict] = None):
         self.reference_pool = reference_pool or []
+        self._factbase = None  # v13 P2: 单一事实源（权威数值校验）
+
+    def set_factbase(self, factbase):
+        """注入 FactBase。_check_data_consistency 据此判定 abstract 数值是否权威。"""
+        self._factbase = factbase
 
     def verify_all(self, chapters: Dict, abstract: str = "",
                    bibliography: str = "") -> VerifyReport:
@@ -239,12 +244,24 @@ class ContentVerifier:
         if not abs_numbers:
             return {"passed": True, "score": 100, "details": "Abstract 无数值"}
 
-        # 检查 Abstract 数值是否在 Experiments 中
+        # 检查 Abstract 数值是否在 Experiments 或 FactBase（权威源）中
+        # v13 P2: 既不在 exp_numbers 也不在 FactBase.metrics 的数才是真不一致
+        # （旧逻辑只比 abstract↔experiments 两份 LLM 文本，可能协同幻觉）
         mismatches = []
         for num in abs_numbers:
             try:
                 num_val = float(num)
                 found = any(abs(num_val - float(e)) < 0.02 for e in exp_numbers)
+                if not found and self._factbase:
+                    # 权威源二次校验：是 FactBase 记录的某个 metric 值吗？
+                    # 注意：用绝对容差 0.02（与 exp_numbers 侧 <0.02 一致），
+                    # 不用 find_metric_value 的 rel_tol（相对容差，语义不同会错配）
+                    for _mv in self._factbase.metrics.values():
+                        try:
+                            if abs(num_val - float(_mv)) < 0.02:
+                                found = True; break
+                        except (TypeError, ValueError):
+                            continue
                 if not found:
                     mismatches.append(num)
             except ValueError:

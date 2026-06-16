@@ -35,7 +35,7 @@ agent/core/
 > FindingBus 补 auditor/constraint/quality 3 个写入源（4 类问题合并回流修订）；
 > FigureManifest 实例化并接通 `_generate_figures`/`_generate_latex_output`，
 > 修复架构图双重注入 bug + 加 `validate_linkage` 文图对账。
-> P1 已完成（FactBase 接 auditor 覆盖 1/3 消费者、删 error_level/last_level 死代码）；待接线（P2/P3）：FactBase 接 verifier/cross_chapter、LayeredMemory.assemble 接章节生成、
+> P1+P2 已完成（FactBase 接 auditor/verifier/cross_chapter 三消费者，verifier 真接入权威校验、cross_chapter 优先路径+dict 兜底、删 error_level/last_level 死代码）；assemble 明确不做（semantic_set 0 写入点会空跑，需先独立补写入点）。
 > audit_with_autofix 复活。7 套 issue → 1 套 Finding；
 3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 

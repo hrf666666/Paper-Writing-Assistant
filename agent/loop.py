@@ -1024,9 +1024,14 @@ Respond with just the strategy, no explanation:"""
         self._project_data["paper_context"] = paper_context
         self._paper_context = paper_context
         self._factbase = _factbase
-        # v13 P1 接线: 把 FactBase 注入 auditor（消事实核查的数值分歧）
+        # v13 P1/P2 接线: 把 FactBase 注入 auditor/verifier/cross_chapter
+        # （消数值分歧：三者统一读 FactBase，不再各自从 project_data 重推导）
         if hasattr(self, 'auditor') and self.auditor is not None:
             self.auditor.set_factbase(_factbase)
+        if hasattr(self, 'verifier') and self.verifier is not None:
+            self.verifier.set_factbase(_factbase)
+        if hasattr(self, 'cross_chapter_checker') and self.cross_chapter_checker is not None:
+            self.cross_chapter_checker.set_factbase(_factbase)
         # 持久化：FactBase 保证 factbase.json + 兼容 paper_context.json 都落盘
         try:
             _fb_save(_factbase, OUTPUT_DIR)
