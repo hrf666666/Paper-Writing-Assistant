@@ -461,7 +461,7 @@ def create_client_for_model(model_alias: str, **overrides) -> object:
     根据模型别名自动创建正确类型的客户端实例。
 
     自动判断 use_zai / non_openai，调用者无需关心底层 SDK。
-    适用于 visual_verifier、figure_critic 等需要按别名创建客户端的场景。
+    适用于 visual_verifier 等需要按别名创建客户端的场景。
 
     Args:
         model_alias: 模型别名（如 "glm_4_6v", "glm_5_1"）
