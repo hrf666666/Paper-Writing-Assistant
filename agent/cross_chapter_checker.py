@@ -18,6 +18,12 @@ from typing import Dict, List, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 
+def _is_float(v):
+    try:
+        float(v); return True
+    except (TypeError, ValueError):
+        return False
+
 class CrossChapterChecker:
     """跨章节一致性检查器"""
 
@@ -40,7 +46,7 @@ class CrossChapterChecker:
         """v13 P2: 注入 FactBase（_find_canonical_value 用 find_metric_value）。"""
         self._factbase = factbase
 
-    def check_all(self, chapters: Dict[int, str], abstract: str = "") -> Tuple[List[Dict], Dict[int, str], str]:
+    def check_all(self, chapters: Dict[int, str], abstract: str = "", auto_fix: bool = True) -> Tuple[List[Dict], Dict[int, str], str]:
         """
         执行全部跨章节一致性检查
 
@@ -64,7 +70,7 @@ class CrossChapterChecker:
 
         checks = [
             ("section_references", lambda: self._check_section_references(fixed_chapters)),
-            ("numerical_consistency", lambda: self._fix_numerical_consistency(fixed_chapters, fixed_abstract)),
+            ("numerical_consistency", lambda: self._fix_numerical_consistency(fixed_chapters, fixed_abstract) if auto_fix else self._check_numerical_only(fixed_chapters)),
             ("format_consistency", lambda: self._check_format_consistency(fixed_chapters)),
             ("citation_continuity", lambda: self._check_citation_continuity(fixed_chapters)),
         ]
@@ -131,6 +137,24 @@ class CrossChapterChecker:
                         "description": f"Introduction 引用了 Section {ref}，但论文只有 {max_chapter} 章",
                         "location": f"Introduction → Section {ref}",
                     })
+
+
+    def _check_numerical_only(self, chapters: Dict[int, str]) -> List[Dict]:
+        """v14: 只检查数值一致性，不执行替换（避免交叉污染）。"""
+        issues = []
+        pc_metrics = self._factbase.metrics if self._factbase else self._paper_context.get("metrics", {})
+        for ch_key, content in chapters.items():
+            import re as _re
+            for num_match in _re.finditer(r'(\d+\.\d+)', content):
+                num = num_match.group(1)
+                if pc_metrics:
+                    found = any(abs(float(num) - float(v)) < 0.01 for v in pc_metrics.values()
+                                if isinstance(v, (int, float)) or _is_float(v))
+                    if not found:
+                        issues.append({"severity": "warning", "type": "numerical_inconsistency",
+                                      "description": f"数值 {num} 未在 FactBase 中找到匹配",
+                                      "location": f"ch{ch_key}"})
+        return issues
 
     def _fix_numerical_consistency(self, chapters: Dict[int, str], abstract: str) -> str:
         """

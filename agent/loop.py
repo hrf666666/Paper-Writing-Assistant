@@ -508,15 +508,6 @@ class ResearchLoop:
             strategy = f"首次执行: {task.target}"
 
         # 使用 LLM 做轻量策略分析（仅在有前序章节时）
-        chapter_names = {1: "Introduction", 2: "Related Work", 3: "Methodology",
-                        4: "Experiments", 5: "Conclusion"}
-        phase_num_str = task.phase_name.replace("phase", "").replace("_", ".")
-
-        chapter_num = 0
-        try:
-            chapter_num = int(phase_num_str.split(".")[0])
-        except (ValueError, IndexError):
-            pass
 
         logger.info(f"THINK [{progress['completed']}/{progress['total']}]: {task.target} - {strategy[:200]}")
 
@@ -1048,7 +1039,8 @@ class ResearchLoop:
         return paper_context
 
     def _build_citation_context(self) -> str:
-        """v14: 委托给 CitationInjector（从 loop 拆出）。保留 cite_key_map 回写供 BibTeX 用。"""
+        """v14: 委托给 CitationInjector。注：每次新建实例（citation_bank 会变），
+        内联缓存可能不命中但不影响正确性。"""
         from agent.citation_injector import CitationInjector
         _inj = CitationInjector(
             reference_pool=self._reference_pool,
@@ -1245,9 +1237,15 @@ class ResearchLoop:
             1: "Introduction", 2: "Related Work",
             3: "Methodology", 4: "Experiments", 5: "Conclusion"
         }
-        # v13 P1 兜底: 确保 auditor 已注入 FactBase（若 phase0_98 失败导致 _factbase 未注入）
-        if getattr(self, '_factbase', None) and not getattr(self.auditor, '_factbase', None):
-            self.auditor.set_factbase(self._factbase)
+        # v14 兜底: 确保 auditor/verifier/cross_chapter 都注入 FactBase
+        _fb = getattr(self, '_factbase', None)
+        if _fb:
+            if hasattr(self, 'auditor') and not getattr(self.auditor, '_factbase', None):
+                self.auditor.set_factbase(_fb)
+            if hasattr(self, 'verifier') and not getattr(self.verifier, '_factbase', None):
+                self.verifier.set_factbase(_fb)
+            if hasattr(self, 'cross_chapter_checker') and not getattr(self.cross_chapter_checker, '_factbase', None):
+                self.cross_chapter_checker.set_factbase(_fb)
 
         for num, name in chapter_names.items():
             if num in self._chapters:
@@ -1637,7 +1635,7 @@ class ResearchLoop:
             # v14: cross_chapter 只报告不一致，不自动改正文（避免数值交叉污染）
             # 数值修正由 QualityLoop 修订层判断（它能看上下文）
             issues, _, _ = self.cross_chapter_checker.check_all(
-                self._chapters, self._abstract
+                self._chapters, self._abstract, auto_fix=False  # v14: 只报告不改正文
             )
             fix_count = len(self.cross_chapter_checker._fixes_applied)
             if fix_count:

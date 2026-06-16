@@ -73,6 +73,9 @@ class OutputEvaluator:
         l2_score = report["L2_content_completeness"].get("score", 0)
         l3_score = report["L3_academic_quality"].get("overall_score", 0)
 
+        # 严肃的惩罚机制：如果 L1 关键项未通过，L3 不应给高分
+        l1_critical_fails = report["L1_format_validity"].get("critical_fails", [])
+
         # v14: cross_chapter critical issues 纳入门控（一致性门控）
         import os, json as _json
         cc_path = os.path.join(self.output_dir, "cross_chapter_check.json")
@@ -84,11 +87,9 @@ class OutputEvaluator:
                 if cc_critical:
                     l1_critical_fails.append(f"cross_chapter:{len(cc_critical)}_critical")
                     logger.warning(f"[OutputEval] 跨章一致性门控: {len(cc_critical)} 个严重问题")
-            except Exception:
-                pass
+            except Exception as _e:
+                logger.debug(f"[OutputEval] cross_chapter 门控读取异常: {_e}")
 
-        # 严肃的惩罚机制：如果 L1 关键项未通过，L3 不应给高分
-        l1_critical_fails = report["L1_format_validity"].get("critical_fails", [])
         if l1_critical_fails:
             # 每个关键失败扣 L3 分数
             penalty = len(l1_critical_fails) * 10
@@ -321,9 +322,9 @@ class OutputEvaluator:
         content_lower = full_content.lower()
         structure_checks = {
             "intro_has_contribution": bool(re.search(
-                r'contribut|we propose|our method|in this paper, we', content_lower[:5000])),
+                r'contribut|we propose|our method|in this paper, we', content_lower)),
             "intro_has_problem": bool(re.search(
-                r'problem|challenge|limitation|difficult', content_lower[:5000])),
+                r'problem|challenge|limitation|difficult', content_lower)),
             "experiments_has_dataset": bool(re.search(
                 r'dataset|benchmark|hci|urbanlf|wanner', content_lower)),
             "experiments_has_comparison": bool(re.search(
@@ -331,7 +332,7 @@ class OutputEvaluator:
             "experiments_has_ablation": ablation_mentions >= 3,
             "conclusion_has_summary": bool(re.search(
                 r'conclusion|in summary|we have (proposed|presented|shown)',
-                content_lower[-3000:])),
+                content_lower[-5000:])),
         }
         checks.update(structure_checks)
         structure_passed = sum(1 for v in structure_checks.values() if v)
