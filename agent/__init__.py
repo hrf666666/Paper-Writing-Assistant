@@ -16,8 +16,6 @@ Agent 模块 - 自主循环架构核心组件
   skill_executor.py       - Skill 执行引擎
   venue_adapter.py        - Venue 配置适配器
   motivation_engine.py    - v7.0 动机驱动写作
-  exemplar_learner.py     - v7.0 深度范例学习
-  rationale_matrix.py     - v7.0 写作理由矩阵
   skill_orchestrators/    - 多步编排器（替代旧 skills/*.py）
 """
 

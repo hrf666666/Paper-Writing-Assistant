@@ -614,19 +614,6 @@ def build_default_plan(venue_adapter=None) -> HierarchicalPlan:
         fallback="使用默认 IEEE TCSVT 风格",
     ))
 
-    if ENABLE_EXEMPLAR_LEARNING:
-        g3_steps.append(AtomicStep(
-            step_id="G3-S3", description="深度范例学习（6层阅读协议）",
-            phase_name="phase0_7", task_id="exemplar_analysis",
-            acceptance_criteria={"metric": "style_profile", "op": ">=", "value": 1, "optional": True},
-        ))
-
-    if ENABLE_RATIONALE_MATRIX:
-        g3_steps.append(AtomicStep(
-            step_id="G3-S4", description="写作理由矩阵（事前规划型）",
-            phase_name="phase0_9", task_id="rationale_matrix",
-            acceptance_criteria={},  # 可选步骤
-        ))
 
     if RUN_ABLATION:
         g3_steps.append(AtomicStep(

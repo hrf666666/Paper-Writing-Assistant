@@ -2,7 +2,7 @@
 """
 JournalStyleLearner — 从 ref_pdf 深度学习期刊特有的写作风格 (v10.1)
 
-扩展 exemplar_learner.py 的 6 层阅读协议，增加 4 个新维度：
+v14: 独立期刊风格学习（exemplar_learner 已删，此处不依赖它）：
   L7: Content Pattern — 内容编排模式（每章的子节组织顺序、逻辑推进）
   L8: Argument Rhythm — 论证节奏（哪里放数据/图表/引用，哪里详写/略写）
   L9: Depth Gradient — 深度梯度（每个子节的推导深度）
