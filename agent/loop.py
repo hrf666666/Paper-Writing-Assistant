@@ -1660,7 +1660,6 @@ class ResearchLoop:
                     logger.warning("[Phase 7.15] 修复计划:")
                     for i, hint in enumerate(fix_plan, 1):
                         logger.warning(f"  {i}. {hint}")
-                    self._auto_fix_issues(fix_plan)
                     recheck = self.gate_pipeline.run(
                         self._chapters, self._abstract, "", skip_llm_gate=True,
                     )
@@ -2218,81 +2217,6 @@ class ResearchLoop:
                     self._chapters[ch_key] = '\n\n'.join(final_paras)
 
     @staticmethod
-    def _resolve_unknown_citations(text: str) -> str:
-        """v11.8: 逐个解析 [?] — 使用最近的 [N] 作为替代（非全部替换为同一编号）"""
-        if '[?]' not in text:
-            return text
-
-        # 收集所有 [N] 和 [?] 的位置
-        all_refs = list(re.finditer(r'\[(\d+)\]', text))
-        unknowns = list(re.finditer(r'\[\?\]', text))
-
-        if not unknowns:
-            return text
-        if not all_refs:
-            # 没有任何已知引用，只能删除 [?]
-            return text.replace('[?]', '')
-
-        # 为每个 [?] 找最近的 [N]
-        result_parts = []
-        last_end = 0
-        replaced = 0
-        for unk in unknowns:
-            result_parts.append(text[last_end:unk.start()])
-            # 找最近的已知引用
-            best_num = None
-            best_dist = float('inf')
-            for ref in all_refs:
-                dist = abs(ref.start() - unk.start())
-                if dist < best_dist:
-                    best_dist = dist
-                    best_num = ref.group(1)
-            result_parts.append(f'[{best_num}]' if best_num else '')
-            last_end = unk.end()
-            replaced += 1
-        result_parts.append(text[last_end:])
-
-        if replaced > 0:
-            logger.info(f"[resolve_unknown] 逐个替换 {replaced} 个 [?] → 最近 [N]")
-        return ''.join(result_parts)
-
-    def _auto_fix_issues(self, fix_hints: List[str]):
-        """
-        v8.0: 根据修复建议自动修复可修复的问题
-        """
-        import re as _re
-        fixed = 0
-
-        for hint in fix_hints:
-            hint_lower = hint.lower()
-
-            # 修复残留标记
-            if "formula_processor" in hint_lower or "formula" in hint_lower:
-                try:
-                    from tools.formula_processor import strip_formula_tags
-                    for ch_key in list(self._chapters.keys()):
-                        content = self._chapters[ch_key]
-                        if '<formula>' in content:
-                            self._chapters[ch_key] = strip_formula_tags(content)
-                            fixed += 1
-                except Exception as e:
-                    logger.debug(f"公式清理修复失败: {e}")
-
-            # v14: LLM 直出 \cite{key}，<citation> 标记已废弃
-
-            # v11.8: 逐个修复 [?] → 最近的 [N]（非全部用同一编号）
-            if "引用" in hint_lower or "[?]" in hint_lower:
-                for ch_key in list(self._chapters.keys()):
-                    content = self._chapters[ch_key]
-                    if '[?]' in content:
-                        cleaned = self._resolve_unknown_citations(content)
-                        if cleaned != content:
-                            self._chapters[ch_key] = cleaned
-                            fixed += 1
-
-        if fixed > 0:
-            logger.info(f"[auto_fix] 自动修复了 {fixed} 个问题")
-
     def _save_all_state(self):
         """保存全部状态变量到检查点（不触发持久化，由 save_checkpoint 触发）"""
         self.checkpoint.save_state("chapters", self._chapters)
