@@ -980,7 +980,7 @@ Respond with just the strategy, no explanation:"""
             def _flatten_metrics(d, prefix=""):
                 for k, v in d.items():
                     if isinstance(v, (int, float)) and not isinstance(v, bool):
-                        # 取 key 末段（去掉嵌套前缀的中间层，如 "表现.Best MAE" → "Best MAE"）
+                        # 保留嵌套前缀（如 "表现.Best MAE"），便于溯源嵌套层级
                         flat_key = (prefix + str(k)) if prefix else str(k)
                         try:
                             metrics[flat_key] = float(v)
@@ -1787,7 +1787,7 @@ Respond with just the strategy, no explanation:"""
         """
         if fig_type == "ablation":
             ab = ablation_results or {}
-            variants = ab.get("ablation_experiments", ab.get("variants", []))
+            variants = ab.get("experiments", ab.get("ablation_design", {}).get("variants", ab.get("variants", [])) if isinstance(ab.get("ablation_design"), dict) else ab.get("variants", []))
             # 必须有真实变体数值（非合成）才画
             if not isinstance(variants, list) or not variants:
                 return {}
