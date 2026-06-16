@@ -1,0 +1,40 @@
+{
+  "passed": false,
+  "weighted_score": 93.9,
+  "total_time": 0.06,
+  "blocked_by": "gate1_consistency",
+  "gates": [
+    {
+      "name": "gate0_format",
+      "priority": "P0_CRITICAL",
+      "passed": true,
+      "score": 100.0,
+      "details": "P0 格式检查全部通过",
+      "fix_hints": [],
+      "skipped": false,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate1_consistency",
+      "priority": "P1_HIGH",
+      "passed": false,
+      "score": 83.75,
+      "details": "V2_data_consistency: Abstract 中 3 个数值未在 Experiments 中找到: ['495.8', '212.8', '71.2",
+      "fix_hints": [
+        "将 Abstract 中的数值替换为 Experiments 表格中的实际数据"
+      ],
+      "skipped": false,
+      "execution_time": 0.0
+    },
+    {
+      "name": "gate2_quality",
+      "priority": "P2_MEDIUM",
+      "passed": true,
+      "score": 100,
+      "details": "跳过（前序 Gate 未通过）",
+      "fix_hints": [],
+      "skipped": true,
+      "execution_time": 0.0
+    }
+  ]
+}

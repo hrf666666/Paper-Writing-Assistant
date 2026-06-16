@@ -22,7 +22,7 @@ _SKILL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 def evaluate_figure(
     png_path: str,
     fig_plan: Dict,
-    vision_model_alias: str = "glm_4_6v",
+    vision_model_alias: str = "tp_qwen3_6_plus",  # v14: qwen3.6-plus 多模态
     tikz_code: Optional[str] = None,
 ) -> Dict:
     """

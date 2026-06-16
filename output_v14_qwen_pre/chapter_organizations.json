@@ -1,0 +1,192 @@
+{
+  "Introduction": {
+    "章节结构": [
+      {
+        "子节名称": "研究背景与现状",
+        "核心任务": "强调所研究问题的重要性，并概述当前领域内解决该问题的主流方法。"
+      },
+      {
+        "子节名称": "现有方法的局限性",
+        "核心任务": "剖析当前主流方法的底层运作机制，分点详细阐述其在计算效率、优化难度、特定场景适应性等方面的固有缺陷。"
+      },
+      {
+        "子节名称": "本文提出的解决方案",
+        "核心任务": "引出本文提出的创新方法或架构，阐述其核心概念、灵感来源以及具体的工作机制和适用范围。"
+      }
+    ],
+    "内容逻辑": "各子节之间采用经典的“漏斗式”递进逻辑（或“问题-解决”模式）。首先从宏观层面确立研究主题的核心价值（背景）；随后将视角收缩至当前的具体解决路径，并敏锐地指出其存在的关键瓶颈（痛点）；在确立痛点之后，逻辑自然过渡到打破常规的创新思路，顺理成章地引出本文的贡献（方案）。过渡自然，层层递进。",
+    "论证手法": [
+      "对比论证：将序列数据和图像数据的处理方式进行对比，将局部操作与非局部操作进行对比。",
+      "引用支撑：在提及主流方法和经典灵感来源时，使用引用标号（如上标38, 23, 4等）支撑观点的权威性。",
+      "分类列举：在论证局限性时，使用“First, Second, Finally”进行结构化的条理列举。",
+      "机理分析：通过对操作（如卷积和递归）的底层机制（处理局部邻域、需重复应用）进行理论分析，推导其必然存在的缺陷。",
+      "直观类比：提及本文方法是对经典计算机视觉方法（non-local means）的泛化，利用读者已知概念解释新概念。"
+    ],
+    "关键句式模板": {
+      "强调研究重要性": "Capturing [研究目标/问题] is of central importance in [研究领域].",
+      "概述现有解决方案": "For [数据类型], [当前主流操作] are the dominant solution to [解决的问题] modeling.",
+      "指出缺陷的过渡": "[当前方法] both process [处理对象], thus [研究目标] can only be captured when... Repeating local operations has several limitations.",
+      "结构化列举缺陷": "First, it is [缺点1]. Second, it causes [缺点2]. Finally, these challenges make [缺点3] difficult.",
+      "引出本文方案": "In this paper, we present [本文方法] as an efficient, simple, and generic component for [实现目标].",
+      "阐述方案原理": "Intuitively, a [本文方法] computes the response at [位置/状态] as [具体计算方式]."
+    },
+    "内容比例": {
+      "研究背景与现状": 0.25,
+      "现有方法的局限性": 0.35,
+      "本文提出的解决方案": 0.4
+    }
+  },
+  "Related Work": {
+    "章节结构": [
+      {
+        "子节名称": "宏观背景与基础方法",
+        "核心任务": "回顾该领域长期占主导地位的基础范式（如CNN架构），梳理技术发展的底层脉络。"
+      },
+      {
+        "子节名称": "核心技术演进（分类综述）",
+        "核心任务": "按照具体的技术流派或解决的问题（如注意力机制、视觉Transformer、高效网络设计等）分类，系统梳理最相关的前沿工作。"
+      },
+      {
+        "子节名称": "本文工作的定位与区分",
+        "核心任务": "总结现有相关研究的局限性或未解决的痛点，明确点出本文方法与前人工作的核心差异及优势。"
+      }
+    ],
+    "内容逻辑": "采用'漏斗式'的递进逻辑，从宏观领域背景切入，逐步聚焦到具体的相近技术流派。各子节之间通过技术演进的动机或解决特定问题的需求进行自然过渡。在详细剖析现有相关工作的基础上，通过指出当前研究的空白或痛点，逻辑顺滑地将焦点收束于本文提出的创新方法，形成逻辑闭环。",
+    "论证手法": [
+      "分类归纳：将繁杂的文献按照技术路线（如全局自注意力、局部自注意力等）进行分组提炼，寻找共性。",
+      "对比分析：横向对比不同流派的优缺点，强调特定方法在计算复杂度与感受野之间的权衡。",
+      "密集引用：大量且准确地引用相关文献，为技术发展的时间线或特定模块的起源提供客观依据。",
+      "举例说明：在论述某一技术发展方向时，列举最具代表性的经典模型作为具体案例支撑。"
+    ],
+    "关键句式模板": {
+      "领域背景介绍": "The dominant approach for [任务领域] has been based on [基础方法范式], which [解释其基本机制或历史地位].",
+      "技术流派分类": "Recently, [新技术范式] has gained increasing attention. Existing works in this direction can be broadly categorized into [类别A] and [类别B].",
+      "指出局限性": "However, these methods suffer from [局限性，如计算复杂度高/缺乏层级结构], making them less applicable/efficient for [特定任务或场景].",
+      "引出本文差异": "In contrast to [前人使用的方法], our method introduces [本文核心机制] to address [具体问题], enabling [本文带来的核心优势]."
+    },
+    "内容比例": {
+      "宏观背景与基础方法": "20%",
+      "核心技术演进（分类综述）": "60%",
+      "本文工作的定位与区分": "20%"
+    }
+  },
+  "Methodology": {
+    "章节结构": [
+      {
+        "子节名称": "整体架构概述",
+        "核心任务": "介绍提出的网络整体层次化设计及数据流向，建立全局认知（如Hierarchical Transformer结构）。"
+      },
+      {
+        "子节名称": "核心模块设计",
+        "核心任务": "详细阐述创新模块的具体机制（如Shifted windows或Non-local operation），包括公式定义、网络细节及设计动机。"
+      },
+      {
+        "子节名称": "计算复杂度与效率分析",
+        "核心任务": "通过理论推导或复杂度计算，证明新方法在计算效率上的优势（如线性计算复杂度）。"
+      },
+      {
+        "子节名称": "网络变体与配置",
+        "核心任务": "列举不同规模的模型配置（如Swin-T, Swin-S等），说明其在不同下游任务中的适应性与扩展性。"
+      }
+    ],
+    "内容逻辑": "采用“总-分-析”的递进逻辑（由宏观到微观，再到理论验证）。首先从宏观层面介绍整体架构；随后深入到微观层面，详细拆解核心创新模块的内部机制与公式；最后通过理论分析与复杂度对比，论证该设计的有效性与高效性。各子节之间通过“提出问题/挑战 -> 提出对应架构 -> 阐述核心机制 -> 证明机制优势”的因果逻辑平滑过渡。",
+    "论证手法": [
+      "对比论证：将提出的方法与现有基础操作进行对比，凸显自身在解决特定问题（如长距离依赖建模、计算效率低下）上的优势。",
+      "理论溯源与引用：引用经典方法或先驱工作作为理论依据（如引用classical non-local means method）。",
+      "数据支撑与指标列举：使用具体的复杂度指标（如linear computational complexity）或多项SOTA基准测试数据来量化并佐证设计的优越性。"
+    ],
+    "关键句式模板": {
+      "提出方法与动机": {
+        "模板": "To address [specific problem/differences], we propose a [method name] whose [key property] is [description].",
+        "原文示例": "To address these differences, we propose a hierarchical Transformer whose representation is computed with Shifted windows."
+      },
+      "模块机制与功能说明": {
+        "模板": "The [scheme/module] brings [benefit] by [action 1], while also allowing for [action 2].",
+        "原文示例": "The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection."
+      },
+      "核心原理解释": {
+        "模板": "[Operation/Method] computes the response at a position as a weighted sum of the features at all positions in [input space].",
+        "原文示例": "a non-local operation computes the response at a position as a weighted sum of the features at all positions in the input feature maps"
+      },
+      "优势与通用性总结": {
+        "模板": "These qualities of [method] make it compatible with a broad range of [task type], including [examples].",
+        "原文示例": "These qualities of Swin Transformer make it compatible with a broad range of vision tasks, including image classification... and dense prediction tasks..."
+      }
+    },
+    "内容比例": {
+      "整体架构概述": "15%",
+      "核心模块设计": "55%",
+      "计算复杂度与效率分析": "20%",
+      "网络变体与配置": "10%"
+    }
+  },
+  "Experiments": {
+    "章节结构": [
+      "Datasets and Metrics (数据集与评估指标): 介绍用于训练和测试的基准数据集（如ImageNet-1K, COCO, ADE20K）以及对应的评估标准（如Top-1 Accuracy, mIoU, AP）。",
+      "Implementation Details (实现细节): 描述模型训练的具体超参数设置、优化器选择、学习率衰减策略、数据增强方法以及部署的硬件环境。",
+      "Main Results (主要结果): 在多个下游任务（如图像分类、目标检测、语义分割）上，将本文模型与当前主流模型（SOTA）进行全面对比，展示整体性能优势。",
+      "Ablation Studies (消融实验): 通过控制变量法，逐一替换或移除核心创新模块（如Shifted Window机制、Non-local block），验证各组件对最终性能的独立贡献。"
+    ],
+    "内容逻辑": "整体遵循“前提设定—宏观验证—微观剖析”的漏斗式递进逻辑。首先通过“实现细节”界定实验环境和公平对比的前提；接着利用“主要结果”在不同基准测试中直观展现模型优越性，回应论文的核心主张；最后通过“消融实验”深入模块内部，提供合理性证明，解答“为什么有效”的问题。各子节环环相扣，形成严密的论证闭环。",
+    "论证手法": [
+      "数据支撑：大量使用精确的数值指标（如 +2.7 box AP, 87.3 top-1 accuracy）作为客观评价依据。",
+      "对比论证：在相同参数量或计算复杂度下，与基线模型或历年SOTA模型进行横向比较，凸显精度或速度的优势。",
+      "控制变量法：在消融实验中，确保单一变量原则，剥离外部因素干扰，严谨证明特定结构设计的有效性。",
+      "图表辅助：利用表格清晰罗列多维度的对比数据，或使用曲线图/特征图直观展示收敛速度与注意力变化。"
+    ],
+    "关键句式模板": {
+      "实验设置与数据集": "We evaluate our method on the [Dataset Name] benchmark. / All models are trained for [X] epochs using [Optimizer] with a learning rate of [Y].",
+      "主要结果展示": "Table [X] shows the results on [Task Name]. / Our method achieves [Metric Value] on [Dataset], outperforming the previous state-of-the-art by a large margin of [+Y].",
+      "消融实验": "To investigate the effectiveness of [Component], we conduct ablation studies. / As shown in Table [X], removing the [Module] leads to a significant drop of [Z]% in [Metric], demonstrating its necessity."
+    },
+    "内容比例": {
+      "Datasets and Metrics": 0.1,
+      "Implementation Details": 0.15,
+      "Main Results": 0.45,
+      "Ablation Studies": 0.3
+    }
+  },
+  "Conclusion": {
+    "章节结构": [
+      {
+        "子节名称": "核心贡献总结",
+        "核心任务": "简明扼要地重述本文提出的核心方法、架构或机制（如Shifted windows机制或Non-local操作），强调其设计初衷、理论优势以及解决的痛点。"
+      },
+      {
+        "子节名称": "实验效果与优势验证",
+        "核心任务": "提炼最核心的实验结果，通过列举在不同下游任务（如图像分类、目标检测、分割）中的具体表现，证明模型相较于以往方法的优越性和通用性。"
+      },
+      {
+        "子节名称": "更广泛影响与未来展望",
+        "核心任务": "探讨方法的延展性（如对其他架构的启发）和对整个领域的意义，并通常会提及代码开源情况，以促进社区未来的研究工作。"
+      }
+    ],
+    "内容逻辑": "遵循“回顾-肯定-展望”的递进逻辑。首先高度浓缩地回顾本文构建的核心方法（回答“做了什么”）；紧接着基于回顾，通过客观详实的实验数据和SOTA（State-of-the-art）对比来肯定方法的有效性（回答“效果如何”）；最后将视角从当前提出的模型拔高，扩展到该模型在其他领域的通用性、对整个AI社区的贡献以及未来研究可能的方向（回答“有何深远意义”），形成从具体方法到宏观价值的完整闭环。",
+    "论证手法": [
+      "数据支撑：大量使用具体的量化指标（如87.3 top-1 accuracy, 58.7 box AP, 51.1 mask AP, 53.5 mIoU等）来客观、精准地佐证模型性能。",
+      "对比论证：将提出的方法与先前的State-of-the-art (SOTA) 方法进行直接的数据差异对比，突出性能的大幅提升（如“surpasses... by a large margin of +2.7 box AP”）。",
+      "举例论证：通过枚举模型成功应用的一系列具体视觉任务（如图像分类、目标检测、语义分割、视频分类等），证明其作为通用骨干网络的强大兼容性。",
+      "拓展引申：将特定设计（如hierarchical design）的优势扩展应用到其他独立架构上（如all-MLP architectures），以证明该底层思想的普适价值。"
+    ],
+    "关键句式模板": {
+      "核心贡献总结": [
+        "This paper presents a new [Model/Method], called [Name], that capably serves as a general-purpose backbone for [Field].",
+        "In this paper, we present [Method] as a generic family of building blocks for [Purpose].",
+        "To address these differences, we propose a [Architecture/Method] whose representation is computed with [Core Mechanism]."
+      ],
+      "实验效果与优势验证": [
+        "These qualities of [Model] make it compatible with a broad range of [Field] tasks, including [Task A] (metric on Dataset) and dense prediction tasks such as [Task B] (metric on Dataset).",
+        "Its performance surpasses the previous state-of-the-art by a large margin of [Delta Metric] on [Dataset], demonstrating the potential of [Model]-based models as [Field] backbones."
+      ],
+      "更广泛影响与未来展望": [
+        "The [Core Design/Method] also prove beneficial for [Other Architectures/Fields].",
+        "The code and models are publicly available at [Link]."
+      ]
+    },
+    "内容比例": {
+      "核心贡献总结": "30%",
+      "实验效果与优势验证": "50%",
+      "更广泛影响与未来展望": "20%"
+    }
+  }
+}

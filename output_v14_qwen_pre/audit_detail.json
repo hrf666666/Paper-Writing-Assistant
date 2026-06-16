@@ -1,0 +1,398 @@
+[
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781597267.8223472,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理解析框架'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制'",
+        "suggestion": "在章节中补充对 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '摒弃EPI范式的全视角多尺度代价卷深度估计网络'",
+        "suggestion": "在章节中补充对 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781598144.3614938,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: <citation>",
+        "location": "Related Work",
+        "evidence": "正则模式 '<citation>' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781598915.4398422,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理解析框架'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制'",
+        "suggestion": "在章节中补充对 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '摒弃EPI范式的全视角多尺度代价卷深度估计网络'",
+        "suggestion": "在章节中补充对 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781599785.1433516,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理解析框架'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制'",
+        "suggestion": "在章节中补充对 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '摒弃EPI范式的全视角多尺度代价卷深度估计网络'",
+        "suggestion": "在章节中补充对 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781600799.7487116,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781600973.787277,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase1",
+    "timestamp": 1781601244.819831,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Introduction",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理解析框架'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制'",
+        "suggestion": "在章节中补充对 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 未在章节中被提及",
+        "location": "Introduction",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '摒弃EPI范式的全视角多尺度代价卷深度估计网络'",
+        "suggestion": "在章节中补充对 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase2",
+    "timestamp": 1781601244.8205845,
+    "passed": true,
+    "summary": "审计完成: 2 个问题 (0 严重, 1 警告)",
+    "issue_count": 2,
+    "critical_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "章节未匹配预期模式: <citation>",
+        "location": "Related Work",
+        "evidence": "正则模式 '<citation>' 未命中",
+        "suggestion": "确保章节包含相关类型的内容"
+      },
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Related Work",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase3",
+    "timestamp": 1781601244.8213716,
+    "passed": true,
+    "summary": "审计完成: 4 个问题 (0 严重, 3 警告)",
+    "issue_count": 4,
+    "critical_count": 0,
+    "warning_count": 3,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的3），结构可能不够完整",
+        "location": "Methodology",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于双掩码建模与类MRI角度频率分析的物理解析框架'",
+        "suggestion": "在章节中补充对 '基于双掩码建模与类MRI角度频率分析的物理解析框架' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制'",
+        "suggestion": "在章节中补充对 '基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制' 的描述"
+      },
+      {
+        "severity": "warning",
+        "category": "step_completion",
+        "description": "创新点 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 未在章节中被提及",
+        "location": "Methodology",
+        "evidence": "项目分析中识别了 3 个创新点，此章节未覆盖 '摒弃EPI范式的全视角多尺度代价卷深度估计网络'",
+        "suggestion": "在章节中补充对 '摒弃EPI范式的全视角多尺度代价卷深度估计网络' 的描述"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase4",
+    "timestamp": 1781601244.8232205,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的2），结构可能不够完整",
+        "location": "Experiments",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5",
+    "timestamp": 1781601244.8242683,
+    "passed": true,
+    "summary": "审计完成: 1 个问题 (0 严重, 0 警告)",
+    "issue_count": 1,
+    "critical_count": 0,
+    "warning_count": 0,
+    "issues": [
+      {
+        "severity": "info",
+        "category": "step_completion",
+        "description": "章节子节数量偏少（0 < 建议的1），结构可能不够完整",
+        "location": "Conclusion",
+        "evidence": "当前子节: []",
+        "suggestion": "考虑增加子节以更好组织内容"
+      }
+    ]
+  },
+  {
+    "phase_name": "phase5_5",
+    "timestamp": 1781601244.8244476,
+    "passed": true,
+    "summary": "摘要审计完成: 5 个问题 (0 严重, 5 警告)",
+    "issue_count": 5,
+    "critical_count": 0,
+    "warning_count": 5,
+    "issues": [
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 在Apple数据集上显著提高了非朗伯体特征对比率495.8%，Teddy上212.8%，David上71.2%",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文实验部分（Chapter 4）仅笼统提及使用了基准数据集，未出现Apple、Teddy、David等具体数据集名称，也没有提及非朗伯体特征对比率及其具体提升数值，建议在正文实验与结果分析章节补充详细的定量对比数据。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 从所有81个角视图明确构建4D成本体积",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文方法论部分（Chapter 3）仅表述为'comprehensively utilizing all available angular views'，并未明确指出具体的角视图数量为81，建议在正文中明确该数值参数。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 建立了一个受MRI频率分析启发的框架来制定介质和角掩码，明确量化像素级粗糙度并解耦反射分量",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文（Chapter 3, 5）仅提及了'physics-driven methodology'和'unified dual-mask physical model'，完全没有提及受'MRI频率分析'启发的相关内容，建议在正文方法论中详细补充此物理建模过程。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 开发了一种使用SAM先验和多视图几何一致性描述符（GCD）的自适应能量调整机制",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文中完全没有提及'SAM priors'和'多视图几何一致性描述符(GCD)'，建议在正文的方法或几何相关章节中增加对该机制及其组件的详细阐述。"
+      },
+      {
+        "severity": "warning",
+        "category": "factuality",
+        "description": "摘要中有无正文支撑的声明: 利用非朗伯体区域中自然平坦的成本体积响应作为显式不确定性信号，通过多尺度U-Net引导邻域深度传播",
+        "location": "Abstract",
+        "evidence": "摘要中提到但正文中未详细论述",
+        "suggestion": "正文缺少关于'不确定性信号引导'机制以及使用'多尺度U-Net'进行邻域深度传播的细节描述，建议在正文网络架构部分予以补充。"
+      }
+    ]
+  }
+]

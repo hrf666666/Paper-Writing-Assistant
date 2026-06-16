@@ -1,0 +1,55 @@
+{
+  "content_patterns": {
+    "Introduction": {
+      "opening_style": "problem_motivation",
+      "contribution_format": "paragraph",
+      "contribution_count": 3,
+      "has_paper_structure_paragraph": false
+    },
+    "Related Work": {
+      "organization": "by_approach",
+      "critique_style": "integrated",
+      "comparison_depth": "moderate"
+    },
+    "Methodology": {
+      "starts_with": "overview",
+      "derivation_style": "moderate",
+      "has_algorithm_box": false,
+      "subsection_count": 3
+    },
+    "Experiments": {
+      "dataset_description": "mixed",
+      "ablation_style": "table",
+      "comparison_style": "table",
+      "has_failure_analysis": false
+    }
+  },
+  "argument_rhythm": {
+    "data_placement": "mixed",
+    "figure_density": "moderate",
+    "citation_density": "high",
+    "paragraph_length": "medium(5-7)"
+  },
+  "depth_gradients": {
+    "Methodology": "key_formulas_only",
+    "Experiments": "comprehensive"
+  },
+  "figure_preferences": {
+    "architecture_style": "detailed_boxes",
+    "color_scheme": "colorful",
+    "annotation_level": "moderate",
+    "preferred_layout": "horizontal_flow"
+  },
+  "content_emphasis": {
+    "primary_focus": "mixed",
+    "novelty_presentation": "explicit_claims"
+  },
+  "journal_red_flags": [
+    "Purely theoretical derivations without empirical validation on standard datasets",
+    "Qualitative-only experimental results lacking standard objective metrics",
+    "Excessive mathematical formalism that obscures system implementation details",
+    "Extremely brief methodology lacking mathematical formulation or system architecture details",
+    "Separating 'Related Work' into a standalone section rather than integrating it into the problem introduction",
+    "Conclusions that fail to acknowledge measurement uncertainties or algorithm limitations"
+  ]
+}

@@ -1679,15 +1679,14 @@ class ResearchLoop:
             pc = getattr(self, '_paper_context', None)
             if pc:
                 self.cross_chapter_checker.set_paper_context(pc)
-            issues, fixed_chapters, fixed_abstract = self.cross_chapter_checker.check_all(
+            # v14: cross_chapter 只报告不一致，不自动改正文（避免数值交叉污染）
+            # 数值修正由 QualityLoop 修订层判断（它能看上下文）
+            issues, _, _ = self.cross_chapter_checker.check_all(
                 self._chapters, self._abstract
             )
-            if self.cross_chapter_checker._fixes_applied:
-                self._chapters = fixed_chapters
-                if fixed_abstract != self._abstract:
-                    self._abstract = fixed_abstract
-                logger.info(f"[Phase 7.2] 已应用 "
-                            f"{len(self.cross_chapter_checker._fixes_applied)} 处自动修复")
+            fix_count = len(self.cross_chapter_checker._fixes_applied)
+            if fix_count:
+                logger.info(f"[Phase 7.2] 发现 {fix_count} 处数值不一致（已报告，不自动改）")
             critical = [i for i in issues if i.get("severity") == "critical"]
             if critical:
                 logger.warning(f"[Phase 7.2] 发现 {len(critical)} 个严重一致性问题:")

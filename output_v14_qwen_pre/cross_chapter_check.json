@@ -1,0 +1,20 @@
+[
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 495.8，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 495.8"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 212.8，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 212.8"
+  },
+  {
+    "severity": "warning",
+    "type": "numerical_inconsistency",
+    "description": "Abstract 提到数值 71.2，但 Experiments 中的结果不含此值",
+    "location": "Abstract → 71.2"
+  }
+]

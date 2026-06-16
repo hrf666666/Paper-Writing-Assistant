@@ -1,0 +1,66 @@
+{
+  "status": "auto_confirmed",
+  "motivation_thread": "**CORE_NARRATIVE:** \nTraditional light field depth estimation remains fundamentally crippled by the EPI paradigm's reliance on rigid 2D slicing and a fragile global Lambertian assumption, which discards over 65% of angular data and creates an unbreakable accuracy ceiling in real-world, non-Lambertian scenes. To shatter this bottleneck, we completely abandon EPI architectures and propose MACVO-Net, a full-angular 4D cost volume framework that utilizes MRI-like frequency analysis and SAM-guided energy adjustments to explicitly model non-Lambertian physics. By transforming naturally flat cost volumes from a catastrophic failure mode into an explicit uncertainty signal, our approach successfully propagates accurate depth across highly specular and translucent materials where traditional methods structurally fail.\n\n**INTRO_HOOK:** \nOpen by highlighting the critical paradox in modern light field vision: while practical applications like autonomous navigation and AR are dominated by complex non-Lambertian materials (glass, metal), traditional EPI networks deliberately discard over 65% of the light field's angular information, causing them to fail with severe texture-copying artifacts exactly where robust depth perception is most needed.\n\n**GAP_BRIDGE:** \nTransition from related work by proving that no amount of EPI network refinement can overcome the MAE lower bound of 0.28, because the root cause is structural—evaluating only 34.6% of views along rigid 2D directions strips away the physical multi-view evidence required to decode specular reflections. This establishes a hard dead-end for EPI methods, necessitating a ground-up redesign of light field processing that abandons 2D slope extraction in favor of a holistic, physics-driven 4D cost volume.\n\n**METHOD_JUSTIFY:** \nThe design of MACVO-Net directly mirrors the physics of non-Lambertian light transport: an MRI-inspired angular frequency analysis (via dual-mask modeling) is introduced to physically classify materials in the frequency domain, which then drives a SAM-guided adaptive energy adjustment mechanism to suppress Lambertian \"smooth artifacts\" (down to 15%) and amplify true non-Lambertian signals (up to 150%). This high-SNR feature space allows the network to safely replace EPI slopes with an explicit 4D cost volume across all 81 views, mathematically utilizing the naturally flat cost volumes of specular regions as a geometric certainty map to guide U-Net multi-scale neighborhood propagation.\n\n**EXPERIMENT_VALIDATE:** \nStructure the results section to explicitly quantify the shattering of the previous EPI performance ceiling, highlighting drastic metric improvements (such as the 495.8% ratio leap on the Apple dataset) to prove the superiority of the 4D cost volume in high-frequency specular regions. Use visual ablation studies to demonstrate that the GCD and SAM-guided energy adjustments effectively eliminate the \"texture-copying\" artifacts prevalent in baseline models, physically validating the accuracy of the uncertainty propagation in complex translucent and scattering scenes.\n\n**CONCLUSION_ECHO:** \nClose by reiterating that the EPI paradigm's 2D structural limitations are a fatal flaw for real-world depth estimation, and summarize how MACVO-Net’s full-view physically-grounded architecture has fundamentally solved this by turning non-Lambertian uncertainty from a system weakness into a mathematically modeled strength. Ultimately, frame this work as the necessary catalyst for transitioning light field depth estimation out of rigid laboratory assumptions and into the complex, specular reality of modern robotic and industrial applications.",
+  "anchors": [
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "motivation_hook",
+      "anchor_text": "Establish the problem of **Direction**: Breaking the Lambertian Assumption Bottleneck in EPI-Based Depth , motivating the need for 基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Introduction",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Enumerate contributions: 基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络, with quantitative evidence",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Related Work",
+      "anchor_type": "gap_bridge",
+      "anchor_text": "Show existing methods lack **Direction**: Breaking the Lambertian Assumption Bottleneck, bridging to our 基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Methodology",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Justify each module (基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络) by connecting to: **Direction**: Breaking the Lambertian Assumption Bottleneck",
+      "priority": "must"
+    },
+    {
+      "chapter_name": "Experiments",
+      "anchor_type": "evidence_support",
+      "anchor_text": "Design experiments validating 基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络 via ablation and SOTA comparison",
+      "priority": "should"
+    },
+    {
+      "chapter_name": "Conclusion",
+      "anchor_type": "contribution_claim",
+      "anchor_text": "Echo how 基于双掩码建模与类MRI角度频率分析的物理解析框架, 基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制, 摒弃EPI范式的全视角多尺度代价卷深度估计网络 successfully addresses **Direction**: Breaking the Lambertian Assumption Bottleneck",
+      "priority": "must"
+    }
+  ],
+  "motivation_summary": "**Direction**: Breaking the Lambertian Assumption Bottleneck in EPI-Based Depth Estimation\n**Problem**: Traditional EPI (Epipolar Plane Image) architectures for light field depth estimation fundamentally rely on the assumption of global Lambertian reflectance. They exploit only 34.6% of available angular viewpoints (28 out of 81) along rigid horizontal and vertical directions, making them structurally incapable of handling specular reflections and scattering effects. This inevitably produces tex",
+  "candidates": [
+    {
+      "direction": "Breaking the Lambertian Assumption Bottleneck in EPI-Based Depth Estimation",
+      "problem": "Traditional EPI (Epipolar Plane Image) architectures for light field depth estimation fundamentally rely on the assumption of global Lambertian reflectance. They exploit only 34.6% of available angular viewpoints (28 out of 81) along rigid horizontal and vertical directions, making them structurally incapable of handling specular reflections and scattering effects. This inevitably produces texture-copying artifacts in non-Lambertian regions, imposing a hard performance ceiling (MAE lower bound of 0.28) that no amount of network refinement can overcome.",
+      "significance": "Real-world scenes are overwhelmingly non-Lambertian—containing glass, metal, glossy surfaces, and translucent materials. The inability of EPI methods to handle these surfaces means depth estimation fails precisely where it is most needed in practical applications such as augmented reality, autonomous navigation, and industrial inspection. The rigid angular subsampling also discards over 65% of captured geometric information, representing a massive waste of the light field's multi-view potential.",
+      "approach": "This project abandons the EPI paradigm entirely and proposes MACVO-Net, which explicitly constructs a 4D cost volume using all 81 angular views across 32 disparity hypotheses. Rather than implicitly extracting slope features from 2D slices, the network performs explicit disparity hypothesis testing across the full angular domain. Crucially, it exploits the physical property that cost volumes in non-Lambertian regions are naturally flat—transforming this from a failure mode into an explicit uncertainty signal that guides depth estimation through neighborhood propagation with U-Net multi-scale context aggregation.",
+      "key_claim": "The EPI paradigm's structural limitation of using only 34.6% of viewpoints along fixed directions is the root cause of non-Lambertian depth estimation failure, and a full-view cost volume approach with explicit uncertainty modeling is necessary to break through this fundamental performance ceiling."
+    },
+    {
+      "direction": "Physics-Grounded Material Decomposition for Reflectance-Aware Depth Estimation",
+      "problem": "Existing light field depth estimation methods treat all pixels uniformly through data-driven feature extraction, without any physical understanding of how light interacts with different materials. They lack the ability to distinguish between diffuse, specular, and scattering reflections, and therefore cannot adapt their depth estimation strategy to the underlying reflectance physics. This leads to systematic errors on surfaces where the reflectance model violates implicit assumptions, with no mechanism to identify or correct these failures.",
+      "significance": "Depth estimation accuracy is fundamentally coupled with material reflectance properties—a single depth estimation strategy cannot work optimally across fundamentally different optical behaviors. Without physically grounded material classification, models apply inappropriate geometric constraints (e.g., Lambertian consistency checks) to specular surfaces, generating confident but incorrect predictions. This lack of physical interpretability also prevents principled debugging, generalization to unseen materials, and theoretical understanding of failure modes, limiting scientific progress in the field.",
+      "approach": "The project introduces a dual-mask physical framework that bridges Maxwell's equations to BRDF parameters through a medium mask (M_med) quantifying pixel-level roughness and an angular direction mask (M_ang) characterizing deflection vector fields. Drawing inspiration from MRI frequency-domain analysis, it applies 2D-DFT to the 9×9 angular samples to decompose the light field into frequency components, establishing that low frequencies dominate diffuse reflection, high frequencies characterize specular reflection, and intermediate frequencies indicate scattering. This physics-based classification then drives a component-aware strategy that adaptively adjusts confidence between EPI methods and scattering models for each reflectance type.",
+      "key_claim": "Depth estimation in mixed-material scenes requires an explicit physical decomposition of reflectance types—grounded in electromagnetic theory and angular frequency analysis—because no single geometric assumption can simultaneously satisfy the optical constraints of diffuse, specular, and scattering surfaces."
+    },
+    {
+      "direction": "Suppressing Specular-Induced Smooth Artifacts via Geometry-Consistency-Guided Feature Purification",
+      "problem": "In complex real-world scenes containing both Lambertian and non-Lambertian regions, depth feature extraction is severely contaminated by 'smooth artifacts'—false texture patterns generated by specular highlights and interreflections that mimic genuine geometric structures. These artifacts corrupt the feature inputs to depth estimation networks, creating persistent systematic errors that propagate through the pipeline. Existing methods lack mechanisms to distinguish true depth-related features from reflectance-induced false signals at the pixel level.",
+      "significance": "Smooth artifacts represent a signal-to-noise problem at the most fundamental level: if the input features are contaminated, no downstream architecture can recover correct depth. The quantified impact is enormous—experiments show that properly suppressing these artifacts and amplifying genuine non-Lambertian signals yields improvements of 495.8% on the Apple dataset, 71.2% on David, and 212.8% on Teddy. Without addressing this feature-level corruption, the depth estimation community is building increasingly sophisticated networks on fundamentally unreliable inputs, creating an arms race that cannot succeed.",
+      "approach": "The project designs a Geometric Consistency Descriptor (GCD) computed as the coefficient of variation (std/mean) of local patch means, which precisely responds to depth discontinuities, surface roughness variations, and multi-view consistency. A double-subtraction strategy automatically switches between global and per-pixel adaptive parameters based on the directional relationship between GCD and energy maps. Combined with SAM (Segment Anything Model) segmentation priors, the system constructs a ternary mask that applies differentiated energy adjustment: aggressively suppressing smooth Lambertian pseudo-textures to 15% while amplifying authentic non-Lambertian signals to 150%, thereby delivering high-SNR purified features to the depth estimation network.",
+      "key_claim": "The dominant bottleneck in complex-scene depth estimation is not network architecture but input feature corruption from specular-induced smooth artifacts, and targeted geometry-consistency-guided energy adjustment with segmentation priors can achieve order-of-magnitude improvements by purifying the feature signal before depth inference."
+    }
+  ]
+}

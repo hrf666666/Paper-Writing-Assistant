@@ -1,0 +1,132 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 69.0,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 17,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 84,
+      "tex_has_citations": true,
+      "tex_table_count": 4,
+      "tex_has_tables": true,
+      "tex_figure_count": 4,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 0,
+      "bib_min_entries": false,
+      "pdf_exists": true,
+      "pdf_size_kb": 182.0,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 6,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 1,
+      "compile_success": false
+    },
+    "score": 100,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 9410,
+      "word_count_ok": true,
+      "citation_count": 84,
+      "citations_min": true,
+      "formula_count": 17,
+      "formulas_min": true,
+      "table_count": 4,
+      "tables_min": true,
+      "figure_count": 4,
+      "figures_min": true,
+      "ablation_mentions": 7,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 100,
+    "sections_found": 5,
+    "total_words": 9410,
+    "total_citations": 84
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 75,
+      "narrative_progression": 65,
+      "methodological_rigor": 60,
+      "experimental_sufficiency": 30,
+      "citation_quality": 40,
+      "writing_style": 70,
+      "data_consistency": 65,
+      "format_compliance": 75
+    },
+    "overall_score": 60,
+    "strengths": [
+      "Well-motivated problem identifying the fundamental limitations (data loss and Lambertian assumptions) of EPI-based methods in non-Lambertian light field depth estimation.",
+      "Innovative paradigm shift from 2D EPI slices to a 4D cost volume that explicitly utilizes all 81 angular views.",
+      "Strong theoretical integration of physical modeling, specifically the proposed dual-mask (medium and angular) framework combined with SAM priors."
+    ],
+    "weaknesses": [
+      "The Experiments section explicitly lacks final quantitative results, state-of-the-art comparisons, and ablation study outcomes, which is a fatal flaw for evaluation.",
+      "Severely limited citations, with fewer than 30 references identified across the manuscript, failing to provide an adequate literature review.",
+      "Incomplete mathematical formalization in the methodology and experiments sections (e.g., missing equations for the dual-mask model and the BadPix metric)."
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "Incomplete experimental validation: The Experiments section defines metrics and setup but contains absolutely no reported performance scores or SOTA comparisons.",
+      "Insufficient references: The paper contains less than 30 citations, which is far below the expected standard for an IEEE TCSVT paper.",
+      "Lack of rigorous mathematical formalization: Key mathematical constructs, such as the unified dual-mask physical model, lack explicit equations and proper derivation."
+    ]
+  },
+  "overall": {
+    "L1_score": 100,
+    "L2_score": 100,
+    "L3_score": 60,
+    "L1_passed": true,
+    "overall_grade": "B",
+    "hierarchical_alignment": {
+      "goal_vs_L_checks": [
+        {
+          "goal": "G2 (参考文献体系)",
+          "goal_passed": false,
+          "L2_citations_min": true,
+          "consistent": false
+        },
+        {
+          "goal": "G5 (学术输出)",
+          "goal_passed": true,
+          "L1_tex_exists": true,
+          "L1_pdf_exists": true,
+          "consistent": true
+        },
+        {
+          "goal": "G4 (章节生成)",
+          "goal_passed": false,
+          "L2_sections_complete": true,
+          "consistent": false
+        }
+      ],
+      "consistent": false
+    }
+  }
+}

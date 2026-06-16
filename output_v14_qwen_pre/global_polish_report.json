@@ -1,0 +1,69 @@
+{
+  "changes": [
+    {
+      "type": "terminology",
+      "chapter": 1,
+      "count": 936,
+      "description": "统一术语 936 处"
+    },
+    {
+      "type": "terminology",
+      "chapter": 4,
+      "count": 236,
+      "description": "统一术语 236 处"
+    },
+    {
+      "type": "terminology",
+      "chapter": 5,
+      "count": 2,
+      "description": "统一术语 2 处"
+    },
+    {
+      "type": "transition",
+      "from": "Related Work",
+      "to": "Methodology",
+      "transition": "To systematically address these limitations and fully exploit the complete angular information of li"
+    },
+    {
+      "type": "transition",
+      "from": "Methodology",
+      "to": "Experiments",
+      "transition": "Equipped with this fully parameterized multi-scale optimization pipeline, we proceed to test the pro"
+    },
+    {
+      "type": "transition",
+      "from": "Experiments",
+      "to": "Conclusion",
+      "transition": "These empirical findings ultimately underscore the fundamental necessity of transcending the structu"
+    }
+  ],
+  "quality_delta": 3.0,
+  "rhythm_report": {
+    "Introduction": {
+      "words": 1367,
+      "percentage": 15.1,
+      "status": "ok"
+    },
+    "Related Work": {
+      "words": 1601,
+      "percentage": 17.7,
+      "status": "ok"
+    },
+    "Methodology": {
+      "words": 3412,
+      "percentage": 37.7,
+      "status": "ok"
+    },
+    "Experiments": {
+      "words": 2332,
+      "percentage": 25.8,
+      "status": "ok"
+    },
+    "Conclusion": {
+      "words": 328,
+      "percentage": 3.6,
+      "status": "too_short"
+    }
+  },
+  "total_changes": 6
+}

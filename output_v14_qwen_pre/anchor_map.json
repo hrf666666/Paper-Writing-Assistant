@@ -1,0 +1,23 @@
+{
+  "innovation_1": {
+    "related_work_section": "2.1 Traditional Methods",
+    "methodology_section": "3.2",
+    "experiment_section": "4.3",
+    "name": "基于双掩码建模与类MRI角度频率分析的物理解析框架",
+    "contribution_statement": "We identify that 传统依赖EPI（极线平面图像）范式的深度估计方法存在结构局限性，且缺乏对光场底层物理频率特性的深刻理解。"
+  },
+  "innovation_2": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.3",
+    "experiment_section": "4.4",
+    "name": "基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制",
+    "contribution_statement": "We propose 一种摒弃EPI范式的全视角多尺度深度估计网络，并创新性地利用双掩码物理解析框架提取特征，作为网络的核心支撑。"
+  },
+  "innovation_3": {
+    "related_work_section": "2.2 Deep Learning Methods",
+    "methodology_section": "3.4",
+    "experiment_section": "4.5",
+    "name": "摒弃EPI范式的全视角多尺度代价卷深度估计网络",
+    "contribution_statement": "We demonstrate 结合多视角几何一致性(GCD)与SAM引导的自适应能量机制能够有效优化该网络，在复杂纹理和遮挡场景下大幅提升了深度估计的精度与鲁棒性。"
+  }
+}

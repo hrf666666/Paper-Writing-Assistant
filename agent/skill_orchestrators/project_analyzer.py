@@ -227,6 +227,9 @@ def _collect_structured_results(project_path):
     for rf in result_files[:8]:  # 最多 8 个文件
         try:
             if rf.endswith(".csv"):
+                # v14: 跳过 per_scene 类细节 CSV（只收 summary/overall 类）
+                if "per_scene" in rf.lower() or "per_class" in rf.lower():
+                    continue
                 with open(rf, encoding="utf-8", errors="ignore") as f:
                     lines_csv = f.readlines()[:20]
                     content = "".join(lines_csv)
@@ -244,9 +247,12 @@ def _collect_structured_results(project_path):
                             if isinstance(v, (int, float)) and not isinstance(v, bool):
                                 # 只收带指标含义的 key（排除 epoch/seed/total_params 等）
                                 kl = k.lower()
-                                if any(x in kl for x in ["mae", "mse", "rmse", "acc", "auc",
-                                        "badpix", "psnr", "ssim", "loss", "best", "score",
-                                        "error", "f1", "iou", "ratio", "cohen"]):
+                                # v14 精简: 只收头线指标（best/mean/overall），不收 per_scene/epoch 细节
+                                # 避免 FactBase 存太多相近数值 → cross_chapter 交叉污染
+                                if any(x in kl for x in ["best_overall", "best_val", "mean_mae",
+                                        "best_mae", "overall_mae", "best_acc", "best_loss"]) or \
+                                   (any(x in kl for x in ["best", "mean", "overall"]) and
+                                    any(x in kl for x in ["mae", "acc", "loss", "psnr", "ssim"])):
                                     metrics[f"{prefix}{k}"] = round(float(v), 6) if isinstance(v, float) else v
                             elif isinstance(v, (dict, list)):
                                 _extract_nums(v, f"{prefix}{k}.", depth+1)

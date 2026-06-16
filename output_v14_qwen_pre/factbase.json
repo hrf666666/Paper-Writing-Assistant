@@ -1,0 +1,14 @@
+{
+  "hardware": "",
+  "training_params": {},
+  "loss_terms": [],
+  "datasets": [],
+  "metrics": {},
+  "model_name": "",
+  "innovation_names": [
+    "基于双掩码建模与类MRI角度频率分析的物理解析框架",
+    "基于多视角几何一致性(GCD)与SAM引导的自适应能量调整机制",
+    "摒弃EPI范式的全视角多尺度代价卷深度估计网络"
+  ],
+  "paper_title": ""
+}
