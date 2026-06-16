@@ -2088,8 +2088,8 @@ class ResearchLoop:
 
             logger.info(f"[Phase 9.5] round {round_num+1}: 处理 {len(remaining)} 个问题")
 
-            # 对抗式裁定：每个问题判断是否误报（defense）
-            for finding in remaining:
+            # 对抗式裁定：每个问题判断是否误报（defense，上限 5 避免过多 LLM 调用）
+            for finding in remaining[:5]:
                 try:
                     defense_prompt = f"""You are an author advocate reviewing a reviewer's criticism of your paper.
 
@@ -2103,8 +2103,11 @@ misunderstanding? Answer JSON: {{"verdict": "invalid"|"fixable", "reason": "..."
                     verdict = self.api_client.parse_json_response(defense, default={})
                     v = verdict.get("verdict", "fixable") if isinstance(verdict, dict) else "fixable"
                     finding.verdict = v
-                    if v == "invalid":
+                    if v == "invalid" and finding.evidence_anchor:
                         logger.info(f"[Phase 9.5] issue '{finding.description[:40]}' → 裁定 invalid（误报）")
+                    elif v == "invalid" and not finding.evidence_anchor:
+                        finding.verdict = "fixable"  # 无证据锚点不判 invalid
+                        logger.info(f"[Phase 9.5] issue '{finding.description[:40]}' → 无 evidence_anchor，默认 fixable")
                 except Exception:
                     finding.verdict = "fixable"  # 裁定失败默认可修
 
@@ -2117,9 +2120,17 @@ misunderstanding? Answer JSON: {{"verdict": "invalid"|"fixable", "reason": "..."
             # 修订：把 fixable 问题的 close_criterion 注入修订 prompt
             brief = self._findings.as_revision_brief()
             # 修订最弱的章节（取质量分最低的）
+            # v14 修: 用 overall_score（不是 dimensions.overall），且按章名匹配
+            _history = self.quality_gate.get_history()
+            _ch_names = {1: "Introduction", 2: "Related Work", 3: "Methodology", 4: "Experiments", 5: "Conclusion"}
+            _ch_scores = {}
+            for h in _history:
+                _hn = h.get("chapter", "").lower()
+                for _cn, _cs in _ch_names.items():
+                    if _cs.lower() == _hn:
+                        _ch_scores[_cn] = h.get("overall_score", 50)
             ch_to_revise = min(self._chapters.keys(),
-                             key=lambda k: self.quality_gate.get_history()[-1].get("dimensions", {}).get("overall", 50)
-                             if self.quality_gate.get_history() else 50) if self._chapters else None
+                             key=lambda k: _ch_scores.get(k, 50)) if self._chapters else None
             if ch_to_revise is None:
                 break
 
@@ -2138,9 +2149,13 @@ Output the revised section in LaTeX. Only output the revised text, no explanatio
                 if revised and len(revised) > len(self._chapters[ch_to_revise]) * 0.3:
                     self._chapters[ch_to_revise] = revised
                     logger.info(f"[Phase 9.5] round {round_num+1}: ch{ch_to_revise} 已修订")
-                    # 重新编译
-                    self._generate_latex_output(results, "")
-                    self._compile_and_validate(results)
+                    # v14 修: 只重新编译，不重跑 LaTeX 生成（避免覆盖摘要/关键词）
+                    try:
+                        from tools.latex_converter import run_latex_converter
+                        run_latex_converter(OUTPUT_DIR, self._chapters, self._abstract or "")
+                        self._compile_and_validate(results)
+                    except Exception as ce:
+                        logger.warning(f"[Phase 9.5] 重编译失败: {ce}")
                 else:
                     logger.warning(f"[Phase 9.5] round {round_num+1}: 修订产出过短，跳过")
             except Exception as e:

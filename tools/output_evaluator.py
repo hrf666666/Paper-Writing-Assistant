@@ -509,7 +509,7 @@ If the paper has no real issues, return an empty issues list with recommendation
                                     if isinstance(i, dict) and i.get("significance") == "minor")
                         # 分数 = 100 - 问题扣分（major 每个 -10, minor 每个 -3）
                         result["overall_score"] = max(20, 100 - major * 10 - minor * 3)
-                        result["issues_count"] = {{"major": major, "minor": minor}}
+                        result["issues_count"] = {"major": major, "minor": minor}
                         logger.info(f"[OutputEval/L3] {caller_name} 评价成功: "
                                     f"{major} major + {minor} minor issues → score {result['overall_score']}")
                     elif "dimensions" in result:
