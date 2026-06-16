@@ -317,6 +317,26 @@ class OutputEvaluator:
         checks["placeholders"] = placeholders
         checks["no_placeholders"] = placeholders == 0
 
+        # v14: 结构要素检查（每章必备要素，纯规则零成本）
+        content_lower = full_content.lower()
+        structure_checks = {
+            "intro_has_contribution": bool(re.search(
+                r'contribut|we propose|our method|in this paper, we', content_lower[:5000])),
+            "intro_has_problem": bool(re.search(
+                r'problem|challenge|limitation|difficult', content_lower[:5000])),
+            "experiments_has_dataset": bool(re.search(
+                r'dataset|benchmark|hci|urbanlf|wanner', content_lower)),
+            "experiments_has_comparison": bool(re.search(
+                r'compare|baseline|state.of.the.art|sota|existing method', content_lower)),
+            "experiments_has_ablation": ablation_mentions >= 3,
+            "conclusion_has_summary": bool(re.search(
+                r'conclusion|in summary|we have (proposed|presented|shown)',
+                content_lower[-3000:])),
+        }
+        checks.update(structure_checks)
+        structure_passed = sum(1 for v in structure_checks.values() if v)
+        checks["structure_complete"] = structure_passed >= 5  # 6项至少5项
+
         # ── 评分 ──
         key_checks = [
             "sections_complete", "word_count_ok", "citations_min",
