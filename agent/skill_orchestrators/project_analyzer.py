@@ -201,7 +201,71 @@ def extract_model_architecture(project_info, paper_title):
     )
 
 
-def extract_experiment_design(project_info, paper_title):
+def _collect_structured_results(project_path):
+    """v14: 扫描项目代码里的结构化结果文件（results.json/training_history.json 等），
+    提取真实数值指标。FactBase 空壳的根因修复——之前只喂代码文本给 LLM 猜。"""
+    import json
+    import os
+    result_files = []
+    search_patterns = ["results.json", "training_history.json", "experiment_manifest.json",
+                       "mba_results.json", "per_scene_mae.csv", "angular_frequency_results.json"]
+    try:
+        for root, dirs, files in os.walk(project_path):
+            # 跳过常见非结果目录
+            dirs[:] = [d for d in dirs if d not in {".git", "__pycache__", "node_modules", ".venv"}]
+            for fn in files:
+                if fn in search_patterns or ("result" in fn.lower() and fn.endswith(".json")):
+                    result_files.append(os.path.join(root, fn))
+    except Exception:
+        return ""
+    
+    if not result_files:
+        return ""
+    
+    # 提取每个文件的数值字段（限制总量避免过长）
+    chunks = []
+    total_chars = 0
+    for rf in result_files[:8]:  # 最多 8 个文件
+        try:
+            if rf.endswith(".csv"):
+                with open(rf, encoding="utf-8", errors="ignore") as f:
+                    content = f.read()[:800]
+                chunks.append(f"--- {os.path.basename(rf)} (csv) ---\n{content}")
+                total_chars += len(content)
+            else:
+                with open(rf, encoding="utf-8", errors="ignore") as f:
+                    data = json.load(f)
+                # 只提取数值字段（metrics），不保留完整结构
+                metrics = {}
+                def _extract_nums(obj, prefix=""):
+                    if isinstance(obj, dict):
+                        for k, v in obj.items():
+                            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                                # 只收带指标含义的 key（排除 epoch/seed/total_params 等）
+                                kl = k.lower()
+                                if any(x in kl for x in ["mae", "mse", "rmse", "acc", "auc",
+                                        "badpix", "psnr", "ssim", "loss", "best", "score",
+                                        "error", "f1", "iou", "ratio", "cohen"]):
+                                    metrics[f"{prefix}{k}"] = round(float(v), 6) if isinstance(v, float) else v
+                            elif isinstance(v, (dict, list)):
+                                _extract_nums(v, f"{prefix}{k}.")
+                    elif isinstance(obj, list):
+                        for i, item in enumerate(obj[:3]):
+                            _extract_nums(item, f"{prefix}[{i}].")
+                _extract_nums(data)
+                if metrics:
+                    snippet = json.dumps(metrics, ensure_ascii=False, indent=2)[:600]
+                    chunks.append(f"--- {os.path.basename(rf)} ---\n{snippet}")
+                    total_chars += len(snippet)
+        except (json.JSONDecodeError, OSError):
+            continue
+        if total_chars > 3000:
+            break
+    
+    return "\n".join(chunks) if chunks else ""
+
+
+def extract_experiment_design(project_info, paper_title, structured_results=""):
     """提炼实验设计"""
     prompt = f"""
     你是一名实验设计专家。
@@ -226,6 +290,12 @@ def extract_experiment_design(project_info, paper_title):
     <dataset_content>
     {project_info['dataset_content'][:4000]}
     </dataset_content>
+    
+    <structured_results_from_code>
+    {structured_results}
+    </structured_results_from_code>
+    以上是项目代码中实际跑出的结构化实验数值（非猜测）。请在"关键结果"字段中优先使用这些真实数值。
+    若无结构化结果（structured_results 为空），则根据代码文本推断合理的目标值。
     
     请以json格式给出，包含上述6个字段（"数据集"、"评估指标"、"训练策略"、"对比方法"、"消融设计"、"关键结果"）。
     回复以```json开头，以```结尾，无需添加任何解释说明。
@@ -290,7 +360,9 @@ def run_project_analyzer():
     
     logger.info("[project_analyzer] 步骤5: 提炼实验设计...")
     try:
-        experiment_design = extract_experiment_design(project_info, PAPER_TITLE)
+        _structured = _collect_structured_results(PROJECT_CODE_PATH)
+        logger.info(f"[project_analyzer] 结构化结果: {len(_structured)} chars")
+        experiment_design = extract_experiment_design(project_info, PAPER_TITLE, structured_results=_structured)
         _orch.save_output("experiment_design.json", experiment_design)
     except Exception as e:
         logger.error(f"[project_analyzer] 步骤5 提炼失败: {e}")
