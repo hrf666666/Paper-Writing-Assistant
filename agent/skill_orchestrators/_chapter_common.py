@@ -82,8 +82,12 @@ class ChapterContext:
             if not isinstance(inn, dict):
                 continue
             name = inn.get("创新点名称", inn.get("name", ""))
-            work = inn.get("工作内容", inn.get("what_it_does", inn.get("description", "")))
-            value = inn.get("价值", inn.get("value", inn.get("why_it_matters", "")))
+            # v14 修正: 覆盖真实 key 集（创新点工作内容 list / 创新点价值）
+            work_raw = inn.get("创新点工作内容", inn.get("工作内容",
+                          inn.get("what_it_does", inn.get("description", ""))))
+            work = "; ".join(str(w) for w in work_raw) if isinstance(work_raw, list) else (str(work_raw) if work_raw else "")
+            value = inn.get("创新点价值", inn.get("价值",
+                       inn.get("value", inn.get("why_it_matters", ""))))
             parts = [f"{i}. {name}"]
             if work:
                 parts.append(f": {work}")
