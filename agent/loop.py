@@ -522,24 +522,6 @@ class ResearchLoop:
         except (ValueError, IndexError):
             pass
 
-        if task.phase_name.startswith("phase") and chapter_num > 0:
-            if chapter_num > 1 and chapter_num in chapter_names:
-                previous_summary = self._build_previous_summary()
-                if previous_summary and len(previous_summary) > 100:
-                    try:
-                        think_prompt = f"""Based on the previous chapters summary, provide a 2-sentence strategy for writing {chapter_names[chapter_num]}.
-Focus on maintaining consistency with previous content and addressing any gaps.
-
-Previous chapters summary:
-{previous_summary[:1000]}
-
-Respond with just the strategy, no explanation:"""
-                        llm_strategy = self.api_client.call_light(think_prompt)
-                        if llm_strategy:
-                            strategy += f"\nLLM策略建议: {llm_strategy.strip()[:200]}"
-                    except Exception as e:
-                        logger.debug(f"LLM策略调用失败(不阻塞): {e}")
-
         logger.info(f"THINK [{progress['completed']}/{progress['total']}]: {task.target} - {strategy[:200]}")
 
         return strategy
@@ -762,9 +744,7 @@ Respond with just the strategy, no explanation:"""
         content = run_fn(self._project_data, self._ref_data, **kwargs)
         content, _ = self._quality_ensure(chapter_name, content)
         self._chapters[phase_num] = content
-        if ENABLE_AUDIT:
-            self._quick_audit(f"phase{phase_num}", chapter_name, content)
-        return content
+        return content  # 审计在 Phase 6.5 统一做
 
     def _has_extra_discussion(self) -> bool:
         """检查 venue_adapter 是否配置了独立的 Discussion/Limitations 章节"""
@@ -1177,8 +1157,6 @@ Respond with just the strategy, no explanation:"""
             "should_retry": False,
             "strategy": "",
             "quality_score": -1,
-            "cross_chapter_issues": [],
-            "failure_patterns": [],
         }
 
         # 章节生成任务：质量评估已在内循环完成，直接记录
@@ -1208,25 +1186,13 @@ Respond with just the strategy, no explanation:"""
                 self.memory.add_log("quality",
                                    f"{chapter_name} 最终质量: {reflection['quality_score']:.1f}/100")
 
-                # 失败模式识别：检测是否有维度持续低分
-                # Abstract 使用更低的质量阈值（摘要难以达到 70+）
+                # should_retry: 质量未达标 → 触发重试（QualityGate 内循环已尝试修订）
                 effective_threshold = self.quality_gate.PASS_THRESHOLD
                 if task.phase_name == "phase5_5":
-                    effective_threshold = 55.0  # Abstract 专用阈值
-
+                    effective_threshold = 55.0
                 if reflection["quality_score"] < effective_threshold:
                     reflection["should_retry"] = True
                     reflection["strategy"] = "revise"
-                    for h in reversed(history[-3:]):
-                        h_chapter = h.get("chapter", "")
-                        if h_chapter.lower() == chapter_name.lower():
-                            dims = h.get("dimensions", {})
-                            for dim_name, score in dims.items():
-                                if score < 50:
-                                    reflection["failure_patterns"].append(
-                                        f"{dim_name} 得分 {score:.0f} < 50，需要重点改进"
-                                    )
-                            break
 
             # 跨章节一致性检查（在 Methodology 之后的每个章节）
             phase_num_int = 0
@@ -1258,10 +1224,6 @@ Respond with just the strategy, no explanation:"""
                 if not verify_report.passed and verify_report.total_score < 40:
                     reflection["should_retry"] = True
                     reflection["strategy"] = "revise"
-                    reflection["failure_patterns"].extend(
-                        f"VERIFY: {c['name']} - {c['details'][:80]}"
-                        for c in verify_report.get_failures()[:3]
-                    )
                     logger.warning(
                         f"[REFLECT] VERIFY 未通过 (score={verify_report.total_score:.1f})，强制重试"
                     )
@@ -2126,27 +2088,6 @@ Respond with just the strategy, no explanation:"""
                 summary += f"Chapter {num} summary:\n{self._chapters[num][:max_chars_per_chapter]}...\n\n"
         return summary
 
-    def _quick_audit(self, phase_name: str, chapter_name: str, content: str):
-        """
-        v5.0: 章节生成后即时审计（轻量版）
-
-        仅做参考文献反向检索和内容真实性快速检查，
-        详细审计在 phase6_5 进行
-        """
-        try:
-            report = self.auditor.audit_chapter(
-                phase_name, chapter_name, content,
-                self._project_data, self._ref_data
-            )
-            critical = sum(1 for i in report.issues if i.severity == "critical")
-            if critical > 0:
-                logger.warning(f"[即时审计] {chapter_name} 发现 {critical} 个严重问题")
-                for issue in report.issues:
-                    if issue.severity == "critical":
-                        logger.warning(f"  - {issue.description[:100]}")
-        except Exception as e:
-            logger.debug(f"即时审计异常（不阻塞）: {e}")
-
     def _deduplicate_content(self):
         """
         去重检查（v11.1 增强）：
@@ -2677,7 +2618,4 @@ Write in English, LaTeX-compatible Markdown format. Do NOT include a top-level s
         # 质量检查
         content, _ = self._quality_ensure(chapter_name, content)
 
-        if ENABLE_AUDIT:
-            self._quick_audit(phase_name, chapter_name, content)
-
-        return content
+        return content  # 审计在 Phase 6.5 统一做
