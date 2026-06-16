@@ -39,20 +39,15 @@ def _load_previous_summary():
 def generate_conclusion(project_data, ref_data, previous_chapters_summary,
                         skip_limitations=False, citation_context="", venue_adapter=None):
     """生成第五章 Conclusion"""
-    
-    innovation_points = project_data.get("innovation_points", [])
-    experiment_design = project_data.get("experiment_design", {})
-    
-    style_guide = ref_data.get("style_guide", {})
-    chapter_org = ref_data.get("chapter_organizations", {}).get("Conclusion", {})
-    article_info = get_article_type_info()
-    
-    innovation_summary = "\n".join([
-        f"贡献{i+1}: {ip.get('创新点名称', 'N/A')} - {ip.get('创新点价值', 'N/A')}"
-        for i, ip in enumerate(innovation_points)
-    ])
-    
-    key_results = experiment_design.get("关键结果", {})
+    from agent.skill_orchestrators._chapter_common import ChapterContext
+    ctx = ChapterContext(project_data, ref_data, "Conclusion",
+                         venue_adapter=venue_adapter, citation_context=citation_context)
+
+    innovation_summary = ctx.innovation_summary  # v14: 统一格式（替代旧的贡献N格式）
+    key_results = ctx.experiment_design.get("关键结果", {})
+    chapter_org = ctx.chapter_org
+    article_info = ctx.article_info
+    _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     
     # 构建参考论文中结论的写法指导
     ref_conclusion_instruction = ""
@@ -85,6 +80,8 @@ def generate_conclusion(project_data, ref_data, previous_chapters_summary,
 
 **前序章节摘要**：
 {previous_chapters_summary[:2000]}
+
+{_planning}
 
 {ref_conclusion_instruction}
 
