@@ -140,10 +140,10 @@ class ChapterContext:
                 if items:
                     blocks.append(f"<chapter_focus>本章应覆盖: {'; '.join(items)}</chapter_focus>")
         # content_strategy 的该章策略
-        ch_strategy = self.content_strategy.get(str(self._chapter_num()))
+        ch_strategy = self.content_strategy.get(self.chapter_name, {})
         if ch_strategy and isinstance(ch_strategy, dict):
-            focus = ch_strategy.get("focus", "")
-            avoid = ch_strategy.get("avoid", [])
+            focus = ch_strategy.get("focus_areas", ch_strategy.get("focus", ""))
+            avoid = ch_strategy.get("should_avoid", ch_strategy.get("avoid", []))
             if focus:
                 blocks.append(f"<content_focus>{focus}</content_focus>")
             if avoid:

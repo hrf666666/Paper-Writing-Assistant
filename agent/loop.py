@@ -492,7 +492,6 @@ class ResearchLoop:
         使用轻量 LLM 调用分析前序章节质量和项目数据，输出执行策略。
         对于重试任务，分析失败原因并给出具体调整建议。
         """
-        context = self.memory.build_context_for_prompt(max_chars=2000)
         progress = self.dispatcher.get_progress()
 
         if task.retry_count > 0:
