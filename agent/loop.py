@@ -1239,7 +1239,7 @@ class ResearchLoop:
         }
         # v14 兜底: 确保 auditor/verifier/cross_chapter 都注入 FactBase
         _fb = getattr(self, '_factbase', None)
-        if _fb:
+        if _fb and not _fb.is_empty():  # v14: 空 FactBase 不注入（会让数值检查静默跳过）
             if hasattr(self, 'auditor') and not getattr(self.auditor, '_factbase', None):
                 self.auditor.set_factbase(_fb)
             if hasattr(self, 'verifier') and not getattr(self.verifier, '_factbase', None):

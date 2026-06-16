@@ -74,7 +74,7 @@ class OutputEvaluator:
         l3_score = report["L3_academic_quality"].get("overall_score", 0)
 
         # 严肃的惩罚机制：如果 L1 关键项未通过，L3 不应给高分
-        l1_critical_fails = report["L1_format_validity"].get("critical_fails", [])
+        l1_critical_fails = report["L1_format_validity"].get("critical_fails") or []  # or [] 防 None
 
         # v14: cross_chapter critical issues 纳入门控（一致性门控）
         import os, json as _json

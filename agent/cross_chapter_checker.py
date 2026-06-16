@@ -144,8 +144,7 @@ class CrossChapterChecker:
         issues = []
         pc_metrics = self._factbase.metrics if self._factbase else self._paper_context.get("metrics", {})
         for ch_key, content in chapters.items():
-            import re as _re
-            for num_match in _re.finditer(r'(\d+\.\d+)', content):
+            for num_match in re.finditer(r'(\d+\.\d+)', content):
                 num = num_match.group(1)
                 if pc_metrics:
                     found = any(abs(float(num) - float(v)) < 0.01 for v in pc_metrics.values()
