@@ -1145,12 +1145,8 @@ class ResearchLoop:
         """
         REFLECT: 评估执行结果
 
-        增强：
-        1. 记录质量分数
-        2. 跨章节一致性检查（在 Methodology 之后开始）
-        3. 失败模式识别
-        4. 基于反思的决策建议
-        5. v8.0: 结合 VERIFY 报告做决策
+        记录质量分 + should_retry + VERIFY 报告决策。
+        跨章节一致性在 Phase 7.2 统一做（不在这里重复）。
         """
         reflection = {
             "should_retry": False,
@@ -1192,28 +1188,6 @@ class ResearchLoop:
                 if reflection["quality_score"] < effective_threshold:
                     reflection["should_retry"] = True
                     reflection["strategy"] = "revise"
-
-            # 跨章节一致性检查（在 Methodology 之后的每个章节）
-            phase_num_int = 0
-            try:
-                phase_num_int = int(phase_num.replace("_", ".").split(".")[0])
-            except ValueError:
-                pass
-
-            if phase_num_int >= 3 and len(self._chapters) >= 2:
-                # v11.2: 注入 paper_context
-                pc = getattr(self, '_paper_context', None)
-                if pc:
-                    self.cross_chapter_checker.set_paper_context(pc)
-                issues, _, _ = self.cross_chapter_checker.check_all(
-                    self._chapters, self._abstract
-                )
-                critical_issues = [i for i in issues if i.get("severity") == "critical"]
-                if critical_issues:
-                    reflection["cross_chapter_issues"] = critical_issues
-                    logger.warning(
-                        f"[REFLECT] 跨章节一致性检查发现 {len(critical_issues)} 个严重问题"
-                    )
 
         # ====== v8.0: VERIFY 报告影响决策 ======
         if verify_report is not None:
@@ -2236,54 +2210,6 @@ class ResearchLoop:
             status=task.status, duration_seconds=duration,
             quality_score=quality
         )
-
-    def _split_by_chapter_titles(self, text: str, chapter_keys: list,
-                                  chapter_names_map: dict):
-        """
-        按章节标题在文本中定位并分割内容到各章。
-
-        策略：按已知的章节标题（如 "Introduction", "Methodology" 等）在文本中
-        搜索，将两次匹配之间的内容归为该章节。
-        """
-        import re
-
-        # 按章节名构建正则，按章节名长度降序排列避免短名误匹配
-        sorted_chapters = sorted(
-            [(k, chapter_names_map.get(k, "")) for k in chapter_keys],
-            key=lambda x: len(x[1]), reverse=True
-        )
-
-        # 找到每个章节标题在文本中的位置
-        positions = []
-        for ch_key, ch_name in sorted_chapters:
-            if not ch_name:
-                continue
-            # v11.6: 严格匹配 Markdown 标题行（必须以 # 开头）
-            # 避免 "In the introduction of..." 这种正文中的匹配
-            pattern = rf'(?:^|\n)\s*#+\s*(?:\d+\.?\s*)?{re.escape(ch_name)}\s*(?:\n|$)'
-            for m in re.finditer(pattern, text, re.IGNORECASE):
-                positions.append((m.start(), ch_key, ch_name))
-                break  # 只取第一个匹配
-
-        if not positions:
-            logger.warning("[_split_by_chapter_titles] 未找到任何章节标题，跳过分割")
-            return
-
-        # 按位置排序
-        positions.sort(key=lambda x: x[0])
-
-        # 分割
-        for i, (pos, ch_key, ch_name) in enumerate(positions):
-            end_pos = positions[i + 1][0] if i + 1 < len(positions) else len(text)
-            content = text[pos:end_pos].strip()
-            if content:
-                self._chapters[ch_key] = content
-
-        logger.info(f"[_split_by_chapter_titles] 按标题分割完成，已更新 {len(positions)} 个章节")
-
-    # ==================================================================
-    # v7.0 子流程方法
-    # ==================================================================
 
     def _init_reference_pool_and_outline(self):
         """构建参考文献池和全局大纲（从 _initialize_project_data 提取）"""
