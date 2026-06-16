@@ -1050,145 +1050,20 @@ Respond with just the strategy, no explanation:"""
         return paper_context
 
     def _build_citation_context(self) -> str:
-        """v13 PR3: 经 LayeredMemory 缓存的引用上下文。
-
-        旧版每章重算（7 次 ×10-30KB）；现依赖指纹不变则命中缓存。
-        citation_bank / cite_key_map 变更时自动失效重算。
-        """
-        return self._memory.get_or_compute(
-            "citation_context",
-            depends=[self._citation_bank, getattr(self, '_cite_key_map', None),
-                     getattr(self, '_paper_context', None)],
-            compute=self._build_citation_context_uncached,
+        """v14: 委托给 CitationInjector（从 loop 拆出）。保留 cite_key_map 回写供 BibTeX 用。"""
+        from agent.citation_injector import CitationInjector
+        _inj = CitationInjector(
+            reference_pool=self._reference_pool,
+            citation_bank=self._citation_bank,
+            factbase=getattr(self, '_factbase', None),
+            paper_context=getattr(self, '_paper_context', None),
+            memory=self._memory,
         )
-
-    def _build_citation_context_uncached(self) -> str:
-        """
-        v11.6: 构建引用上下文字符串，注入章节 prompt
-        v11.2: 同时注入 PaperContext 事实约束
-        """
-        parts = []
-
-        # v11.2: P0 — PaperContext 事实约束（最高优先级）
-        pc = getattr(self, '_paper_context', None) or (self._project_data or {}).get("paper_context")
-        if pc and isinstance(pc, dict) and any(pc.values()):
-            fact_lines = []
-            if pc.get("hardware"):
-                fact_lines.append(f"  Hardware: {pc['hardware']}")
-            if pc.get("training_params"):
-                for k, v in pc["training_params"].items():
-                    fact_lines.append(f"  {k}: {v}")
-            if pc.get("loss_terms"):
-                lt = list(pc['loss_terms']) if not isinstance(pc['loss_terms'], list) else pc['loss_terms']
-                fact_lines.append(f"  Loss components: {', '.join(str(t) for t in lt[:6])}")
-            if pc.get("datasets"):
-                ds = list(pc['datasets']) if not isinstance(pc['datasets'], list) else pc['datasets']
-                fact_lines.append(f"  Datasets: {', '.join(str(d) for d in ds[:5])}")
-            if pc.get("metrics"):
-                metric_lines = [f"    {k}: {v}" for k, v in list(pc["metrics"].items())[:8]]
-                fact_lines.append("  Key metrics (use these EXACT values throughout):")
-                fact_lines.extend(metric_lines)
-            if pc.get("model_name"):
-                fact_lines.append(f"  Model name: {pc['model_name']}")
-            if pc.get("innovation_names"):
-                inn = list(pc['innovation_names']) if not isinstance(pc['innovation_names'], list) else pc['innovation_names']
-                fact_lines.append(f"  Innovation components: {', '.join(str(n) for n in inn[:5])}")
-            if fact_lines:
-                parts.append("**MANDATORY FACT SHEET (PaperContext)** — Use these exact values. Do NOT invent different numbers:")
-                parts.append("\n".join(fact_lines))
-
-        # 1. 从 citation_bank 提取可引用的 claim（仅提供论文主张摘要，供 LLM 引用时理解上下文）
-        if self._citation_bank and self._citation_bank.get("claims"):
-            claims = self._citation_bank["claims"][:50]
-            claim_lines = []
-            for c in claims:
-                title = c.get("title", "")
-                year = c.get("year", "")
-                claim_text = c.get("claim", "")
-                if title and claim_text:
-                    claim_lines.append(f"  - [{year}] {title}: {claim_text[:150]}")
-            if claim_lines:
-                parts.append("**Reference claims (use these papers for citations):**")
-                parts.append("\n".join(claim_lines[:40]))
-
-        # 2. v13.0: 生成精确 cite key 列表，让 LLM 直接用 \\cite{key}
-        cite_key_block = self._build_cite_key_list()
-        if cite_key_block:
-            parts.append(cite_key_block)
-
-        if not parts:
-            return ""
-
-        instruction = ("\n\n**IMPORTANT**: When citing, "
-                       "use \\cite{key} format with keys from the CITE KEY REFERENCE LIST above. "
-                       "Do NOT fabricate cite keys not in that list. "
-                       "Each chapter must cite at least 5 different references.")
-        return "\n\n".join(parts) + instruction
-
-    def _build_cite_key_list(self) -> str:
-        """
-        v14.0: 构建统一的 cite key → paper 映射（单一真相源）。
-        - generate_bib_key 不含位置后缀，纯确定性
-        - 冲突时追加 _2, _3... 后缀
-        - 映射缓存到 self._cite_key_map，所有下游模块共享
-        """
-        from tools.text_utils import generate_bib_key
-
-        self._cite_key_map = {}   # key → paper_info
-        self._title_to_key = {}   # title_lower → key
-        entries = {}              # key → display string
-
-        # 去重合并：reference_pool（主） + citation_bank claims（补）
-        seen_titles = set()
-        all_sources = []
-        for p in (self._reference_pool or []):
-            t = p.get("title", "").lower().strip()
-            if t and t not in seen_titles:
-                all_sources.append(p)
-                seen_titles.add(t)
-        if self._citation_bank and self._citation_bank.get("claims"):
-            for c in self._citation_bank["claims"]:
-                t = c.get("title", "").lower().strip()
-                if t and t not in seen_titles:
-                    all_sources.append(c)
-                    seen_titles.add(t)
-
-        # 生成 key + 冲突消解
-        for p in all_sources:
-            title = p.get("title", "")
-            if not title:
-                continue
-            authors = p.get("authors", [])
-            year = str(p.get("year", ""))
-            base_key = generate_bib_key(authors, year, title)
-
-            key = base_key
-            suffix = 2
-            while key in self._cite_key_map:
-                existing = self._cite_key_map[key]
-                if existing.get("title", "").lower().strip() == title.lower().strip():
-                    break  # 同一篇论文，复用已有 key
-                key = f"{base_key}_{suffix}"
-                suffix += 1
-
-            if key not in self._cite_key_map:
-                venue = p.get("venue_abbr", "") or p.get("venue", "")
-                if isinstance(venue, dict):
-                    venue = venue.get("raw", "")
-                venue_str = f", {venue}" if venue else ""
-                entries[key] = f"{title[:80]} ({year}{venue_str})"
-                self._cite_key_map[key] = p
-                self._title_to_key[title.lower().strip()] = key
-
-        if not entries:
-            return ""
-
-        lines = [f"  \\cite{{{key}}} — {desc}" for key, desc in entries.items()]
-        return (
-            "**CITE KEY REFERENCE LIST** — Use these EXACT \\cite{key} commands in your LaTeX output. "
-            "Do NOT fabricate cite keys not in this list:\n"
-            + "\n".join(lines[:60])
-        )
+        result = _inj.build()
+        # 回写 cite_key_map / title_to_key（BibTeX 阶段依赖）
+        self._cite_key_map = _inj.cite_key_map
+        self._title_to_key = _inj.title_to_key
+        return result
 
     def _ensure_bib_has_all_cited_keys(self, tex_path: str):
         """
