@@ -35,7 +35,10 @@ agent/core/
 > FindingBus 补 auditor/constraint/quality 3 个写入源（4 类问题合并回流修订）；
 > FigureManifest 实例化并接通 `_generate_figures`/`_generate_latex_output`，
 > 修复架构图双重注入 bug + 加 `validate_linkage` 文图对账。
-> P1+P2 已完成（FactBase 接 auditor/verifier/cross_chapter 三消费者，verifier 真接入权威校验、cross_chapter 优先路径+dict 兜底、删 error_level/last_level 死代码）；assemble 明确不做（semantic_set 0 写入点会空跑，需先独立补写入点）。
+> P1+P2 已完成（FactBase 接 auditor/verifier/cross_chapter 三消费者，verifier 真接入权威校验、cross_chapter 优先路径+dict 兜底、删 error_level/last_level 死代码）。
+> **v13.1 P3 诚实取舍**：调研后两块都不接线，避免凑数：
+> - **audit_with_autofix 删除**（90 行）：调研确认已被 QualityGate.evaluate_and_revise + FindingBus 回流（loop.py P0/P5）取代，复活=重复配额+双修订链打架。删而非复活。
+> - **semantic_set/assemble 不做**：单独补写入点=纯死数据（0 消费者），必须三件一起大改（5 写入点+_run_chapter_phase 调 assemble+5 orchestrator 改读）且收益是换组装方式非真省 token（citation_context 已缓存）。留待有 token 超预算证据再做。
 > audit_with_autofix 复活。7 套 issue → 1 套 Finding；
 3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 
