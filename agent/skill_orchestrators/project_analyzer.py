@@ -204,8 +204,6 @@ def extract_model_architecture(project_info, paper_title):
 def _collect_structured_results(project_path):
     """v14: 扫描项目代码里的结构化结果文件（results.json/training_history.json 等），
     提取真实数值指标。FactBase 空壳的根因修复——之前只喂代码文本给 LLM 猜。"""
-    import json
-    import os
     result_files = []
     search_patterns = ["results.json", "training_history.json", "experiment_manifest.json",
                        "mba_results.json", "per_scene_mae.csv", "angular_frequency_results.json"]
@@ -216,6 +214,7 @@ def _collect_structured_results(project_path):
             for fn in files:
                 if fn in search_patterns or ("result" in fn.lower() and fn.endswith(".json")):
                     result_files.append(os.path.join(root, fn))
+        result_files.sort()  # v14 审查修复: 排序保证可复现
     except Exception:
         return ""
     
@@ -229,7 +228,8 @@ def _collect_structured_results(project_path):
         try:
             if rf.endswith(".csv"):
                 with open(rf, encoding="utf-8", errors="ignore") as f:
-                    content = f.read()[:800]
+                    lines_csv = f.readlines()[:20]
+                    content = "".join(lines_csv)
                 chunks.append(f"--- {os.path.basename(rf)} (csv) ---\n{content}")
                 total_chars += len(content)
             else:
@@ -237,7 +237,8 @@ def _collect_structured_results(project_path):
                     data = json.load(f)
                 # 只提取数值字段（metrics），不保留完整结构
                 metrics = {}
-                def _extract_nums(obj, prefix=""):
+                def _extract_nums(obj, prefix="", depth=0):
+                    if depth > 10: return
                     if isinstance(obj, dict):
                         for k, v in obj.items():
                             if isinstance(v, (int, float)) and not isinstance(v, bool):
@@ -248,10 +249,10 @@ def _collect_structured_results(project_path):
                                         "error", "f1", "iou", "ratio", "cohen"]):
                                     metrics[f"{prefix}{k}"] = round(float(v), 6) if isinstance(v, float) else v
                             elif isinstance(v, (dict, list)):
-                                _extract_nums(v, f"{prefix}{k}.")
+                                _extract_nums(v, f"{prefix}{k}.", depth+1)
                     elif isinstance(obj, list):
-                        for i, item in enumerate(obj[:3]):
-                            _extract_nums(item, f"{prefix}[{i}].")
+                        # v14 审查修复: 跳过 history/epoch 等数组（喂 epoch 值会干扰 best_*）
+                        pass
                 _extract_nums(data)
                 if metrics:
                     snippet = json.dumps(metrics, ensure_ascii=False, indent=2)[:600]
@@ -267,6 +268,13 @@ def _collect_structured_results(project_path):
 
 def extract_experiment_design(project_info, paper_title, structured_results=""):
     """提炼实验设计"""
+    # v14: 预计算 structured_results 块（f-string 表达式不能含反斜杠）
+    _structured_block = ""
+    if structured_results:
+        _structured_block = ("<structured_results_from_code>\n" + structured_results
+                             + "\n</structured_results_from_code>\n"
+                             + "以上是项目代码中实际跑出的结构化实验数值（非猜测）。"
+                             + "关键结果字段必须包含这些数值，禁止编造不同的数字。\n")
     prompt = f"""
     你是一名实验设计专家。
     以下是一篇标题为"{paper_title}"的论文的实验报告和训练代码。
@@ -291,12 +299,7 @@ def extract_experiment_design(project_info, paper_title, structured_results=""):
     {project_info['dataset_content'][:4000]}
     </dataset_content>
     
-    <structured_results_from_code>
-    {structured_results}
-    </structured_results_from_code>
-    以上是项目代码中实际跑出的结构化实验数值（非猜测）。请在"关键结果"字段中优先使用这些真实数值。
-    若无结构化结果（structured_results 为空），则根据代码文本推断合理的目标值。
-    
+    {_structured_block}
     请以json格式给出，包含上述6个字段（"数据集"、"评估指标"、"训练策略"、"对比方法"、"消融设计"、"关键结果"）。
     回复以```json开头，以```结尾，无需添加任何解释说明。
     """

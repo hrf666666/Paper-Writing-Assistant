@@ -972,9 +972,27 @@ Respond with just the strategy, no explanation:"""
         # 从 关键实验结果 / 关键结果 / key_results 提取
         key_results = exp_design.get("关键结果", {}) or exp_design.get("key_results", {})
         if isinstance(key_results, dict):
-            for k, v in key_results.items():
-                if isinstance(v, (int, float, str)):
-                    metrics[k] = v
+            # v14: 递归展平嵌套 dict（修 FactBase 空壳断点——旧逻辑只展开一层，嵌套数值被丢）
+            def _flatten_metrics(d, prefix=""):
+                for k, v in d.items():
+                    if isinstance(v, (int, float)) and not isinstance(v, bool):
+                        # 取 key 末段（去掉嵌套前缀的中间层，如 "表现.Best MAE" → "Best MAE"）
+                        flat_key = (prefix + str(k)) if prefix else str(k)
+                        try:
+                            metrics[flat_key] = float(v)
+                        except (TypeError, ValueError):
+                            pass
+                    elif isinstance(v, str):
+                        # 尝试把 "0.133" 这类数值字符串转 float
+                        try:
+                            fv = float(v.strip())
+                            flat_key = (prefix + str(k)) if prefix else str(k)
+                            metrics[flat_key] = fv
+                        except ValueError:
+                            pass  # 非数值描述串，跳过
+                    elif isinstance(v, dict):
+                        _flatten_metrics(v, (prefix + str(k) + ".") if prefix else str(k) + ".")
+            _flatten_metrics(key_results)
         # 从 关键实验结果.成功发现 解析数值（格式: "Overall MAE 达到 0.133"）
         key_exp = exp_design.get("关键实验结果", {})
         if isinstance(key_exp, dict):
