@@ -86,7 +86,7 @@ class OutputEvaluator:
             "L2_score": l2_score,
             "L3_score": l3_score,
             "L1_passed": report["L1_format_validity"].get("all_passed", False),
-            "overall_grade": self._compute_grade(l1_score, l2_score, l3_score),
+            "overall_grade": self._compute_grade(l1_score, l2_score, l3_score, critical_fails=l1_critical_fails),
         }
 
         # v12.0: 分层验收对齐
@@ -422,8 +422,8 @@ Evaluate this paper across 8 dimensions (0-100):
 7. Data Consistency: All numerical results consistent across Abstract/Experiments?
 8. Format Compliance: IEEEtran class, lettersize option, markboth headers, equation numbering?
 
-IMPORTANT: Score CONSERVATIVELY.
-- If no real figures (only TikZ placeholders), score experimental_sufficiency ≤ 50
+IMPORTANT: Score CONSERVATIVELY based on substance, not surface.
+- Experimental sufficiency: judge by whether there are datasets, SOTA comparisons, and ablation study — NOT by figure count. A theory-heavy paper with few figures but rigorous experiments is NOT penalized.
 - If references < 30, score citation_quality ≤ 50
 - If Markdown residuals (## or **) exist, score format_compliance ≤ 50
 
@@ -503,7 +503,9 @@ Output JSON:
                 return f.read()
         return None
 
-    def _compute_grade(self, l1: int, l2: int, l3: int) -> str:
+    def _compute_grade(self, l1: int, l2: int, l3: int, critical_fails: list = None) -> str:
+        if critical_fails:
+            return "D"
         if l1 < 60:
             return "D"
         avg = l1 * 0.1 + l2 * 0.35 + l3 * 0.55
