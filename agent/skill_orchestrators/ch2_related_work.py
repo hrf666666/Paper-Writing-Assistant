@@ -90,6 +90,9 @@ def _determine_subsections(innovation_points, experiment_design, ref_data):
 def generate_related_work(project_data, ref_data, previous_chapters=None, citation_context=""):
     """生成第二章 Related Work"""
     
+    from agent.skill_orchestrators._chapter_common import ChapterContext
+    ctx = ChapterContext(project_data, ref_data, "Related Work", citation_context=citation_context)
+    _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     innovation_points = project_data.get("innovation_points", [])
     experiment_design = project_data.get("experiment_design", {})
     style_guide = ref_data.get("style_guide", {})
@@ -168,6 +171,7 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
 
 **本研究的创新点**（用于构建对比关系）：
 {innovation_summary}
+{_planning}
 
 **相关论文参考**：
 {papers_summary if papers_summary else "请根据领域知识自行补充代表性工作。"}

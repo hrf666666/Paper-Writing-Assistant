@@ -358,6 +358,9 @@ if __name__ == "__main__":
 def generate_experiments(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """生成第四章 Experiments"""
     
+    from agent.skill_orchestrators._chapter_common import ChapterContext
+    ctx = ChapterContext(project_data, ref_data, "Experiments", venue_adapter=venue_adapter, citation_context=citation_context)
+    _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     innovation_points = project_data.get("innovation_points", [])
     model_architecture = project_data.get("model_architecture", {})
     experiment_design = project_data.get("experiment_design", {})
@@ -407,6 +410,8 @@ def generate_experiments(project_data, ref_data, previous_chapters=None, citatio
 <domain_info>
 {json.dumps(domain_info, ensure_ascii=False, indent=2)[:2000]}
 </domain_info>
+
+{_planning}
 
 **具体要求**：
 1. 对每个数据集，描述：名称、场景类型、视角数/图像数、分辨率、深度图来源、训练/验证/测试划分

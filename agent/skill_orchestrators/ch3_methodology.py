@@ -62,6 +62,9 @@ def generate_architecture_diagram(model_architecture, figure_style, paper_title,
 def generate_methodology(project_data, ref_data, previous_chapters=None, citation_context="", venue_adapter=None):
     """生成第三章 Methodology"""
     
+    from agent.skill_orchestrators._chapter_common import ChapterContext
+    ctx = ChapterContext(project_data, ref_data, "Methodology", citation_context=citation_context)
+    _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     innovation_points = project_data.get("innovation_points", [])
     model_architecture = project_data.get("model_architecture", {})
     experiment_design = project_data.get("experiment_design", {})
@@ -122,6 +125,7 @@ def generate_methodology(project_data, ref_data, previous_chapters=None, citatio
 
 <innovation_points>
 {innovation_summary}
+{_planning}
 </innovation_points>
 
 **架构图结构**（用于对齐描述，图已自动渲染为 PDF）：

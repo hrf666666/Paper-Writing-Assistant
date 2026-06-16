@@ -29,6 +29,9 @@ def generate_introduction(project_data, ref_data, citation_context="", venue_ada
     3. 介绍本研究的动机和贡献
     """
     
+    from agent.skill_orchestrators._chapter_common import ChapterContext
+    ctx = ChapterContext(project_data, ref_data, "Introduction", venue_adapter=venue_adapter, citation_context=citation_context)
+    _planning = ctx.planning_block()  # v14: 消费 motivation/outline/content_strategy
     innovation_points = project_data.get("innovation_points", [])
     experiment_design = project_data.get("experiment_design", {})
     model_architecture = project_data.get("model_architecture", {})
@@ -78,7 +81,8 @@ def generate_introduction(project_data, ref_data, citation_context="", venue_ada
 <project_report>
 {project_info.get('report_content', '')[:4000]}
 </project_report>
-{_motivation_block}{style_instruction}
+{_motivation_block}
+{_planning}{style_instruction}
 
 {citation_context}
 
