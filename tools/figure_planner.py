@@ -355,23 +355,42 @@ def _default_plan(paper_content: Dict, venue: str,
             {"from": "m3", "to": "m4", "label": ""},
         ]
 
-    return {
-        "figures": [{
-            "fig_id": "fig1",
-            "fig_type": "teaser",
-            "fig_role": "main",
-            "title": f"Overall Architecture of {method_name}",
-            "caption": "The overall framework of the proposed method.",
-            "size_type": "teaser",
-            "layout_direction": "left_to_right",
-            "layout_template": "pipeline",
-            "key_message": content_brief.get("core_contribution", "Proposed method framework") if content_brief else "Proposed method framework",
-            "modules": modules,
-            "connections": connections,
-            "groups": [],
-            "annotations": [],
-        }]
-    }
+    # v13.2 #2: fallback 也规划 3 张图骨架（达 TCSVT min_figures=3）
+    # data 字段留空，由 loop.py 按图类型从 ablation_results/experiment_design 注入
+    figures = [{
+        "fig_id": "fig1",
+        "fig_type": "teaser",
+        "fig_role": "main",
+        "title": f"Overall Architecture of {method_name}",
+        "caption": "The overall framework of the proposed method.",
+        "size_type": "teaser",
+        "layout_direction": "left_to_right",
+        "layout_template": "pipeline",
+        "key_message": content_brief.get("core_contribution", "Proposed method framework") if content_brief else "Proposed method framework",
+        "modules": modules,
+        "connections": connections,
+        "groups": [],
+        "annotations": [],
+    }, {
+        "fig_id": "fig_ablation",
+        "fig_type": "ablation",
+        "fig_role": "supporting",
+        "title": "Ablation Study",
+        "caption": "Ablation study on key components.",
+        "size_type": "double",
+        "key_message": "Each proposed component contributes to performance",
+        "data": None,  # 由 loop.py 从 ablation_results 注入
+    }, {
+        "fig_id": "fig_comparison",
+        "fig_type": "comparison",
+        "fig_role": "supporting",
+        "title": "Comparison with State-of-the-Art",
+        "caption": "Quantitative comparison with existing methods.",
+        "size_type": "double",
+        "key_message": "Our method outperforms prior work",
+        "data": None,  # 由 loop.py 从 experiment_design 注入
+    }]
+    return {"figures": figures}
 
 
 def _validate_plan(plan: Dict, venue: str,

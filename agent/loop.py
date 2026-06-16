@@ -748,6 +748,7 @@ Respond with just the strategy, no explanation:"""
             self._project_data['content_strategy'] = self._content_strategy
         if hasattr(self, '_motivation_thread') and self._motivation_thread:
             self._project_data['motivation_thread'] = self._motivation_thread
+        # 注：rationale_matrix/exemplar_dossier 暂不注入（ch1-5 无消费者，注入=死代码）
 
         kwargs = {"citation_context": self._build_citation_context(),
                   "venue_adapter": self.venue_adapter}
@@ -1433,7 +1434,9 @@ Respond with just the strategy, no explanation:"""
                 # v13 接线: auditor 审计结果录入 FindingBus（供 QualityLoop 修订回流）
                 from agent.core.finding import audit_report_to_findings as _a2f
                 _ch_loc = f"ch{num}"
-                self._findings.record_many(_a2f(report, chapter_hint=_ch_loc))
+                _recorded = self._findings.record_many(_a2f(report, chapter_hint=_ch_loc))
+                logger.info(f"[Phase6.5] {name}: 录入 {len(_recorded)} auditor findings, "
+                            f"bus 总计 {len(self._findings.all())}")
 
                 # 打印审计摘要
                 critical = sum(1 for i in report.issues if i.severity == "critical")
@@ -1877,6 +1880,96 @@ Respond with just the strategy, no explanation:"""
         except Exception as e:
             logger.warning(f"去重检查失败（不影响输出）: {e}")
 
+    @staticmethod
+    def _build_figure_data(fig_type: str, ablation_results, project_data, factbase) -> Dict:
+        """v13.2 #1: 按图类型构建数据图 data。
+
+        诚实原则：只用真实数据（FactBase.metrics），绝不合成造假数值。
+        - ablation: 需 ablation_results 有真实变体数值，否则返回 {}（走 TikZ 示意降级）
+        - comparison: 需 FactBase 有真实 Ours 值 + experiment_design 有真实基线数值，
+          否则返回 {}（不合成基线）
+        无真实数据时返回 {} → figure_generator 走 _gen_data_figure_llm（TikZ 示意，诚实降级）。
+        """
+        if fig_type == "ablation":
+            ab = ablation_results or {}
+            variants = ab.get("ablation_experiments", ab.get("variants", []))
+            # 必须有真实变体数值（非合成）才画
+            if not isinstance(variants, list) or not variants:
+                return {}
+            comps = ["Full Model"]
+            metric_lists = {}
+            # 从每个 variant 提取真实数值
+            has_real = False
+            for var in variants[:4]:
+                if not isinstance(var, dict):
+                    continue
+                vn = var.get("name", var.get("variant", "?"))
+                comps.append(str(vn)[:20])
+                # 变体需带 metrics/results 字段才算真实
+                vm = var.get("metrics", var.get("results", {}))
+                if isinstance(vm, dict) and vm:
+                    has_real = True
+                    for k, v in vm.items():
+                        fv = ResearchLoop._try_float(v)
+                        if fv is not None:
+                            metric_lists.setdefault(k, []).append(fv)
+            if not has_real or not metric_lists:
+                return {}  # 无真实变体数值 → 诚实降级
+            # 补 Full Model 行（从 FactBase 或 experiment_design）
+            full_vals = {}
+            if factbase and getattr(factbase, "metrics", None):
+                for k in metric_lists:
+                    fv = ResearchLoop._try_float(factbase.metrics.get(k))
+                    if fv is not None:
+                        full_vals[k] = fv
+            for k, lst in metric_lists.items():
+                lst.insert(0, full_vals.get(k, 0.0))  # Full 在前
+            return {"title": "Ablation Study", "components": comps, "metrics": metric_lists}
+
+        if fig_type == "comparison":
+            # 需真实 Ours 值 + 真实基线数值（experiment_design 里带数值的 baselines）
+            ed = (project_data or {}).get("experiment_design", {})
+            baselines = ed.get("baselines", ed.get("对比方法", []))
+            if not isinstance(baselines, list):
+                return {}
+            # 真实 Ours 值
+            ours_vals = []
+            metric_names = []
+            if factbase and getattr(factbase, "metrics", None):
+                for m in list(factbase.metrics.keys())[:3]:
+                    fv = ResearchLoop._try_float(factbase.metrics[m])
+                    if fv is not None:
+                        metric_names.append(m); ours_vals.append(fv)
+            if not metric_names:
+                return {}
+            # 真实基线数值（每个 baseline 需带 metrics/results）
+            methods = ["Ours"]
+            values = [ours_vals]
+            for bl in baselines[:3]:
+                if not isinstance(bl, dict):
+                    continue
+                bm = bl.get("metrics", bl.get("results", {}))
+                if not isinstance(bm, dict) or not bm:
+                    continue  # 无数值的基线跳过
+                bn = bl.get("name", bl.get("method", "?"))
+                row = []
+                for m in metric_names:
+                    row.append(ResearchLoop._try_float(bm.get(m)) or 0.0)
+                methods.append(str(bn)[:20]); values.append(row)
+            if len(values) < 2:
+                return {}  # 无真实基线数值 → 诚实降级
+            return {"title": "SOTA Comparison", "methods": methods,
+                    "metrics": metric_names, "values": values}
+        return {}
+
+    @staticmethod
+    def _try_float(v):
+        """安全转 float，失败返回 None。"""
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
     def _generate_figures(self, results: Dict) -> str:
         """Phase 7.28: 规划并生成论文图表，返回 figure LaTeX snippets"""
         figure_latex_snippets = ""
@@ -1907,6 +2000,11 @@ Respond with just the strategy, no explanation:"""
             figures_dir = os.path.join(OUTPUT_DIR, "figures")
             for fp in fig_plans:
                 try:
+                    # v13.2 #1: 按图类型注入结构化 data（让数据图能渲染而非降级 TikZ）
+                    _fdata = self._build_figure_data(fp.get("fig_type", ""), self._ablation_results,
+                                                     self._project_data, self._factbase)
+                    if _fdata:
+                        fp = {**fp, "data": _fdata}
                     fig_result = generate_figure_from_plan(
                         fp, figures_dir, venue=venue_name,
                         project_path=(self._project_data.get('project_path')

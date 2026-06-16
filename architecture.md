@@ -39,6 +39,12 @@ agent/core/
 > **v13.1 P3 诚实取舍**：调研后两块都不接线，避免凑数：
 > - **audit_with_autofix 删除**（90 行）：调研确认已被 QualityGate.evaluate_and_revise + FindingBus 回流（loop.py P0/P5）取代，复活=重复配额+双修订链打架。删而非复活。
 > - **semantic_set/assemble 不做**：单独补写入点=纯死数据（0 消费者），必须三件一起大改（5 写入点+_run_chapter_phase 调 assemble+5 orchestrator 改读）且收益是换组装方式非真省 token（citation_context 已缓存）。留待有 token 超预算证据再做。
+
+> **v13.2 产出瓶颈治理（基于实跑 Grade B 证据）**：
+> - **#1 实验数据图闭环**：_build_figure_data 只用真实数据（FactBase/ablation_results/experiment_design 的真实数值），无真实数据返回 {} 触发 TikZ 示意诚实降级——绝不合成造假数值。figure_generator 的 data 路由已支持。
+> - **#2 figure_planner 多图 fallback**：_default_plan 从 1 张扩为 3 张骨架（teaser+ablation+comparison），让 fallback 也达 TCSVT min_figures=3。
+> - **#3 motivation 注入 ch1**：motivation_thread（已生成却从未进 prompt）注入 ch1 1.1 节。rationale/exemplar 暂不注入（ch1-5 无消费者=死代码）。
+> - **#4 FindingBus 诊断埋点**：record_many 后加计数日志，待下次实跑据日志定位"0 条"根因（半完成，诚实标注）。
 > audit_with_autofix 复活。7 套 issue → 1 套 Finding；
 3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 
