@@ -27,12 +27,10 @@ from agent.core.errors import (
 )
 from agent.core.factbase import (
     FactBase,
-    build_from_project_data as build_factbase,
     save as save_factbase,
     load as load_factbase,
     exists as factbase_exists,
 )
-from agent.core.memory import LayeredMemory
 from agent.core.finding import (
     Finding, FindingBus, Severity, Location, FixAction,
     audit_report_to_findings, cross_chapter_issues_to_findings,
@@ -49,11 +47,10 @@ __all__ = [
     "classify", "to_transient", "to_permanent",
     "is_transient", "should_retry",
     # factbase
-    "FactBase", "build_factbase", "save_factbase",
+    "FactBase", "save_factbase",
     "load_factbase", "factbase_exists",
     # memory
-    "LayeredMemory",
-    # finding
+        # finding
     "Finding", "FindingBus", "Severity", "Location", "FixAction",
     "audit_report_to_findings", "cross_chapter_issues_to_findings",
     "violations_to_findings", "quality_issues_to_findings",

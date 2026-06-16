@@ -106,8 +106,7 @@ API_CALL_INTERVAL = 3.0
 
 # 生成模型优先级（GLM 5.2 thinking 优先，跨 provider 降级）
 GENERATION_MODELS = [
-    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（本次主模型，单模态文本生成）
-    "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max（备选）
+    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主模型，单模态文本生成）
     "tp_qwen3_6_plus",   # 阿里 Token Plan Qwen3.6-Plus（多模态备选）
     "glm_5_2",           # 智谱 GLM-5.2（降级）
     "glm_5_1",           # 智谱 GLM-5.1（降级）
@@ -127,8 +126,7 @@ GENERATION_MODELS = [
 
 # 推理/决策模型（GLM thinking 优先，跨 provider 降级）
 REASONING_MODELS = [
-    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（本次主模型）
-    "qwen3_7_max",       # 阿里百炼 Qwen3.7-Max
+    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主模型）
     "tp_qwen3_6_plus",   # Token Plan Qwen3.6-Plus（多模态备选）
     "glm_5_2",           # 智谱 GLM-5.2（降级）
     "glm_5_1",           # 智谱 GLM-5.1（降级）

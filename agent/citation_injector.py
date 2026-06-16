@@ -20,27 +20,30 @@ class CitationInjector:
     """引用上下文构建器。数据源在构造时注入，cite_key_map/title_to_key 构建后回写到传入的 holder。"""
 
     def __init__(self, reference_pool: List[Dict], citation_bank: Dict,
-                 factbase=None, paper_context: Optional[Dict] = None,
-                 memory=None):
+                 factbase=None, paper_context: Optional[Dict] = None):
         self._reference_pool = reference_pool or []
         self._citation_bank = citation_bank or {}
         self._factbase = factbase
         self._paper_context = paper_context or {}
-        self._memory = memory  # LayeredMemory，用于缓存
+        # v14: 内联指纹缓存（替代 LayeredMemory.get_or_compute）
+        self._cached_fp = ""
+        self._cached_result = ""
         # 构建后回写的映射（被 BibTeX 阶段消费）
         self.cite_key_map: Dict[str, Dict] = {}
         self.title_to_key: Dict[str, str] = {}
 
     def build(self) -> str:
-        """构建引用上下文（经 LayeredMemory 缓存）。返回注入 prompt 的字符串。"""
-        if self._memory is not None:
-            return self._memory.get_or_compute(
-                "citation_context",
-                depends=[self._citation_bank, self.cite_key_map, self._paper_context,
-                         getattr(self._factbase, 'metrics', None)],
-                compute=self._build_uncached,
-            )
-        return self._build_uncached()
+        """构建引用上下文（带指纹缓存，v14 内联，不依赖 LayeredMemory）。"""
+        import hashlib
+        deps = [self._citation_bank, self._paper_context,
+                getattr(self._factbase, 'metrics', None)]
+        fp = hashlib.md5(repr(deps).encode("utf-8", errors="ignore")).hexdigest()[:12]
+        if self._cached_fp == fp and self._cached_result:
+            return self._cached_result
+        result = self._build_uncached()
+        self._cached_fp = fp
+        self._cached_result = result
+        return result
 
     def _build_uncached(self) -> str:
         """构建引用上下文（未缓存版）。"""

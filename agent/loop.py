@@ -99,9 +99,6 @@ class ResearchLoop:
 
         self.api_client = api_client or get_api_client()
         self.memory = MemoryManager(OUTPUT_DIR)
-        # v13 PR3: 分层记忆（上下文治理：缓存重文本 + 检索式组装）
-        from agent.core.memory import LayeredMemory
-        self._memory = LayeredMemory()
         # v13 PR4: 统一问题总线（audit/constraint/quality/cross_chapter 协作中枢）
         from agent.core.finding import FindingBus
         self._findings = FindingBus()
@@ -1058,7 +1055,7 @@ class ResearchLoop:
             citation_bank=self._citation_bank,
             factbase=getattr(self, '_factbase', None),
             paper_context=getattr(self, '_paper_context', None),
-            memory=self._memory,
+
         )
         result = _inj.build()
         # 回写 cite_key_map / title_to_key（BibTeX 阶段依赖）

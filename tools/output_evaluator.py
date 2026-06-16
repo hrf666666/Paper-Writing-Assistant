@@ -73,6 +73,20 @@ class OutputEvaluator:
         l2_score = report["L2_content_completeness"].get("score", 0)
         l3_score = report["L3_academic_quality"].get("overall_score", 0)
 
+        # v14: cross_chapter critical issues 纳入门控（一致性门控）
+        import os, json as _json
+        cc_path = os.path.join(self.output_dir, "cross_chapter_check.json")
+        if os.path.exists(cc_path):
+            try:
+                with open(cc_path, "r", encoding="utf-8") as _f:
+                    cc_issues = _json.load(_f)
+                cc_critical = [i for i in cc_issues if i.get("severity") == "critical"]
+                if cc_critical:
+                    l1_critical_fails.append(f"cross_chapter:{len(cc_critical)}_critical")
+                    logger.warning(f"[OutputEval] 跨章一致性门控: {len(cc_critical)} 个严重问题")
+            except Exception:
+                pass
+
         # 严肃的惩罚机制：如果 L1 关键项未通过，L3 不应给高分
         l1_critical_fails = report["L1_format_validity"].get("critical_fails", [])
         if l1_critical_fails:
