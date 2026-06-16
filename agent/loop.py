@@ -2013,9 +2013,9 @@ class ResearchLoop:
         except Exception as e:
             logger.warning(f"[Phase 8.8] 分层验收失败（不阻塞）: {e}")
 
-        # ── Phase 9: 输出有效性 + 完整度评价 ──
+        # ── Phase 9: 输出评价（paperjury 范式：找问题带证据）──
         try:
-            logger.info("[Phase 9] 运行输出评价（对标 IEEE TCSVT）...")
+            logger.info("[Phase 9] 运行输出评价（paperjury 对抗式审稿）...")
             from tools.output_evaluator import run_output_evaluator
             outline = self._load_outline()
             hier_report = results.get("hierarchical_validation")
@@ -2026,10 +2026,126 @@ class ResearchLoop:
             )
             results["evaluation"] = eval_result.get("overall", {})
             grade = eval_result.get("overall", {}).get("overall_grade", "?")
+
+            # v14 paperjury: L3 issues 录入 FindingBus（带 evidence_anchor + close_criterion）
+            l3_issues = eval_result.get("L3_academic_quality", {}).get("issues", [])
+            if l3_issues:
+                from agent.core.finding import Finding, Severity, Location
+                self._findings.clear(source="l3_review")
+                for issue in l3_issues:
+                    if not isinstance(issue, dict):
+                        continue
+                    sev = Severity.CRITICAL if issue.get("significance") == "major" else Severity.WARNING
+                    self._findings.record(Finding(
+                        source="l3_review",
+                        kind=f"review:{issue.get('kind', 'substantive')}",
+                        severity=sev,
+                        description=issue.get("summary", ""),
+                        location=Location(raw=issue.get("section", "")),
+                        evidence_anchor=issue.get("evidence_anchor", ""),
+                        close_criterion=issue.get("close_criterion", ""),
+                    ))
+                logger.info(f"[Phase 9] L3 issues 录入 FindingBus: {len(l3_issues)} 条")
+
             logger.info(f"[Phase 9] 评价完成: Grade={grade}")
+
+            # ── Phase 9.5: 对抗式裁定 + 修订迭代（paperjury 核心）──
+            l3_fixable = [f for f in self._findings.by(source="l3_review", severity=Severity.CRITICAL)
+                          if f.close_criterion]
+            if l3_fixable:
+                logger.info(f"[Phase 9.5] {len(l3_fixable)} 个 major 问题有 close_criterion，进入裁定+修订")
+                self._l3_revise_loop(results)
+                # 重评
+                logger.info("[Phase 9.5] 修订后重评...")
+                eval_result2 = run_output_evaluator(
+                    OUTPUT_DIR, api_client=self.api_client,
+                    outline=outline, unified_results=None,
+                    hierarchical_report=hier_report,
+                )
+                grade2 = eval_result2.get("overall", {}).get("overall_grade", "?")
+                results["evaluation"] = eval_result2.get("overall", {})
+                logger.info(f"[Phase 9.5] 重评完成: Grade {grade} → {grade2}")
+            else:
+                logger.info("[Phase 9.5] 无 major fixable 问题，跳过修订迭代")
+
         except Exception as e:
             results["evaluation_error"] = str(e)
             logger.warning(f"[Phase 9] 评价失败: {e}")
+
+    def _l3_revise_loop(self, results: Dict, max_rounds: int = 2):
+        """v14 paperjury: L3 评价驱动的修订迭代。
+
+        对 FindingBus 里 l3_review 的 critical 问题（带 close_criterion），
+        生成修订 prompt → LLM 修订 → 重新编译。
+        对抗式裁定：每个问题先让 LLM 判断是否为误报（defense），只对真问题修订。
+        """
+        for round_num in range(max_rounds):
+            remaining = [f for f in self._findings.by(source="l3_review", severity=Severity.CRITICAL)
+                         if f.close_criterion and f.verdict != "invalid"]
+            if not remaining:
+                logger.info(f"[Phase 9.5] round {round_num+1}: 无剩余 major fixable 问题")
+                break
+
+            logger.info(f"[Phase 9.5] round {round_num+1}: 处理 {len(remaining)} 个问题")
+
+            # 对抗式裁定：每个问题判断是否误报（defense）
+            for finding in remaining:
+                try:
+                    defense_prompt = f"""You are an author advocate reviewing a reviewer's criticism of your paper.
+
+Reviewer claim: {finding.description}
+Evidence quoted: "{finding.evidence_anchor}"
+Section: {finding.location}
+
+Does the paper ALREADY address this issue elsewhere? Is the criticism valid, or is it a
+misunderstanding? Answer JSON: {{"verdict": "invalid"|"fixable", "reason": "..."}}"""
+                    defense = self.api_client.call_evaluation(defense_prompt)
+                    verdict = self.api_client.parse_json_response(defense, default={})
+                    v = verdict.get("verdict", "fixable") if isinstance(verdict, dict) else "fixable"
+                    finding.verdict = v
+                    if v == "invalid":
+                        logger.info(f"[Phase 9.5] issue '{finding.description[:40]}' → 裁定 invalid（误报）")
+                except Exception:
+                    finding.verdict = "fixable"  # 裁定失败默认可修
+
+            # 只对 fixable 的问题修订
+            fixable = [f for f in remaining if f.verdict == "fixable"]
+            if not fixable:
+                logger.info(f"[Phase 9.5] round {round_num+1}: 全部裁定为 invalid，无需修订")
+                break
+
+            # 修订：把 fixable 问题的 close_criterion 注入修订 prompt
+            brief = self._findings.as_revision_brief()
+            # 修订最弱的章节（取质量分最低的）
+            ch_to_revise = min(self._chapters.keys(),
+                             key=lambda k: self.quality_gate.get_history()[-1].get("dimensions", {}).get("overall", 50)
+                             if self.quality_gate.get_history() else 50) if self._chapters else None
+            if ch_to_revise is None:
+                break
+
+            revise_prompt = f"""Revise the following section to address these specific issues.
+Each issue has a close_criterion — revise until the criterion is met.
+
+{brief}
+
+Current section content:
+{self._chapters[ch_to_revise][:6000]}
+
+Output the revised section in LaTeX. Only output the revised text, no explanation."""
+
+            try:
+                revised = self.api_client.call_generation(revise_prompt)
+                if revised and len(revised) > len(self._chapters[ch_to_revise]) * 0.3:
+                    self._chapters[ch_to_revise] = revised
+                    logger.info(f"[Phase 9.5] round {round_num+1}: ch{ch_to_revise} 已修订")
+                    # 重新编译
+                    self._generate_latex_output(results, "")
+                    self._compile_and_validate(results)
+                else:
+                    logger.warning(f"[Phase 9.5] round {round_num+1}: 修订产出过短，跳过")
+            except Exception as e:
+                logger.warning(f"[Phase 9.5] round {round_num+1}: 修订失败: {e}")
+                break
 
     def _build_previous_summary(self, max_chars_per_chapter: int = 1500) -> str:
         """构建前序章节摘要"""

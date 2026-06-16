@@ -72,14 +72,22 @@ class FixAction:
 
 @dataclass
 class Finding:
-    """统一问题/发现。所有子系统的问题都归一为此类型。"""
-    source: str                       # "auditor"|"verifier"|"quality"|"cross_chapter"|"constraint"|"latex"|"figure"
+    """统一问题/发现。所有子系统的问题都归一为此类型。
+
+    v14 paperjury: evidence_anchor/close_criterion/verdict 用于对抗式审稿范式。
+    """
+    source: str                       # "auditor"|"verifier"|"quality"|"cross_chapter"|"constraint"|"latex"|"l3_review"
     kind: str                         # 来源前缀化的分类："citation:missing"|"number:mismatch"|...
     severity: Severity
     description: str
     location: Location = field(default_factory=Location)
     evidence: str = ""
     fix: Optional[FixAction] = None
+
+    # v14 paperjury 范式（对抗式审稿）
+    evidence_anchor: str = ""         # 精确原文引用（引不出=不能报，杜绝笼统指控）
+    close_criterion: str = ""         # "什么算修好了"的可验证标准
+    verdict: str = ""                 # ""(未裁定)|"invalid"(误报)|"fixable"(能修)|"author"(改不了)
 
     # 自增 id（FindingBus 分配）
     id: str = ""
@@ -95,6 +103,12 @@ class Finding:
             d["fix"] = {"op": self.fix.op, "target": self.fix.target,
                         "replacement": self.fix.replacement,
                         "auto_apply": self.fix.auto_apply}
+        if self.evidence_anchor:
+            d["evidence_anchor"] = self.evidence_anchor
+        if self.close_criterion:
+            d["close_criterion"] = self.close_criterion
+        if self.verdict:
+            d["verdict"] = self.verdict
         return d
 
 
@@ -193,6 +207,8 @@ class FindingBus:
                 entry += f"  证据: {f.evidence[:80]}"
             if f.fix and f.fix.hint:
                 entry += f"  建议: {f.fix.hint[:80]}"
+            if f.close_criterion:
+                entry += f"  修复标准: {f.close_criterion[:80]}"
             entry += "\n"
             if used + len(entry) > max_chars:
                 lines.append(f"...（还有 {len(cands) - len(lines) + 1} 条问题未列出）")

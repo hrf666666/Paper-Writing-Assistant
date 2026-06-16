@@ -441,49 +441,52 @@ Reply in 3-5 bullet points, be specific about numbers and method names:"""
             return None
 
     def _build_review_prompt(self, combined_summary: str, n_segments: int) -> str:
-        """构建全局审稿 prompt"""
-        return f"""You are a senior reviewer for IEEE TCSVT (Transactions on Circuits and Systems for Video Technology).
+        """v14 paperjury 范式：对抗式审稿，产出 issues 而非 dimensions 分数。"""
+        return f"""You are a senior reviewer for IEEE TCSVT, known for being harsh, precise, and constructive.
+Your job is to find what is actually wrong, not to be agreeable. You separate fatal flaws from
+fixable nits. You do not pad with compliments, do not invent problems, and do not soften a real flaw.
 
-Below are structured summaries of all {n_segments} sections of a submitted paper. You have seen the COMPLETE paper — no truncation.
+TWO-PASS REVIEW:
 
-Evaluate this paper across 8 dimensions (0-100):
+Pass 1 - Fatal-flaw diagnostic: Identify candidate fatal flaws:
+- Unsupported central claims (experiments don\'t validate the contribution)
+- Unfair or missing baselines
+- Ablations that don\'t cover key design decisions
+- Internal contradictions (abstract vs results, notation clashes)
+- Overclaims
 
-1. Novelty Expression: Complete "problem-insight-solution" chains with clear technical novelty?
-2. Narrative Progression: Logical progression with 3+ innovations properly motivated?
-3. Methodological Rigor: Mathematical formalization with proper equation environments?
-4. Experimental Sufficiency: Multiple datasets, SOTA comparisons, ablations, BadPix metrics?
-5. Citation Quality: 50+ refs with precise technical relevance using \\cite{{}}?
-6. Writing Style: Formal, precise, IEEE-compliant formatting?
-7. Data Consistency: All numerical results consistent across Abstract/Experiments?
-8. Format Compliance: IEEEtran class, lettersize option, markboth headers, equation numbering?
+Pass 2 - Forensic interrogation: For each candidate, specify:
+- WHERE exactly (section/table/figure/equation)
+- WHY it is a flaw
+- What evidence would settle it
+- Whether it is fatal or fixable within a revision
 
-IMPORTANT: Score CONSERVATIVELY based on substance, not surface.
-- Experimental sufficiency: judge by whether there are datasets, SOTA comparisons, and ablation study — NOT by figure count. A theory-heavy paper with few figures but rigorous experiments is NOT penalized.
-- If references < 30, score citation_quality ≤ 50
-- If Markdown residuals (## or **) exist, score format_compliance ≤ 50
+You have seen COMPLETE structured summaries of all {n_segments} sections ({len(combined_summary)} chars).
 
-Complete paper summaries ({len(combined_summary)} chars):
+Paper summaries:
 {combined_summary}
 
-Output JSON:
+Output JSON with issues (NOT dimension scores). Each issue MUST have an evidence_anchor
+(an EXACT verbatim quote from the paper — if you cannot quote the exact text, do NOT file the issue):
+
 {{
-    "dimensions": {{
-        "novelty_expression": <0-100>,
-        "narrative_progression": <0-100>,
-        "methodological_rigor": <0-100>,
-        "experimental_sufficiency": <0-100>,
-        "citation_quality": <0-100>,
-        "writing_style": <0-100>,
-        "data_consistency": <0-100>,
-        "format_compliance": <0-100>
-    }},
-    "overall_score": <average>,
-    "strengths": ["s1", "s2", "s3"],
-    "weaknesses": ["w1", "w2", "w3"],
+    "issues": [
+        {{
+            "summary": "<one-line: what is wrong>",
+            "evidence_anchor": "<EXACT verbatim quote from the paper>",
+            "section": "<where: Introduction|Methodology|Experiments|...>",
+            "significance": "major|minor",
+            "kind": "substantive|mechanical",
+            "close_criterion": "<what specific change would fix this — verifiable, not vague>",
+            "references": "<optional: which other section/evidence settles this>"
+        }}
+    ],
+    "overall_confidence": <1-5>,
     "recommendation": "accept|minor_revision|major_revision|reject",
-    "key_gaps_vs_tcsvt": ["gap1", "gap2", "gap3"]
+    "strengths": ["s1", "s2"]
 }}
 
+If the paper has no real issues, return an empty issues list with recommendation "accept".
 ```json ... ``` only."""
 
     def _call_eval_with_fallback(self, prompt: str) -> Optional[Dict]:
@@ -496,15 +499,26 @@ Output JSON:
             try:
                 response = caller_fn(prompt)
                 result = self.api_client.parse_json_response(response, default={})
-                if isinstance(result, dict) and "dimensions" in result:
-                    dims = result["dimensions"]
-                    if isinstance(dims, dict):
-                        scores = [v for v in dims.values()
-                                  if isinstance(v, (int, float))]
-                        if scores and "overall_score" not in result:
-                            result["overall_score"] = round(
-                                sum(scores) / len(scores), 1)
-                    logger.info(f"[OutputEval/L3] {caller_name} 评价成功")
+                if isinstance(result, dict) and ("issues" in result or "dimensions" in result):
+                    # v14 paperjury: 从 issues 反推分数
+                    issues = result.get("issues", [])
+                    if isinstance(issues, list):
+                        major = sum(1 for i in issues
+                                    if isinstance(i, dict) and i.get("significance") == "major")
+                        minor = sum(1 for i in issues
+                                    if isinstance(i, dict) and i.get("significance") == "minor")
+                        # 分数 = 100 - 问题扣分（major 每个 -10, minor 每个 -3）
+                        result["overall_score"] = max(20, 100 - major * 10 - minor * 3)
+                        result["issues_count"] = {{"major": major, "minor": minor}}
+                        logger.info(f"[OutputEval/L3] {caller_name} 评价成功: "
+                                    f"{major} major + {minor} minor issues → score {result['overall_score']}")
+                    elif "dimensions" in result:
+                        # 降级兼容：旧格式 dimensions
+                        dims = result["dimensions"]
+                        if isinstance(dims, dict):
+                            scores = [v for v in dims.values() if isinstance(v, (int, float))]
+                            if scores and "overall_score" not in result:
+                                result["overall_score"] = round(sum(scores) / len(scores), 1)
                     return result
                 logger.warning(f"[OutputEval/L3] {caller_name} 返回无效 JSON")
             except AttributeError:
