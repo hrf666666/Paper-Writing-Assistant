@@ -1630,22 +1630,7 @@ class ResearchLoop:
             logger.warning(f"[Phase 7.9] 约束预检失败（不阻塞）: {e}")
 
     def _postprocess_content(self):
-        """Phase 7.0–7.26: 全局打磨 + 有序门控 + 跨章节一致性 + 公式处理 + 去重"""
-        # ── Phase 7.0: 全局打磨 ──
-        try:
-            logger.info("[Phase 7.0] 全局打磨...")
-            from tools.global_polisher import run_global_polisher
-            polish_result = run_global_polisher(
-                OUTPUT_DIR, self._chapters,
-                abstract=self._abstract or "",
-                api_client=self.api_client,
-            )
-            if polish_result.get("polished_chapters"):
-                self._chapters = polish_result["polished_chapters"]
-            logger.info(f"[Phase 7.0] 打磨完成: {polish_result.get('total_changes', 0)} 处修改")
-        except Exception as e:
-            logger.warning(f"[Phase 7.0] 全局打磨失败: {e}")
-
+        """Phase 7.15–7.26: 有序门控 + 跨章节一致性 + 公式处理 + 去重"""
         # ── Phase 7.15: 有序门控流水线 ──
         logger.info("[Phase 7.15] 有序门控流水线（VERIFY + 质量综合评估）...")
         try:
