@@ -332,7 +332,7 @@ def quality_issues_to_findings(issues: List[Dict],
         out.append(Finding(
             source="quality",
             kind=f"quality:{dim}" if ":" not in dim else dim,
-            severity=Severity.WARNING,   # quality issues 默认 warning（重写可解）
+            severity=_norm_severity(d.get("severity", "warning")),
             description=desc,
             location=_parse_location(loc_raw, chapter_hint),
         ))

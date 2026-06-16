@@ -703,7 +703,8 @@ Respond with just the strategy, no explanation:"""
             if _final_report is not None and getattr(_final_report, "issues", None):
                 from agent.core.finding import quality_issues_to_findings as _q2f, Severity
                 _ch_loc = self._ch_name_to_loc(chapter_name)
-                self._findings.clear(source="quality")  # 只留最新一轮
+                _ch_loc = self._ch_name_to_loc(chapter_name)
+                self._findings.clear(source="quality")  # quality 按章重评，清旧留新
                 self._findings.record_many(_q2f(_final_report.issues, chapter_hint=_ch_loc))
         except Exception:
             pass
@@ -1610,24 +1611,28 @@ Respond with just the strategy, no explanation:"""
                     # 旧 bug: arch_pdf 存在时 remaining = 全量 snippets（架构图被注入两次）
                     # 新: 架构图已由 run_latex_converter 注入 ch3，remaining 只取非架构图
                     from agent.core.figure_manifest import FigType
-                    _non_arch = [e for e in self._figure_manifest.all()
-                                 if e.fig_type != FigType.ARCHITECTURE
-                                 and e in self._figure_manifest.usable_for_injection()]
-                    remaining_figures = ""
-                    for e in _non_arch:
-                        remaining_figures += self._figure_manifest._single_figure(e) + "\n\n"
-                    remaining_figures = remaining_figures.strip()
+                    # 直接遍历 usable（已做筛选/去重），避免 O(n²) 的 all() ∩ usable
+                    _non_arch = [e for e in self._figure_manifest.usable_for_injection()
+                                 if e.fig_type != FigType.ARCHITECTURE]
                     # 文图对账：正文 \ref{fig:X} 都该有 manifest 条目
                     _missing_refs = self._figure_manifest.validate_linkage(tex_content)
                     if _missing_refs:
-                        logger.warning(f"[Phase 7.3] 文图对账: {len(_missing_refs)} 个 \ref{{fig:}} 无对应图: {_missing_refs[:5]}")
-                    if remaining_figures and "\bibliographystyle" in tex_content:
+                        logger.warning(f"[Phase 7.3] 文图对账: {len(_missing_refs)} 个 "
+                                       f"\ref{{fig:}} 无对应图: {_missing_refs[:5]}")
+                    # 用公开 API 渲染非架构图（不伸手进私有 _single_figure）
+                    remaining_figures = self._figure_manifest.to_latex_snippets(
+                        exclude_types=[FigType.ARCHITECTURE])
+                    _bib = "\bibliographystyle"
+                    if remaining_figures and _bib in tex_content:
                         tex_content = tex_content.replace(
-                            "\bibliographystyle",
-                            remaining_figures + "\n\n\bibliographystyle",
+                            _bib,
+                            remaining_figures + "\n\n" + _bib,
                         )
                     elif remaining_figures:
                         tex_content += "\n\n" + remaining_figures
+                    with open(tex_path, "w", encoding="utf-8") as f:
+                        f.write(tex_content)
+                    logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
@@ -1911,7 +1916,7 @@ Respond with just the strategy, no explanation:"""
                             fig_type=_type_map.get(fp.get("fig_type", ""), FigType.MODULE_DETAIL),
                             source_pdf=_fig_tex_path,
                             caption=_caption,
-                            supports_claim=fp.get("claim", _caption[:40]),
+                            supports_claim=fp.get("key_message", _caption[:40]),  # planner 用 key_message 字段
                             status=FigStatus.RENDERED,
                             size_type=_size_type,
                         ))

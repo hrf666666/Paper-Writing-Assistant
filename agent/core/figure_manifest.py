@@ -166,12 +166,19 @@ class FigureManifest:
 
     # ── 生成 LaTeX（从结构化清单，而非裸字符串拼接）──
 
-    def to_latex_snippets(self) -> str:
+    def to_latex_snippets(self, exclude_types=None) -> str:
+        """把可注入的图渲染为 LaTeX figure 环境（替代旧裸字符串拼接）。
+
+        exclude_types: 排除的图类型集合（如已由别处注入的架构图），避免双重注入。
+        组合用 \subfloat，不把光栅图用 matplotlib 合成（保留矢量）。
+        """
         """把可注入的图渲染为 LaTeX figure 环境（替代旧裸字符串拼接）。
 
         组合用 \subfloat，不把光栅图用 matplotlib 合成（保留矢量）。
         """
         usable = self.usable_for_injection()
+        if exclude_types:
+            usable = [e for e in usable if e.fig_type not in set(exclude_types)]
         if not usable:
             return ""
         # 按 section 分组
