@@ -1,0 +1,52 @@
+{
+  "total_phases_audited": 13,
+  "total_issues": 56,
+  "critical_issues": 1,
+  "warning_issues": 39,
+  "info_issues": 16,
+  "overall_passed": false,
+  "phase_results": {
+    "phase1": {
+      "passed": true,
+      "issue_count": 4
+    },
+    "phase2": {
+      "passed": true,
+      "issue_count": 2
+    },
+    "phase3": {
+      "passed": true,
+      "issue_count": 9
+    },
+    "phase4": {
+      "passed": true,
+      "issue_count": 8
+    },
+    "phase5": {
+      "passed": true,
+      "issue_count": 2
+    },
+    "phase5_1": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_2": {
+      "passed": true,
+      "issue_count": 0
+    },
+    "phase5_5": {
+      "passed": false,
+      "issue_count": 6
+    }
+  },
+  "verified_references": 0,
+  "all_critical": [
+    {
+      "phase": "phase5_5",
+      "category": "consistency",
+      "description": "摘要与正文不一致: achieves a state-of-the-art mean absolute error of 0.234",
+      "location": "Abstract",
+      "suggestion": "修正摘要或正文使之一致"
+    }
+  ]
+}

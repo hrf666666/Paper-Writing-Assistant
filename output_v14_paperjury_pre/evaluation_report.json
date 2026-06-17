@@ -1,0 +1,132 @@
+{
+  "L1_format_validity": {
+    "checks": {
+      "md_exists": true,
+      "md_size_kb": 68.5,
+      "md_min_size": true,
+      "tex_exists": true,
+      "tex_has_ieeetran": true,
+      "tex_has_lettersize": true,
+      "tex_has_abstract": true,
+      "tex_has_keywords": true,
+      "tex_has_markboth": true,
+      "tex_equation_count": 18,
+      "tex_has_display_math": true,
+      "tex_no_markdown": true,
+      "tex_md_residuals": 0,
+      "tex_cite_count": 79,
+      "tex_has_citations": true,
+      "tex_table_count": 3,
+      "tex_has_tables": true,
+      "tex_figure_count": 7,
+      "tex_has_figures": true,
+      "tex_no_placeholder": true,
+      "tex_no_chinese": true,
+      "tex_chinese_chars": 0,
+      "bib_exists": true,
+      "bib_entries": 0,
+      "bib_min_entries": false,
+      "pdf_exists": true,
+      "pdf_size_kb": 164.6,
+      "pdf_min_size": true,
+      "figures_dir_exists": true,
+      "figure_files_count": 12,
+      "figures_min": true,
+      "compile_log_exists": true,
+      "compile_errors": 1,
+      "compile_success": false
+    },
+    "score": 100,
+    "all_passed": true,
+    "critical_fails": []
+  },
+  "L2_content_completeness": {
+    "checks": {
+      "section_introduction": true,
+      "section_related_work": true,
+      "section_methodology": true,
+      "section_experiments": true,
+      "section_conclusion": true,
+      "sections_complete": true,
+      "total_words": 9367,
+      "word_count_ok": true,
+      "citation_count": 79,
+      "citations_min": true,
+      "formula_count": 18,
+      "formulas_min": true,
+      "table_count": 3,
+      "tables_min": true,
+      "figure_count": 7,
+      "figures_min": true,
+      "ablation_mentions": 6,
+      "ablations_min": true,
+      "has_badpix": true,
+      "placeholders": 0,
+      "no_placeholders": true
+    },
+    "score": 100,
+    "sections_found": 5,
+    "total_words": 9367,
+    "total_citations": 79
+  },
+  "L3_academic_quality": {
+    "dimensions": {
+      "novelty_expression": 65,
+      "narrative_progression": 75,
+      "methodological_rigor": 40,
+      "experimental_sufficiency": 35,
+      "citation_quality": 40,
+      "writing_style": 75,
+      "data_consistency": 15,
+      "format_compliance": 80
+    },
+    "overall_score": 53,
+    "strengths": [
+      "Addresses a highly relevant and challenging problem in light field depth estimation (non-Lambertian/specular reflections) with a well-motivated physics-inspired approach.",
+      "Proposes an interesting conceptual integration of MRI-like 2D-DFT spectral analysis on angular patches for material decoupling.",
+      "Highly parameter-efficient architecture (600K parameters) that effectively processes the full 81-view angular domain."
+    ],
+    "weaknesses": [
+      "Severe data inconsistency and suspected copy-paste errors: Abstract reports MAE of 0.281567, while Conclusion reports 0.312866; furthermore, the loss weight lambda (0.7307893) is directly reused as a reported MAE metric.",
+      "Lack of mathematical formalization for the core claims; the 'Unified Dual-Mask Physical Model' is described conceptually, but the equations provided are basic CNN/U-Net operations rather than physical/optical formulations.",
+      "The experimental section is incomplete/truncated in the manuscript text, failing to present the actual quantitative SOTA comparison tables before evaluating them."
+    ],
+    "recommendation": "major_revision",
+    "key_gaps_vs_tcsvt": [
+      "TCSVT requires rigorous mathematical formulation for physics-based models, but the dual-mask optical equations and wave-vector representations are missing.",
+      "The manuscript contains alarming numerical inconsistencies (mismatched MAEs between Abstract and Conclusion, physically impossible MAE > 1.0 for normalized disparity, spatial resolution mismatches between 128x128 and 256x256).",
+      "Citation density is insufficient for a comprehensive TCSVT submission, with fewer than 30 distinct references identified across the reviewed sections."
+    ]
+  },
+  "overall": {
+    "L1_score": 100,
+    "L2_score": 100,
+    "L3_score": 53,
+    "L1_passed": true,
+    "overall_grade": "B",
+    "hierarchical_alignment": {
+      "goal_vs_L_checks": [
+        {
+          "goal": "G2 (参考文献体系)",
+          "goal_passed": false,
+          "L2_citations_min": true,
+          "consistent": false
+        },
+        {
+          "goal": "G5 (学术输出)",
+          "goal_passed": true,
+          "L1_tex_exists": true,
+          "L1_pdf_exists": true,
+          "consistent": true
+        },
+        {
+          "goal": "G4 (章节生成)",
+          "goal_passed": false,
+          "L2_sections_complete": true,
+          "consistent": false
+        }
+      ],
+      "consistent": false
+    }
+  }
+}

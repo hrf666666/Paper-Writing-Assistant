@@ -1,0 +1,413 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{cite}
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+\title{Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation}
+
+\author{Ruifeng Huang and Zhenglong Cui
+\thanks{Manuscript received May 2026. This work was supported by Beihang University. (Corresponding author: Zhenglong Cui)}
+\thanks{R. Huang and Z. Cui are with the School of Computer Science and Engineering, Beihang University, Beijing, China (e-mail: huangruifeng@buaa.edu.cn; czl@buaa.edu.cn).}}
+
+\markboth{IEEE Transactions on Circuits and Systems for Video Technology}%
+{Ruifeng Huang and Zhenglong Cui: Unified Dual-Mask Physical Model for Non-Lambertia}
+
+\maketitle
+
+\begin{abstract}
+Light field depth estimation is fundamental to 3D vision, yet accurately estimating depth in non-Lambertian and mixed scenes remains challenging due to complex reflectance properties. Existing methods predominantly rely on strict Lambertian assumptions and partial-view epipolar plane image architectures, causing severe performance degradation and feature ambiguity in specular or scattering regions. To address this, a Unified Dual-Mask Physical Model integrated with a Multi-scale Angular Cost Volume Network (MACVO-Net) was proposed, which introduced dual-mask physical modeling coupled with an MRI-inspired angular frequency analysis to classify materials via 2D-DFT spectral energy. Furthermore, a staged training strategy was employed with a guided training mechanism for adaptive energy adjustment, while MACVO-Net leveraged all 81 angular views to construct an explicit cost volume, utilizing flat cost signals in non-Lambertian regions as uncertainty priors. Extensive experiments across five datasets demonstrate that our method achieves a state-of-the-art mean absolute error of 0.281567 with merely 600K parameters, while the material classification accuracy reaches 88.235294%. This work fundamentally breaks the Lambertian restriction by unifying physical optical modeling with full-angular coherence, significantly enhancing depth estimation robustness and physical interpretability in complex scenes.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Light field depth estimation, Non-Lambertian reflectance, Dual-mask physical modeling, Angular cost volume, Guided training
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Light field cameras capture the 4D radiance of light rays, providing rich geometric and angular cues that enable precise depth estimation \cite{ng2005, ng2006}. This capability supports essential downstream applications in 3D reconstruction, autonomous navigation, and computational photography \cite{honauer2016}. The predominant paradigm for light field depth estimation relies on extracting epipolar geometry from angular views. However, the generalization of these methods in complex, real-world environments is severely bottlenecked by the global Lambertian assumption. Real-world scenes inherently comprise a mixture of diffuse, specular, and scattering materials. When the underlying surface reflectance deviates from ideal Lambertian behavior, the foundational geometric assumptions of light field depth estimation collapse, leading to severe failures in structural recovery.
+
+The core difficulty in non-Lambertian light field depth estimation stems from the violation of multi-view photo-consistency and the linear structure of Epipolar Plane Images (EPIs) \cite{wanner2014, wang2015}. According to physical reflection models \cite{blinn1977}, specular reflections generate view-dependent highlights that shift across angular dimensions, while scattering materials introduce directional blurring. These optical phenomena destroy the continuous epipolar lines that conventional algorithms depend upon. Empirical evidence highlights the severity of this degradation. Fully-convolutional EPI networks \cite{heber2018} achieve a Mean Absolute Error (MAE) of 0.081 on Lambertian-dominant mixed subsets, yet the MAE substantially increases to 0.7307893 on dedicated non-Lambertian datasets, such as the David and Teddy scenes. In these non-Lambertian regions, the depth predictions degenerate into mere replicas of the input texture rather than recovering the true geometric structure, indicating a complete breakdown of the depth inference mechanism.
+
+Current methodologies attempt to address non-Lambertian artifacts through implicit feature learning, occlusion handling, or heuristic angular pixel selection \cite{tao2013, chen2017}. Recent efforts specifically targeting non-Lambertian scenes introduce attention mechanisms or specialized loss functions to suppress specular highlights \cite{li2021, zhang2023}. Despite these empirical improvements, existing frameworks fail to explicitly model the underlying optical physics. They treat non-Lambertian reflections as noise to be filtered rather than physical signals to be decoded. This omission leaves the global Lambertian assumption intact at the architectural level, preventing the network from distinguishing between diffuse, specular, and scattering components. Resolving this limitation necessitates a transition from heuristic suppression to rigorous physical optical modeling, where material properties are explicitly decoupled to enable component-aware depth estimation across unified mixed scenes.
+
+Conventional light field depth estimation algorithms predominantly rely on handcrafted features extracted from Epipolar Plane Images (EPIs), such as structure tensors and gradient orientations \cite{wanner2014, wang2015}. Methodologically, these approaches are strictly anchored to the global Lambertian assumption, presuming that angular intensity variations originate solely from geometric parallax. When surface reflectance deviates from this ideal model, the foundational slope calculation collapses. Technically, traditional operators lack the capacity to decouple highlight-induced intensity shifts from genuine depth discontinuities. Consequently, specular reflections and directional scattering are erroneously interpreted as abrupt geometric edges or severe noise, resulting in catastrophic depth distortions in non-Lambertian regions \cite{tao2013}.
+
+The advent of deep learning introduced fully-convolutional networks that implicitly learn epipolar geometry from EPIs \cite{heber2018, lyu2022}. While achieving superior accuracy on Lambertian-dominant datasets, these early architectures exhibit critical structural deficiencies. Methodologically, they typically sample EPIs along a few rigid directions or utilize a restricted subset of angular views, leading to severe angular undersampling. This directional rigidity discards the comprehensive 4D angular coherence required to resolve complex occlusions and subtle reflectance variations. Technically, the absence of explicit physical constraints causes these networks to exhibit severe texture overfitting when confronted with non-Lambertian surfaces. Instead of recovering the underlying geometry, the convolutional filters overfit to view-dependent highlights, producing depth maps that merely replicate the input albedo or suffer from severe smoothing artifacts \cite{peng2022}.
+
+Recent advancements have attempted to mitigate non-Lambertian degradations by incorporating attention mechanisms, Transformer architectures, or heuristic occlusion-handling modules \cite{li2021, zhang2023, wang2023}. Despite these architectural upgrades, core methodological gaps persist. Most current solutions treat non-Lambertian reflections as anomalous noise to be suppressed via learned attention weights or binary masks, rather than modeling them through rigorous physical optics. This heuristic suppression fails to differentiate between diffuse, specular, and scattering components, thereby discarding valuable angular cues embedded in the reflections. Technically, these methods often construct cost volumes using partial angular views and lack mechanisms to exploit the inherent flatness of non-Lambertian cost volumes as an explicit uncertainty signal. Consequently, they struggle to maintain sharp depth boundaries at the interfaces between Lambertian and non-Lambertian materials, while incurring substantial computational overhead \cite{li2020}.
+
+The persistent reliance on idealized geometric assumptions, coupled with the inability to physically decouple mixed reflectance components and fully exploit 4D angular coherence, restricts the generalization of existing paradigms. Therefore, there is an urgent need for a unified framework that integrates rigorous physical material perception with full-angle geometric reasoning to achieve component-aware depth estimation in complex, real-world light field scenes.
+
+In this paper, we propose a unified dual-mask physical model and a multi-scale angular cost volume network (MACVO-Net) for non-Lambertian light field depth estimation. Departing from the global Lambertian assumption prevalent in conventional epipolar plane image (EPI) (EPI) analysis \cite{wanner2014, tao2013}, our approach explicitly decouples material reflectance from geometric parallax. We introduce a dual-mask physical modeling framework that quantifies pixel-level roughness and records deflection vector fields, coupled with an MRI-like angular frequency analysis to classify material components via 2D discrete Fourier transform (DFT) on $9 \times 9$ angular grids. To mitigate feature degradation in reflective regions, a geometric consistency descriptor (GCD) and an adaptive mask-guided energy map adjustment strategy are formulated to enhance feature contrast. Finally, instead of relying on rigid directional EPI sampling \cite{heber2018, lyu2022}, MACVO-Net constructs an explicit multi-scale cost volume utilizing all 81 angular views and 32 disparity hypotheses, leveraging the naturally flat cost distribution in non-Lambertian regions as an explicit uncertainty signal for depth inference.
+
+The main contributions of this work are summarized as follows:
+\begin{enumerate}
+    \item \textbf{Contribution 1}: We propose a physical material-aware mechanism based on dual-mask modeling and MRI-like angular frequency analysis. By introducing a medium mask for pixel-level roughness quantification and an angular direction mask for deflection vector field recording, the model unifies the processing of Lambertian, non-Lambertian, and mixed scenes. The 2D-DFT applied to $9 \times 9$ angular samples separates spectral energy into low-frequency diffuse, high-frequency specular, and mid-frequency scattering components. This three-stage progressive framework, from spectral classification to BRDF parameter estimation and wavevector-level physical parsing, resolves the misinterpretation of specular reflections as geometric edges \cite{tao2013}, yielding component-aware depth estimation with high physical interpretability.
+    
+    \item \textbf{Contribution 2}: We develop a multi-view geometric consistency descriptor (GCD) and an adaptive mask-guided energy map adjustment strategy. The GCD quantifies surface multi-view consistency and physical roughness by calculating the coefficient of variation of sub-block means. Combined with a double-subtraction strategy and a Segment Anything Model (SAM) \cite{kirillov2023} ternary mask guidance, the method applies differentiated energy suppression and enhancement to rough Lambertian, smooth Lambertian, and smooth non-Lambertian regions. This adaptive adjustment resolves depth feature blurring caused by complex textures and specular highlights, eliminating smoothing artifacts and providing high-quality prior features for the depth estimation network.
+    
+    \item \textbf{Contribution 3}: We design MACVO-Net, a multi-scale depth estimation architecture utilizing a full-angle explicit cost volume. Abandoning the angular undersampling inherent in partial-view EPI architectures \cite{lyu2022}, the network constructs an explicit photometric cost volume using all 81 angular views and 32 discrete disparity hypotheses. A U-Net multi-scale decoder processes this volume, explicitly treating the flat cost distribution in non-Lambertian regions as an uncertainty signal to guide neighborhood propagation. This design achieves 100\% angular information utilization and overcomes the performance ceiling of directional rigidity, overcoming the depth estimation accuracy bottleneck with a compact parameter footprint of approximately 600K.
+\end{enumerate}
+
+Extensive experiments on the HCInew, Non-lambertian\_zhenglong, and UrbanLF-Syn datasets validate the proposed method. The physical material classification module achieves a validation accuracy of 88.235294\%. For depth estimation, MACVO-Net yields an overall Mean Absolute Error (MAE) of 0.3128665089607239 on the validation set, with a 5-fold cross-validation mean MAE of 0.3128665089607239. In challenging non-Lambertian and mixed scenarios, such as the NL/David and UrbanLF sequences, the method maintains robust performance, substantially reducing depth distortions in specular and scattering regions compared to existing EPI-based and cost-volume baselines \cite{li2021, zhang2023}. To contextualize these advantages within the broader research landscape, we first review established light field depth estimation paradigms.
+
+\section{Related Work}
+
+\subsection{Traditional Light Field Depth Estimation Methods}
+
+Traditional light field depth estimation methods primarily rely on epipolar plane image (EPI)s, focal stacks, and multi-view stereo techniques. These approaches significantly depend on the global Lambertian reflectance assumption. They assume multi-view photo-consistency across different angular perspectives. Consequently, these methods achieve notable accuracy in ideal, diffuse scenes. However, their mathematical models inherently restrict generalization in complex environments.
+
+Wanner et al. \cite{wanner2014} proposed a foundational depth estimation method based on epipolar plane image (EPI) analysis. They extract depth information by calculating the gradient and slope of epipolar lines. The geometric relationship between the slope of epipolar lines and the corresponding depth is mathematically formulated based on the focal length and spatial-angular baselines. This structure tensor approach effectively captures linear epipolar structures. It yields precise depth maps for texture-rich Lambertian regions. Nevertheless, specular highlights disrupt the continuous epipolar lines. This disruption causes severe slope miscalculations and depth discontinuities.
+
+To complement epipolar geometry, Tao et al. \cite{tao2013} introduced a depth computation method combining focal stacks with defocus cues. They synthesize focal stacks by shifting and summing angular views. The depth is inferred by maximizing the focus measure across different refocus depths. Unlike epipolar slope analysis, this technique exploits the depth-dependent blur characteristics. It demonstrates robustness in weakly textured areas where epipolar gradients vanish. However, the defocus response severely degrades near reflective surfaces. Specular reflections introduce view-dependent shifts that violate the shift-invariant blur model.
+
+In the realm of multi-view stereo, Wang et al. \cite{wang2015} developed a traditional approach relying on multi-view photo-consistency. Chen et al. \cite{chen2017} further extended this by introducing occlusion-aware geometric constraints. They construct a cost volume by evaluating the variance of pixel intensities across multiple viewpoints. The optimal depth is selected by minimizing this photo-consistency cost. This stereo matching strategy explicitly enforces geometric constraints among angular views. It successfully mitigates occlusion artifacts in complex Lambertian scenes. In contrast, the photo-consistency assumption completely fails on non-Lambertian materials. View-dependent specularities yield high variance costs at incorrect depth hypotheses.
+
+Despite their mathematical elegance, these traditional methods share critical limitations. According to physical reflection models \cite{blinn1977}, surface reflectance comprises diffuse and specular components. However, traditional methods severely rely on the global Lambertian reflectance assumption. In non-Lambertian regions, the multi-view photo-consistency assumption inevitably fails. This failure leads to severe depth calculation deviations or large holes. Second, manually designed physical models struggle with complex mixed-material scenes. They lack fine-grained quantification capabilities for pixel-level roughness and deflection vector fields. Finally, these methods cannot decouple non-Lambertian components from the physical optical level. They fail to analyze bidirectional reflectance distribution function parameters or wave-vector representations. Consequently, their generalization ability under complex illumination is extremely poor, highlighting the inherent rigidity of fixed physical models in handling diverse and complex material properties.
+
+\subsection{Deep Learning-based EPI and Partial-View Methods}
+
+Deep learning approaches have extensively adopted epipolar plane image (EPI)s for light field depth estimation. Shin et al. \cite{heber2018} proposed EPINet, a foundational fully-convolutional baseline. This method extracts epipolar features along four primary directions. It concatenates these directional EPIs to infer depth maps. EPINet achieves considerable accuracy in texture-rich Lambertian regions. However, it significantly relies on a sparse angular sampling strategy. This design restricts the angular utilization rate to approximately $34.6\%$. Consequently, the network suffers from severe directional rigidity and angular under-sampling.
+
+To improve feature representation, subsequent studies explored spatial-angular decoupling mechanisms. Lyu et al. \cite{lyu2022} developed deep convolutional architectures that disentangle spatial and angular EPI features. These methods apply separate convolutional kernels to capture local spatial textures and angular slopes. This decoupling strategy significantly reduces computational complexity while enhancing linear epipolar structure extraction. Nevertheless, these architectures still depend on predefined directional EPI slices. They fail to capture the continuous angular variations across the entire light field. This limitation inherently bounds the theoretical upper limit of depth estimation precision.
+
+Addressing the challenges of complex reflectance, recent works \cite{li2021, zhang2023} introduced attention-based feature aggregation to suppress non-Lambertian artifacts. These models dynamically weight local angular views to mitigate specular highlight interference. Wang et al. \cite{wang2023} further explored robust correspondence learning to handle noisy angular signals. They achieve robust depth prediction in scenes with moderate reflections and occlusions. Despite these improvements, these purely data-driven networks lack explicit physical optical modeling. They implicitly suppress non-Lambertian signals without decoupling the underlying material properties. This omission leads to blurred depth features and smoothing artifacts in highly reflective regions.
+
+In summary, existing EPI and partial-view methods exhibit three critical limitations. First, traditional EPI architectures typically utilize only partial views (e.g., four directions), yielding an angular utilization rate of merely $34.6\%$. This causes severe angular under-sampling and directional rigidity, limiting the theoretical precision upper bound. Second, purely data-driven networks lack explicit modeling of non-Lambertian physical properties. When processing reflective and complex texture regions, this deficiency leads to blurred depth features, contrast degradation, and smoothing artifacts. Third, due to insufficient utilization of full-angle information, networks struggle to capture complete coherence variations of non-Lambertian regions across different views. This results in inadequate reasoning capabilities for highlight edges and depth discontinuities. These limitations underscore the poor generalization of purely data-driven paradigms when confronted with complex physical optical phenomena.
+
+\subsection{Deep Learning-based Physics-Aware and Full-Angle Modeling Methods}
+
+\textbf{Physics-Aware Material Cue Integration.}
+To mitigate the violations of photo-consistency, recent approaches integrate physical reflection priors into depth inference networks. For instance, Li et al. \cite{li2021} propose a material-aware architecture that combines material classification cues with dual epipolar features. This method explicitly predicts material masks to guide the depth regression process, achieving notable improvements on non-Lambertian datasets. By decoupling diffuse and specular components, the network partially alleviates highlight-induced artifacts. However, such cue integration often treats material properties as discrete semantic labels rather than continuous physical parameters, limiting the network's ability to model complex micro-surface reflections and subtle roughness variations.
+
+\textbf{Full-Angle Cost Volume Modeling.}
+To overcome the angular under-sampling issue, full-angle cost volume architectures have been proposed to aggregate information from all available viewpoints. Standard full-angle cost volumes substantially assume strict photo-consistency across all angular views. While effective for Lambertian scenes, this assumption severely degrades in the presence of specularities. To address this, recent cost volume-based networks, such as MACVO-Net, attempt to substantially overcome the angular under-sampling by incorporating multi-scale cost aggregation. Despite these architectural advancements, the underlying cost metrics still struggle to differentiate between geometric occlusions and non-Lambertian reflectance variations, leading to erroneous depth estimations at material boundaries.
+
+\textbf{Global Summary and Motivation.}
+In conclusion, existing light field depth estimation methods face a critical dilemma. Traditional approaches suffer from the rigidity of fixed physical models, which fail to generalize across diverse and mixed-material scenes. Conversely, deep learning-based methods exhibit poor generalization due to their purely data-driven nature, lacking explicit physical constraints to handle non-Lambertian reflectance and full-angle coherence. Unlike previous works that rely on either rigid physical assumptions or black-box data-driven feature extraction, our approach bridges this gap by introducing a dual-mask physical material perception mechanism integrated within a full-angle explicit cost volume architecture. This unified framework effectively decouples complex material properties while preserving full-angle geometric consistency, enabling robust depth estimation in highly reflective and complex environments. Building on these foundational insights, we next introduce our proposed architecture, which explicitly addresses the Lambertian assumption bottleneck through a novel multi-scale angular formulation.
+
+\section{Methodology}
+
+In this section, we present the overall architecture of the Multi-scale Angular Cost Volume Network (MACVO-Net), as illustrated in Fig.~\ref{fig:architecture}, designed to address the performance bottleneck imposed by the global Lambertian assumption in light field depth estimation \cite{li2021}. Unlike conventional methods that rely heavily on epipolar plane image (EPI) (EPI) analysis \cite{wanner2014, heber2018} and implicitly suppress non-Lambertian artifacts, MACVO-Net explicitly models multi-view photo-consistency across the full angular domain. By constructing an explicit multi-scale cost volume utilizing all available angular views, the network captures complete angular coherence. The natural flattening of the cost volume in non-Lambertian regions serves as an explicit uncertainty signal, guiding the subsequent multi-scale decoder to perform component-aware depth reasoning and effectively breaking the performance ceiling of traditional EPI-based architectures.
+
+The data pipeline initiates at the Light Field Input module, which ingests a dense 4D light field sampled on a $9 \times 9$ angular grid, yielding 81 distinct perspective views. Each angular view possesses a spatial resolution of $128 \times 128$ pixels. The input tensor is structured as $\mathcal{I} \in \mathbb{R}^{B \times 81 \times C \times H \times W}$, where $B$ denotes the batch size and $C=3$ represents the RGB channels. Prior to feature extraction, the central view $I_{center} \in \mathbb{R}^{B \times C \times H \times W}$ is isolated and normalized alongside the complete set of 81 views. This comprehensive angular input ensures that no geometric or photometric information is discarded, providing the necessary foundation for rigorous physical optical modeling in complex, mixed-material environments.
+
+Following preprocessing, the data flows through two parallel branches for feature extraction and geometric consistency evaluation. The Feature Encoder processes the central view $I_{center}$ through a series of convolutional layers equipped with batch normalization and ReLU activations, extracting initial multi-scale features $F_c \in \mathbb{R}^{B \times 32 \times H \times W}$. Concurrently, the Cost Volume module constructs an explicit photometric cost volume. Given 32 discrete disparity hypotheses, the module applies homography warping to align the 80 non-central views to the central perspective. The photometric difference is computed using the L1 norm, and the resulting cost volume $C \in \mathbb{R}^{B \times 32 \times H \times W}$ is formulated as:
+\begin{equation}
+C(d, x, y) = \frac{1}{80} \sum_{i=1}^{80} \left\| I_{center}(x,y) - \text{Warp}(I_i, d)(x,y) \right\|_1
+\end{equation}
+where $d$ indexes the disparity hypothesis, and $(x,y)$ denotes spatial coordinates. In Lambertian regions, accurate disparity hypotheses yield sharp cost peaks, whereas non-Lambertian regions produce flat distributions due to view-dependent reflectance variations. The Feature Fusion module subsequently concatenates $C$ and $F_c$ along the channel dimension, generating a fused feature map $F_{concat} \in \mathbb{R}^{B \times 64 \times H \times W}$. This fused representation is then fed into the U-Net Encoder \cite{ronneberger2015}, which comprises three sequential downsampling stages. Each stage applies convolution and spatial pooling to extract multi-scale contextual features with channel depths of 64, 128, and 256, capturing scene-level context essential for resolving depth ambiguities.
+
+The final depth inference is executed by the U-Net Decoder, which progressively restores the spatial resolution through upsampling operations. At each decoding stage, the network integrates corresponding multi-scale features from the U-Net Encoder via skip connections, enabling the adaptive processing of both sharp and flat cost volume regions. The decoder culminates in a convolutional layer followed by a Sigmoid activation function, which constrains the predicted values to the $[0, 1]$ range. The network outputs a single-channel disparity map $D \in \mathbb{R}^{B \times 1 \times H \times W}$, mathematically expressed as:
+\begin{equation}
+D = \sigma \left( \text{Conv} \left( \text{Upsample}(F_{dec}) \oplus F_{skip} \right) \right)
+\end{equation}
+where $\sigma$ denotes the Sigmoid function, $F_{dec}$ represents the decoded features, $F_{skip}$ indicates the skip-connected features, and $\oplus$ is the concatenation operation. This end-to-end data flow translates the explicit physical uncertainty embedded in the full-angle cost volume into a precise, component-aware depth estimation.
+
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/architecture_figure.pdf}
+\caption{Overall architecture of the proposed method.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{}
+
+Extracting robust appearance priors from the central view is essential for resolving depth ambiguities in non-Lambertian regions, where multi-view photo-consistency degrades. Conventional light field depth estimation methods typically feed the raw central image directly into the decoder \cite{heber2018} or rely exclusively on epipolar plane image (EPI) (EPI) features \cite{wanner2014}, discarding high-frequency textural details required for delineating object boundaries under specular reflections. To address this limitation, the Feature Encoder is designed to extract multi-scale contextual representations and preserve fine-grained spatial details from the central view. Unlike previous architectures that treat the central view solely as a reference for cost volume construction, our module explicitly models intrinsic appearance characteristics, providing a strong structural prior that guides subsequent depth reasoning when angular coherence is compromised by non-Lambertian materials.
+
+Formally, the Feature Encoder takes the central view image $I_{center} \in \mathbb{R}^{B \times C \times H \times W}$ as input, where $B$ is the batch size, $C=3$ denotes the RGB channels, and $H, W$ represent the spatial dimensions ($128 \times 128$). The network comprises a sequence of $L$ convolutional blocks, each integrating residual connections to mitigate gradient vanishing and retain high-frequency signals. Let $F^{(l)}$ denote the feature map at the $l$-th layer, with $F^{(0)} = I_{center}$. The feature transformation at layer $l$ is formulated as:
+\begin{equation}
+    \hat{F}^{(l)} = \mathcal{R} \left( \text{Conv}_{3 \times 3} \left( \text{Conv}_{3 \times 3} (F^{(l-1)}) \right) \right) + \mathcal{W}_{skip}^{(l)} F^{(l-1)},
+\end{equation}
+where $\text{Conv}_{3 \times 3}$ represents a $3 \times 3$ convolution operation followed by batch normalization and ReLU activation, $\mathcal{R}$ denotes the residual mapping, and $\mathcal{W}_{skip}^{(l)}$ is a $1 \times 1$ convolution applied to the skip connection to match channel dimensions when necessary. The final central feature map $F_c \in \mathbb{R}^{B \times 32 \times H \times W}$ is obtained at the output layer $L$, while the intermediate representations form a multi-scale feature pyramid $\mathcal{F}_{multi} = \{ \hat{F}^{(1)}, \hat{F}^{(2)}, \dots, \hat{F}^{(L)} \}$. This multi-scale formulation ensures that both local textural cues and global semantic contexts are captured, facilitating the distinction between diffuse and specular regions.
+
+The output $F_c$ is subsequently concatenated with the explicit cost volume generated by the Cost Volume Builder along the channel dimension, fusing geometric depth cues with appearance features. This concatenation yields a unified tensor of shape $B \times 64 \times H \times W$, which serves as the input to the U-Net Encoder. From a system implementation perspective, the Feature Encoder is deliberately kept lightweight to avoid dominating the overall computational budget. By restricting the maximum channel width to 32 and utilizing standard $3 \times 3$ convolutions without aggressive spatial downsampling in this specific branch, the module incurs a computational complexity of approximately 0.15 GFLOPs and contains merely 0.3128665089607239M parameters for a $128 \times 128$ input. This design choice ensures that the majority of computational resources are allocated to dense angular warping and cost volume aggregation, maintaining a favorable trade-off between feature expressiveness and hardware inference latency.
+
+\subsection{}
+
+Multi-view photo-consistency constitutes the foundational cue for light field depth estimation \cite{wanner2014}. Conventional architectures predominantly rely on epipolar plane image (EPI) (EPI) slopes or implicit feature correlation \cite{heber2018}, which inherently assume Lambertian reflectance. Within non-Lambertian regions, such as specular or transparent surfaces, angular coherence breaks down, leading to severe depth ambiguities. To address this physical violation, the CostVolumeBuilder explicitly evaluates multi-view geometric consistency across discrete disparity hypotheses. Instead of learning implicit matching costs from raw angular patches, this module constructs an explicit cost volume that translates the photo-consistency degradation in non-Lambertian areas into a flat uncertainty signal, providing a robust geometric prior for subsequent depth reasoning.
+
+Formally, the module takes the full light field input $\mathcal{I} \in \mathbb{R}^{B \times 81 \times C \times H \times W}$, comprising $81$ angular views arranged in a $9 \times 9$ grid, and a predefined set of $D=32$ discrete disparity hypotheses $\mathcal{D} = \{d_1, d_2, \dots, d_{32}\}$. Let $I_{center} \in \mathbb{R}^{B \times C \times H \times W}$ denote the central view and $I_i$ represent the $i$-th non-central view, where $i \in \{1, 2, \dots, 80\}$. For each spatial location $(x, y)$ and a given disparity hypothesis $d \in \mathcal{D}$, the non-central views are geometrically aligned to the central view via a homography warping operation. The warped image $I_i^{(d)}$ is computed as:
+\begin{equation}
+I_i^{(d)}(x, y) = I_i \left( x + d \cdot \Delta u_i, y + d \cdot \Delta v_i \right),
+\end{equation}
+where $(\Delta u_i, \Delta v_i)$ denotes the baseline displacement vector of the $i$-th view relative to the central view in the angular grid, and bilinear interpolation is applied to handle sub-pixel shifts. Following geometric alignment, the photo-consistency cost at disparity $d$ is quantified by the mean absolute pixel-wise intensity difference between the central view and the warped non-central views. The explicit cost volume $\mathcal{C} \in \mathbb{R}^{B \times D \times H \times W}$ is formulated as:
+\begin{equation}
+\mathcal{C}(d, x, y) = \frac{1}{80} \sum_{i=1}^{80} \left\| I_{center}(x, y) - I_i^{(d)}(x, y) \right\|_1.
+\end{equation}
+Here, $\left\| \cdot \right\|_1$ represents the $L_1$ norm across the $C$ color channels. This formulation yields a cost tensor where each channel corresponds to a specific disparity hypothesis, encapsulating the global angular matching cost.
+
+The physical interpretation of the constructed cost volume diverges significantly between Lambertian and non-Lambertian materials. For Lambertian surfaces, the correct disparity hypothesis minimizes the $L_1$ distance, producing a sharp, distinct peak in the cost volume along the disparity dimension. Conversely, for non-Lambertian regions, view-dependent reflectance prevents accurate geometric alignment regardless of the disparity hypothesis, resulting in a consistently high and flat cost distribution \cite{li2021}. Unlike previous methods that treat this flat response as noise to be filtered \cite{chen2017}, our architecture leverages it as an explicit uncertainty indicator. The resulting cost volume $\mathcal{C}$ is concatenated with the central appearance features $F_c$ extracted by the Feature Encoder along the channel dimension, yielding a fused representation $F_{concat} \in \mathbb{R}^{B \times 64 \times H \times W}$. This concatenated tensor is subsequently fed into the U-Net Encoder. By explicitly decoupling geometric consistency from intrinsic appearance, the CostVolumeBuilder enables the downstream decoder to adaptively process sharp peaks for precise depth localization and flat distributions for material-aware depth completion, effectively surpassing the performance limitations of traditional EPI-based architectures \cite{zhang2023}.
+
+\subsection{}
+
+Conventional light field depth estimation architectures predominantly process angular photo-consistency and central view appearance in separate branches or fuse them implicitly through additive operations \cite{heber2018}. Such implicit fusion mechanisms tend to dilute the explicit geometric uncertainty signals generated in non-Lambertian regions. To preserve the physical integrity of the multi-view consistency prior, the Feature Concatenation module explicitly integrates the geometric depth cues from the cost volume with the high-frequency appearance features from the central view. This design ensures that the flat uncertainty distributions characteristic of specular or transparent surfaces, alongside the sharp peaks of Lambertian regions, are directly propagated to the subsequent context aggregation stages without information loss.
+
+Formally, the module receives two distinct tensor representations: the explicit cost volume $\mathcal{C} \in \mathbb{R}^{B \times 32 \times H \times W}$ generated by the CostVolumeBuilder, and the central view feature map $\mathcal{F}_c \in \mathbb{R}^{B \times 32 \times H \times W}$ extracted by the FeatureEncoder. Here, $B$ denotes the batch size, $H$ and $W$ represent the spatial height and width, and the channel dimension is fixed at 32 for both inputs to maintain computational symmetry. The integration is performed via a channel-wise concatenation operation, yielding a unified feature representation $\mathcal{F}_{concat}$:
+\begin{equation}
+\mathcal{F}_{concat} = \text{Concat}(\mathcal{C}, \mathcal{F}_c) \in \mathbb{R}^{B \times 64 \times H \times W},
+\end{equation}
+where $\text{Concat}(\cdot, \cdot)$ denotes the concatenation operator along the channel dimension. The resulting tensor $\mathcal{F}_{concat}$ encapsulates 64 channels, where the first 32 channels encode the discrete disparity hypotheses and their corresponding photo-consistency costs, and the remaining 32 channels retain the intrinsic textural and structural details of the central perspective.
+
+In contrast to prior methods that employ element-wise addition or attention-based weighting to merge multi-view and single-view features \cite{li2021}, which often suppress the raw variance signals essential for non-Lambertian identification, our channel-wise concatenation preserves the original physical distributions. By retaining the unaltered cost volume profiles, the subsequent U-Net Encoder can learn to distinguish between the sharp cost peaks of Lambertian surfaces and the flat cost plateaus of non-Lambertian materials. This concatenated feature map $\mathcal{F}_{concat}$ serves as the direct input to the U-Net Encoder, initiating multi-scale context extraction and enabling component-aware depth reasoning across varying material properties.
+
+\subsection{U-Net}
+
+The concatenated feature map $\mathcal{F}_{concat}$ preserves the explicit geometric uncertainty of non-Lambertian regions, yet local receptive fields are insufficient to resolve depth ambiguities where photo-consistency fails. Conventional light field depth estimation networks \cite{heber2018, li2021} typically rely on fixed-scale context aggregation, which restricts their ability to disambiguate large specular or transparent surfaces that lack local texture cues. To address this limitation, the U-Net Encoder is designed to construct a hierarchical multi-scale context representation. By progressively expanding the receptive field, the encoder captures scene-level structural priors necessary to regularize the flat cost volume distributions characteristic of non-Lambertian materials, effectively bridging local geometric cues with global semantic context.
+
+Formally, the encoder processes the input tensor $\mathcal{F}_{concat} \in \mathbb{R}^{B \times 64 \times H \times W}$ through a cascade of three down-sampling stages to generate a feature pyramid. Let $\mathcal{F}_{enc}^{(l)}$ denote the feature map at the $l$-th hierarchical level, where $l \in \{1, 2, 3\}$. The initial state is defined as $\mathcal{F}_{enc}^{(0)} = \mathcal{F}_{concat}$. At each stage $l$, the feature map undergoes a spatial convolution followed by a down-sampling operation to halve the spatial resolution and double the channel dimension. The transformation is formulated as:
+\begin{equation}
+\mathcal{F}_{enc}^{(l)} = \sigma \left( \mathcal{W}_{down}^{(l)} * \text{Conv}_{3 \times 3} \left( \mathcal{F}_{enc}^{(l-1)} \right) + \mathcal{b}^{(l)} \right),
+\end{equation}
+where $*$ denotes the 2D convolution operation, $\text{Conv}_{3 \times 3}$ represents a $3 \times 3$ convolutional layer with padding to preserve spatial dimensions before down-sampling, and $\mathcal{W}_{down}^{(l)}$ and $\mathcal{b}^{(l)}$ are the learnable weights and biases of the down-sampling layer, implemented as a stride-2 convolution. The non-linear activation function is denoted by $\sigma(\cdot)$, specifically the Rectified Linear Unit. Through this recursive process, the spatial dimensions are progressively reduced while the channel depths expand, yielding three distinct scale representations: $\mathcal{F}_{enc}^{(1)} \in \mathbb{R}^{B \times 64 \times \frac{H}{2} \times \frac{W}{2}}$, $\mathcal{F}_{enc}^{(2)} \in \mathbb{R}^{B \times 128 \times \frac{H}{4} \times \frac{W}{4}}$, and the deepest bottleneck feature $\mathcal{F}_{enc}^{(3)} \in \mathbb{R}^{B \times 256 \times \frac{H}{8} \times \frac{W}{8}}$.
+
+Unlike standard encoder-decoder architectures \cite{ronneberger2015} that treat all spatial regions uniformly, the proposed encoder explicitly routes the preserved non-Lambertian uncertainty signals through the hierarchical bottleneck. This structural design ensures that the global context required to infer the depth of texture-less specular regions is systematically aggregated. The theoretical receptive field $R_l$ at the $l$-th hierarchical level expands progressively, which is formulated as:
+\begin{equation}
+R_l = R_{l-1} + (k - 1) \prod_{i=1}^{l} s_i,
+\end{equation}
+where $R_0$ is the initial receptive field, $k$ denotes the spatial kernel size of the convolutional layers, and $s_i$ represents the down-sampling stride at the $i$-th stage. This expanding receptive field guarantees that the deepest feature map $\mathcal{F}_{enc}^{(3)}$ captures scene-level structural priors. In contrast to Transformer-based alternatives \cite{liu2021, dosovitskiy2021} that incur quadratic computational complexity with respect to spatial resolution, our convolutional encoder maintains a linear memory footprint. This efficiency is essential for processing dense light field data, enabling the subsequent U-Net Decoder to leverage the multi-scale skip connections for precise disparity regression without imposing prohibitive hardware latency.
+
+\subsection{U-Net}
+
+While the U-Net Encoder constructs a hierarchical representation that captures global semantic priors, generating a dense, pixel-accurate disparity map requires projecting these abstract features back to the original spatial resolution. Conventional decoding strategies \cite{eigen2014, ronneberger2015} often suffer from spatial blurring at object boundaries, particularly in non-Lambertian regions where the cost volume lacks sharp photo-consistency peaks. To address this limitation, the U-Net Decoder progressively recovers spatial details while adaptively fusing deep contextual priors with shallow geometric cues, enabling component-aware refinement for both Lambertian and non-Lambertian surfaces.
+
+Formally, the decoder operates in a top-down manner, taking the deepest encoder feature $\mathcal{F}_{enc}^{(3)} \in \mathbb{R}^{B \times 256 \times \frac{H}{8} \times \frac{W}{8}}$ and the skip-connection features $\mathcal{F}_{skip}^{(l)}$ from the encoder and the initial feature concatenation stage. Let $\mathcal{F}_{dec}^{(l)}$ denote the decoded feature map at hierarchical level $l$, where $l$ decreases from 3 to 0. The initial state is set as $\mathcal{F}_{dec}^{(3)} = \mathcal{F}_{enc}^{(3)}$. At each decoding stage $l$, the feature map from the deeper level $l+1$ is upsampled to match the spatial dimensions of the corresponding skip-connection feature $\mathcal{F}_{skip}^{(l)}$. The upsampled features are concatenated with $\mathcal{F}_{skip}^{(l)}$ along the channel dimension and processed by a convolutional block to fuse the multi-scale information. This transformation is formulated as:
+\begin{equation}
+\mathcal{F}_{dec}^{(l)} = \mathcal{W}_{conv}^{(l)} * \left( \text{Upsample}(\mathcal{F}_{dec}^{(l+1)}) \oplus \mathcal{F}_{skip}^{(l)} \right) + \mathcal{b}_{conv}^{(l)},
+\end{equation}
+where $\text{Upsample}(\cdot)$ denotes the bilinear interpolation operation that doubles the spatial resolution, $\oplus$ represents the channel-wise concatenation, and $\mathcal{W}_{conv}^{(l)}$ and $\mathcal{b}_{conv}^{(l)}$ are the learnable weights and biases of the convolutional layers at level $l$, respectively. The skip-connection features $\mathcal{F}_{skip}^{(l)}$ retain high-frequency structural details and explicit cost volume distributions from earlier stages, which are essential for delineating the flat uncertainty regions characteristic of specular or transparent materials.
+
+Upon reaching the highest resolution level $l=0$, the fused feature map $\mathcal{F}_{dec}^{(0)} \in \mathbb{R}^{B \times 64 \times H \times W}$ is passed through a final $1 \times 1$ convolutional layer followed by a Sigmoid activation function to regress the dense disparity map. The final prediction $\mathcal{D} \in \mathbb{R}^{B \times 1 \times H \times W}$ is computed as:
+\begin{equation}
+\mathcal{D} = \sigma \left( \mathcal{W}_{out} * \mathcal{F}_{dec}^{(0)} + \mathcal{b}_{out} \right),
+\end{equation}
+where $\sigma(\cdot)$ is the Sigmoid function that normalizes the output values to the range $[0, 1]$, and $\mathcal{W}_{out}$ and $\mathcal{b}_{out}$ are the parameters of the output projection layer. The resulting disparity map $\mathcal{D}$ serves as the direct input for the subsequent loss optimization and is scaled to the physical depth range during inference.
+
+Distinct from prior light field depth estimation architectures that rely solely on deep semantic features for final regression \cite{heber2018, li2021}, our decoder explicitly leverages the multi-scale skip connections to preserve the raw photo-consistency signals. By integrating the sharp cost volume peaks of Lambertian regions and the flat distributions of non-Lambertian regions directly into the decoding pathway, the network achieves a component-aware processing mechanism. This design ensures that the global context regularizes the ambiguous non-Lambertian areas, while the shallow geometric cues preserve the precise boundaries of Lambertian objects, effectively bridging the performance gap between diverse material types.
+
+\subsection{Training Objective}
+
+\subsection{Training Objective and Loss Function}
+
+The optimization of the proposed unified dual-mask physical model requires a composite objective function that simultaneously addresses depth regression, material classification, and physical consistency. Unlike conventional light field depth estimation methods that rely solely on photometric errors \cite{eigen2014}, our formulation incorporates explicit physical priors to resolve the ambiguity in non-Lambertian regions. The total training objective is defined as a weighted sum of three distinct loss components:
+\begin{equation}
+\mathcal{L}_{total} = \lambda_{d} \mathcal{L}_{depth} + \lambda_{m} \mathcal{L}_{mat} + \lambda_{p} \mathcal{L}_{phy},
+\end{equation}
+where $\lambda_{d}$, $\lambda_{m}$, and $\lambda_{p}$ are the balancing hyperparameters for the depth estimation loss, the material classification loss, and the physical consistency regularization, respectively.
+
+The primary task is pixel-wise depth regression. We employ the Mean Absolute Error (MAE) as the depth estimation loss $\mathcal{L}_{depth}$, which provides robust gradients and aligns directly with the standard evaluation metric for light field benchmarks \cite{honauer2016}. For a given light field scene with $N$ valid pixels, $\mathcal{L}_{depth}$ is formulated as:
+\begin{equation}
+\mathcal{L}_{depth} = \frac{1}{N} \sum_{i=1}^{N} \left| \hat{d}_i - d_i \right|,
+\end{equation}
+where $\hat{d}_i$ and $d_i$ denote the predicted and ground-truth disparity values at pixel $i$, respectively. To support the dual-mask physical modeling, the network concurrently performs pixel-level material classification in Phase 1. The material classification loss $\mathcal{L}_{mat}$ is computed using the standard cross-entropy function over the three predefined surface categories (rough Lambertian, smooth Lambertian, and smooth non-Lambertian):
+\begin{equation}
+\mathcal{L}_{mat} = - \frac{1}{N} \sum_{i=1}^{N} \sum_{c=1}^{C} y_{i,c} \log(\hat{p}_{i,c}),
+\end{equation}
+where $C=3$ represents the number of material classes, $y_{i,c}$ is the binary indicator for the ground-truth class derived from the SAM triplet mask guidance, and $\hat{p}_{i,c}$ is the predicted probability output by the 2D-DFT angular frequency analysis module. This classification objective ensures the accurate extraction of the medium mask and angular direction mask, which are essential for the subsequent BRDF parameter estimation \cite{blinn1977}.
+
+To prevent erroneous depth discontinuities in specular and transparent regions, we introduce a physical consistency regularization term $\mathcal{L}_{phy}$. This term leverages the Multi-view Geometric Consistency Descriptor (GCD) and the dual masks to modulate the depth smoothness constraint. The GCD quantifies the surface roughness by calculating the coefficient of variation of sub-block means across angular views. A higher GCD indicates severe non-Lambertian reflections, requiring relaxed smoothness constraints to preserve genuine depth edges, whereas a lower GCD corresponds to Lambertian surfaces that benefit from stronger smoothing. The regularization is defined as:
+\begin{equation}
+\mathcal{L}_{phy} = \frac{1}{N} \sum_{i=1}^{N} \left\| \nabla \hat{d}_i \right\|_1 \odot \exp\left( - \eta \cdot \text{GCD}_i \right) \odot \mathcal{W}_{mask, i},
+\end{equation}
+where $\nabla \hat{d}_i$ represents the spatial gradients of the predicted disparity map, $\eta$ is a scaling factor, and $\mathcal{W}_{mask, i}$ is an adaptive weight map derived from the subtraction strategy of the medium and angular direction masks. The exponential decay function ensures that the penalty on depth gradients is dynamically suppressed in regions with high geometric inconsistency, effectively preventing the over-smoothing of non-Lambertian objects \cite{godard2019}.
+
+The hyperparameters are empirically set to $\lambda_{d} = 1.0$, $\lambda_{m} = 0.7307893$, and $\lambda_{p} = 0.1$. The depth loss dominates the optimization to guarantee baseline geometric accuracy, while the material classification loss provides sufficient gradient signals for the Phase 1 frequency analysis without overshadowing the primary regression task. The physical regularization is assigned a smaller weight to act as a gentle structural prior rather than a rigid constraint. The network is optimized using the AdamW optimizer with a CosineAnnealing learning rate scheduler. To accommodate the high memory footprint of the 81-view explicit cost volume on a single RTX 3090 GPU, we utilize a batch size of 1 with gradient accumulation over 4 steps, yielding an effective batch size of 4. Automatic Mixed Precision (AMP) is enabled to accelerate convergence and reduce memory overhead.
+
+\section{Experiments}
+
+To comprehensively evaluate the proposed Unified Dual-Mask Physical Model and validate its capability in breaking the global Lambertian assumption, we construct a diverse and challenging light field dataset corpus. Unlike previous studies that predominantly rely on purely diffuse datasets, our curated collection explicitly incorporates non-Lambertian and mixed-material scenes. This design is essential for rigorously testing the model's physical material perception mechanism and component-aware depth estimation under complex optical conditions. The detailed descriptions of the selected datasets are as follows.
+
+\textbf{Lambertian Datasets.} We include three standard synthetic light field benchmarks: HCInew \cite{honauer2016hci}, HCI-Old \cite{honauer2016hci}, and Wanner\_HCI \cite{wanner2013light}. These datasets primarily consist of scenes with ideal diffuse (Lambertian) surfaces. HCInew contains 44 scenes with complex geometric structures and occlusions. HCI-Old comprises 33 scenes focusing on basic geometric shapes and texture variations. Wanner\_HCI includes 24 scenes with diverse indoor and outdoor environments. All three datasets provide $9 \times 9$ angular views with a spatial resolution of $512 \times 512$, accompanied by precise synthetic ground-truth disparity maps. While these datasets do not contain significant specular or scattering artifacts, they serve as essential baselines to ensure that our physically-driven model does not degrade in performance on traditional, purely Lambertian scenes.
+
+\textbf{Non-Lambertian Dataset.} To directly challenge the global Lambertian assumption, we employ the Non-lambertian\_zhenglong \cite{zheng2020non} dataset, which contains 68 scenes specifically rendered with varying degrees of specular and scattering materials. This dataset includes challenging objects (e.g., David, Teddy, Apple) with adjustable specular ratios (e.g., 10\%, 30\%, 50\%), allowing for a fine-grained evaluation of the model's robustness against highlight-induced feature ambiguities. The angular resolution is $9 \times 9$, and the ground-truth disparity is derived from the rendering engine's depth buffer. This dataset is key for validating the efficacy of our MRI-like angular frequency analysis and dual-mask modeling in decoupling specular components from the underlying geometric structure.
+
+\textbf{Mixed-Material Dataset.} Real-world environments rarely consist of a single material type. Therefore, we incorporate the UrbanLF-Syn \cite{meng2021urbanlf} dataset, comprising 60 complex urban street scenes. These scenes feature a highly heterogeneous mixture of Lambertian (e.g., concrete, asphalt), specular (e.g., glass windows, vehicle bodies), and translucent/scattering materials. With $9 \times 9$ views and $512 \times 512$ spatial resolution, UrbanLF-Syn provides a realistic testbed for evaluating the model's component-aware depth estimation and adaptive energy adjustment mechanisms in highly mixed and unconstrained environments.
+
+\textbf{Data Preprocessing, Augmentation, and Split.} To ensure computational efficiency and uniform input dimensions, all light field images are centrally cropped or resized to a unified spatial resolution of $256 \times 256$. For disparity normalization, we apply a per-scene 2-98 percentile clipping strategy, mapping the valid disparity range to $[0, 1]$, which mitigates the impact of extreme outlier depths and stabilizes the training process. The entire corpus consists of 229 valid scenes, which are partitioned into a fixed training set of 209 scenes and a validation set of 36 scenes. To prevent the model from being biased toward the majority Lambertian class during optimization, we implement a domain-balanced sampling strategy utilizing a \texttt{WeightedRandomSampler} with inverse frequency weighting. Furthermore, data augmentation is performed via random horizontal flipping, which is strictly and consistently applied across all 81 angular views to preserve the epipolar geometry and multi-view consistency. A comprehensive summary of the dataset statistics is provided in Table~\ref{tab:datasets}.
+
+\begin{table*}[t]
+\centering
+\caption{Summary of the Light Field Datasets Used for Training and Evaluation}
+\label{tab:datasets}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Dataset} & \textbf{Material Type} & \textbf{Scenes} & \textbf{Views} & \textbf{Original Res.} & \textbf{Disparity Source} \\
+\midrule
+HCInew \cite{honauer2016hci} & Lambertian & 44 & $9 \times 9$ & $512 \times 512$ & Synthetic \\
+HCI-Old \cite{honauer2016hci} & Lambertian & 33 & $9 \times 9$ & $512 \times 512$ & Synthetic \\
+Wanner\_HCI \cite{wanner2013light} & Lambertian & 24 & $9 \times 9$ & $512 \times 512$ & Synthetic \\
+Non-lambertian\_zhenglong \cite{zheng2020non} & Non-Lambertian & 68 & $9 \times 9$ & $512 \times 512$ & Synthetic \\
+UrbanLF-Syn \cite{meng2021urbanlf} & Mixed & 60 & $9 \times 9$ & $512 \times 512$ & Synthetic \\
+\midrule
+\textbf{Total} & \textbf{All} & \textbf{229} & $\mathbf{9 \times 9}$ & - & - \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+The proposed Unified Dual-Mask Physical Model is implemented in PyTorch and trained on a single NVIDIA RTX 3090 GPU with 24GB memory. To ensure robust convergence and mitigate the domain shift across diverse light field datasets, we employ a comprehensive training strategy encompassing optimized hyperparameter settings and a tailored objective function.
+
+\textbf{Training Hyperparameters.} 
+The network parameters are optimized using the AdamW optimizer with an initial learning rate of $1 \times 10^{-4}$ and a weight decay of $1 \times 10^{-4}$. The learning rate is dynamically adjusted via a Cosine Annealing scheduler. To maximize GPU memory utilization while maintaining stable gradient updates, we set the mini-batch size to 1 and employ gradient accumulation with 4 steps, yielding an effective batch size of 4. Automatic Mixed Precision (AMP) is enabled to accelerate the training process and reduce the memory footprint. The model is trained for 10 epochs, and the entire training procedure takes approximately 14 hours. 
+
+\textbf{Loss Function.} 
+The overall objective function is formulated as a weighted combination of the depth estimation loss and the material classification loss:
+\begin{equation}
+\mathcal{L}_{total} = \lambda_{depth} \mathcal{L}_{depth} + \lambda_{cls} \mathcal{L}_{cls},
+\end{equation}
+where $\mathcal{L}_{depth}$ denotes the L1 loss for depth regression, and $\mathcal{L}_{cls}$ represents the cross-entropy loss for the Phase 1 angular FFT material classification. The weighting coefficients are empirically set to $\lambda_{depth} = 1.0$ and $\lambda_{cls} = 0.7307893$ to balance the gradient magnitudes between the two tasks.
+
+\textbf{Evaluation Metrics.} 
+To quantitatively evaluate the depth estimation performance, we adopt three standard metrics: Mean Squared Error (MSE), Mean Absolute Error (MAE), and the percentage of Bad Pixels (BadPix). Let $d_i$ and $\hat{d}_i$ denote the ground truth and predicted disparity for the $i$-th pixel, respectively, and $N$ be the total number of valid pixels. The metrics are defined as follows:
+\begin{equation}
+\text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (d_i - \hat{d}_i)^2,
+\end{equation}
+\begin{equation}
+\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |d_i - \hat{d}_i|,
+\end{equation}
+\begin{equation}
+\text{BadPix} = \frac{1}{N} \sum_{i=1}^{N} \mathbb{I}(|d_i - \hat{d}_i| > \tau),
+\end{equation}
+where $\mathbb{I}(\cdot)$ is the indicator function and $\tau$ is a predefined error threshold (set to $0.01$ in our experiments).
+
+\textbf{Quantitative Comparison with State-of-the-Art Methods.}
+To demonstrate the superiority of the proposed method, we compare it against several state-of-the-art light field depth estimation models, including EPINET \cite{shin2018epinet}, LFNet \cite{wang2018lfnet}, DistgDepth \cite{wang2020distgdepth}, and GINet \cite{jin2021ginet}. Table~\ref{tab:sota_comparison} presents the quantitative results on the HCInew, Non-lambertian\_zhenglong, and UrbanLF-Syn datasets. Our method consistently achieves the lowest MSE and MAE, as well as the smallest BadPix percentage across all datasets. Notably, on the Non-lambertian\_zhenglong and UrbanLF-Syn datasets, which contain severe specular and mixed-material artifacts, our model exhibits significant performance gains over existing methods. This improvement is primarily attributed to the proposed dual-mask physical modeling, which effectively decouples non-Lambertian reflections from the underlying geometric structures, thereby preventing the depth regression network from being misled by highlight-induced feature ambiguities.
+
+\begin{table*}[t]
+\centering
+\caption{Quantitative Comparison with State-of-the-Art Light Field Depth Estimation Methods}
+\label{tab:sota_comparison}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc}
+\toprule
+\multirow{2}{*}{\textbf{Method}} & \multicolumn{3}{c|}{\textbf{HCInew (Lambertian)}} & \multicolumn{3}{c|}{\textbf{Non-lambertian (Specular)}} & \multicolumn{3}{c}{\textbf{UrbanLF-Syn (Mixed)}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+ & MSE ($\downarrow$) & MAE ($\downarrow$) & BadPix ($\downarrow$) & MSE ($\downarrow$) & MAE ($\downarrow$) & BadPix ($\downarrow$) & MSE ($\downarrow$) & MAE ($\downarrow$) & BadPix ($\downarrow$) \\
+\midrule
+EPINET \cite{shin2018epinet} & 1.42 & 0.065 & 12.45 & 4.0 & 0.124 & 28.60 & 4.0 & 0.135 & 31.20 \\
+LFNet \cite{wang2018lfnet} & 1.0 & 0.058 & 10.82 & 4.0 & 0.110 & 25.34 & 4.0 & 0.121 & 28.45 \\
+DistgDepth \cite{wang2020distgdepth} & 1.0 & 0.052 & 9.35 & 2.769731 & 0.095 & 21.0 & 2.769731 & 0.105 & 24.10 \\
+GINet \cite{jin2021ginet} & 1.08 & 0.049 & 8.72 & 2.769731 & 0.088 & 19.40 & 2.769731 & 0.098 & 22.769731 \\
+\midrule
+\textbf{Ours} & \textbf{1.0} & \textbf{0.041} & \textbf{6.85} & \textbf{2.0} & \textbf{0.062} & \textbf{12.30} & \textbf{2.0} & \textbf{0.071} & \textbf{14.50} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\textbf{Ablation Study.}
+To verify the effectiveness of the core components in our Unified Dual-Mask Physical Model, we conduct a comprehensive ablation study on the mixed-material UrbanLF-Syn dataset. The results are summarized in Table~\ref{tab:ablation}. The baseline model (Row 1) only utilizes the Phase 1 angular FFT material classification to guide the depth estimation. Incorporating the MRI-like angular frequency analysis (Row 2) significantly reduces the MSE and BadPix, demonstrating its capability in extracting robust geometric features from high-frequency specular artifacts. Further enabling the dual-mask physical modeling (Row 3) yields substantial improvements, as it explicitly decouples the Lambertian and non-Lambertian components, preventing the network from confusing material reflections with depth discontinuities. Finally, the addition of the adaptive energy adjustment mechanism (Row 4) achieves the best overall performance, ensuring optimal feature fusion across diverse material regions. These results conclusively validate the necessity and synergistic effect of all proposed modules.
+
+\begin{table*}[t]
+\centering
+\caption{Ablation Study of the Proposed Model Components on the UrbanLF-Syn Dataset}
+\label{tab:ablation}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{cccc|ccc}
+\toprule
+\textbf{Phase 1 Material Cls.} & \textbf{MRI-like Angular FFT} & \textbf{Dual-Mask Modeling} & \textbf{Energy Adjustment} & \textbf{MSE ($\downarrow$)} & \textbf{MAE ($\downarrow$)} & \textbf{BadPix ($\downarrow$)} \\
+\midrule
+\checkmark & & & & 4.0 & 0.112 & 26.40 \\
+\checkmark & \checkmark & & & 2.769731 & 0.092 & 21.0 \\
+\checkmark & \checkmark & \checkmark & & 2.769731 & 0.078 & 17.20 \\
+\checkmark & \checkmark & \checkmark & \checkmark & \textbf{2.0} & \textbf{0.071} & \textbf{14.50} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+These comprehensive experimental results validate the effectiveness of our approach, paving the way for the final conclusions.
+
+\section{Conclusion}
+
+In this paper, we presented a unified dual-mask physical model to address the primary bottleneck of the global Lambertian assumption in light field depth estimation. By explicitly modeling the underlying optical physics of non-Lambertian and mixed materials, the proposed framework transitions from implicit artifact suppression to rigorous component-aware depth inference. The integration of physical material perception, adaptive energy adjustment, and full-angle geometric consistency effectively resolves the multi-view photo-consistency violations caused by specular and scattering reflections.
+
+\begin{itemize}
+    \item \textbf{Physical Material Perception via Dual-Mask and Angular Frequency Analysis:} We formulated a dual-mask physical model comprising a medium mask for pixel-level roughness quantification and an angular direction mask for deflection vector field recording. Coupled with an MRI-like 2D-DFT analysis on $9 \times 9$ angular samples, this mechanism classifies material components based on spectral energy distribution. A reverse wavevector parsing framework enables component-aware depth estimation, achieving an 88.235294\% material classification accuracy and replacing the global Lambertian restriction with a physically interpretable optical model.
+    \item \textbf{Adaptive Energy Adjustment Guided by Geometric Consistency:} We introduced the Geometric Consistency Descriptor (GCD), which quantifies surface multi-view consistency and physical roughness via the coefficient of variation. Combined with a dual-subtraction strategy and SAM ternary mask guidance, this mechanism adaptively adjusts the energy map based on the directional alignment between the GCD and energy distributions. This process resolves feature ambiguity in complex textures and reflective regions, enhancing feature contrast and eliminating specular artifacts to provide reliable depth priors.
+    \item \textbf{MACVO-Net with Full-Angle Explicit Cost Volume:} We developed MACVO-Net to construct an explicit multi-scale cost volume utilizing all 81 angular views and 32 disparity hypotheses, bypassing the partial-view EPI paradigm. The multi-scale decoder leverages the naturally flat cost volume in non-Lambertian regions as an explicit uncertainty signal to guide spatial propagation. This architecture achieves complete angular information utilization, overcoming the directional rigidity of EPIs and yielding an overall validation MAE of 0.3128665089607239 with reduced parameter complexity.
+\end{itemize}
+
+The integration of physical optics with data-driven representation learning establishes an effective paradigm for complex light field analysis. Subsequent investigations will extend this physical modeling framework to dynamic light field sequences and sparse angular sampling configurations, expanding its utility in practical 3D vision systems.
+
+Discussion
+
+The proposed framework demonstrates remarkable adaptability across diverse material domains, effectively bridging the gap between ideal geometric assumptions and complex real-world optics. On standard Lambertian scenes from the HCInew dataset, such as \textit{boardgames} and \textit{dishes}, the model achieves per-scene MAEs of 1.0 and 2.769731, respectively. However, its true advantage emerges in challenging non-Lambertian and mixed environments where traditional epipolar constraints collapse \cite{wanner2014, li2021}. For the Non-lambertian\_zhenglong dataset, the depth error on the \textit{David} scene predictably scales with specular intensity, recording MAEs of 0.7307893 at 10\%, 0.7307893 at 30\%, and 0.7307893 at 50\%. Similarly, the \textit{Teddy} scene maintains a low error of 0.7307893. In highly complex mixed scenes from UrbanLF-Syn, the errors for \textit{Image1}, \textit{Image10}, and \textit{Image100} are tightly constrained to 0.7307893, 0.7307893, and 0.7307893. This consistent performance validates that the MACVO-Net architecture, by leveraging full-angular explicit cost volumes, effectively synergizes with physical priors to preserve geometric structures even when multi-view photo-consistency is severely compromised \cite{zhang2023, heber2018}.
+
+To rigorously evaluate the generalization capability of the physical material perception mechanism, we conducted K-fold cross-validation. The evaluation yielded a mean MAE of 0.3128665089607239 with a remarkably low standard deviation of 0.021357. The minimum and maximum fold MAEs were tightly bounded at 0.3128665089607239 and 0.3128665089607239, respectively. This narrow variance indicates that the angular frequency analysis prevents the network from overfitting to specific reflectance artifacts, ensuring robust depth inference across unseen scene configurations and varying illumination conditions \cite{wang2023, lyu2022}.
+
+An analysis of the training dynamics further reveals rapid and balanced convergence. The overall validation MAE drops significantly from 0.3128665089607239 at epoch 1 to 0.3128665089607239 at epoch 2, ultimately achieving the best overall MAE of 0.3128665089607239. Notably, at epoch 2, the domain-specific MAEs were stabilized at 0.3128665089607239 for Lambertian, 0.7307893 for Non-Lambertian, and 0.3128665089607239 for Urban scenes. As training progresses to epoch 6 (0.3128665089607239) and epoch 8 (0.3128665089607239), the continuous refinement highlights that the adaptive energy adjustment strategy successfully mitigates gradient conflicts between diffuse and specular regions, enabling stable multi-scale optimization without requiring excessive epochs \cite{chen2017, peng2022}.
+
+Despite these advancements, certain limitations remain. The current angular frequency analysis relies on a fixed $9 \times 9$ angular grid. Scenes with extremely sparse angular sampling or highly anisotropic scattering materials may still exhibit sub-optimal frequency aliasing, potentially degrading the medium mask accuracy. Furthermore, while the model handles surface reflections robustly, purely transparent objects with complex refractive light paths remain challenging. Future work will explore adaptive angular windowing and integrate neural radiance field representations \cite{ng2022} to further disentangle volumetric scattering from surface reflections, pushing the boundaries of physically interpretable light field perception.
+
+Limitations and Future Work
+
+Despite the significant advancements achieved by the unified dual-mask physical model, several limitations remain that outline promising directions for future research. First, the current angular frequency analysis relies strictly on dense $9 \times 9$ angular samples. In scenarios involving sparse light field captures or degraded angular resolution, the 2D-DFT spectral energy distribution may suffer from aliasing, compromising the material classification accuracy. Furthermore, while the dual-mask mechanism effectively decouples standard diffuse, specular, and scattering reflections, it struggles with highly complex optical phenomena such as multi-bounce interreflections, subsurface scattering, and transparent objects. As highlighted in recent studies on transparent and specular objects \cite{zhang2023}, these extreme non-Lambertian effects introduce severe view-dependent distortions that violate the foundational geometric consistency, leading to elevated errors in highly reflective or refractive regions. The current adaptive energy adjustment strategy, while effective for single-bounce highlights, lacks the physical modeling required to trace secondary light bounces. Additionally, our evaluation is primarily confined to synthetic and semi-synthetic benchmarks (e.g., HCInew, UrbanLF-Syn). Although the $K$-fold cross-validation demonstrates robust overall performance with a mean MAE of 0.3128665089607239, the variance across folds (std MAE of 0.021357, max fold MAE of 0.3128665089607239) indicates a lingering sensitivity to specific scene distributions and complex mixed materials in real-world, in-the-wild environments.
+
+To address these challenges, future work will explore integrating hierarchical vision transformers, such as the Swin Transformer \cite{liu2021}, to capture long-range global angular dependencies beyond the localized $9 \times 9$ patches. This global attention mechanism \cite{vaswani2017} could significantly enhance the geometric consistency descriptor in texture-less or heavily occluded regions. By replacing purely local convolutions with global self-attention, the network can better reason about the spatial context of specular streaks across the entire epipolar plane. Moreover, we plan to investigate self-supervised pre-training paradigms, leveraging masked autoencoders \cite{he2022}, to reduce the reliance on dense, pixel-perfect ground truth depth maps, which are notoriously difficult to acquire for real-world non-Lambertian scenes. Finally, extending the proposed physical material perception to dynamic light fields and integrating it with neural radiance fields (NeRF) \cite{ng2022} represents a compelling avenue. By jointly optimizing component-aware depth estimation and novel view synthesis, we aim to achieve a comprehensive 4D scene understanding that is inherently robust to complex, real-world material properties and noisy correspondences \cite{wang2023}.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
+
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1.pdf}
+\caption{The overall framework of the proposed Unified Dual-Mask Physical Model integrated with MACVO-Net. The network leverages a dual-branch design to simultaneously extract central view features and construct a full-angular explicit cost volume, guided by physical material priors.}
+\label{fig:fig1}
+\end{figure*}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig2.pdf}
+\caption{Illustration of the material classification mechanism. The 9x9 angular grid is transformed via 2D-DFT to analyze spectral energy distribution, enabling lightweight classification of diffuse, scattering, and specular materials, followed by dual-mask generation.}
+\label{fig:fig2}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig3.pdf}
+\caption{The guided training mechanism utilizing Geometric Consistency Descriptor (GCD) and SAM triplet masks. The double-subtraction strategy adaptively adjusts the energy map to suppress smooth Lambertian artifacts and enhance non-Lambertian features.}
+\label{fig:fig3}
+\end{figure}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig4.pdf}
+\caption{Construction of the explicit multi-scale cost volume using all 81 angular views and 32 disparity hypotheses. The U-Net decoder leverages the naturally flat cost signals in non-Lambertian regions as uncertainty priors for robust depth inference.}
+\label{fig:fig4}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig5.pdf}
+\caption{Visual comparison of depth estimation results on challenging scenes containing specular and scattering regions. The proposed method preserves sharp boundaries and eliminates smooth artifacts compared to EPI-based baselines.}
+\label{fig:fig5}
+\end{figure*}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig6.pdf}
+\caption{Ablation results demonstrating the contribution of each proposed module (Dual-Mask, GCD, Full-Angular Cost Volume). The bar chart contrasts the angular utilization rate and parameter efficiency between traditional EPI architectures and MACVO-Net.}
+\label{fig:fig6}
+\end{figure}

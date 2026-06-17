@@ -1,0 +1,307 @@
+{
+  "brief": "论文标题: Unified Dual-Mask Physical Model for Non-Lambertian Light Field Depth Estimation\n\n创新点:\n  1. 基于双掩码与类MRI角度频域分析的物理材质感知机制: 打破了传统光场深度估计中全域朗伯反射的假设限制，通过严密的物理光学建模和频域分析，实现了对非朗伯（镜面/散射）和混合场景的材质感知与分量级深度估计，大幅提升了模型的物理可解释性和泛化能力。\n  2. 多视角几何一致性描述子(GCD)与自适应Mask引导的能量图调整策略: 有效解决了复杂纹理和反光区域导致的深度特征模糊问题，通过自适应能量调整显著提升了非朗伯与朗伯区域的特征对比度，为后续的深度估计网络提供了高质量的先验特征输入，消除了光滑伪影。\n  3. 基于全角度显式代价体积的MACVO-Net多尺度深度估计架构: 从根本上解决了EPI架构因角度欠采样和方向刚性导致的性能天花板问题，实现了100%的角度信息利用；同时通过显式代价体积的平坦信号优雅地处理了非朗伯区域视角一致性假设失效的难题，在参数量更少的情况下突破了深度估计精度瓶颈。\n\n模型架构: MACVO-Net（多尺度角度代价体网络）旨在解决非朗伯光场深度估计的瓶颈。输入为中心视角图像及完整的81个视角图像（9x9角度网格，分辨率如128x128）。首先通过FeatureEncoder提取中心视角的多尺度特征；同时，CostVolumeBuilder利用所有81个视角和32个视差假设构建显式的光度代价体（Cost Volume），以捕捉多视角一致性（朗伯区域呈现尖锐峰值，非朗伯区域呈现平坦分布作为不确定性信号）。随后，将代价体与中心特征拼接，输入到包含3个下采样尺度的U-Net Encoder中提取多尺度上下文特征，最后通过带有跳跃连接的U-Net Decoder进行上采样和特征融合，最终输出单通道的视差图（Disparity Map）。该架构通过显式视差假设测试和多尺度解码，有效打破了传统EPI架构的性能天花板。\n\n数据集: {\"名称\": [\"HCInew\", \"HCI-Old\", \"Wanner_HCI\", \"Non-lambertian_zhenglong\", \"UrbanLF-Syn\"], \"规模\": \"总计229个有效场景（209 train + 36 val），包含512x512或不同分辨率，81视角（9x9）\", \"场景类型\": \"Lambertian（HCInew, HCI-Old, Wanner_HCI）、Non-Lambertian（Non-lambertian_zhenglong）、Mixed（UrbanLF-Syn）\", \"划分方式\": \"Train/Val固定划分，域平衡采样（Weighte",
+  "log_entries": [
+    {
+      "timestamp": 1781616246.563482,
+      "category": "log",
+      "content": "EXECUTE: Ch2 Related Work 完成, 耗时 677s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781616246.5640404,
+      "category": "quality",
+      "content": "Related Work 最终质量: 88.9/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781616246.5640526,
+      "category": "quality",
+      "content": "VERIFY phase2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781616246.564066,
+      "category": "log",
+      "content": "任务完成: generate_chapter2, 质量: 88.89999999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781616254.9435015,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch3 Methodology\nLLM策略建议: Structure the methodology around explicit non-Lambertian reflectance modeling to directly resolve the geometric failures caused by diffuse, specular, and scattering mate",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781616254.9435055,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter3 - Ch3 Methodology",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617017.122926,
+      "category": "log",
+      "content": "EXECUTE: Ch3 Methodology 完成, 耗时 762s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617017.124371,
+      "category": "quality",
+      "content": "Methodology 最终质量: 91.8/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617017.1251001,
+      "category": "quality",
+      "content": "VERIFY phase3: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617017.1251159,
+      "category": "log",
+      "content": "任务完成: generate_chapter3, 质量: 91.82499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617027.628324,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch4 Experiments\nLLM策略建议: Design experiments that explicitly benchmark your proposed approach against traditional Lambertian-dependent baselines using datasets containing complex mixed-material r",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781617027.6283524,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter4 - Ch4 Experiments",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618203.0432115,
+      "category": "log",
+      "content": "EXECUTE: Ch4 Experiments 完成, 耗时 1175s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618203.043773,
+      "category": "quality",
+      "content": "Experiments 最终质量: 93.1/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618203.0619698,
+      "category": "quality",
+      "content": "VERIFY phase4: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618203.0619826,
+      "category": "log",
+      "content": "任务完成: generate_chapter4, 质量: 93.075",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618214.933572,
+      "category": "log",
+      "content": "THINK: 首次执行: Ch5 Conclusion\nLLM策略建议: Synthesize your final remarks by directly echoing how non-Lambertian surface reflectance disrupts epipolar geometry, ensuring every concluding statement remains tightly a",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618214.9335775,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5 - Ch5 Conclusion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618339.9939897,
+      "category": "log",
+      "content": "EXECUTE: Ch5 Conclusion 完成, 耗时 125s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618339.9941838,
+      "category": "quality",
+      "content": "Conclusion 最终质量: 95.9/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618340.0131056,
+      "category": "quality",
+      "content": "VERIFY phase5: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618340.0131235,
+      "category": "log",
+      "content": "任务完成: generate_chapter5, 质量: 95.9",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618351.04734,
+      "category": "log",
+      "content": "THINK: 首次执行: Extra: Discussion\nLLM策略建议: Begin by explicitly restating the central tension between idealized Lambertian assumptions and real-world non-Lambertian reflectance to maintain direct thematic contin",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618351.0473464,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_1 - Extra: Discussion",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618489.5997612,
+      "category": "log",
+      "content": "EXECUTE: Extra: Discussion 完成, 耗时 139s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618489.6195877,
+      "category": "quality",
+      "content": "VERIFY phase5_1: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618489.6196003,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_1, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618499.9316092,
+      "category": "log",
+      "content": "THINK: 首次执行: Extra: Limitations and Future Work\nLLM策略建议: Directly revisit the breakdown of global Lambertian assumptions introduced in Chapter 1, systematically aligning each experimental result with the ini",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618499.931615,
+      "category": "log",
+      "content": "开始执行任务: generate_chapter5_2 - Extra: Limitations and Future Work",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618618.991048,
+      "category": "log",
+      "content": "EXECUTE: Extra: Limitations and Future Work 完成, 耗时 119s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618619.0137029,
+      "category": "quality",
+      "content": "VERIFY phase5_2: 87.5/100 (PASS)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618619.0137157,
+      "category": "log",
+      "content": "任务完成: generate_chapter5_2, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618628.842897,
+      "category": "log",
+      "content": "THINK: 首次执行: Abstract & Keywords\nLLM策略建议: Synthesize your proposed solutions for non-Lambertian reflectance to explicitly demonstrate how they resolve the epipolar geometric breakdowns outlined in the introd",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618628.8429039,
+      "category": "log",
+      "content": "开始执行任务: generate_abstract - Abstract & Keywords",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.0976963,
+      "category": "log",
+      "content": "EXECUTE: Abstract & Keywords 完成, 耗时 114s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.097929,
+      "category": "quality",
+      "content": "abstract 最终质量: 95.8/100",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.1193595,
+      "category": "quality",
+      "content": "VERIFY phase5_5: 99.9/100 (FAIL)",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.1193762,
+      "category": "log",
+      "content": "任务完成: generate_abstract, 质量: 95.82499999999999",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.1465743,
+      "category": "log",
+      "content": "THINK: 首次执行: 参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.14658,
+      "category": "log",
+      "content": "开始执行任务: review_content - 参考文献审查",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.1494758,
+      "category": "log",
+      "content": "EXECUTE: 参考文献审查 完成, 耗时 0s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.1711087,
+      "category": "log",
+      "content": "任务完成: review_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.2269082,
+      "category": "log",
+      "content": "THINK: 首次执行: 反幻觉审计",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618743.2269125,
+      "category": "log",
+      "content": "开始执行任务: audit_content - 反幻觉审计",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618799.0948408,
+      "category": "log",
+      "content": "EXECUTE: 反幻觉审计 完成, 耗时 56s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618799.1179655,
+      "category": "log",
+      "content": "任务完成: audit_content, 质量: N/A",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618799.145828,
+      "category": "log",
+      "content": "THINK: 首次执行: 生成LaTeX/PDF输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781618799.145834,
+      "category": "log",
+      "content": "开始执行任务: generate_output - 生成LaTeX/PDF输出",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781620092.8615894,
+      "category": "log",
+      "content": "EXECUTE: 生成LaTeX/PDF输出 完成, 耗时 1294s",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1781620092.8833148,
+      "category": "log",
+      "content": "任务完成: generate_output, 质量: N/A",
+      "metadata": {}
+    }
+  ],
+  "decisions": [],
+  "dead_ends": []
+}

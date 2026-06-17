@@ -1,0 +1,89 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+Warning--I didn't find a database entry for "ng2005"
+Warning--I didn't find a database entry for "ng2006"
+Warning--I didn't find a database entry for "honauer2016"
+Warning--I didn't find a database entry for "wanner2014"
+Warning--I didn't find a database entry for "wang2015"
+Warning--I didn't find a database entry for "blinn1977"
+Warning--I didn't find a database entry for "heber2018"
+Warning--I didn't find a database entry for "tao2013"
+Warning--I didn't find a database entry for "chen2017"
+Warning--I didn't find a database entry for "li2021"
+Warning--I didn't find a database entry for "zhang2023"
+Warning--I didn't find a database entry for "lyu2022"
+Warning--I didn't find a database entry for "peng2022"
+Warning--I didn't find a database entry for "wang2023"
+Warning--I didn't find a database entry for "li2020"
+Warning--I didn't find a database entry for "kirillov2023"
+Warning--I didn't find a database entry for "ronneberger2015"
+Warning--I didn't find a database entry for "liu2021"
+Warning--I didn't find a database entry for "dosovitskiy2021"
+Warning--I didn't find a database entry for "eigen2014"
+Warning--I didn't find a database entry for "godard2019"
+Warning--I didn't find a database entry for "honauer2016hci"
+Warning--I didn't find a database entry for "wanner2013light"
+Warning--I didn't find a database entry for "zheng2020non"
+Warning--I didn't find a database entry for "meng2021urbanlf"
+Warning--I didn't find a database entry for "shin2018epinet"
+Warning--I didn't find a database entry for "wang2018lfnet"
+Warning--I didn't find a database entry for "wang2020distgdepth"
+Warning--I didn't find a database entry for "jin2021ginet"
+Warning--I didn't find a database entry for "ng2022"
+Warning--I didn't find a database entry for "vaswani2017"
+Warning--I didn't find a database entry for "he2022"
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 0 entries,
+            4087 wiz_defined-function locations,
+            853 strings with 7609 characters,
+and the built_in function-call counts, 104 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 19
+:= -- 27
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 1
+format.name$ -- 0
+if$ -- 3
+int.to.chr$ -- 0
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 23
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1
+stack$ -- 0
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 0
+warning$ -- 0
+while$ -- 0
+width$ -- 0
+write$ -- 22
+(There were 32 warnings)

@@ -1,0 +1,98 @@
+{
+  "ablation_experiments": [
+    {
+      "experiment_name": "Ablation of MRI-like Angular Frequency Analysis",
+      "target_module": "类MRI角度频率分析（角度 2D-FFT 材质分类）",
+      "hypothesis": "基于2D-DFT的频谱能量分布（低频漫反射、高频镜面、中频散射）能够比传统空间域特征更准确、轻量地实现材质三分类，为后续深度估计提供可靠的物理先验。",
+      "modification": "在材质分类模块（如`material_classification.py`）中，注释掉`torch.fft.fft2`及频谱能量分布计算代码，替换为计算9x9角域patch的像素方差和Sobel梯度幅值，并通过预设经验阈值（如方差>0.5为镜面）进行硬分类。",
+      "expected_result": "材质分类的Accuracy和AUC显著下降（低于85%和0.90的目标值），导致Non-Lambertian和Mixed场景的MAE明显上升，证明频域分析在复杂材质区分上的优越性。",
+      "comparison_with": "基于角域像素方差与梯度幅值的传统启发式阈值分类法"
+    },
+    {
+      "experiment_name": "Ablation of GCD and Adaptive Mask-guided Energy Adjustment",
+      "target_module": "多视角几何一致性描述子 (GCD) 与 双减法策略",
+      "hypothesis": "GCD能够准确量化表面多视角一致性与物理粗糙度，结合自适应Alpha参数的双减法策略能根据区域特性动态调整能量图，有效解决反光和复杂纹理导致的特征模糊。",
+      "modification": "在能量图调整模块中，移除GCD（子块均值变异系数std/mean）计算和自适应Alpha生成逻辑，将能量调整公式强制替换为使用固定全局参数（如`Alpha=0.5`）的传统全局减法操作：`E_adjusted = E - 0.5 * mean(E)`。",
+      "expected_result": "复杂纹理和反光区域的特征对比度提升受限，Apple/David/Teddy等场景的ratio提升幅度大幅回落，Non-Lambertian场景的MAE显著增加，证明自适应调整对消除光滑伪影的关键作用。",
+      "comparison_with": "固定全局Alpha参数的传统能量图减法策略"
+    },
+    {
+      "experiment_name": "Ablation of Full-Angle Explicit Cost Volume",
+      "target_module": "CostVolumeBuilder (全角度81视角显式代价体)",
+      "hypothesis": "利用全部81个视角构建显式代价体能够100%利用角度信息，捕捉完整的几何一致性，从而打破传统EPI架构因角度欠采样导致的性能天花板。",
+      "modification": "在`cost_volume_builder.py`中，修改视角采样逻辑，从遍历全部81个视角（9x9网格）改为仅提取水平、垂直和两个对角线方向的EPI视角（共约33个视角），并相应调整单应性变换（Warp）循环和代价体计算的通道维度。",
+      "expected_result": "Lambertian场景MAE可能轻微上升或持平，但Non-Lambertian场景由于缺乏足够的多角度约束，MAE显著上升；同时模型参数量可能微降，但整体性能无法突破EPI架构的瓶颈（如MAE停滞在0.282左右）。",
+      "comparison_with": "传统的4方向EPI（Epipolar Plane Image）部分视角采样架构"
+    },
+    {
+      "experiment_name": "Ablation of Dual-Mask Physical Modeling",
+      "target_module": "双掩码物理建模（介质掩码 + 角度方向掩码）",
+      "hypothesis": "双掩码（量化粗糙度的介质掩码和记录偏折矢量的角度方向掩码）能够统一且精细地处理朗伯、非朗伯及混合场景，提供像素级的物理属性先验。",
+      "modification": "在物理先验提取模块中，移除介质掩码和角度方向掩码的生成与特征融合逻辑，替换为使用单一Sobel算子提取的边缘掩码（Edge Mask）来引导特征加权，仅保留空间边缘信息而丢失物理材质信息。",
+      "expected_result": "混合场景（Mixed）和具有复杂材质过渡的区域深度估计出现明显伪影和边界模糊，整体MAE上升，证明双掩码在统一处理多材质场景中的不可替代性。",
+      "comparison_with": "基于Sobel算子的单一边缘掩码（Edge Mask）引导策略"
+    },
+    {
+      "experiment_name": "Ablation of Beckmann NDF and Simplified BRDF Model",
+      "target_module": "Beckmann法线分布函数与简化BRDF物理模型",
+      "hypothesis": "基于Beckmann分布的简化BRDF模型能够准确拟合非朗伯反射的微观物理特性，为深度估计网络提供符合光学规律的物理约束。",
+      "modification": "在BRDF拟合模块（如`brdf_fitting.py`）中，将Beckmann NDF计算公式替换为传统的Phong分布公式`D = (m+2)/(2*pi) * cos^m(alpha)`，并移除微观粗糙度参数m的物理边界约束，退化为纯经验模型。",
+      "expected_result": "Non-Lambertian场景的高光和散射区域拟合残差增大，导致该区域的深度估计MAE大幅增加，证明Beckmann分布在描述真实物理材质粗糙度方面的准确性优于经验模型。",
+      "comparison_with": "传统的经验型Phong/Blinn-Phong反射模型"
+    },
+    {
+      "experiment_name": "Ablation of SAM Tri-Mask Guided Energy Adjustment",
+      "target_module": "SAM三元Mask引导的能量图调整",
+      "hypothesis": "结合SAM先验的三元Mask能够对粗糙朗伯、光滑朗伯和光滑非朗伯区域进行精准的语义级区分，从而实施差异化的能量压制与增强，消除光滑伪影。",
+      "modification": "在Mask引导模块中，移除基于SAM先验的三元Mask生成与差异化加权逻辑（如×0.15压制和×1.5增强），替换为基于K-Means聚类（K=3）对能量图特征进行无监督区域划分，并对三个聚类中心应用统一的调整系数。",
+      "expected_result": "光滑朗伯区域出现过度压制或压制不足，光滑非朗伯区域增强效果不佳，导致相关场景（如Apple, Teddy）的深度特征对比度下降，MAE上升，证明SAM语义先验在精细化区域处理中的价值。",
+      "comparison_with": "基于K-Means聚类（K=3）的无监督区域划分与统一调整策略"
+    }
+  ],
+  "_model_analysis": {
+    "modules": [
+      {
+        "module_name": "数据加载与灰度化预处理 (Data Loading & Grayscale Preprocessing)",
+        "code_location": "tools/brdf_modeling.py -> load_scene",
+        "core_function": "加载多视角图像序列，将其转换为单通道灰度图，并统一resize到指定的空间分辨率（如256x256）。",
+        "ablation_replacement": "1) 保留RGB三通道信息进行多通道联合拟合；2) 使用原始高分辨率图像不进行下采样；3) 引入图像增强（如直方图均衡化）预处理。",
+        "expected_impact": "保留RGB能捕捉与波长相关的材质反射差异，但会成倍增加计算量；不resize会保留高频纹理细节，但导致拟合时间呈平方级增长；引入增强可能改变真实的物理辐射度，导致拟合出的反射率参数失真。"
+      },
+      {
+        "module_name": "角域坐标近似映射 (Angular Coordinate Approximation)",
+        "code_location": "tools/brdf_modeling.py -> fit_brdf_to_patch (角度计算循环部分)",
+        "core_function": "将9x9的角域patch展平，通过计算像素到中心的欧氏距离并线性归一化来近似视角角度(theta)，作为BRDF模型的自变量。",
+        "ablation_replacement": "1) 使用相机的真实内外参矩阵计算精确的三维视角方向向量及真实夹角；2) 使用极坐标重采样替代笛卡尔坐标展平。",
+        "expected_impact": "使用真实相机参数能显著提高大视角边缘区域的物理拟合精度，消除由于透视投影和距离近似带来的几何畸变误差；极坐标重采样能更好地对齐各向同性材质的环形高光分布。"
+      },
+      {
+        "module_name": "Beckmann法线分布函数 (Beckmann Normal Distribution Function)",
+        "code_location": "tools/brdf_modeling.py -> beckmann_distribution",
+        "core_function": "计算Beckmann分布以模拟微观表面法线分布，控制材质粗糙度参数(m)和高光反射的形状与衰减。",
+        "ablation_replacement": "1) 替换为GGX (Trowbridge-Reitz) 分布；2) 替换为Phong分布；3) 完全移除（退化为纯Lambertian漫反射）。",
+        "expected_impact": "替换为GGX能更好地拟合真实世界材质（尤其是具有长尾高光的非朗伯表面，如Apple）；退化为Lambertian将导致模型完全无法拟合高光区域，镜面反射参数(ρ_s)和粗糙度(m)失效。"
+      },
+      {
+        "module_name": "简化BRDF物理模型 (Simplified BRDF Physical Model)",
+        "code_location": "tools/brdf_modeling.py -> simplified_brdf_model",
+        "core_function": "组合漫反射和镜面反射分量，忽略了几何衰减(G)和菲涅尔(F)项，构建简化的辐射度方程：I(θ) = ρ_d + ρ_s * D(θ, m)。",
+        "ablation_replacement": "1) 恢复完整的Cook-Torrance模型（加入Geometry和Fresnel项）；2) 替换为纯经验模型（如Blinn-Phong）；3) 仅保留漫反射项（Lambert模型）。",
+        "expected_impact": "加入G和F项能提升掠射角（大角度）下的物理准确性，但会增加非线性拟合的难度和不稳定性；替换为经验模型计算更快但失去物理可解释性；仅保留漫反射会导致非朗伯区域（如David的头发）产生巨大的拟合残差。"
+      },
+      {
+        "module_name": "非线性参数拟合优化器 (Non-linear Parameter Fitting Optimizer)",
+        "code_location": "tools/brdf_modeling.py -> fit_brdf_to_patch (scipy.optimize.curve_fit部分)",
+        "core_function": "使用非线性最小二乘法（如Trust Region Reflective）逐像素拟合BRDF参数（ρ_d, ρ_s, m），并处理参数边界和异常值。",
+        "ablation_replacement": "1) 替换为基于深度学习的回归网络（如CNN/Transformer直接预测参数）；2) 使用基于梯度的优化器（如L-BFGS）；3) 使用全局启发式算法（如粒子群优化PSO）。",
+        "expected_impact": "深度学习网络能实现端到端极速推理并利用空间上下文，但需要大量Ground Truth训练；L-BFGS对初始值更敏感，易陷入局部最优；PSO更鲁棒能跳出局部最优，但计算时间会增加几个数量级，失去实时性。"
+      },
+      {
+        "module_name": "空间独立优化与参数映射 (Spatially Independent Optimization & Mapping)",
+        "code_location": "tools/brdf_modeling.py -> compute_brdf_parameters",
+        "core_function": "遍历图像的每个像素，独立进行BRDF参数拟合，缺乏空间上下文感知，直接生成参数图（rho_d_map, rho_s_map, m_map）。",
+        "ablation_replacement": "1) 引入空间正则化（如全变分TV或马尔可夫随机场MRF）联合优化相邻像素；2) 使用超像素（Superpixels）或图像分割，对同一语义区域统一拟合；3) 引入3D卷积或Non-local注意力机制聚合邻域信息。",
+        "expected_impact": "独立拟合极易受图像噪声影响，导致参数图出现严重噪点；引入空间正则化或超像素能显著提升参数图的平滑度和抗噪鲁棒性，但可能会模糊不同材质（如头发与背景）的物理边界，降低局部细节的准确性。"
+      }
+    ]
+  }
+}

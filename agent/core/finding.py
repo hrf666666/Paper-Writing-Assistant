@@ -351,5 +351,7 @@ def quality_issues_to_findings(issues: List[Dict],
             severity=_norm_severity(d.get("severity", "warning")),
             description=desc,
             location=_parse_location(loc_raw, chapter_hint),
+            evidence_anchor=d.get("evidence_anchor", ""),
+            close_criterion=d.get("close_criterion", ""),
         ))
     return out

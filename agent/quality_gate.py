@@ -159,60 +159,49 @@ class QualityGate:
         except Exception as e:
             logger.debug(f"[风格检查] 检查器不可用，跳过风格加权: {e}")
 
-        prompt = f"""
-你是一名顶级学术期刊的审稿专家。请从以下4个维度评估论文章节 "{chapter_name}" 的质量：
+        prompt = f"""You are an Unflinching Academic Gatekeeper reviewing the "{chapter_name}" section of an IEEE journal paper.
+Find what is actually wrong, with surgical precision. Separate fatal flaws from fixable nits.
 
-**评估维度**（每项0-100分）：
-
-1. **学术规范** (academic_rigor)
-   - 表述是否学术化，有无口语化表达
-   - 论证是否严谨，有无逻辑跳跃
-   - 术语使用是否准确一致
-   - 是否存在不当术语（如使用了教育领域术语而非CS领域术语）
-
-2. **逻辑连贯** (logical_coherence)
-   - 段落间过渡是否自然
-   - 论证链条是否完整
-   - 与前序章节的衔接是否流畅
-
-3. **引用自然** (citation_naturalness)
-   - <citation>标记位置是否合理
-   - 引用是否融入句式
-   - 引用密度是否适中
-
-4. **内容完整** (content_completeness)
-   - 是否覆盖了该章节应有的核心内容
-   - 公式、图表、数据是否充分
-   - 细节深度是否足够
+TWO-PASS REVIEW:
+Pass 1 - Fatal-flaw diagnostic: Missing claims support, logical gaps, terminology errors, formatting issues.
+Pass 2 - Forensic: For each candidate, specify WHERE exactly, WHY it is a flaw, what evidence settles it.
 
 {style_ref}
 {tier_constraint_text}
 
-**待评估内容**：
+**Section under review:**
 <chapter_content>
 {chapter_content[:6000]}
 </chapter_content>
 
-{"**前序章节摘要**：" + previous_content[:1000] if previous_content else ""}
+{"**Previous sections summary:**" + previous_content[:1000] if previous_content else ""}
 
-请以json格式给出评估结果：
+Output JSON with BOTH dimensions (0-100) AND issues (each with evidence + close_criterion):
+
+```json
 {{
   "dimensions": {{
-    "academic_rigor": 分数,
-    "logical_coherence": 分数,
-    "citation_naturalness": 分数,
-    "content_completeness": 分数
+    "academic_rigor": <0-100>,
+    "logical_coherence": <0-100>,
+    "citation_naturalness": <0-100>,
+    "content_completeness": <0-100>
   }},
   "issues": [
-    {{"dimension": "维度名", "description": "问题描述", "location": "原文片段[:80]"}}
+    {{
+      "dimension": "academic_rigor|logical_coherence|citation_naturalness|content_completeness",
+      "description": "<what is wrong>",
+      "evidence_anchor": "<EXACT verbatim quote from the text>",
+      "close_criterion": "<what specific change would fix this>",
+      "significance": "major|minor"
+    }}
   ],
-  "suggestions": ["修改建议1", "修改建议2"],
-  "should_retry": true/false,
-  "retry_strategy": "revise"/"regenerate"/"adjust_prompt"
+  "suggestions": ["s1", "s2"]
 }}
+```
 
-回复以```json开头，以```结尾。
-"""
+Each issue MUST have an evidence_anchor (EXACT quote - if you cannot quote it, do NOT file it).
+If no real issues, return empty issues list.
+```json ... ``` only."""
 
         try:
             response = self.api_client.call_evaluation(prompt)

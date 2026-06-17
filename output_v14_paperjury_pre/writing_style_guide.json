@@ -1,0 +1,37 @@
+{
+  "句式特征": {
+    "问题导向/挑战陈述句式": [
+      "Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities...",
+      "Retrieving aerosol properties from satellite remote sensing over a bright surface is a challenging problem in the research of atmospheric and land applications."
+    ],
+    "方案提出/贡献声明句式": [
+      "To address these differences, we propose a hierarchical Transformer whose representation is computed with Shifted windows.",
+      "In this paper, we present non-local operations as a generic family of building blocks for capturing long-range dependencies.",
+      "In this paper we propose a new approach to retrieve aerosol properties over surfaces such as arid, semiarid, and urban areas..."
+    ],
+    "对比与优势强调句式": [
+      "In contrast to the progressive behavior of recurrent and convolutional operations, non-local operations capture long-range dependencies directly by computing interactions between any two positions...",
+      "...where the surface reflectance is usually very bright in the red part of visible spectrum and in the near infrared, but is much darker in the blue spectral region..."
+    ]
+  },
+  "段落组织": {
+    "段落开头引入方式": "常采用宏观背景陈述或领域核心挑战引入。例如直接点明某任务的重要性（如'Capturing long-range dependencies is of central importance...'），或直接指出当前研究面临的难题（如'Retrieving aerosol properties... is a challenging problem...'）。",
+    "段内论证逻辑": "遵循'现状描述 → 剖析局限 → 提出本文方法'的递进逻辑。通过先肯定现有方法（如CNN/RNN），再用转折词或枚举（First/Second/Finally）指出其计算效率或优化上的瓶颈，从而自然引出本文提出的新模块或新架构。",
+    "段落结尾收束方式": "多以总结方法优势、强调应用潜力或声明代码开源来收束。例如'These qualities of Swin Transformer make it compatible with a broad range of vision tasks...'，或'This new algorithm, when applied to... will provide high spatial resolution... global information...'，以及简短的'Code will be made available.'。"
+  },
+  "用词特征": [
+    "过渡词：To address these differences, In contrast to, Consequently, However, First... Second... Finally, In addition, Together with",
+    "强调词：central importance, by a large margin, demonstrating the potential, extensively, comprehensive, outperform",
+    "限定词：capably serves as, usually very bright, relatively short lifetime, can be easily combined, indicate good agreement",
+    "学术动词/短语：presents, propose, arise from, plugged into, showcase the effectiveness, infer atmospheric properties, capture long-range dependencies"
+  ],
+  "论证模式": [
+    "背景/挑战 → 现有方法局限 → 提出新方案 → 方案优势/特性 → 实验验证/结果（经典的Problem-Solution-Evaluation模式，广泛用于Abstract和Introduction）",
+    "现象/重要性 → 现有研究空白/不足 (However/Despite) → 本文填补空白的方法 → 方法细节与验证（常用于引言部分梳理Related Work和引出Motivation）",
+    "总述核心贡献 → 分点列举优势 (First/Second/Finally 或 a/b/c) → 具体应用场景展示（用于清晰、结构化地展示本文方法的多个创新点和适用性）"
+  ],
+  "引用风格": {
+    "引用的嵌入方式": "以句末引用为主，作为事实陈述、现有方法或数据集来源的支撑（如'...recurrent operations are the dominant solution...<sup>38, 23</sup>'）；部分采用句中/定语嵌入，将经典方法作为灵感来源或对比基准（如'Inspired by the classical non-local means method [4]...'）。",
+    "引用与论述的衔接方式": "多采用'顺承支撑'与'对比转折'相结合的方式。先通过句末引用客观陈述前人工作（Many authors have extensively investigated...<sup>27, 30</sup>），随后使用'However'、'In contrast to'等转折词指出前人工作的局限性或未覆盖的空白，从而紧密衔接并凸显本文研究的必要性与创新性。"
+  }
+}

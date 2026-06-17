@@ -1,0 +1,89 @@
+{
+  "数据集": {
+    "名称": [
+      "HCInew",
+      "HCI-Old",
+      "Wanner_HCI",
+      "Non-lambertian_zhenglong",
+      "UrbanLF-Syn"
+    ],
+    "规模": "总计229个有效场景（209 train + 36 val），包含512x512或不同分辨率，81视角（9x9）",
+    "场景类型": "Lambertian（HCInew, HCI-Old, Wanner_HCI）、Non-Lambertian（Non-lambertian_zhenglong）、Mixed（UrbanLF-Syn）",
+    "划分方式": "Train/Val固定划分，域平衡采样（WeightedRandomSampler逆频率加权），输入统一处理为256x256，视差归一化（逐场景2-98百分位截断至[0,1]）"
+  },
+  "评估指标": {
+    "深度估计指标": "MAE (Mean Absolute Error)",
+    "材质分类指标": "Accuracy (准确率), AUC",
+    "目标值": {
+      "整体 val_MAE": "< 0.20",
+      "Lambertian val_MAE": "< 0.16",
+      "Non-Lambertian val_MAE": "< 0.25",
+      "Mixed val_MAE": "< 0.22",
+      "Phase 1 材质分类 Accuracy": "> 85% (0.85)",
+      "Phase 1 材质分类 AUC": "> 0.90"
+    }
+  },
+  "训练策略": {
+    "硬件": "RTX 3090 (24GB), single device",
+    "优化器与调度器": "使用 CosineAnnealingLR 学习率调度器，开启 AMP (自动混合精度)",
+    "Batch Size": "Batch size = 1, Gradient accumulation = 4 (有效 batch size = 4)",
+    "Epoch": "训练历史显示至少 10 个 epoch",
+    "数据增强": "随机水平翻转（一致应用于81视角）"
+  },
+  "对比方法": [
+    "EPINet4Dir V3 (754K params, 4方向EPI基线)",
+    "EPINet4Dir V22 (949K params, 两阶段架构)",
+    "ACO (TCSVT'23)",
+    "PlaneNet",
+    "MaterialDualCueNet"
+  ],
+  "消融设计": {
+    "消融模块": [
+      "双掩码建模（介质掩码 + 角度方向掩码）",
+      "类MRI角度频率分析（角度 2D-FFT 材质分类）",
+      "多视角几何一致性描述子 (GCD)",
+      "双减法策略（全局/自适应 Alpha 参数）",
+      "SAM 三元 Mask 引导的能量图调整（粗糙朗伯/光滑朗伯/光滑非朗伯）",
+      "分量感知深度估计（漫反射/镜面/散射加权融合）"
+    ],
+    "对比方式": "通过逐步移除或替换上述核心物理先验模块（如移除角度FFT退化为纯EPI、移除SAM三元Mask、使用固定Alpha替代自适应Alpha等），对比各子集（L/NL/Mixed）的 MAE 变化及能量图 ratio 提升，验证各模块对非朗伯场景失效问题的修复效果。"
+  },
+  "关键结果": {
+    "单场景MAE (per_scene_mae)": {
+      "HCInew/additional/antinous (Lambertian)": 2.769731,
+      "HCInew/additional/boardgames (Lambertian)": 1.1628541,
+      "HCInew/additional/dishes (Lambertian)": 2.268977,
+      "NL/David 10% (Non-Lambertian)": 0.45580095,
+      "NL/David 30% (Non-Lambertian)": 0.5062084,
+      "NL/David 50% (Non-Lambertian)": 0.55129045,
+      "NL/Teddy (Non-Lambertian)": 0.53329545,
+      "UrbanLF/train/Image1 (Mixed)": 0.5790448,
+      "UrbanLF/train/Image10 (Mixed)": 0.71240795,
+      "UrbanLF/train/Image100 (Mixed)": 0.7307893
+    },
+    "K折交叉验证 (kfold_results)": {
+      "mean_mae": 0.281567,
+      "std_mae": 0.021357,
+      "min_fold_mae": 0.249021,
+      "max_fold_mae": 0.3105
+    },
+    "Phase 1 材质分类结果": {
+      "best_val_acc": 88.235294,
+      "best_epoch": 1
+    },
+    "整体深度估计最优结果": {
+      "config.accumulation_steps": 4,
+      "best_overall_mae": 0.26377,
+      "best_epoch": 2
+    },
+    "训练历史关键节点 (training_history)": {
+      "epoch_1_val_mae": 0.33888409330564384,
+      "epoch_2_val_mae": 0.2641219667652074,
+      "epoch_2_MAE_Lambertian": 0.3128665089607239,
+      "epoch_2_MAE_Non-Lambertian": 0.4191288948059082,
+      "epoch_2_MAE_Urban": 0.25408061493687184,
+      "epoch_6_val_mae": 0.24088774709140554,
+      "epoch_8_val_mae": 0.23463745415210724
+    }
+  }
+}

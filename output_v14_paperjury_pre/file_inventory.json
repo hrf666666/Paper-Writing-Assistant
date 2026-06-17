@@ -1,0 +1,1328 @@
+{
+  "final_report": [],
+  "closure_report": [],
+  "project_brief": [
+    {
+      "path": "PROJECT_BRIEF.md",
+      "size": 8501
+    },
+    {
+      "path": "data/HCI-Old/README.txt",
+      "size": 3250
+    }
+  ],
+  "model_code": [
+    {
+      "path": "workspace/ARCHITECTURE_SWITCH.md",
+      "size": 6795
+    },
+    {
+      "path": "workspace/ARCHITECTURE_SURVEY.md",
+      "size": 12843
+    },
+    {
+      "path": "tools/brdf_modeling.py",
+      "size": 7030
+    }
+  ],
+  "train_script": [
+    {
+      "path": "PERSISTENT_CONSTRAINTS.md",
+      "size": 1458
+    },
+    {
+      "path": "outputs/exp_v25_energy_preproc/training_history.json",
+      "size": 7948
+    },
+    {
+      "path": "data/HCInew/train.txt",
+      "size": 292
+    },
+    {
+      "path": "scripts/dry_run.py",
+      "size": 8810
+    },
+    {
+      "path": "scripts/train_stable.py",
+      "size": 13244
+    },
+    {
+      "path": "scripts/train_v25_energy_preproc.py",
+      "size": 8285
+    },
+    {
+      "path": "workspace/CONSTRAINT_RELAXATION_PROPOSAL.md",
+      "size": 34001
+    },
+    {
+      "path": "workspace/train_macvo_pilot.py",
+      "size": 7867
+    },
+    {
+      "path": "workspace/dry_run_macvo.py",
+      "size": 3691
+    },
+    {
+      "path": "tools/dry_run.py",
+      "size": 9484
+    },
+    {
+      "path": "tools/analyze_domain_distribution.py",
+      "size": 2819
+    },
+    {
+      "path": "tools/dry_run_forward.py",
+      "size": 2762
+    }
+  ],
+  "eval_script": [
+    {
+      "path": "docs/comprehensive_validation_report.md",
+      "size": 4717
+    },
+    {
+      "path": "analysis/defocus_validation.py",
+      "size": 18428
+    },
+    {
+      "path": "analysis/angular_freq_validate.py",
+      "size": 10434
+    },
+    {
+      "path": "data/HCInew/test.txt",
+      "size": 140
+    },
+    {
+      "path": "workspace/ANGULAR_FREQUENCY_VALIDATION.md",
+      "size": 6189
+    },
+    {
+      "path": "tools/comprehensive_validation.py",
+      "size": 16252
+    },
+    {
+      "path": "tools/eval_checkpoint.py",
+      "size": 3508
+    },
+    {
+      "path": "tools/validate_angular_cone.py",
+      "size": 2965
+    },
+    {
+      "path": "tools/eval_fixed_split.py",
+      "size": 6239
+    }
+  ],
+  "dataset": [
+    {
+      "path": "DATASET_MANIFEST.json",
+      "size": 184063
+    },
+    {
+      "path": "datasets/real_lf_dataset.py",
+      "size": 3647
+    },
+    {
+      "path": "datasets/unified_lf_dataset.py",
+      "size": 16617
+    },
+    {
+      "path": "data/DATASETS_GUIDE.md",
+      "size": 4247
+    },
+    {
+      "path": "workspace/DATASET_MANIFEST.json",
+      "size": 184063
+    },
+    {
+      "path": "workspace/lambertian_data_analysis.md",
+      "size": 25760
+    },
+    {
+      "path": "tools/stage2_dataset_decomposition.py",
+      "size": 13755
+    },
+    {
+      "path": "tools/analyze_lambertian_data_quality.py",
+      "size": 35573
+    }
+  ],
+  "config": [
+    {
+      "path": "config.yaml",
+      "size": 2857
+    }
+  ],
+  "loss": [],
+  "utils": [],
+  "other": [
+    {
+      "path": "EXPERIMENT_LOG.md",
+      "size": 8645
+    },
+    {
+      "path": "state.json",
+      "size": 4356
+    },
+    {
+      "path": "IDEA_REPORT.md",
+      "size": 11253
+    },
+    {
+      "path": "STRATEGY_RULES.json",
+      "size": 1459
+    },
+    {
+      "path": "cycle_153_terminal_reaffirmation.md",
+      "size": 1541
+    },
+    {
+      "path": "TCSVT_ANALYSIS.md",
+      "size": 8743
+    },
+    {
+      "path": "RESEARCH_BREAKTHROUGH_REPORT.md",
+      "size": 18123
+    },
+    {
+      "path": "_sandbox_last_verdict.json",
+      "size": 163
+    },
+    {
+      "path": "paper_research_2025-07-17.md",
+      "size": 19532
+    },
+    {
+      "path": "DESIGN_V22.md",
+      "size": 9316
+    },
+    {
+      "path": "RESEARCH_ROADMAP.md",
+      "size": 6953
+    },
+    {
+      "path": "MEMORY_LOG.md",
+      "size": 5166
+    },
+    {
+      "path": "IMPLEMENTATION_STATUS.json",
+      "size": 2136
+    },
+    {
+      "path": "datasets/__init__.py",
+      "size": 251
+    },
+    {
+      "path": "outputs/angular_fft_analysis/multifeature_rf_report.txt",
+      "size": 3547
+    },
+    {
+      "path": "outputs/angular_fft_analysis/report.txt",
+      "size": 7379
+    },
+    {
+      "path": "outputs/exp_material_classifier/results.json",
+      "size": 9285
+    },
+    {
+      "path": "outputs/phase1_mba/mba_results.json",
+      "size": 1033
+    },
+    {
+      "path": "outputs/exp_stable_pilot/results.json",
+      "size": 2237
+    },
+    {
+      "path": "outputs/exp_v25_energy_preproc/experiment_manifest.json",
+      "size": 570
+    },
+    {
+      "path": "outputs/exp_v25_energy_preproc/log.txt",
+      "size": 19344
+    },
+    {
+      "path": "docs/FALSIFIABILITY_ANNOTATIONS.md",
+      "size": 4334
+    },
+    {
+      "path": "docs/stage1_exploration_report.md",
+      "size": 11574
+    },
+    {
+      "path": "model_snapshots/cycle_007_material_classifier.py",
+      "size": 8117
+    },
+    {
+      "path": "model_snapshots/cycle_009___init__.py",
+      "size": 411
+    },
+    {
+      "path": "model_snapshots/cycle_006_material_classifier.py",
+      "size": 7583
+    },
+    {
+      "path": "model_snapshots/cycle_014_material_classifier.py",
+      "size": 5879
+    },
+    {
+      "path": "model_snapshots/cycle_008_epinet_4dir_v25_energy_preproc.py",
+      "size": 7506
+    },
+    {
+      "path": "model_snapshots/cycle_012___init__.py",
+      "size": 411
+    },
+    {
+      "path": "model_snapshots/cycle_001_epinet_4dir_v25_energy_preproc.py",
+      "size": 7506
+    },
+    {
+      "path": "model_snapshots/cycle_005_cost_volume_net.py",
+      "size": 4604
+    },
+    {
+      "path": "model_snapshots/cycle_002_material_classifier.py",
+      "size": 5950
+    },
+    {
+      "path": "model_snapshots/cycle_011___init__.py",
+      "size": 411
+    },
+    {
+      "path": "model_snapshots/cycle_015_material_classifier.py",
+      "size": 5950
+    },
+    {
+      "path": "model_snapshots/cycle_017___init__.py",
+      "size": 411
+    },
+    {
+      "path": "model_snapshots/cycle_001_epinet_full_angular.py",
+      "size": 3560
+    },
+    {
+      "path": "model_snapshots/cycle_004_material_classifier.py",
+      "size": 5950
+    },
+    {
+      "path": "model_snapshots/cycle_006_epinet_multihead.py",
+      "size": 5483
+    },
+    {
+      "path": "model_snapshots/cycle_005_material_classifier.py",
+      "size": 5950
+    },
+    {
+      "path": "analysis/angular_freq_results.json",
+      "size": 4955
+    },
+    {
+      "path": "analysis/defocus_results/summary.txt",
+      "size": 1527
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image275/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image260/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image264/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image267/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image272/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image270/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image278/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image261/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image263/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image256/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image266/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image254/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image280/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image255/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image262/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image252/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image259/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image268/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image265/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image277/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image258/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image257/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image271/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image279/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image276/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image253/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image251/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image273/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image269/range.txt",
+      "size": 51
+    },
+    {
+      "path": "data/UrbanLF-Syn/test/Image274/range.txt",
+      "size": 52
+    },
+    {
+      "path": "data/HCInew/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/vis.txt",
+      "size": 140
+    },
+    {
+      "path": "data/HCInew/generate.txt",
+      "size": 483
+    },
+    {
+      "path": "data/HCInew/invalid.txt",
+      "size": 182
+    },
+    {
+      "path": "data/HCInew/training/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/boxes/parameters.cfg",
+      "size": 763
+    },
+    {
+      "path": "data/HCInew/training/boxes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/dino/parameters.cfg",
+      "size": 781
+    },
+    {
+      "path": "data/HCInew/training/dino/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/sideboard/parameters.cfg",
+      "size": 771
+    },
+    {
+      "path": "data/HCInew/training/sideboard/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/training/cotton/parameters.cfg",
+      "size": 770
+    },
+    {
+      "path": "data/HCInew/training/cotton/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/stripes/parameters.cfg",
+      "size": 669
+    },
+    {
+      "path": "data/HCInew/stratified/stripes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/dots/parameters.cfg",
+      "size": 667
+    },
+    {
+      "path": "data/HCInew/stratified/dots/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/backgammon/parameters.cfg",
+      "size": 730
+    },
+    {
+      "path": "data/HCInew/stratified/backgammon/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/stratified/pyramids/parameters.cfg",
+      "size": 672
+    },
+    {
+      "path": "data/HCInew/stratified/pyramids/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/pens/parameters.cfg",
+      "size": 803
+    },
+    {
+      "path": "data/HCInew/additional/pens/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/tower/parameters.cfg",
+      "size": 796
+    },
+    {
+      "path": "data/HCInew/additional/tower/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/dishes/parameters.cfg",
+      "size": 795
+    },
+    {
+      "path": "data/HCInew/additional/dishes/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/tomb/parameters.cfg",
+      "size": 776
+    },
+    {
+      "path": "data/HCInew/additional/tomb/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/rosemary/parameters.cfg",
+      "size": 816
+    },
+    {
+      "path": "data/HCInew/additional/rosemary/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/pillows/parameters.cfg",
+      "size": 805
+    },
+    {
+      "path": "data/HCInew/additional/pillows/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/vinyl/parameters.cfg",
+      "size": 805
+    },
+    {
+      "path": "data/HCInew/additional/vinyl/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/museum/parameters.cfg",
+      "size": 774
+    },
+    {
+      "path": "data/HCInew/additional/museum/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/antinous/parameters.cfg",
+      "size": 799
+    },
+    {
+      "path": "data/HCInew/additional/antinous/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/platonic/parameters.cfg",
+      "size": 780
+    },
+    {
+      "path": "data/HCInew/additional/platonic/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/medieval2/parameters.cfg",
+      "size": 782
+    },
+    {
+      "path": "data/HCInew/additional/medieval2/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/boardgames/parameters.cfg",
+      "size": 783
+    },
+    {
+      "path": "data/HCInew/additional/boardgames/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/greek/parameters.cfg",
+      "size": 809
+    },
+    {
+      "path": "data/HCInew/additional/greek/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/kitchen/parameters.cfg",
+      "size": 811
+    },
+    {
+      "path": "data/HCInew/additional/kitchen/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/town/parameters.cfg",
+      "size": 797
+    },
+    {
+      "path": "data/HCInew/additional/town/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/additional/table/parameters.cfg",
+      "size": 792
+    },
+    {
+      "path": "data/HCInew/additional/table/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/bicycle/parameters.cfg",
+      "size": 766
+    },
+    {
+      "path": "data/HCInew/test/bicycle/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/origami/parameters.cfg",
+      "size": 777
+    },
+    {
+      "path": "data/HCInew/test/origami/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/herbs/parameters.cfg",
+      "size": 779
+    },
+    {
+      "path": "data/HCInew/test/herbs/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/HCInew/test/bedroom/parameters.cfg",
+      "size": 762
+    },
+    {
+      "path": "data/HCInew/test/bedroom/license.txt",
+      "size": 785
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 70%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 50%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 80%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 10%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/David 30%/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "data/Non-lambertian_dataset_zhenglong/Teddy/parameters.txt",
+      "size": 127
+    },
+    {
+      "path": "models/components.py",
+      "size": 4804
+    },
+    {
+      "path": "models/epinet_4dir.py",
+      "size": 4133
+    },
+    {
+      "path": "models/angular_freq_net_v2.py",
+      "size": 8318
+    },
+    {
+      "path": "models/epinet_4dir_v25_energy_preproc.py",
+      "size": 7506
+    },
+    {
+      "path": "models/__init__.py",
+      "size": 411
+    },
+    {
+      "path": "models/energy_optimization.py",
+      "size": 12141
+    },
+    {
+      "path": "models/angular_freq_net.py",
+      "size": 4827
+    },
+    {
+      "path": "models/cost_volume_net.py",
+      "size": 4732
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_182355_7aca2e.md",
+      "size": 367
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_141331_4919c4.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_162855_62f249.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_190611_1c69a6.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_185508_173716.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260616_022741_1088f5.md",
+      "size": 361
+    },
+    {
+      "path": "directive_archive/auto_directive_20260616_014541_c009c0.md",
+      "size": 467
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_165958_987fdc.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/auto_directive_20260615_161447_8b43b5.md",
+      "size": 498
+    },
+    {
+      "path": "directive_archive/directive_20260615_230727_b9bd38.md",
+      "size": 1117
+    },
+    {
+      "path": "directive_archive/auto_directive_20260616_022004_182371.md",
+      "size": 467
+    },
+    {
+      "path": "directive_archive/auto_directive_20260616_020553_4bafb3.md",
+      "size": 467
+    },
+    {
+      "path": "directive_archive/directive_20260615_231044_9529fc.md",
+      "size": 1059
+    },
+    {
+      "path": "scripts/kfold_cv_lambertian.py",
+      "size": 13901
+    },
+    {
+      "path": "workspace/paper_research_2026-06-16_v2.md",
+      "size": 19616
+    },
+    {
+      "path": "workspace/paper_research_2026-06-16.md",
+      "size": 12666
+    },
+    {
+      "path": "workspace/angular_frequency_results.json",
+      "size": 19466
+    },
+    {
+      "path": "workspace/angular_freq_classification_results.json",
+      "size": 19466
+    },
+    {
+      "path": "workspace/paper_research_2026-06-10.md",
+      "size": 21965
+    },
+    {
+      "path": "workspace/paper_research_2026-06-16_v3.md",
+      "size": 8863
+    },
+    {
+      "path": "workspace/paper_research_2026-06-16_v4.md",
+      "size": 12024
+    },
+    {
+      "path": "workspace/macvo_net.py",
+      "size": 10391
+    },
+    {
+      "path": "workspace/critical_disparity_analysis.md",
+      "size": 1782
+    },
+    {
+      "path": "workspace/paper_research_2026-07-14_alternative.md",
+      "size": 18088
+    },
+    {
+      "path": "configs/val_split_fix.json",
+      "size": 402
+    },
+    {
+      "path": "configs/fixed_lambertian_split.json",
+      "size": 1911
+    },
+    {
+      "path": "ref_paper/INDEX.md",
+      "size": 364
+    },
+    {
+      "path": "tools/final_decoupling_method.py",
+      "size": 6424
+    },
+    {
+      "path": "tools/improved_scheme_c_experiment.py",
+      "size": 8450
+    },
+    {
+      "path": "tools/angular_cone_analysis.py",
+      "size": 14107
+    },
+    {
+      "path": "tools/diag_lambertian_mae.py",
+      "size": 2078
+    },
+    {
+      "path": "tools/analyze_illumination_coupling.py",
+      "size": 5481
+    },
+    {
+      "path": "tools/feature_fusion.py",
+      "size": 8906
+    },
+    {
+      "path": "tools/debug_fusion_direction.py",
+      "size": 3528
+    },
+    {
+      "path": "tools/geometric_feature_classification.py",
+      "size": 13594
+    },
+    {
+      "path": "tools/rpca_quick.py",
+      "size": 9892
+    },
+    {
+      "path": "tools/four_scenes_final_comparison.py",
+      "size": 10583
+    },
+    {
+      "path": "tools/final_summary_visualization.py",
+      "size": 4494
+    },
+    {
+      "path": "tools/entropy_shape_analysis.py",
+      "size": 12368
+    },
+    {
+      "path": "tools/mba_analysis.py",
+      "size": 17292
+    },
+    {
+      "path": "tools/deep_analysis_nonlambertian_types.py",
+      "size": 4609
+    },
+    {
+      "path": "tools/four_scenes_comparison.py",
+      "size": 9681
+    },
+    {
+      "path": "tools/angular_4family_analysis.py",
+      "size": 21411
+    },
+    {
+      "path": "tools/multi_feature_analysis.py",
+      "size": 23801
+    },
+    {
+      "path": "tools/check_gt_ranges.py",
+      "size": 7704
+    },
+    {
+      "path": "tools/statistical_boundary_detection.py",
+      "size": 9424
+    },
+    {
+      "path": "tools/teddy_corrected_analysis.py",
+      "size": 7347
+    },
+    {
+      "path": "tools/stage2_pixel_features.py",
+      "size": 4487
+    },
+    {
+      "path": "tools/analyze_anomaly_v22.py",
+      "size": 13135
+    },
+    {
+      "path": "tools/plot_comprehensive.py",
+      "size": 8247
+    },
+    {
+      "path": "tools/compare_aco_vs_decomposition.py",
+      "size": 12752
+    },
+    {
+      "path": "tools/entropy_deep_analysis.py",
+      "size": 18773
+    },
+    {
+      "path": "tools/visualize_all_methods.py",
+      "size": 6744
+    },
+    {
+      "path": "tools/subtraction_best_visualization.py",
+      "size": 10200
+    },
+    {
+      "path": "tools/v24_confidence_deep.py",
+      "size": 23804
+    },
+    {
+      "path": "tools/v24_confidence_analysis.py",
+      "size": 21485
+    },
+    {
+      "path": "tools/adaptive_geo_correction.py",
+      "size": 9406
+    },
+    {
+      "path": "tools/improved_entropy_decoupled.py",
+      "size": 17826
+    },
+    {
+      "path": "tools/pixel_energy_map.py",
+      "size": 13179
+    },
+    {
+      "path": "tools/orthogonal_removal_experiment.py",
+      "size": 12008
+    },
+    {
+      "path": "tools/epi_signal_diagnosis.py",
+      "size": 21778
+    },
+    {
+      "path": "tools/verify_fusion_visualization.py",
+      "size": 4258
+    },
+    {
+      "path": "tools/signal_decomposition.py",
+      "size": 12158
+    },
+    {
+      "path": "tools/multifeature_v2_results.json",
+      "size": 1219
+    },
+    {
+      "path": "tools/analyze_scheme_c_mechanism.py",
+      "size": 11288
+    },
+    {
+      "path": "tools/fix_val_split.py",
+      "size": 6837
+    },
+    {
+      "path": "tools/rpca_decomposition.py",
+      "size": 14443
+    },
+    {
+      "path": "tools/plot_apple_comparison.py",
+      "size": 9023
+    },
+    {
+      "path": "tools/corrected_hybrid_method.py",
+      "size": 9271
+    },
+    {
+      "path": "tools/audit_hcinew_gt.py",
+      "size": 4364
+    },
+    {
+      "path": "tools/comprehensive_comparison_v20_final.py",
+      "size": 18507
+    },
+    {
+      "path": "tools/verify_aco_epi.py",
+      "size": 12490
+    },
+    {
+      "path": "tools/epi_signal_diagnosis_results.json",
+      "size": 19318
+    },
+    {
+      "path": "tools/angular_fft_diagnostic.py",
+      "size": 8528
+    },
+    {
+      "path": "tools/multifeature_v2.py",
+      "size": 16790
+    },
+    {
+      "path": "tools/illumination_gradient_experiment.py",
+      "size": 12846
+    },
+    {
+      "path": "tools/angular_theory_verification.py",
+      "size": 28049
+    },
+    {
+      "path": "tools/final_best_features.py",
+      "size": 6710
+    },
+    {
+      "path": "tools/teddy_failure_analysis.py",
+      "size": 8557
+    },
+    {
+      "path": "tools/spatial_consistency_experiment.py",
+      "size": 10672
+    },
+    {
+      "path": "tools/analyze_hair_anomaly.py",
+      "size": 9557
+    },
+    {
+      "path": "tools/comprehensive_comparison_v19_corrected.py",
+      "size": 15780
+    },
+    {
+      "path": "tools/debug_v10_thresholds.py",
+      "size": 5999
+    },
+    {
+      "path": "tools/per_scene_analysis.py",
+      "size": 2978
+    },
+    {
+      "path": "tools/triple_elimination_v16_grabcut.py",
+      "size": 15475
+    },
+    {
+      "path": "tools/analyze_gt_quality.py",
+      "size": 5684
+    },
+    {
+      "path": "tools/angular_patch_analysis.py",
+      "size": 23247
+    },
+    {
+      "path": "tools/angular_cone_residual_analysis.py",
+      "size": 10191
+    },
+    {
+      "path": "tools/pixel_material_map.py",
+      "size": 12824
+    },
+    {
+      "path": "tools/triple_elimination_v15.py",
+      "size": 15073
+    },
+    {
+      "path": "tools/measure_oscillation.py",
+      "size": 3574
+    },
+    {
+      "path": "tools/triple_elimination_v14.py",
+      "size": 15789
+    },
+    {
+      "path": "tools/sh_decomposition.py",
+      "size": 15999
+    },
+    {
+      "path": "tools/final_comparison.py",
+      "size": 10165
+    },
+    {
+      "path": "tools/three_solutions_experiment.py",
+      "size": 12119
+    },
+    {
+      "path": "tools/compare_david_apple_aco.py",
+      "size": 11911
+    },
+    {
+      "path": "tools/triple_elimination_v13.py",
+      "size": 15728
+    },
+    {
+      "path": "tools/multifeature_classification.py",
+      "size": 18854
+    },
+    {
+      "path": "tools/reverse_subtraction_simple_plot.py",
+      "size": 7764
+    },
+    {
+      "path": "tools/summary_report.py",
+      "size": 5810
+    },
+    {
+      "path": "tools/_extended_discriminability.py",
+      "size": 12023
+    },
+    {
+      "path": "tools/compare_david_apple_aco_v2.py",
+      "size": 11451
+    },
+    {
+      "path": "tools/four_scenes_adaptive_comparison.py",
+      "size": 12813
+    },
+    {
+      "path": "tools/asymmetry_subtraction_experiment.py",
+      "size": 10338
+    },
+    {
+      "path": "tools/reverse_subtraction_experiment.py",
+      "size": 12893
+    },
+    {
+      "path": "tools/check_apple_method.py",
+      "size": 4203
+    },
+    {
+      "path": "tools/audit_val_split.py",
+      "size": 6875
+    },
+    {
+      "path": "tools/analyze_normalization.py",
+      "size": 14427
+    },
+    {
+      "path": "tools/debug_v12_clustering.py",
+      "size": 7411
+    },
+    {
+      "path": "tools/angular_fft_analysis.py",
+      "size": 37701
+    },
+    {
+      "path": "tools/analyze_david_weakness.py",
+      "size": 12678
+    },
+    {
+      "path": "tools/angular_freq_analysis.py",
+      "size": 15306
+    },
+    {
+      "path": "tools/adaptive_feature_selection.py",
+      "size": 9586
+    },
+    {
+      "path": "tools/create_fixed_split.py",
+      "size": 3797
+    },
+    {
+      "path": "tools/analyze_why_normalization_works.py",
+      "size": 4774
+    },
+    {
+      "path": "tools/triple_elimination_v17_sam.py",
+      "size": 17029
+    },
+    {
+      "path": "tools/angular_distribution_shape_experiment.py",
+      "size": 10664
+    },
+    {
+      "path": "tools/triple_elimination_v10.py",
+      "size": 14919
+    },
+    {
+      "path": "tools/angular_range_intersection_experiment.py",
+      "size": 13714
+    },
+    {
+      "path": "tools/angular_feature_analysis.py",
+      "size": 22051
+    },
+    {
+      "path": "tools/apple_transparency_comparison.py",
+      "size": 8191
+    },
+    {
+      "path": "tools/triple_elimination_v12.py",
+      "size": 18826
+    },
+    {
+      "path": "tools/angular_spectral_analysis.py",
+      "size": 28826
+    },
+    {
+      "path": "tools/angular_frequency_analysis.py",
+      "size": 40358
+    },
+    {
+      "path": "tools/triple_elimination_v11.py",
+      "size": 16608
+    },
+    {
+      "path": "tools/visualize_normalization.py",
+      "size": 7859
+    },
+    {
+      "path": "tools/epi_material_analysis.py",
+      "size": 8296
+    },
+    {
+      "path": "tools/transparency_comparison.py",
+      "size": 11555
+    },
+    {
+      "path": "tools/comprehensive_comparison_v18.py",
+      "size": 11711
+    },
+    {
+      "path": "tools/triple_elimination_v18_sam_adaptive.py",
+      "size": 21283
+    },
+    {
+      "path": "tools/generate_all_pixel_maps.py",
+      "size": 5977
+    },
+    {
+      "path": "tools/entropy_reciprocal_experiment.py",
+      "size": 8578
+    },
+    {
+      "path": "tools/deep_analysis_decoupling.py",
+      "size": 6989
+    },
+    {
+      "path": "tools/triple_elimination_v9.py",
+      "size": 11558
+    },
+    {
+      "path": "tools/unified_visualization.py",
+      "size": 11320
+    },
+    {
+      "path": "tools/diagnose_v21.py",
+      "size": 3482
+    },
+    {
+      "path": "_closure_archive/CYCLE_67_NOOP_ACKNOWLEDGMENT.md",
+      "size": 3228
+    },
+    {
+      "path": "_closure_archive/CYCLE_60_NOOP_ACKNOWLEDGMENT.md",
+      "size": 1527
+    },
+    {
+      "path": "_closure_archive/PROJECT_CLOSURE.md",
+      "size": 4340
+    },
+    {
+      "path": "_closure_archive/CYCLE_62_NOOP_ACKNOWLEDGMENT.md",
+      "size": 564
+    },
+    {
+      "path": "_closure_archive/CYCLE_72_NOOP_ACKNOWLEDGMENT.md",
+      "size": 2243
+    },
+    {
+      "path": "_closure_archive/CYCLE_68_STATUS_CONFIRMATION.md",
+      "size": 2922
+    },
+    {
+      "path": "_closure_archive/CLOSURE_ACKNOWLEDGMENT.md",
+      "size": 446
+    }
+  ]
+}
