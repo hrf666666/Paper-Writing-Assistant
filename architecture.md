@@ -723,3 +723,9 @@ output/
 ├── chapter1~5/             # 各章中间文件
 └── memory_state.json       # 记忆状态（断点恢复用）
 ```
+
+
+## 八、PaperJury 统一评价范式（v14 最终）
+一个评价范式（paperjury），两个时机（生成时+终局），一个修订闭环（QualityGate）。
+生成阶段 QualityGate evaluate 用 paperjury 两轮审稿（issues + evidence_anchor + close_criterion）。
+终局 L3 同范式确认，close_criterion 写报告。删了 _l3_revise_loop（架构不合理的第二套修订）。
