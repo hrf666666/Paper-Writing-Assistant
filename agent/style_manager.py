@@ -203,7 +203,7 @@ class StyleManager:
         sections = []
 
         # P0: 通用写作纪律（跨期刊通用，最高优先级）
-        discipline_path = os.path.join(_SKILLS_DIR, "academic_writing_style", "writing_discipline.md")
+        discipline_path = os.path.join(_SKILLS_DIR, "writing_discipline.md")
         if os.path.exists(discipline_path):
             try:
                 with open(discipline_path, "r", encoding="utf-8") as f:
@@ -215,7 +215,7 @@ class StyleManager:
                 pass
 
         # P3: IEEE 特有学术规范（从 style_guide.md 加载章节相关的规则）
-        guide_path = os.path.join(_SKILLS_DIR, "academic_writing_style", "style_guide.md")
+        guide_path = os.path.join(_SKILLS_DIR, "style_guide.md")
         if os.path.exists(guide_path):
             try:
                 with open(guide_path, "r", encoding="utf-8") as f:

@@ -68,3 +68,4 @@ test_batch*.py
 # Deprecated/legacy run scripts
 run_pipeline_v9_3.sh
 monitor_*.sh
+/output/
