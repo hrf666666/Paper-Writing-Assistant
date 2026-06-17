@@ -2299,7 +2299,6 @@ Output the revised section in LaTeX. Only output the revised text, no explanatio
                                 final_paras.append(para)
                     self._chapters[ch_key] = '\n\n'.join(final_paras)
 
-    @staticmethod
     def _save_all_state(self):
         """保存全部状态变量到检查点（不触发持久化，由 save_checkpoint 触发）"""
         self.checkpoint.save_state("chapters", self._chapters)
