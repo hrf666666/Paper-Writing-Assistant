@@ -2046,6 +2046,8 @@ class ResearchLoop:
                         close_criterion=issue.get("close_criterion", ""),
                     ))
                 logger.info(f"[Phase 9] L3 issues 录入 FindingBus: {len(l3_issues)} 条")
+                # v14: L3 close_criterion 写进报告（供人工/下一轮参考）
+                results["l3_findings"] = [f.to_dict() for f in self._findings.by(source="l3_review")]
 
             logger.info(f"[Phase 9] 评价完成: Grade={grade}")
 

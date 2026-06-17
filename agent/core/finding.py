@@ -348,7 +348,7 @@ def quality_issues_to_findings(issues: List[Dict],
         out.append(Finding(
             source="quality",
             kind=f"quality:{dim}" if ":" not in dim else dim,
-            severity=_norm_severity(d.get("severity", "warning")),
+            severity=_norm_severity(d.get("severity") or ("critical" if d.get("significance") == "major" else "warning")),
             description=desc,
             location=_parse_location(loc_raw, chapter_hint),
             evidence_anchor=d.get("evidence_anchor", ""),
