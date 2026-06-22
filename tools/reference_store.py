@@ -182,13 +182,6 @@ def _json_to_authors(authors_json: str) -> List[Dict]:
     return [{"name": n} for n in names if n]
 
 
-def _row_to_dict(row) -> Optional[Dict]:
-    """sqlite3.Row → dict"""
-    if row is None:
-        return None
-    return dict(row)
-
-
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ReferenceStore 主类
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1003,15 +996,6 @@ def get_reference_store(db_path: str = None) -> ReferenceStore:
 
         _store_instance = ReferenceStore(db_path)
         return _store_instance
-
-
-def reset_reference_store():
-    """重置全局单例（测试用）"""
-    global _store_instance
-    with _store_lock:
-        if _store_instance is not None:
-            _store_instance.close()
-            _store_instance = None
 
 
 def init_reference_store_from_output(output_dir: str) -> ReferenceStore:
