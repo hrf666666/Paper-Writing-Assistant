@@ -97,6 +97,13 @@ _TRANSIENT_PATTERNS = (
     "internal server error", "bad gateway", "server error",
     "service unavailable", "gateway timeout", "connection aborted",
 )
+# 模型不存在/不可用特征的文本（v14 缺口1：覆盖 qwen/dashscope）
+# 归 permanent：换模型可解，重试同一模型无意义（api_client 收到 permanent 立即 failover）
+_MODEL_NOT_FOUND_PATTERNS = (
+    "model not exist", "model_not_found", "model does not exist",
+    "model not found", "no such model", "invalid model",
+    "model unavailable", "model is not available",
+)
 
 
 def _retry_after_from_message(message: str) -> Optional[float]:
@@ -171,6 +178,9 @@ def classify(exc: BaseException) -> tuple[str, Optional[float], Optional[BaseExc
     # 鉴权/参数类文本
     if any(p in msg_lower for p in ("401", "403", "unauthorized", "forbidden",
                                      "invalid api key", "authentication")):
+        return "permanent", None, exc
+    # 模型不存在/不可用（v14 缺口1：换模型可解，归 permanent → 立即 failover）
+    if any(p in msg_lower for p in _MODEL_NOT_FOUND_PATTERNS):
         return "permanent", None, exc
 
     # ── 3. 兜底 ──
