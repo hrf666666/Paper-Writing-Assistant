@@ -14,7 +14,7 @@ PipelineContext — 全局共享状态容器（单一真相源）
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, MISSING
 from typing import Dict, List, Any
 
 
@@ -71,7 +71,12 @@ class PipelineContext:
         """从 CheckpointManager 加载所有字段。返回是否有数据。"""
         has_data = False
         for f in fields(self):
-            val = checkpoint_mgr.get_state(f.name, f.default_factory() if f.default_factory else f.default)
+            # f.default_factory 是 MISSING 哨兵时 bool() 仍为 True，必须显式比较。
+            if f.default_factory is not MISSING:
+                default = f.default_factory()
+            else:
+                default = f.default
+            val = checkpoint_mgr.get_state(f.name, default)
             setattr(self, f.name, val)
             if val:
                 has_data = True
