@@ -616,15 +616,6 @@ def verify_citation_web(paper_title: str, author_hint: str = "") -> Dict:
     return result
 
 
-def check_search_intent(query: str) -> Optional[str]:
-    """检查搜索意图"""
-    data = web_search(query, engine="search_std", count=1, search_intent=True)
-    if not data:
-        return None
-    intents = data.get("search_intent", [])
-    return intents[0].get("intent") if intents else None
-
-
 # ====== 兜底：正则解析（LLM 不可用时） ======
 
 def _fallback_parse(raw_results: List[Dict], limit: int) -> List[Dict]:

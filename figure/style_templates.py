@@ -243,37 +243,6 @@ def get_style(venue_name: str) -> Dict:
     return TCSVT_STYLE  # 默认 IEEE 风格
 
 
-def apply_style(style: Dict):
-    """将风格应用到 matplotlib 全局配置"""
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-
-    font_sizes = style.get("font_sizes", {})
-
-    plt.rcParams.update({
-        "font.family": style.get("font_family", "serif"),
-        "font.serif": style.get("font_serif", ["Times New Roman", "DejaVu Serif"]),
-        "font.sans-serif": style.get("font_sans_serif", ["Arial", "DejaVu Sans"]),
-        "font.size": font_sizes.get("axis_label", 9),
-        "axes.labelsize": font_sizes.get("axis_label", 9),
-        "axes.titlesize": font_sizes.get("title", 10),
-        "xtick.labelsize": font_sizes.get("tick_label", 7),
-        "ytick.labelsize": font_sizes.get("tick_label", 7),
-        "legend.fontsize": font_sizes.get("legend", 7),
-        "figure.dpi": style.get("dpi_color", 300),
-        "savefig.dpi": style.get("dpi_color", 300),
-        "savefig.bbox": "tight",
-        "savefig.pad_inches": 0.05,
-        "axes.grid": style.get("chart", {}).get("grid_alpha", 0.3) > 0,
-        "grid.alpha": style.get("chart", {}).get("grid_alpha", 0.3),
-        "lines.linewidth": style.get("chart", {}).get("line_width", 1.2),
-        "lines.markersize": style.get("chart", {}).get("marker_size", 5),
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-    })
-
-
 def get_figure_size(style: Dict, size_type: str = "single") -> tuple:
     """
     获取图表尺寸 (width, height) in inches
