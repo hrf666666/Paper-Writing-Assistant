@@ -106,40 +106,29 @@ API_CALL_INTERVAL = 3.0
 
 # 生成模型优先级（GLM 5.2 thinking 优先，跨 provider 降级）
 GENERATION_MODELS = [
-    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主模型，单模态文本生成）
-    "tp_qwen3_6_plus",   # 阿里 Token Plan Qwen3.6-Plus（多模态备选）
-    "glm_5_2",           # 智谱 GLM-5.2（降级）
-    "glm_5_1",           # 智谱 GLM-5.1（降级）
-    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking）
-    "tp_deepseek_v4_pro",# 阿里 Token Plan DeepSeek-V4-Pro
-    "tp_qwen3_6_plus",   # 阿里 Token Plan Qwen3.6-Plus
-    "glm_5",             # 智谱 GLM-5（zai SDK）
-    "tp_deepseek_v4_flash",# 阿里 Token Plan DeepSeek-V4-Flash
-    "tp_qwen3_6_flash",  # 阿里 Token Plan Qwen3.6-Flash
-    "qwen3_6_plus",      # 阿里百炼 Qwen3.6-Plus（备选）
-    "claude_opus_4_7",   # Claude Opus 4.7（需代理）
-    "claude_opus_4_6",   # Claude Opus 4.6（需代理）
-    "gpt_5_5",           # GPT-5.5（需代理）
-    "gpt_5_4",           # GPT-5.4（需代理）
-    "gpt_5_3",           # GPT-5.3（需代理）
+    # v15.3: 连通性测试后重排——仅保留 6/23 实测可用的 GLM 模型
+    # tp_qwen/tp_deepseek 全 403 AccessDenied，qwen3 百炼 401 invalid_key，已移除
+    "glm_5_2",           # 智谱 GLM-5.2（主模型，最强，11.2s）
+    "glm_5_1",           # 智谱 GLM-5.1（降级，10.3s）
+    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking，12.3s）
+    "glm_5",             # 智谱 GLM-5（zai SDK，3.5s）
+    "glm_4_5v",          # 智谱 GLM-4.5V（5.7s）
+    "glm_4_6v",          # 智谱 GLM-4.6V（1.1s，最快）
 ]
 
-# 推理/决策模型（GLM thinking 优先，跨 provider 降级）
+# 推理/决策模型（GLM thinking 优先）
 REASONING_MODELS = [
-    "tp_qwen3_7_max",    # 阿里 Token Plan Qwen3.7-Max（主模型）
-    "tp_qwen3_6_plus",   # Token Plan Qwen3.6-Plus（多模态备选）
-    "glm_5_2",           # 智谱 GLM-5.2（降级）
+    "glm_5_2",           # 智谱 GLM-5.2（主推理模型）
     "glm_5_1",           # 智谱 GLM-5.1（降级）
-    "glm_4_7",           # 智谱 GLM-4.7（zai SDK, thinking）
-    "tp_deepseek_v4_pro",# DeepSeek-V4-Pro（推理强）
-    "gpt_5_5",           # GPT-5.5（需代理）
+    "glm_4_7",           # 智谱 GLM-4.7（thinking 模式）
+    "glm_5",             # 智谱 GLM-5
 ]
 
-# 轻量模型（用于分类/判断等小任务）
+# 轻量模型（用于分类/判断等小任务，速度优先）
 LIGHT_MODELS = [
-    "tp_qwen3_6_flash",  # Token Plan Qwen3.6-Flash（最快）
-    "tp_deepseek_v4_flash",# Token Plan DeepSeek-V4-Flash
-    "glm_5",             # 智谱 GLM-5
+    "glm_4_6v",          # 智谱 GLM-4.6V（最快，1.1s）
+    "glm_5",             # 智谱 GLM-5（3.5s）
+    "glm_4_5v",          # 智谱 GLM-4.5V（5.7s）
 ]
 
 # ==================== 执行-评价模型分离策略 ====================
