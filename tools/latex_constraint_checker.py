@@ -18,6 +18,7 @@
 """
 
 import re
+import os
 import hashlib
 import logging
 from abc import ABC, abstractmethod

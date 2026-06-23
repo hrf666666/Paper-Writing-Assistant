@@ -1593,16 +1593,31 @@ class ResearchLoop:
                     remaining_figures = self._figure_manifest.to_latex_snippets(
                         exclude_types=[FigType.ARCHITECTURE])
                     _bib = "\bibliographystyle"
+                    _end_doc = "\end{document}"
                     if remaining_figures and _bib in tex_content:
                         tex_content = tex_content.replace(
                             _bib,
                             remaining_figures + "\n\n" + _bib,
                         )
                     elif remaining_figures:
-                        tex_content += "\n\n" + remaining_figures
-                    with open(tex_path, "w", encoding="utf-8") as f:
-                        f.write(tex_content)
-                    logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
+                        # v15.4 #3: bibliographystyle 不在时，插在 \end{document} 前（而非追加末尾）
+                        if _end_doc in tex_content:
+                            tex_content = tex_content.replace(
+                                _end_doc,
+                                remaining_figures + "\n\n" + _end_doc,
+                            )
+                        else:
+                            tex_content += "\n\n" + remaining_figures
+                    # v15.4 #3: 位置校验——确保注入的 figure 块在 \end{document} 之前
+                    if remaining_figures and _end_doc in tex_content:
+                        _end_idx = tex_content.rfind(_end_doc)
+                        _fig_idx = tex_content.rfind("\\begin{figure")
+                        if _fig_idx > _end_idx:
+                            # figure 块在 \end{document} 之后 → 移到前面（致命结构错误）
+                            logger.warning("[Phase 7.3] 检测到 figure 在 \\end{document} 之后，"
+                                           "重新定位到 \\end{document} 前")
+                            _after_end = tex_content[_end_idx + len(_end_doc):]
+                            tex_content = tex_content[:_end_idx] + _after_end + "\n" + _end_doc
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
