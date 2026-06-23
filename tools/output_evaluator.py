@@ -182,8 +182,7 @@ class OutputEvaluator:
 
             if not checks["tex_has_ieeetran"]:
                 critical_fails.append("missing_ieeetran")
-            if not checks["tex_has_display_math"]:
-                critical_fails.append("no_display_math")
+            # v15.3 L0-1: no_display_math 从 critical 移除（公式数量是内容问题，归 L2 formulas_min）
             if checks["tex_md_residuals"] > 5:
                 critical_fails.append("excessive_markdown_residuals")
 
@@ -231,13 +230,12 @@ class OutputEvaluator:
                 checks["compile_success"] = False
 
         # ── 评分 ──
+        # v15.3 L0-1: L1 只评格式合规性，内容数量（公式/表/图）归 L2 避免双倍扣分
         key_items = [
             "md_exists", "tex_exists", "tex_has_ieeetran",
             "tex_has_abstract", "tex_has_keywords",
             "tex_no_markdown", "tex_no_placeholder",
-            "tex_has_display_math", "tex_has_tables",
             "bib_exists", "pdf_exists", "pdf_min_size",
-            "figures_min",
         ]
         passed = sum(1 for k in key_items if checks.get(k))
         score = int(passed / len(key_items) * 100)
@@ -276,6 +274,12 @@ class OutputEvaluator:
         checks["total_words"] = words
         checks["word_count_ok"] = 3000 <= words <= 15000
 
+        # v15.3 L0-2: 阈值按字数缩放（避免短论文被刻板阈值误判）
+        # 公式/表/图密度应随篇幅缩放，而非写死固定值
+        scaled_min_formulas = max(3, words // 2000)   # 7319词→3, 14999词→7
+        scaled_min_tables = max(2, words // 4000)      # 7319词→2, 14999词→3
+        scaled_min_figures = max(2, words // 3000)     # 7319词→2, 14999词→5
+
         # 引用统计
         cite_count = len(re.findall(r'\\cite\{', full_content))
         ref_matches = set(int(r) for r in re.findall(r'\[(\d+)\]', full_content))
@@ -289,17 +293,17 @@ class OutputEvaluator:
         multline_count = len(re.findall(r'\\begin\{multline\}', full_content))
         gather_count = len(re.findall(r'\\begin\{gather\}', full_content))
         checks["formula_count"] = eq_count + align_count + multline_count + gather_count
-        checks["formulas_min"] = checks["formula_count"] >= profile["min_formulas"]
+        checks["formulas_min"] = checks["formula_count"] >= scaled_min_formulas
 
         # 表格统计（支持 table 和 table*）
         table_count = len(re.findall(r'\\begin\{table', full_content))
         checks["table_count"] = table_count
-        checks["tables_min"] = table_count >= profile["min_tables"]
+        checks["tables_min"] = table_count >= scaled_min_tables
 
         # 图片统计（支持 figure 和 figure*）
         fig_count = len(re.findall(r'\\begin\{figure', full_content))
         checks["figure_count"] = fig_count
-        checks["figures_min"] = fig_count >= profile["min_figures"]
+        checks["figures_min"] = fig_count >= scaled_min_figures
 
         # 消融实验提及
         ablation_mentions = len(re.findall(
@@ -330,9 +334,9 @@ class OutputEvaluator:
             "experiments_has_comparison": bool(re.search(
                 r'compare|baseline|state.of.the.art|sota|existing method', content_lower)),
             "experiments_has_ablation": ablation_mentions >= 3,
-            "conclusion_has_summary": bool(re.search(
-                r'conclusion|in summary|we have (proposed|presented|shown)',
-                content_lower[-5000:])),
+            # v15.3 L0-3: conclusion 定位用 \section 而非 [-5000:] 窗口
+            # （IEEE 格式 references 恒在 conclusion 之后，窗口假设失效）
+            "conclusion_has_summary": self._conclusion_has_summary(full_content),
         }
         checks.update(structure_checks)
         structure_passed = sum(1 for v in structure_checks.values() if v)
@@ -551,6 +555,30 @@ If the paper has no real issues, return an empty issues list with recommendation
             with open(path, "r", encoding="utf-8") as f:
                 return f.read()
         return None
+
+    def _conclusion_has_summary(self, full_content: str) -> bool:
+        """v15.3 L0-3: 定位 Conclusion 章节正文，检查是否含总结性表述。
+
+        旧逻辑用 content[-5000:] 窗口，但 IEEE 格式 references 恒在 conclusion 之后，
+        导致窗口捕获的是参考文献而非结论正文。
+        新逻辑用 \\section{Conclusion} 定位结论段，在其中查关键词。
+        """
+        # 定位 \section{Conclusion} 到下一个 \section 或 \bibliography 之间的正文
+        m = re.search(
+            r'\\section\*?\{[^}]*[Cc]onclusion[^}]*\}(.*?)(?:\\section|\Z|\\bibliography)',
+            full_content, re.DOTALL
+        )
+        if not m:
+            # 无 Conclusion 章节标题 → 退回全文（容错）
+            conclusion_text = full_content.lower()
+        else:
+            conclusion_text = m.group(1).lower()
+        return bool(re.search(
+            r'conclusion|in summary|we have (proposed|presented|shown)|'
+            r'in this (paper|work)|to summarize|'
+            r'we propose|we present|this (paper|work).*(propose|present|address|contribut)',
+            conclusion_text
+        ))
 
     def _compute_grade(self, l1: int, l2: int, l3: int, critical_fails: list = None) -> str:
         if critical_fails:
