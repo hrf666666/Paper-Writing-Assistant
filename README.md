@@ -1,6 +1,14 @@
-# 论文范文写作助手 v14.0 (Paper Writing Assistant)
+# 论文范文写作助手 v15.3 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v15.3 里程碑：评价可信化 + 数值 owner 真相源 + 前移闭环
+
+> **v15.3 核心突破**——治愈 v14 评价模块的诊断→改进断裂。根因是 `as_fact_sheet` 一行代码把 baseline 数值标成 "Ours 权威值"（3 环节连环放大），导致 LLM 误用 baseline 值 + cross_chapter 查"存在性"非"语义" + FindingBus 后半程无消费者。4 层 11 项改动（~220 行，无新模块）：
+> - **L0 评价可信化**：L1/L2 去重（公式/表/图不再双倍扣分）+ 阈值按字数缩放（短论文不再误判）+ conclusion 定位用 `\section` 而非 `[-5000:]` 窗口
+> - **L1 owner 真相源**：as_fact_sheet 按 owner 分组渲染（ours vs baseline）+ training_params 进 FactBase + cross_chapter owner 对账（正文 ours 上下文的数须匹配 ours 值）
+> - **L2 前移闭环**：Phase 5.6 全章草稿审计（auditor + cross_chapter）在正文未锁时跑，critical findings 触发 _quality_ensure rerun——解 FindingBus 死信箱
+> - **L3 末轮机械**：引用真实性（cite key 全在 bib）+ 图-ref 一致（\ref 指向 \label）+ undefined ref warning
 
 ## v13.0 里程碑：内核重建 — 恢复 agent 设计初心
 
@@ -11,10 +19,10 @@
 | 契约 | 文件 | 解决的旧病 |
 |------|------|-----------|
 | **错误分级** | `errors.py` | `TransientError`/`PermanentError`/`DegradedResult` + `classify()` 闸口；429 配额不再静默吞为"0图/0引用"；占位符不再进 PDF |
-| **FactBase 单一事实源** | `factbase.py` | 替代 PaperContext 写读分裂；auditor/verifier/cross_chapter 读同一 `factbase.json`，消除数值分歧 |
+| **FactBase 单一事实源** | `factbase.py` | 替代 PaperContext 写读分裂；auditor/verifier/cross_chapter 读同一 `factbase.json`，消除数值分歧。**v15.3: as_fact_sheet 按 owner 分组（ours vs baseline），不再把 baseline 标 ours** |
 | **分层记忆** | `memory.py` | `LayeredMemory` 三层（WORKING/EPISODIC/SEMANTIC）+ `get_or_compute()` 缓存重文本，消除 citation_context 7× 重算；`assemble(intent,budget)` 检索式组装 |
-| **Finding 统一问题总线** | `finding.py` | `Finding`/`FindingBus` 统一 7 套 issue 结构；4 个适配器接入旧子系统；`as_revision_brief()` 回流到修订 |
-| **QualityLoop 真闭环** | `quality_gate.py` + `loop._quality_ensure` | 章节修订不再只看 QualityGate 自身维度，同时修复 cross_chapter/auditor 发现的问题（一次修订修多类） |
+| **Finding 统一问题总线** | `finding.py` | `Finding`/`FindingBus` 统一 7 套 issue 结构；4 个适配器接入旧子系统；`as_revision_brief()` 回流到修订。**v15.3: Phase 5.6 前移让 findings 在草稿态被消费，不再死在后半程** |
+| **QualityLoop 真闭环** | `quality_gate.py` + `loop._quality_ensure` | 章节修订不再只看 QualityGate 自身维度，同时修复 cross_chapter/auditor 发现的问题（一次修订修多类）。**v15.3: Phase 5.6 全章草稿审计触发 critical rerun** |
 | **FigureManifest 文图联动** | `figure_manifest.py` | 图的结构化清单（替代裸字符串拼接）；确定性筛选（排除失败/占位/低质）；`validate_linkage()` 正文↔图对账 |
 
 ### v13.0 关键修复（对照旧版病灶）

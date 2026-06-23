@@ -1,10 +1,30 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v14.0 | 更新: 2026-06-16
+> 版本: v15.3 | 更新: 2026-06-23
 
 ---
 
-## 0. v13.0 内核契约层（新增）
+## 0. v15.3 评价可信化 + 数值 owner 真相源 + 前移闭环
+
+> **v15.3 治愈 v14 评价模块的诊断→改进断裂。** 根因：`as_fact_sheet` 一行代码把
+> baseline 数值标成 "Ours 权威值"（3 环节连环放大），导致 LLM 误用 baseline 值 +
+> cross_chapter 查"存在性"非"语义" + FindingBus 后半程无消费者。4 层 11 项改动：
+
+| 层 | 改动 | 文件 |
+|----|------|------|
+| L0 评价可信化 | L1/L2 去重 + 阈值按字数缩放 + conclusion 定位用 `\section` | output_evaluator.py |
+| L1 owner 真相源 | as_fact_sheet 分组渲染 + training_params 进库 + cross_chapter owner 对账 | factbase.py, cross_chapter_checker.py, loop.py |
+| L2 前移闭环 | Phase 5.6 草稿态审计（auditor+cc）→ critical 触发 rerun | loop.py, hierarchical_planner.py |
+| L3 末轮机械 | 引用真实性 + 图-ref 一致 + undefined ref warning | output_evaluator.py |
+
+**关键设计决策：**
+- owner 修 + 前移是 AND 关系（owner 修让 cross_chapter 抓得到，前移让 findings 有消费者）
+- FactBase key 前缀已含 owner（"基线模型表现" vs "结构化核心指标"），是 `as_fact_sheet` 把它盖掉的
+- cross_chapter owner 对账用信号词表（纯正则，不需 LLM）：表现指标在正文 100% 带 owner 上下文
+
+---
+
+## 1. v13.0 内核契约层
 
 v13.0 在 `agent/core/` 新增**契约层**，是 audit/constraint/guidance/eval/iteration/memory
 协作的共同语言。旧模块通过适配器接入，不改内部逻辑。本层自身不依赖 agent 其他模块（零循环依赖）。
