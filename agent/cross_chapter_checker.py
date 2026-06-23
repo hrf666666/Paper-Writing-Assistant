@@ -139,20 +139,62 @@ class CrossChapterChecker:
                     })
 
 
+    # v15.3 L1-3: owner 信号词表（判断正文数值讲的是 ours 还是 baseline）
+    _OURS_SIGNALS = ("our method", "our approach", "our architecture", "our framework",
+                     "the proposed", "ours", "we achieve", "we propose", "we present",
+                     "our model", "this paper", "this work", "macvo", "our scheme")
+    _BASELINE_SIGNALS = ("baseline", "epinet", "costvolume", "existing method",
+                         "previous", "conventional", "compared method", "pilot")
+
+    def _detect_owner(self, context: str) -> str:
+        """v15.3 L1-3: 根据数值所在句子上下文判 owner（ours/baseline/unknown）"""
+        ctx_lower = context.lower()
+        for sig in self._OURS_SIGNALS:
+            if sig in ctx_lower:
+                return "ours"
+        for sig in self._BASELINE_SIGNALS:
+            if sig in ctx_lower:
+                return "baseline"
+        return "unknown"
+
     def _check_numerical_only(self, chapters: Dict[int, str]) -> List[Dict]:
-        """v14: 只检查数值一致性，不执行替换（避免交叉污染）。"""
+        """v15.3 L1-3: owner 对账 + 整数匹配（替代 v14 存在性检查）。
+
+        改进点：
+        1. 正则含整数（\\d+\\.?\\d*），不只小数（解 patch/view count 盲区）
+        2. owner 对账：正文 ours 上下文的数须匹配 FactBase owner=ours 的值，
+           baseline 上下文须匹配 baseline 的值
+        3. unknown 上下文：退回存在性检查（兼容）
+        """
         issues = []
-        pc_metrics = self._factbase.metrics if self._factbase else self._paper_context.get("metrics", {})
+        fb = self._factbase
+        if not fb or not fb.metrics:
+            return issues  # 无 FactBase 无法对账
         for ch_key, content in chapters.items():
-            for num_match in re.finditer(r'(\d+\.\d+)', content):
-                num = num_match.group(1)
-                if pc_metrics:
-                    found = any(abs(float(num) - float(v)) < 0.01 for v in pc_metrics.values()
-                                if isinstance(v, (int, float)) or _is_float(v))
-                    if not found:
+            # v15.3: 含整数 + 小数（\d+\.?\d*），过滤纯年份/编号
+            for num_match in re.finditer(r'(?<![\w\d])(\d{1,4}(?:\.\d+)?)(?!\w)', content):
+                num_str = num_match.group(1)
+                try:
+                    num = float(num_str)
+                except ValueError:
+                    continue
+                # 跳过明显非指标数值（纯整数 > 1000 多为年份/参数量，但允许 patch_size）
+                # 取数值前 100 字符做上下文判 owner
+                ctx_start = max(0, num_match.start() - 100)
+                context = content[ctx_start:num_match.end()]
+                owner = self._detect_owner(context)
+                # owner 对账
+                if owner == "ours":
+                    if not fb.find_metric_by_owner(num, "ours"):
                         issues.append({"severity": "warning", "type": "numerical_inconsistency",
-                                      "description": f"数值 {num} 未在 FactBase 中找到匹配",
+                                      "description": f"数值 {num_str} 标注为 ours 但未匹配 FactBase owner=ours 的值",
                                       "location": f"ch{ch_key}"})
+                elif owner == "baseline":
+                    if not fb.find_metric_by_owner(num, "baseline"):
+                        issues.append({"severity": "warning", "type": "numerical_inconsistency",
+                                      "description": f"数值 {num_str} 标注为 baseline 但未匹配 FactBase owner=baseline 的值",
+                                      "location": f"ch{ch_key}"})
+                # unknown：不报（避免误报训练参数/阈值等无关数值）
         return issues
 
     def _fix_numerical_consistency(self, chapters: Dict[int, str], abstract: str) -> str:

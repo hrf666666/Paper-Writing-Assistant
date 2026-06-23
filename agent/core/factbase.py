@@ -48,6 +48,47 @@ class FactBase:
 
     # ── 查询 API ──
 
+    # v15.3 L1: owner 分类（metrics key 前缀含 owner 信息）
+    # baseline 信号：key 含这些词 → baseline；否则 → ours
+    _BASELINE_SIGNALS = ("基线", "baseline", "Baseline", "CostVolume",
+                         "EPINet", "Pilot", "对比", "compare")
+
+    @classmethod
+    def _classify_owner(cls, metric_key: str) -> str:
+        """判断一个 metric key 的 owner：'ours' 或 'baseline'。
+
+        metrics key 前缀自带 owner 信息（"结构化核心指标" = ours，
+        "基线模型表现 (EPINet)" / "CostVolumeDepthNet Pilot" = baseline）。
+        """
+        if any(sig in metric_key for sig in cls._BASELINE_SIGNALS):
+            return "baseline"
+        return "ours"
+
+    def find_metric_by_owner(self, value: float, owner: str,
+                              rel_tol: float = 0.01) -> Optional[str]:
+        """v15.3 L1: 反向查询 + owner 过滤。
+        给定数值 + owner（ours/baseline），找匹配的 metric key。
+        用于 cross_chapter owner 对账（正文 ours 上下文的数匹配 ours 的 metric）。
+        """
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            return None
+        for k, mv in self.metrics.items():
+            if self._classify_owner(k) != owner:
+                continue
+            try:
+                mvf = float(mv)
+            except (TypeError, ValueError):
+                continue
+            if mvf == 0:
+                if v == 0:
+                    return k
+                continue
+            if abs(v - mvf) / abs(mvf) <= rel_tol:
+                return k
+        return None
+
     def get_metric(self, name: str, default: Optional[float] = None) -> Optional[float]:
         """读取权威数值。大小写不敏感，去空白。"""
         if not self.metrics:
@@ -99,8 +140,17 @@ class FactBase:
         if self.loss_terms:
             lines.append(f"loss_terms: {', '.join(self.loss_terms)}")
         if self.metrics:
-            ms = ", ".join(f"{k}={v}" for k, v in self.metrics.items())
-            lines.append(f"metrics (Ours 权威值): {ms}")
+            # v15.3 L1-1: 按 owner 分组渲染（修 baseline 被错标 "Ours" 的病灶）
+            ours = {k: v for k, v in self.metrics.items()
+                    if self._classify_owner(k) == "ours"}
+            baselines = {k: v for k, v in self.metrics.items()
+                         if self._classify_owner(k) == "baseline"}
+            if ours:
+                ms = ", ".join(f"{k}={v}" for k, v in ours.items())
+                lines.append('metrics (Ours 权威值，正文声称我们的必须匹配): ' + ms)
+            if baselines:
+                bs = ", ".join(f"{k}={v}" for k, v in baselines.items())
+                lines.append('baselines (对比用，非我们的结果，正文必须标注是 baseline): ' + bs)
         if self.innovation_names:
             lines.append(f"innovations: {', '.join(self.innovation_names)}")
         lines.append("</fact_base>")

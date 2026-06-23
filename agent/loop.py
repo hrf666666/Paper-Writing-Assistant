@@ -861,18 +861,38 @@ class ResearchLoop:
         # 先从 训练策略 子字典提取
         strategy = exp_design.get("训练策略", {})
         if isinstance(strategy, dict):
+            # v15.3 L1-2: 扩展 key_map 覆盖实际数据格式 + patch_size（L3 issue #3 根因）
             key_map = {
                 "优化器": "optimizer", "学习率": "learning_rate",
+                "优化器与学习率": "optimizer_lr",
                 "权重衰减": "weight_decay", "batch_size": "batch_size",
+                "Batch Size": "batch_size",
                 "损失函数": "loss_function", "采样与数据策略": "sampling_strategy",
                 "epoch": "epochs", "训练轮数": "epochs",
+                "Epochs": "epochs",
+                "patch_size": "patch_size", "Patch Size": "patch_size",
+                "训练尺寸": "patch_size", "patch": "patch_size",
+                "其他策略": "other_strategy",
             }
             for cn_key, en_key in key_map.items():
                 val = strategy.get(cn_key, "")
-                if val:
+                if val and en_key not in training_params:
                     training_params[en_key] = str(val)
+        # v15.3 L1-2: 从实验设置文本里抽 patch_size（如 "128×128 patches"）
+        for section_key in ["训练策略", "实验设置", "数据集"]:
+            section = exp_design.get(section_key, {})
+            if isinstance(section, dict):
+                section_text = json.dumps(section, ensure_ascii=False)
+            elif isinstance(section, str):
+                section_text = section
+            else:
+                continue
+            patch_m = re.search(r'(\d{2,4})\s*[×x*]\s*(\d{2,4})\s*(?:patch|crop|tile|image)', section_text, re.IGNORECASE)
+            if patch_m and "patch_size" not in training_params:
+                training_params["patch_size"] = f"{patch_m.group(1)}x{patch_m.group(2)}"
+                break
         # 再用英文 key 做补充（兼容旧格式）
-        for key in ["epochs", "batch_size", "optimizer", "learning_rate"]:
+        for key in ["epochs", "batch_size", "optimizer", "learning_rate", "patch_size"]:
             val = exp_design.get(key, "")
             if val and key not in training_params:
                 training_params[key] = str(val)
