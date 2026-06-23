@@ -224,17 +224,56 @@ class OutputEvaluator:
                     log_content = f.read()
                 error_count = log_content.count("! ")
                 checks["compile_errors"] = error_count
-                checks["compile_success"] = error_count == 0 and "Output written" in log_content
+                # v15.3 L3-3: undefined ref 是 warning 不是 error，单独计数
+                undefined_refs = len(re.findall(
+                    r'LaTeX Warning: Reference.*?undefined', log_content))
+                undefined_cites = len(re.findall(
+                    r'LaTeX Warning: Citation.*?undefined', log_content))
+                checks["undefined_refs"] = undefined_refs + undefined_cites
+                checks["compile_success"] = (
+                    error_count == 0 and "Output written" in log_content
+                    and checks["undefined_refs"] == 0
+                )
             except Exception:
                 checks["compile_errors"] = -1
+                checks["undefined_refs"] = -1
                 checks["compile_success"] = False
+
+        # v15.3 L3-1: 引用真实性（cite key 全在 bib 存在）
+        if checks.get("tex_exists") and checks.get("bib_exists"):
+            try:
+                cite_keys = set()
+                for m in re.finditer(r'\\cite\{([^}]+)\}', tex_content):
+                    for k in m.group(1).split(','):
+                        cite_keys.add(k.strip())
+                bib_keys = set(re.findall(r'@\w+\{([^,]+),', bib_content))
+                missing = cite_keys - bib_keys
+                checks["undefined_cite_keys"] = len(missing)
+                checks["all_cites_valid"] = len(missing) == 0
+            except Exception:
+                checks["undefined_cite_keys"] = -1
+                checks["all_cites_valid"] = False
+
+        # v15.3 L3-2: 图-正文引用一致（\ref{fig:X} 指向存在的 \label{fig:X}）
+        if checks.get("tex_exists"):
+            try:
+                fig_refs = set(re.findall(r'\\ref\{(fig:[^}]+)\}', tex_content))
+                fig_labels = set(re.findall(r'\\label\{(fig:[^}]+)\}', tex_content))
+                dangling_fig_refs = fig_refs - fig_labels
+                checks["dangling_fig_refs"] = len(dangling_fig_refs)
+                checks["fig_refs_resolved"] = len(dangling_fig_refs) == 0
+            except Exception:
+                checks["dangling_fig_refs"] = -1
+                checks["fig_refs_resolved"] = False
 
         # ── 评分 ──
         # v15.3 L0-1: L1 只评格式合规性，内容数量（公式/表/图）归 L2 避免双倍扣分
+        # v15.3 L3: 引用真实性 + 图-ref 一致性纳入 L1（机械修复检查）
         key_items = [
             "md_exists", "tex_exists", "tex_has_ieeetran",
             "tex_has_abstract", "tex_has_keywords",
             "tex_no_markdown", "tex_no_placeholder",
+            "all_cites_valid", "fig_refs_resolved",
             "bib_exists", "pdf_exists", "pdf_min_size",
         ]
         passed = sum(1 for k in key_items if checks.get(k))
