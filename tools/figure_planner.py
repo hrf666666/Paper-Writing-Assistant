@@ -175,7 +175,12 @@ def plan_figures(
 
     if not plan or "figures" not in plan:
         logger.warning(f"[FigurePlanner] {model_alias} 返回无效 JSON，尝试备选模型")
-        for fallback_alias in ["qwen3_7_max", "tp_qwen3_7_max", "glm_5"]:
+        # v15.4 #4: fallback 列表从 config 取（单一来源），不再硬编码 qwen/tp_qwen
+        try:
+            from config.project_config import REASONING_MODELS as _fallback_models
+        except Exception:
+            _fallback_models = ["glm_5"]
+        for fallback_alias in _fallback_models:
             if fallback_alias == model_alias:
                 continue
             try:

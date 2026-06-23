@@ -102,6 +102,10 @@ class ZhipuAIClient:
             # 优先取 content，为空取 reasoning_content
             content = msg.content if msg.content else ""
             if not content and hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+                # v15.4 #6: reasoning_content 是非结构化思维链，标记为脏输出
+                # 下游（JSON 解析/TikZ 生成）应加强校验，因 reasoning_content 格式纪律弱
+                logger.warning(f"[ZhipuAI] {self.model} content 为空，降级使用 reasoning_content "
+                               f"({len(msg.reasoning_content)} chars) — 脏输出，格式纪律弱")
                 content = msg.reasoning_content
             return content if content is not None else ""
         except IndexError:
@@ -155,7 +159,9 @@ class ZhipuAIClient:
         if answer_content:
             return answer_content
         if reasoning_fallback:
-            logger.info(f"[ZhipuAI] {self.model} content 为空，使用 reasoning_content ({len(reasoning_fallback)} chars)")
+            # v15.4 #6: 流式降级也标记脏输出（与同步路径一致）
+            logger.warning(f"[ZhipuAI] {self.model} content 为空，降级使用 reasoning_content "
+                           f"({len(reasoning_fallback)} chars) — 脏输出，格式纪律弱")
             return reasoning_fallback
         return ""
 

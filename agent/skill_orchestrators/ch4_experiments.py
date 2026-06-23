@@ -215,10 +215,15 @@ def _design_ablation_experiments(innovation_points, model_architecture, experime
     except Exception as e:
         logger.debug(f"消融设计失败: {e}")
         ablation_design = {"ablation_experiments": []}
-    
+
+    # v15.4 #1: parse_json 可能返回 None（非抛异常），需显式检查
+    if not isinstance(ablation_design, dict):
+        logger.warning(f"[chapter4] 消融设计解析为空/非dict，用空结构兜底")
+        ablation_design = {"ablation_experiments": []}
+
     # 将模块分析结果附加到消融设计中
     ablation_design["_model_analysis"] = model_analysis
-    
+
     return ablation_design
 
 
