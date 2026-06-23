@@ -617,6 +617,12 @@ class ResearchLoop:
                 self._abstract = exec_result["content"]
                 result = self._abstract
 
+            elif phase == "phase5_6":
+                # v15.3 L2: 全章草稿审计 + 一致性（前移闭环）
+                # 在 phase5_5（摘要）后、phase6（审查）前，对全章 + 摘要做
+                # auditor + cross_chapter，findings 录入 FindingBus 供 _quality_ensure 消费。
+                result = self._run_pre_lock_audit()
+
             elif phase == "phase6":
                 result = self._run_review_phase()
 
@@ -1238,6 +1244,110 @@ class ResearchLoop:
             with open(f"{OUTPUT_DIR}/reference_verification_final.json", 'w', encoding='utf-8') as f:
                 json.dump(verification, f, ensure_ascii=False, indent=2)
 
+        return results
+
+    def _run_pre_lock_audit(self) -> Dict:
+        """Phase 5.6: 全章草稿审计 + 一致性（v15.3 L2 前移闭环）
+
+        在 phase5_5（摘要）后、phase6（审查）前执行：
+        1. auditor.audit_chapter × 5 章 → FindingBus(chN)
+        2. cross_chapter.check_all(chapters, abstract) → FindingBus(chN)
+        3. 若 FindingBus 有 critical → 触发受影响章节的 _quality_ensure rerun
+
+        这是 v15.3 的核心：让 auditor/cross_chapter 的 findings 在草稿态
+        （正文未锁）就被消费，而非死在 Phase 6.5/7.2 的 FindingBus 坟墓里。
+        _quality_ensure 内部已调 as_revision_brief → 能取到这些 findings。
+        """
+        logger.info("\n" + "=" * 60)
+        logger.info("  Phase 5.6: 全章草稿审计 + 一致性（v15.3 前移闭环）")
+        logger.info("=" * 60)
+
+        results = {"pre_lock_audit": True, "reruns": []}
+        chapter_names = {
+            1: "Introduction", 2: "Related Work",
+            3: "Methodology", 4: "Experiments", 5: "Conclusion"
+        }
+
+        # 兜底: 确保 auditor/cross_chapter 注入 FactBase
+        _fb = getattr(self, '_factbase', None)
+        if _fb and not _fb.is_empty():
+            if hasattr(self, 'auditor') and not getattr(self.auditor, '_factbase', None):
+                self.auditor.set_factbase(_fb)
+            if hasattr(self, 'cross_chapter_checker') and not getattr(self.cross_chapter_checker, '_factbase', None):
+                self.cross_chapter_checker.set_factbase(_fb)
+
+        # 1. auditor 审计各章 → FindingBus
+        audit_findings_count = 0
+        if hasattr(self, 'auditor') and self.auditor is not None:
+            for num, name in chapter_names.items():
+                if num in self._chapters:
+                    try:
+                        report = self.auditor.audit_chapter(
+                            f"phase5_6", name,
+                            self._chapters[num],
+                            self._project_data, self._ref_data
+                        )
+                        from agent.core.finding import audit_report_to_findings as _a2f
+                        _ch_loc = f"ch{num}"
+                        recorded = self._findings.record_many(_a2f(report, chapter_hint=_ch_loc))
+                        audit_findings_count += len(recorded)
+                    except Exception as e:
+                        logger.warning(f"[Phase 5.6] auditor {name} 失败: {e}")
+        logger.info(f"[Phase 5.6] auditor 录入 {audit_findings_count} findings")
+
+        # 2. cross_chapter 一致性 → FindingBus
+        cc_findings_count = 0
+        if hasattr(self, 'cross_chapter_checker') and self.cross_chapter_checker is not None:
+            try:
+                pc = getattr(self, '_paper_context', None)
+                if pc:
+                    self.cross_chapter_checker.set_paper_context(pc)
+                issues, _, _ = self.cross_chapter_checker.check_all(
+                    self._chapters, self._abstract, auto_fix=False
+                )
+                from agent.core.finding import cross_chapter_issues_to_findings
+                self._findings.clear(source="cross_chapter")
+                recorded = self._findings.record_many(cross_chapter_issues_to_findings(issues))
+                cc_findings_count = len(recorded)
+                logger.info(f"[Phase 5.6] cross_chapter 录入 {cc_findings_count} findings")
+            except Exception as e:
+                logger.warning(f"[Phase 5.6] cross_chapter 失败: {e}")
+
+        # 3. 若有 critical findings → 触发受影响章节 rerun
+        from agent.core.finding import Severity
+        critical_chapters = set()
+        for f in self._findings.all():
+            if getattr(f, 'severity', None) == Severity.CRITICAL:
+                ch = getattr(f.location, 'chapter', None) if hasattr(f, 'location') else None
+                if ch and ch.startswith("ch"):
+                    critical_chapters.add(ch)
+
+        if critical_chapters:
+            logger.info(f"[Phase 5.6] 发现 critical findings，触发 rerun: {critical_chapters}")
+            ch_num_map = {"ch1": (1, "Introduction"), "ch2": (2, "Related Work"),
+                          "ch3": (3, "Methodology"), "ch4": (4, "Experiments"),
+                          "ch5": (5, "Conclusion")}
+            for ch_loc in critical_chapters:
+                if ch_loc in ch_num_map:
+                    num, name = ch_num_map[ch_loc]
+                    if num in self._chapters:
+                        old_content = self._chapters[num]
+                        # _quality_ensure 内部调 as_revision_brief 取 FindingBus brief
+                        new_content, report = self._quality_ensure(name, old_content)
+                        if new_content != old_content:
+                            self._chapters[num] = new_content
+                            results["reruns"].append({
+                                "chapter": name, "revised": True,
+                                "score": getattr(report, 'overall_score', 0)
+                            })
+                            logger.info(f"[Phase 5.6] {name} rerun 完成 (score={getattr(report, 'overall_score', 0):.1f})")
+        else:
+            logger.info(f"[Phase 5.6] 无 critical findings，无需 rerun")
+
+        results["total_findings"] = audit_findings_count + cc_findings_count
+        results["critical_reruns"] = len(results["reruns"])
+        logger.info(f"[Phase 5.6] 完成: {results['total_findings']} findings, "
+                     f"{results['critical_reruns']} reruns")
         return results
 
     def _run_audit_phase(self) -> Dict:

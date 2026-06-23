@@ -682,6 +682,15 @@ def build_default_plan(venue_adapter=None) -> HierarchicalPlan:
         acceptance_criteria={},  # Abstract 由 quality_gate 单独评估
     ))
 
+    # v15.3 L2: 全章草稿审计 + 一致性（前移闭环）
+    # 在 phase5_5（摘要）之后、phase6（审查）之前，对全章 + 摘要做
+    # auditor + cross_chapter 检查，findings 录入 FindingBus 供 _quality_ensure 消费。
+    g4_steps.append(AtomicStep(
+        step_id="G4-S10", description="Pre-lock Audit & Consistency",
+        phase_name="phase5_6", task_id="pre_lock_audit",
+        acceptance_criteria={},  # 审计不设硬性指标，critical findings 触发 rerun
+    ))
+
     # ── G5: 学术输出 ──
     g5_steps = [
         AtomicStep(
