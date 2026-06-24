@@ -1243,6 +1243,7 @@ class ResearchLoop:
             inner = m.group(1)
             parts = [p.strip() for p in inner.split(",")]
             new_parts = []
+            has_bad = False
             for k in parts:
                 if not k or k in valid_keys:
                     new_parts.append(k)
@@ -1253,16 +1254,34 @@ class ResearchLoop:
                     fixed_pairs.append((k, good))
                     new_parts.append(good)
                 else:
-                    # 留痕而非删除：把该 key 标记，保留可见性供人工/末轮处理
+                    # 留痕而非删除：标记为 unknown
                     unknown_keys.append(k)
-                    new_parts.append(rf"\textbf{{[REF?-{k}]}}")
+                    has_bad = True
 
-            # 仅当该 \cite{} 内有 key 被改/标时才重写这一处
-            new_inner = ", ".join(new_parts)
-            if new_inner != inner:
-                tex_content = (tex_content[:m.start(1)] + new_inner
-                               + tex_content[m.end(1):])
+            # v15.8 修复1: 留痕方式重写——不能在 \cite{} 内部放 \textbf{}
+            # （花括号嵌套破坏 LaTeX + offset 越界破坏周围文字）。
+            # 正确做法：含 bad key 的整条 \cite{} 替换为可见留痕（在 cite 外部）。
+            if has_bad:
+                # 该 \cite{} 含编造 key → 整条替换为留痕标记
+                _valid_in_cite = [p for p in new_parts if not p.startswith("[REF?")]
+                _bad_in_cite = [k for k in parts if k not in valid_keys
+                                and not self._fuzzy_match_cite_key(k, valid_keys)]
+                if _valid_in_cite:
+                    # 混合 cite（有合法有编造）→ 保留合法的，编造的留痕在外部
+                    _valid_cite = "\\cite{" + ", ".join(_valid_in_cite) + "}"
+                    _ref_marker = "".join(r"\textbf{[REF?-%s]}" % k for k in _bad_in_cite)
+                    _replacement = _valid_cite + _ref_marker
+                else:
+                    # 全是编造 → 整条替换
+                    _replacement = "".join(r"\textbf{[REF?-%s]}" % k for k in _bad_in_cite)
+                tex_content = (tex_content[:m.start()] + _replacement
+                               + tex_content[m.end():])
                 # 重扫以避免 offset 失效（\cite{} 不多，性能可接受）
+                cite_spans = list(_re.finditer(r'\\cite\{([^}]+)\}', tex_content))
+            elif ", ".join(new_parts) != inner:
+                # 只有 fuzzy 修正（无 bad key）→ 替换内部
+                tex_content = (tex_content[:m.start(1)] + ", ".join(new_parts)
+                               + tex_content[m.end(1):])
                 cite_spans = list(_re.finditer(r'\\cite\{([^}]+)\}', tex_content))
 
         changed = bool(fixed_pairs or unknown_keys)

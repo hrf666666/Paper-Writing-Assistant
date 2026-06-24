@@ -64,6 +64,73 @@ class FactBase:
             return "baseline"
         return "ours"
 
+    # v15.8: 指标名语义标签（用于 ours vs baseline 配对）
+    _METRIC_TAGS = ["overall", "non-lambertian", "lambertian",
+                    "mixed", "urban", "psnr", "ssim", "bd", "mse", "mae"]
+    # v15.8: "越高越好"的指标（默认是"越低越好"如 MAE/MSE）
+    _HIGHER_IS_BETTER = {"psnr", "ssim", "auc", "accuracy"}
+
+    @classmethod
+    def _metric_tag(cls, key: str) -> Optional[str]:
+        """提取 metric key 的语义标签（overall/lambertian/...），用于配对。"""
+        kl = key.lower()
+        for tag in cls._METRIC_TAGS:
+            if tag in kl:
+                return tag
+        return None
+
+    def _compute_comparison(self, ours: Dict, baselines: Dict,
+                            rel_tol: float = 0.005) -> str:
+        """v15.8: 预计算 ours vs baseline 对比结论。
+
+        按指标语义标签（overall/lambertian/...）配对 ours 和 baseline，
+        标注每个指标的改进/退步/持平。返回注入 prompt 的结论文本。
+        rel_tol: 持平阈值（相对差异 <0.5% 视为持平）。
+        """
+        # 按 tag 分组
+        ours_by_tag = {}
+        for k, v in ours.items():
+            tag = self._metric_tag(k)
+            if tag:
+                try:
+                    ours_by_tag.setdefault(tag, []).append((k, float(v)))
+                except (TypeError, ValueError):
+                    pass
+        baselines_by_tag = {}
+        for k, v in baselines.items():
+            tag = self._metric_tag(k)
+            if tag:
+                try:
+                    baselines_by_tag.setdefault(tag, []).append((k, float(v)))
+                except (TypeError, ValueError):
+                    pass
+        # 配对并算胜负
+        conclusions = []
+        for tag in sorted(set(ours_by_tag) & set(baselines_by_tag)):
+            ov = ours_by_tag[tag][0][1]   # 取第一个 ours 值
+            bv = baselines_by_tag[tag][0][1]  # 取第一个 baseline 值
+            if bv == 0:
+                continue
+            rel = (ov - bv) / abs(bv)
+            if abs(rel) < rel_tol:
+                status = "持平"
+            else:
+                # v15.8: 高优指标（PSNR/SSIM/AUC）越高越好，其余越低越好
+                _higher_better = tag in self._HIGHER_IS_BETTER
+                _improved = (ov > bv) if _higher_better else (ov < bv)
+                status = (f"改进 {abs(rel)*100:.1f}%" if _improved
+                          else f"退步 {abs(rel)*100:.1f}%")
+            conclusions.append(f"  {tag}: ours={ov} vs baseline={bv} → {status}")
+        if not conclusions:
+            return ""
+        # 突出 Overall（最终评判指标）
+        _has_overall_regress = any("退步" in c and "overall" in c for c in conclusions)
+        header = ""
+        if _has_overall_regress:
+            header = ("  ⚠️ Overall 指标退步！禁止声称'整体优越/unified superior'，"
+                      "只能声称子集（如 Non-Lambertian）改进")
+        return header + "\n" + "\n".join(conclusions) if header else "\n".join(conclusions)
+
     def find_metric_by_owner(self, value: float, owner: str,
                               rel_tol: float = 0.01) -> Optional[str]:
         """v15.3 L1: 反向查询 + owner 过滤。
@@ -151,6 +218,12 @@ class FactBase:
             if baselines:
                 bs = ", ".join(f"{k}={v}" for k, v in baselines.items())
                 lines.append('baselines (对比用，非我们的结果，正文必须标注是 baseline): ' + bs)
+            # v15.8 修复3: 预计算 ours vs baseline 对比结论
+            # 防止 LLM 看到子集改进就声称"整体优越"但 Overall 实际退步
+            _comparison = self._compute_comparison(ours, baselines)
+            if _comparison:
+                lines.append("⚠️ 数值对比结论（正文声称必须与此一致，禁止夸大）:")
+                lines.append(_comparison)
         if self.innovation_names:
             lines.append(f"innovations: {', '.join(self.innovation_names)}")
         lines.append("</fact_base>")

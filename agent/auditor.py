@@ -735,15 +735,39 @@ class Auditor:
                 if not _found:
                     flagged.append(m.group(0)[:60])
 
-        if flagged:
+        # v15.8 修复2: 能力夸大检查——"零参数/无参数"等声称但依赖外部模型
+        # issue[1]: "零参数V20能量图"声称 zero-parameter，但依赖 SAM（有大量参数）
+        _capability_patterns = [
+            r'(zero-parameter|zero.parameter|无参数|零参数|parameter.free|parameter free)',
+            r'(no (?:additional|learnable|trainable) parameters?|无需(?:额外)?参数)',
+        ]
+        _external_dep_signals = [
+            "sam", "segment anything", "pretrained", "pre-trained",
+            "foundation model", "backbone", "第三方", "外部模型",
+        ]
+        _capability_overclaims = []
+        for pat in _capability_patterns:
+            for m in re.finditer(pat, content, re.IGNORECASE):
+                _ctx = content[max(0, m.start()-200):m.end()+200].lower()
+                # 检查上下文是否提到外部依赖
+                _deps = [d for d in _external_dep_signals if d in _ctx]
+                if _deps:
+                    _capability_overclaims.append(
+                        f"'{m.group(0)}' 但上下文依赖 {_deps[:2]}")
+
+        if flagged or _capability_overclaims:
+            _all_msgs = flagged[:3]
+            if _capability_overclaims:
+                _all_msgs += [f"能力夸大: {x}" for x in _capability_overclaims[:2]]
             report.add_issue(
                 "warning", "factuality",
-                f"检测到 {len(flagged)} 处疑似方法过度声称（overclaim）："
-                f"正文声称的理论/原理在项目代码（loss/model）中未找到对应实现",
+                f"检测到 {len(flagged)} 处理论 overclaim + "
+                f"{len(_capability_overclaims)} 处能力夸大（zero-parameter 等"
+                f"声称但依赖外部模型）",
                 chapter_name,
-                f"疑似 overclaim 表述: {flagged[:3]}",
-                "核实这些理论表述是否真实对应代码实现；若是类比/启发式命名，"
-                "应在文中明确说明（如'inspired by'而非'based on'），避免过度声称"
+                f"疑似 overclaim 表述: {_all_msgs}",
+                "核实这些声称是否真实；'零参数'若依赖 SAM/pretrained，"
+                "必须明确声明外部依赖的参数量/计算开销，不能声称'zero-parameter'"
             )
 
     # ========== 内部一致性检查 ==========
