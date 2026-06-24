@@ -605,6 +605,15 @@ class ResearchLoop:
                     if ours_matches:
                         experiments_summary += f"\n\n**关键数值（必须使用这些数字）**: {ours_matches[:15]}"
 
+                # v15.8 改动1: 弱点一致性闭环——abstract 必须看到 Limitations 的弱点认知
+                # + FactBase 对比结论，避免声称与弱点矛盾（L3 issue[0]/[2] 根因）
+                limitations_summary = ""
+                if "5_2" in self._chapters:
+                    limitations_summary = self._chapters["5_2"][:2000]
+                fact_sheet = ""
+                if getattr(self, '_factbase', None) and not self._factbase.is_empty():
+                    fact_sheet = self._factbase.as_fact_sheet()
+
                 exec_result = executor.execute_with_quality(
                     "abstract",
                     {
@@ -617,6 +626,9 @@ class ResearchLoop:
                         "style_guide": self._ref_data.get("style_guide", {}),
                         "experiments_summary": experiments_summary,
                         "citation_context": self._build_citation_context(),
+                        # v15.8: 弱点一致性——abstract 生成时已知 Limitations 承认的弱点
+                        "limitations_summary": limitations_summary,
+                        "fact_sheet": fact_sheet,
                     },
                     style_guide=self._ref_data.get("style_guide", {}),
                 )

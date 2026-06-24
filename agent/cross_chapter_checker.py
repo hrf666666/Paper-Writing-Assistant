@@ -71,6 +71,7 @@ class CrossChapterChecker:
         checks = [
             ("section_references", lambda: self._check_section_references(fixed_chapters)),
             ("numerical_consistency", lambda: self._fix_numerical_consistency(fixed_chapters, fixed_abstract) if auto_fix else self._check_numerical_only(fixed_chapters)),
+            ("cross_chapter_metric_consistency", lambda: self._check_cross_chapter_metric_consistency(fixed_chapters)),
             ("format_consistency", lambda: self._check_format_consistency(fixed_chapters)),
             ("citation_continuity", lambda: self._check_citation_continuity(fixed_chapters)),
         ]
@@ -195,6 +196,55 @@ class CrossChapterChecker:
                                       "description": f"数值 {num_str} 标注为 baseline 但未匹配 FactBase owner=baseline 的值",
                                       "location": f"ch{ch_key}"})
                 # unknown：不报（避免误报训练参数/阈值等无关数值）
+        return issues
+
+    def _check_cross_chapter_metric_consistency(self, chapters: Dict[int, str]) -> List[Dict]:
+        """v15.8 改动2: 同指标名跨章节一致性检查（E3 剩余）。
+
+        抓"同一指标名（如 Lambertian MAE）在不同章节出现不同值"的矛盾。
+        例：Intro 引用 Lambertian MAE=0.411（基线），Conclusion 引用 0.081（混台）。
+        这是 cross_chapter 的 owner 对账查不出的——因为两个值都在 FactBase 里。
+
+        策略：
+        1. 从每章提取"指标名→数值"对（匹配 "XXX MAE/error/accuracy ... N.NN" 模式）
+        2. 同名指标在不同章节的值差异 > 容差 → warning
+        """
+        issues = []
+        # 指标名提取模式：常见指标词后跟数值
+        _metric_pattern = re.compile(
+            r'((?:Overall|Lambertian|Non-Lambertian|Mixed|Urban|specular|diffuse)\s*'
+            r'(?:MAE|MSE|RMSE|PSNR|SSIM|error|accuracy|AUC|BME|rel\.?\s*err))'
+            r'[^0-9]{0,30}?(\d+\.\d{2,})', re.IGNORECASE)
+        # 按章收集 {指标名归一化: {章节: 值}}
+        from collections import defaultdict
+        metric_by_chapter = defaultdict(dict)  # {metric_norm: {ch: value}}
+        for ch_key, content in chapters.items():
+            for m in _metric_pattern.finditer(content):
+                _name = m.group(1).lower().strip()
+                try:
+                    _val = float(m.group(2))
+                except ValueError:
+                    continue
+                metric_by_chapter[_name][ch_key] = _val
+        # 检查同名指标跨章节一致性
+        for _name, ch_vals in metric_by_chapter.items():
+            if len(ch_vals) < 2:
+                continue
+            vals = list(ch_vals.values())
+            _min, _max = min(vals), max(vals)
+            if _min == 0:
+                continue
+            _rel_diff = abs(_max - _min) / abs(_min)
+            # 容差 20%（同指标跨章节允许小幅差异，如四舍五入；>20% 判矛盾）
+            if _rel_diff > 0.20:
+                _detail = ", ".join(f"ch{ch}={v}" for ch, v in sorted(ch_vals.items()))
+                issues.append({
+                    "severity": "warning",
+                    "type": "cross_chapter_metric_inconsistency",
+                    "description": (f"指标 '{_name}' 跨章节数值差异过大"
+                                    f"({_rel_diff*100:.0f}%): {_detail}"),
+                    "location": "cross-chapter",
+                })
         return issues
 
     def _fix_numerical_consistency(self, chapters: Dict[int, str], abstract: str) -> str:

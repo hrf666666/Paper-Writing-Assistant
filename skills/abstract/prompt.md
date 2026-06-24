@@ -34,12 +34,28 @@
 </project_report>
 {% endif %}
 
+{% if fact_sheet %}
+**⚠️ 权威事实清单（Abstract 的数值声称必须与此一致，禁止夸大）**：
+{{fact_sheet}}
+{% endif %}
+
+{% if limitations_summary %}
+**⚠️ 已识别的方法弱点（Abstract 必须与这些弱点认知一致，禁止回避）**：
+<limitations_acknowledged>
+{{limitations_summary}}
+</limitations_acknowledged>
+{% endif %}
+
 **写作规则**：
 - Abstract必须自包含，不引用具体章节、图表编号
 - 不使用引用标记（Abstract中通常不引用文献）
 - 每句话都有实质信息，零废话
 - 数字和结果要具体（如"improves RMSE by 12.3%"而非"achieves significant improvement"）
 - 使用第三人称，过去时描述方法，现在时描述结果/结论
+- **弱点一致性（重要）**：如果 fact_sheet 显示某指标（如 Overall MAE）相对基线退步，
+  禁止在 Abstract 中声称"整体优越/unified superior/outperforms overall"；
+  只能声称确实改进的子集指标（如"reduces non-Lambertian MAE by 14.9%"）。
+  数值声称必须与 fact_sheet 的对比结论一致，不得选择性引用子集改进来暗示整体优势。
 
 **Keywords**：
 - 提供 {{keyword_count}} 个关键词
