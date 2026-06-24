@@ -148,6 +148,17 @@ class ChapterContext:
                 blocks.append(f"<content_focus>{focus}</content_focus>")
             if avoid:
                 blocks.append(f"<content_avoid>避免: {', '.join(str(a) for a in avoid[:3])}</content_avoid>")
+        # v15.7: 文图联动——注入该章应引用的图指令（治本 orphan 图）
+        # figure_directives 由 phase0_99 图预规划填入 project_data
+        _ch_num = str(self._chapter_num())
+        _fig_dirs = self.project_data.get("figure_directives", {})
+        if _ch_num in _fig_dirs:
+            _flines = ["<figure_directive>本章应引用以下图"
+                       "（在合适位置用 Fig.~\\ref{label} 引用，与图内容呼应）："]
+            for _label, _desc in _fig_dirs[_ch_num]:
+                _flines.append(f"- \\ref{{{_label}}}: {_desc}")
+            _flines.append("</figure_directive>")
+            blocks.append("\n".join(_flines))
         return "\n".join(blocks) if blocks else ""
 
     def _chapter_num(self) -> int:

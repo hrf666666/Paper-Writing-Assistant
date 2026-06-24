@@ -567,6 +567,10 @@ class ResearchLoop:
                 # v11.2: 构建 PaperContext（共享事实源）
                 self._build_paper_context()
 
+            elif phase == "phase0_99":
+                # v15.7: 图预规划（章节前，文图联动通信回路）
+                self._plan_figures_early()
+
 
 
             elif phase in ("phase1", "phase2", "phase3", "phase4", "phase5"):
@@ -1065,6 +1069,66 @@ class ResearchLoop:
                      f"model={model_name}")
 
         return paper_context
+
+    def _plan_figures_early(self):
+        """v15.7 phase0_99: 图规划前移——章节前规划图，建立文图联动通信回路。
+
+        根因：planner 原在 Phase7.28（章节后）规划，结果从未流入章节生成 → 7 张图全 orphan。
+        解法：前移到此处（章节前），用 abstract+innovation 规划（method_text 留空，章节未生成），
+        填 manifest(PLANNED) + 构建章节图指令塞 project_data['figure_directives']，
+        后续 planning_block 自动注入章节 prompt。Phase7.28 复用此 plan（ablation_hash 一致）。
+        """
+        from tools.figure_planner import plan_figures
+        _content = {
+            "title": PAPER_TITLE,
+            "abstract": (getattr(self, '_abstract', '') or ''
+                         or (self._outline or {}).get('abstract', '')),
+            "method_text": "",  # 章节未生成，留空——planner 靠 abstract+innovation 规划
+            "innovations": self._project_data.get("innovation_points", []),
+        }
+        _venue = (getattr(self.venue_adapter, 'venue_name', 'IEEE TCSVT')
+                  if self.venue_adapter else 'IEEE TCSVT')
+        try:
+            plan = plan_figures(
+                _content, venue=_venue,
+                content_brief=getattr(self, '_content_strategy', None),
+            )
+        except Exception as e:
+            logger.warning(f"[phase0_99] 图预规划失败（章节将无图引用指令）: {e}")
+            return
+        # ablation_hash 与 Phase7.28 一致 → 7.28 复用此 plan 不重新规划
+        plan["_ablation_hash"] = (hash(json.dumps(self._ablation_results, sort_keys=True,
+                                                   default=str))
+                                  if self._ablation_results else 0)
+        try:
+            with open(os.path.join(OUTPUT_DIR, "figure_plan.json"), "w", encoding="utf-8") as f:
+                json.dump(plan, f, ensure_ascii=False, indent=2)
+        except Exception as we:
+            logger.warning(f"[phase0_99] figure_plan.json 写盘失败: {we}")
+        # 填 manifest(PLANNED) + 构建章节图指令
+        from agent.core.figure_manifest import FigureEntry, FigStatus, FigType, _TYPE_TO_SECTION
+        _type_map = {"teaser": FigType.TEASER, "architecture": FigType.ARCHITECTURE,
+                     "module_detail": FigType.MODULE_DETAIL, "ablation": FigType.ABLATION,
+                     "comparison": FigType.COMPARISON, "qualitative": FigType.QUALITATIVE}
+        directives = {}  # {章节号(str): [(label, 描述), ...]}
+        for f_fig in plan.get("figures", []):
+            ft = f_fig.get("fig_type", "")
+            ftype = _type_map.get(ft, FigType.MODULE_DETAIL)
+            sec = _TYPE_TO_SECTION.get(ftype, "")
+            fig_id = f_fig.get("fig_id", ft)
+            self._figure_manifest.add(FigureEntry(
+                fig_id=fig_id, fig_type=ftype, label=f"fig:{fig_id}",
+                belongs_to_section=sec,
+                supports_claim=f_fig.get("title", fig_id),
+                status=FigStatus.PLANNED,
+            ))
+            if sec:
+                directives.setdefault(sec, []).append(
+                    (f"fig:{fig_id}", f_fig.get("title", ft)))
+        self._project_data['figure_directives'] = directives
+        logger.info(f"[phase0_99] 图预规划完成: {len(plan.get('figures', []))} 张, "
+                    f"manifest 填 PLANNED, 章节指令: "
+                    f"{ {k: len(v) for k, v in directives.items()} }")
 
     def _build_citation_context(self) -> str:
         """v14: 委托给 CitationInjector。注：每次新建实例（citation_bank 会变），
@@ -2118,6 +2182,12 @@ class ResearchLoop:
                 return figure_latex_snippets
 
             logger.info(f"[Phase 7.28] 规划了 {len(fig_plans)} 个图表")
+            # v15.7: 前移规划时 method_text 空，module_detail caption 粗糙；
+            # 用成品章节补充（轻量字段填充，非 LLM 重新规划）
+            for fp in fig_plans:
+                _cap = fp.get("caption", "")
+                if not _cap or len(_cap) < 10:
+                    fp["caption"] = fp.get("title", fp.get("fig_id", ""))
             figures_dir = os.path.join(OUTPUT_DIR, "figures")
             for fp in fig_plans:
                 try:
@@ -2132,7 +2202,7 @@ class ResearchLoop:
                                       if isinstance(self._project_data, dict) else None),
                     )
                     if fig_result and fig_result.get("pdf_path"):
-                        # v13 接线 P0-d: 录入 FigureManifest（结构化，替代裸字符串拼接）
+                        # v15.7: manifest 录入改 add→update（phase0_99 已 add PLANNED，避免重复）
                         from agent.core.figure_manifest import FigureEntry, FigType, FigStatus
                         _fig_id = fp.get("fig_id", "fig")
                         _size_type = fp.get("size_type", "double")
@@ -2142,15 +2212,26 @@ class ResearchLoop:
                         _type_map = {"teaser": FigType.TEASER, "architecture": FigType.ARCHITECTURE,
                                      "ablation": FigType.ABLATION, "comparison": FigType.COMPARISON,
                                      "qualitative": FigType.QUALITATIVE}
-                        self._figure_manifest.add(FigureEntry(
-                            fig_id=_fig_id,
-                            fig_type=_type_map.get(fp.get("fig_type", ""), FigType.MODULE_DETAIL),
-                            source_pdf=_fig_tex_path,
-                            caption=_caption,
-                            supports_claim=fp.get("key_message", _caption[:40]),  # planner 用 key_message 字段
-                            status=FigStatus.RENDERED,
-                            size_type=_size_type,
-                        ))
+                        _existing = self._figure_manifest.get(_fig_id)
+                        if _existing:
+                            # phase0_99 已 add(PLANNED) → update 为 RENDERED + 填 source_pdf/caption
+                            self._figure_manifest.update(
+                                _fig_id, status=FigStatus.RENDERED,
+                                source_pdf=_fig_tex_path, caption=_caption,
+                                size_type=_size_type,
+                                supports_claim=fp.get("key_message", _caption[:40]),
+                            )
+                        else:
+                            # 前移规划未覆盖的图（如 resume 旧 checkpoint）→ 兜底 add
+                            self._figure_manifest.add(FigureEntry(
+                                fig_id=_fig_id,
+                                fig_type=_type_map.get(fp.get("fig_type", ""), FigType.MODULE_DETAIL),
+                                source_pdf=_fig_tex_path,
+                                caption=_caption,
+                                supports_claim=fp.get("key_message", _caption[:40]),
+                                status=FigStatus.RENDERED,
+                                size_type=_size_type,
+                            ))
                 except Exception as fe:
                     logger.warning(f"[Phase 7.28] 图表 {fp.get('fig_id', '?')} 生成失败: {fe}")
             # v13 接线 P0: 从 manifest 生成 LaTeX（经筛选规则，替代裸字符串）

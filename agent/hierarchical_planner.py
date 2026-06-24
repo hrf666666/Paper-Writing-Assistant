@@ -629,6 +629,14 @@ def build_default_plan(venue_adapter=None) -> HierarchicalPlan:
         acceptance_criteria={"metric": "paper_context_exists", "op": "==", "value": True},
     ))
 
+    # v15.7: 图预规划（章节前，建立文图联动通信回路）
+    # planner 前移到此处规划，结果经 planning_block 注入章节 prompt，治本 orphan 图
+    g3_steps.append(AtomicStep(
+        step_id="G3-S7", description="图预规划（章节前，文图联动）",
+        phase_name="phase0_99", task_id="figure_preplan",
+        acceptance_criteria={"metric": "figure_plan_exists", "op": "==", "value": True},
+    ))
+
     # ── G4: 章节生成 ──
     g4_steps = [
         AtomicStep(

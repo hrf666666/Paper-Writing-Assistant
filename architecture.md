@@ -1,10 +1,32 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v15.6 | 更新: 2026-06-24
+> 版本: v15.7 | 更新: 2026-06-24
 
 ---
 
-## 0. v15.6 实跑后深挖根因修复（4 个 bugfix）
+## 0. v15.7 文图联动治本（规划前移 + 通信回路）
+
+> **v15.7 解决地基级问题——文图联动通信断裂**。v14 FigureManifest 承诺"文图联动单一真相源"，
+> 但 figure_planner 在 Phase7.28（章节后）规划，结果从未流入章节生成 → 7 张图全 orphan。
+>
+> **问题本质 = 通信断裂**（planner 规划了图，但结果不流入章节），非归属之争。经三圈推理排除：
+> - ❌ 粗+精二次规划（臃肿：3 层机制解 1 个通信问题）
+> - ❌ 图归章节（致命：全局协调丧失）
+> - ❌ prompt 硬编码（打补丁：动态规划对不上硬编码 ref）
+>
+> **解法（4 处改动 ~60 行）**：
+> - **phase0_99 规划前移**（`loop._plan_figures_early`）：章节前用 abstract+innovation 规划
+>   （method_text 空），写 figure_plan.json + 填 manifest(PLANNED) + 构建 figure_directives。
+>   关键验证：所有图的信息需求在章节前就绪（teaser 需 abstract 非 method）。
+> - **通信回路**（`_chapter_common.planning_block`）：读 figure_directives 按 _TYPE_TO_SECTION
+>   拼引用指令，注入章节 prompt。复用 v14 planning_block 范式，**零章节签名/prompt 改动**。
+> - **Phase7.28 复用**：ablation_hash 一致 → 读前移 plan 不重新规划；add→update 防 duplicate；
+>   渲染前用成品 method 补粗糙 caption。
+>
+> **数据流**：phase0_99 规划→manifest(PLANNED)+directives → phase1-5 planning_block 注入
+> → 正文 \ref{fig:xxx} → phase7.28 渲染+update(RENDERED) → phase7.3 注入 LaTeX
+
+## 1. v15.6 实跑后深挖根因修复（4 个 bugfix）
 
 > **v15.6 来自 v15.5 实跑的综合分析 + 根因深挖**。逐个错误挖到代码行级，并反思
 > "为何历史 review 漏检"。4 项修复（~80 行），无架构改动。

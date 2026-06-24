@@ -1,6 +1,19 @@
-# 论文范文写作助手 v15.6 (Paper Writing Assistant)
+# 论文范文写作助手 v15.7 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。**v15.5 治愈引用漂移与 figure 非确定性：cite key 前置校验门（不再静默删引用）+ figure plan 落盘复用（不再每次 LLM 重规划导致缺图）**。**v15.6 实跑后修复 4 个深挖根因：图墙时序错位（figure 不再堆在参考文献后）+ None 污染（heNone 畸形 key 消除）+ overclaim 反向校验（L2不再冒充Maxwell力学）+ validator 矢量图识别（图页不再误判空白）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。**v15.5 治愈引用漂移与 figure 非确定性：cite key 前置校验门（不再静默删引用）+ figure plan 落盘复用（不再每次 LLM 重规划导致缺图）**。**v15.6 实跑后修复 4 个深挖根因：图墙时序错位 + None 污染 + overclaim 反向校验 + validator 矢量图识别**。**v15.7 治本文图联动断裂：图规划前移到章节前，结果经 planning_block 注入章节 prompt，正文自然 \ref 图（7 张 orphan → 0）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v15.7 里程碑：文图联动治本（规划前移 + 通信回路）
+
+> **v15.7 解决地基级问题——文图联动通信断裂**。v14 引入 FigureManifest 时承诺"文图联动单一真相源"，但 figure_planner 在 Phase7.28（章节后）规划，结果从未流入章节生成，导致 7 张图全 orphan（正文从不 \ref）。经三圈推理排除臃肿方案（粗+精二次规划/图归章节/prompt硬编码），定位问题本质是**通信断裂**而非归属之争。
+>
+> **解法（4 处改动 ~60 行，零章节签名改动）**：
+> - **规划前移**（phase0_99）：plan_figures 在章节前用 abstract+innovation 规划（method_text 空，章节未生成），写 figure_plan.json + 填 manifest(PLANNED) + 构建 figure_directives 塞 project_data
+> - **通信回路**（planning_block）：ChapterContext.planning_block 读 figure_directives，按 _TYPE_TO_SECTION 拼引用指令注入章节 prompt——复用 v14 已有的 planning_block 注入范式，**不改任何章节签名/prompt**
+> - **Phase7.28 复用**：ablation_hash 一致使 Phase7.28 读到前移 plan 不重新规划；manifest add→update 避免 duplicate；渲染前用成品 method 补粗糙 caption
+> - **验证**：5 章全部调用 planning_block 且 _planning 注入 prompt → figure 指令自动通达所有章节
+>
+> **为何不臃肿**：一次规划（非二次）、零签名改动（合并进 planning_block）、用 manifest 已有 add/update 方法（非新状态机）。268 测试全过。
+> - **推迟**：E3 数值矛盾（需 FactBase 条件溯源）+ L3 稳定性 + G4 字数闭环
 
 ## v15.6 里程碑：4 个实跑后深挖根因修复
 
