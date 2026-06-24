@@ -1857,6 +1857,23 @@ class ResearchLoop:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
 
+                    # v15.7: dangling fig ref 降级——前移规划让正文引用了图，
+                    # 但图可能渲染失败(非RENDERED)导致没生成 \label → 引用悬空。
+                    # 不能静默删（那是老路），降级为可见提示让读者知道图缺失。
+                    _actual_labels = set(_re.findall(r'\\label\{(fig:[^}]+)\}', tex_content))
+                    _all_refs = set(_re.findall(r'\\ref\{(fig:[^}]+)\}', tex_content))
+                    _dangling = sorted(_all_refs - _actual_labels)
+                    if _dangling:
+                        for _dref in _dangling:
+                            tex_content = _re.sub(
+                                r'\\ref\{' + _re.escape(_dref) + r'\}',
+                                r'\\textit{(fig. unavailable)}',
+                                tex_content)
+                        with open(tex_path, "w", encoding="utf-8") as f:
+                            f.write(tex_content)
+                        logger.warning(f"[Phase 7.3] {len(_dangling)} 个 fig ref 对应的图"
+                                       f"渲染失败(label缺失)，已降级为可见提示: {_dangling}")
+
             # v15.7: 宏包校验——LLM 可能用了未 load 的命令（如 makecell），自动补缺
             _tex_path = f"{OUTPUT_DIR}/latex/main.tex"
             if os.path.exists(_tex_path):
