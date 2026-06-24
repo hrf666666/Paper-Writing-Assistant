@@ -23,7 +23,11 @@ def generate_bib_key(authors: list, year: Any, title: str, num: int = 0) -> str:
     if authors:
         first = authors[0]
         name = first.get("name", "") if isinstance(first, dict) else str(first)
-        surname = name.split()[-1].lower() if name else ""
+        # v15.6 E2: surname 取首作者的姓。PaperFetch 常把整串作者塞进单元素
+        # （如 "Xiaolong Wang, Ross Girshick, ..., Kaiming He"），需先取首作者
+        # （第一个逗号前），再取其姓（该片段末词）。
+        _first_author = name.split(",")[0].strip() if name else ""
+        surname = _first_author.split()[-1].lower() if _first_author else ""
         surname = re.sub(r'[^a-z]', '', surname)
 
     if not surname or len(surname) < 2:
@@ -35,6 +39,8 @@ def generate_bib_key(authors: list, year: Any, title: str, num: int = 0) -> str:
         surname = (meaningful[0][:6] + meaningful[1][:4]) if len(meaningful) >= 2 \
             else meaningful[0][:10] if meaningful else "ref"
 
-    yr = str(year) if year else ""
+    # v15.6 E2: 防御 None 污染——year 可能是 None/"None"/非数字字符串
+    _yr_raw = str(year) if year is not None else ""
+    yr = _yr_raw if _yr_raw.isdigit() else ""
     key = f"{surname}{yr}"
     return key[:20]

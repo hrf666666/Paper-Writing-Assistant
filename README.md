@@ -1,6 +1,23 @@
-# 论文范文写作助手 v15.3 (Paper Writing Assistant)
+# 论文范文写作助手 v15.6 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。**v15.5 治愈引用漂移与 figure 非确定性：cite key 前置校验门（不再静默删引用）+ figure plan 落盘复用（不再每次 LLM 重规划导致缺图）**。**v15.6 实跑后修复 4 个深挖根因：图墙时序错位（figure 不再堆在参考文献后）+ None 污染（heNone 畸形 key 消除）+ overclaim 反向校验（L2不再冒充Maxwell力学）+ validator 矢量图识别（图页不再误判空白）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v15.6 里程碑：4 个实跑后深挖根因修复
+
+> **v15.6 来自 v15.5 实跑的综合分析**——逐个挖到代码行级根因，反思"为何历史 review 漏检"。4 项修复（~80 行），无架构改动：
+> - **E1 图墙时序错位**：v15.4 #3 只认 `\bibliographystyle` 锚点，但 Phase 7.3 时刻 tex 是 `thebibliography`（要等 7.8 才转换）→ 图插在参考文献后堆成"图墙"。修复：锚点列表优先级匹配（thebibliography/bibliographystyle/bibliography）+ 位置校验扩展。
+> - **E2 None 污染**：`str(p.get("year"))` 当 year=None 产出 "None" 字符串 → heNone 畸形 key 污染真相源；surname 取末位作者（He）而非首作者（Wang）。双 bug 叠加。修复：year 显式类型判断 + surname 取首作者姓。
+> - **E4 overclaim 反向校验**：auditor 原只查"应提未提"（正向遗漏），不查"凭空包装"（负向 overclaim）。修复：新增 `_check_method_overclaim`，抓"基于X理论"表述对照真实代码（loss/model_content），L2 不再冒充 Maxwell 力学。
+> - **E5 validator 矢量图识别**：pdf_validator 只数文字面积，TikZ/pgfplots 矢量图（get_images 检不到）页被判空白。修复：用 get_drawings() 识别矢量图，有图页不算空白；valid 判定不再被 coverage 阈值误杀。
+> - **反思**：4 个漏检归因三个结构性盲区——逻辑正确≠时序正确（E1）、默认值兜不住None（E2）、验收标准定在"能跑通"非"真达标"（E5）。
+> - **推迟 v15.7**：E3 数值矛盾（需 FactBase 加实验条件溯源，属架构改动）。
+
+## v15.5 里程碑：引用前置校验门 + figure plan 固化
+
+> **v15.5 治愈两个系统性问题**——根因都来自 v15.3 后的 6/22 vs 6/23 对照实测。两次运行的 `undefined_cite_keys` 与缺图（6/23 回落到 3 张 default plan）暴露：cite key 仅靠 prompt 祈使句约束 + Phase 7.8b 事后静默删；figure plan 每次 LLM 现规划不落盘。2 项改动（~120 行）：
+> - **A1 引用前置校验门**：`_validate_cite_keys` 在 Phase 7.8 写盘后先跑——合法 key 通过、同 surname+年份差≤1 的笔误 fuzzy 修正、编造 key（如 `urbanlf_dataset`）改为 `[REF?]` 留痕（不再静默删，保留可见性）。Phase 7.8b 的"删 cite"分支删除。
+> - **A2 figure plan 固化**：`plan_figures` 结果落盘 `figure_plan.json`（带 `_source`/`_ablation_hash`），后续读盘复用——checkpoint resume 不再重规划；`_default_plan` 从 3 张升级 4 张（+module_detail）；plan 来源（llm/fallback/default_4）可观测。
+> - **推迟到 v15.6**：L3 评价稳定性（离散计数抖动）+ G4 Conclusion 字数闭环（需动评价范式，风险大）。
 
 ## v15.3 里程碑：评价可信化 + 数值 owner 真相源 + 前移闭环
 

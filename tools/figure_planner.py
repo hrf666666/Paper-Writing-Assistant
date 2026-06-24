@@ -170,6 +170,8 @@ def plan_figures(
 
     logger.debug(f"[FigurePlanner] 原始响应 (前500字): {raw[:500]}")
 
+    # v15.5 A2.1: 追踪 plan 来源（llm / fallback_model / default_4），让回落可观测
+    _plan_source = "llm"
     # 解析 JSON
     plan = _parse_json_response(raw)
 
@@ -190,6 +192,7 @@ def plan_figures(
                 plan = _parse_json_response(raw)
                 if plan and "figures" in plan:
                     logger.info(f"[FigurePlanner] 备选模型 {fallback_alias} 成功")
+                    _plan_source = "fallback_model"
                     break
             except Exception as e:
                 logger.warning(f"[FigurePlanner] 备选模型 {fallback_alias} 失败: {e}")
@@ -198,11 +201,17 @@ def plan_figures(
     if not plan or "figures" not in plan:
         logger.warning("[FigurePlanner] 所有模型均返回无效，使用默认计划")
         plan = _default_plan(paper_content, venue, content_brief)
+        _plan_source = plan.get("_source", "default_4")  # _default_plan 已自带标记
 
     # 验证和补全
     plan = _validate_plan(plan, venue, content_brief)
 
-    logger.info(f"[FigurePlanner] 规划完成: {len(plan['figures'])} 张图表")
+    # v15.5 A2.1: 统一打标（_default_plan 已自带，这里给 LLM/fallback 路径补上）
+    from datetime import datetime as _dt
+    plan.setdefault("_source", _plan_source)
+    plan.setdefault("_planned_at", _dt.now().isoformat(timespec="seconds"))
+
+    logger.info(f"[FigurePlanner] 规划完成: {len(plan['figures'])} 张图表 (source={_plan_source})")
     return plan
 
 
@@ -360,7 +369,7 @@ def _default_plan(paper_content: Dict, venue: str,
             {"from": "m3", "to": "m4", "label": ""},
         ]
 
-    # v13.2 #2: fallback 也规划 3 张图骨架（达 TCSVT min_figures=3）
+    # v15.5 A2.3: fallback 升级为 4 张图骨架（达 TCSVT 主流配置 min_figures=4）
     # data 字段留空，由 loop.py 按图类型从 ablation_results/experiment_design 注入
     figures = [{
         "fig_id": "fig1",
@@ -374,6 +383,22 @@ def _default_plan(paper_content: Dict, venue: str,
         "key_message": content_brief.get("core_contribution", "Proposed method framework") if content_brief else "Proposed method framework",
         "modules": modules,
         "connections": connections,
+        "groups": [],
+        "annotations": [],
+    }, {
+        # v15.5 A2.3: 新增 module_detail（方法图），覆盖 TCSVT 典型配置
+        "fig_id": "fig_module",
+        "fig_type": "module_detail",
+        "fig_role": "supporting",
+        "title": f"Detail of Core Module in {method_name}",
+        "caption": "Detailed view of the proposed core module.",
+        "size_type": "double",
+        "layout_direction": "top_to_bottom",
+        "layout_template": "hierarchical",
+        "key_message": (innovations[0].get("name", "Core module design")
+                        if innovations else "Core module design"),
+        "modules": modules[:6] if modules else [],
+        "connections": connections[:6] if connections else [],
         "groups": [],
         "annotations": [],
     }, {
@@ -395,7 +420,11 @@ def _default_plan(paper_content: Dict, venue: str,
         "key_message": "Our method outperforms prior work",
         "data": None,  # 由 loop.py 从 experiment_design 注入
     }]
-    return {"figures": figures}
+    # v15.5 A2.1: 标记来源——让"回落到 default"从静默变可观测
+    from datetime import datetime as _dt
+    return {"figures": figures,
+            "_source": "default_4",
+            "_planned_at": _dt.now().isoformat(timespec="seconds")}
 
 
 def _validate_plan(plan: Dict, venue: str,

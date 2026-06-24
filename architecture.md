@@ -1,10 +1,67 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v15.3 | 更新: 2026-06-23
+> 版本: v15.6 | 更新: 2026-06-24
 
 ---
 
-## 0. v15.3 评价可信化 + 数值 owner 真相源 + 前移闭环
+## 0. v15.6 实跑后深挖根因修复（4 个 bugfix）
+
+> **v15.6 来自 v15.5 实跑的综合分析 + 根因深挖**。逐个错误挖到代码行级，并反思
+> "为何历史 review 漏检"。4 项修复（~80 行），无架构改动。
+>
+> - **E1 图墙时序错位**（`loop.py` Phase 7.3）：
+>   - v15.4 #3 的盲区：注入锚点只认 `\bibliographystyle`，但 Phase 7.3 执行时刻
+>     tex 里是 `\begin{thebibliography}`（要等 Phase 7.8 才转换）→ 走 elif 把图
+>     插在 thebibliography 之后 → 7 张 figure* 全堆在参考文献后（图墙）。
+>   - **review 漏检根因**：逻辑正确 ≠ 时序正确。v15.4 review 只验证代码逻辑，
+>     没问"Phase 7.3 执行时 tex 里到底有没有 bibliographystyle"。
+>   - 修复：锚点列表 `[bibliographystyle, thebibliography, bibliography{]` 优先级匹配，
+>     图必插在参考文献区之前；位置校验扩展到 bibliography 锚点。
+>
+> - **E2 None 污染**（`citation_injector.py:148` + `text_utils.py`）：
+>   - 双 bug 叠加：`str(p.get("year"))` 当 year=None → "None" 字符串污染；
+>     surname `name.split()[-1]` 取末位作者（He）而非首作者（Wang）。
+>     结果：heNone 畸形 key 进真相源。
+>   - **review 漏检根因**：默认值兜不住 None。`.get("year","")` 看似安全，
+>     但只防缺键不防 None 值；测试从没构造 year=None case。
+>   - 修复：year 显式类型判断（int/数字字符串才接受）+ surname 取首作者姓。
+>
+> - **E4 overclaim 反向校验**（`auditor._check_method_overclaim`）：
+>   - auditor 原只查"应提未提"（正向遗漏），不查"凭空包装"（负向 overclaim）。
+>     LLM 把 L2损失+Sigmoid 冒充成"基于 Maxwell 波矢力学"。
+>   - 修复：新增反向校验，抓"基于/grounded in X理论"表述，对照真实代码
+>     （loss_config_content/model_content）+ innovation_names；抓 overclaim，
+>     放过代码里真实存在的术语（sigmoid/L2）。
+>
+> - **E5 validator 矢量图识别**（`pdf_validator.py`）：
+>   - 空白页判定只数文字面积，TikZ/pgfplots 矢量图（get_images 检不到）→ 图墙页
+>     判空白（假阳性 [10,11,12,13]）。**review 漏检根因**：测试覆盖常见路径，
+>     没覆盖"图密集型论文"边界。
+>   - 修复：用 get_drawings() 识别矢量图，有图页不算空白；valid 判定不再被
+>     text_coverage 阈值（旧 0.3，图论文达不到）误杀。
+>
+> - **推迟 v15.7**：E3 数值矛盾（Lambertian MAE Intro 0.411 vs Conclusion 0.081）
+>   需 FactBase 加实验条件溯源字段，属架构改动，不混进 bugfix 小版本。
+
+## 1. v15.5 引用前置校验门 + figure plan 固化
+
+> **v15.5 治愈两个系统性问题**（基于 6/22 vs 6/23 对照实测）。根因：cite key 仅靠
+> prompt 祈使句约束 + Phase 7.8b 事后静默删（损伤正文）；figure plan 每次 LLM 现规划
+> 不落盘（回落 3 张 default 导致缺图）。2 项改动，无新模块：
+>
+> - **A1 引用前置校验门**（`loop._validate_cite_keys`）：Phase 7.8 写盘后先于 7.8b 跑。
+>   真相源 = `_cite_key_map`（CitationInjector 用 `generate_bib_key` 确定性生成）。
+>   - 合法 key 通过；同 surname+年份差≤1 的笔误 fuzzy 修正（如 he2015→he2016）；
+>   - 编造 key（如 `urbanlf_dataset`，无年份形态）→ 替换为 `\textbf{[REF?-原key]}` 留痕，
+>     **不再静默删**（保留可见性供人工/末轮处理）。
+>   - Phase 7.8b 的"正则删 cite"分支删除（编造 key 已被前置门拦截）。
+> - **A2 figure plan 固化**（`loop._generate_figures` + `figure_planner.plan_figures`）：
+>   - plan 结果落盘 `figure_plan.json`（带 `_source`/`_planned_at`/`_ablation_hash`）；
+>   - 后续读盘复用，ablation hash 不一致才重新规划——checkpoint resume 不再缺图；
+>   - `_default_plan` 3→4 张（+module_detail 方法图）；plan 来源（llm/fallback/default_4）可观测。
+> - **推迟 v15.6**：L3 离散计数稳定性 + G4 Conclusion 字数闭环（需动评价范式）。
+
+## 1. v15.3 评价可信化 + 数值 owner 真相源 + 前移闭环
 
 > **v15.3 治愈 v14 评价模块的诊断→改进断裂。** 根因：`as_fact_sheet` 一行代码把
 > baseline 数值标成 "Ours 权威值"（3 环节连环放大），导致 LLM 误用 baseline 值 +
@@ -62,7 +119,7 @@ agent/core/
 
 > **v13.2 产出瓶颈治理（基于实跑 Grade B 证据）**：
 > - **#1 实验数据图闭环**：_build_figure_data 只用真实数据（FactBase/ablation_results/experiment_design 的真实数值），无真实数据返回 {} 触发 TikZ 示意诚实降级——绝不合成造假数值。figure_generator 的 data 路由已支持。
-> - **#2 figure_planner 多图 fallback**：_default_plan 从 1 张扩为 3 张骨架（teaser+ablation+comparison），让 fallback 也达 TCSVT min_figures=3。
+> - **#2 figure_planner 多图 fallback**：_default_plan 扩为 4 张骨架（teaser+module_detail+ablation+comparison），让 fallback 也达 TCSVT 主流配置 min_figures=4。**v15.5: plan 结果落盘 figure_plan.json 复用，且带 _source 标记（llm/fallback_model/default_4）让回落可观测。**
 > - **#3 motivation 注入 ch1**：motivation_thread（已生成却从未进 prompt）注入 ch1 1.1 节。rationale/exemplar 暂不注入（ch1-5 无消费者=死代码）。
 > - **#4 FindingBus 诊断埋点**：record_many 后加计数日志，待下次实跑据日志定位"0 条"根因（半完成，诚实标注）。
 > audit_with_autofix 复活。7 套 issue → 1 套 Finding；

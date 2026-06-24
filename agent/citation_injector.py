@@ -145,7 +145,11 @@ class CitationInjector:
             if not title:
                 continue
             authors = p.get("authors", [])
-            year = str(p.get("year", ""))
+            # v15.6 E2: year=None 时 str(None)="None" 会污染 cite key（如 heNone）。
+            # 用显式判断，只接受真实年份；非年份值（None/缺失/非数字）留空。
+            _yr = p.get("year")
+            year = str(_yr) if isinstance(_yr, (int, float)) or (
+                isinstance(_yr, str) and _yr.isdigit()) else ""
             base_key = generate_bib_key(authors, year, title)
 
             key = base_key

@@ -28,6 +28,8 @@ input/
 
 # Old backups
 output_backup*/
+output_6_*/
+output_*/
 
 # Test artifacts
 test/

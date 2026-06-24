@@ -105,6 +105,8 @@ class ResearchLoop:
         # v13 接线 P0: 图清单（文图联动单一真相源，替代裸字符串）
         from agent.core.figure_manifest import FigureManifest
         self._figure_manifest = FigureManifest()
+        # v15.5 A2.2: figure plan 缓存开关（True = 强制重新规划，调试用）
+        self._force_replan = False
         self.checkpoint = CheckpointManager(OUTPUT_DIR)
         self.quality_gate = QualityGate(self.api_client)
         self.directive_mgr = DirectiveManager(OUTPUT_DIR)
@@ -1081,10 +1083,123 @@ class ResearchLoop:
         self._title_to_key = _inj.title_to_key
         return result
 
+    def _validate_cite_keys(self, tex_path: str) -> dict:
+        """
+        v15.5 A1.1: 引用前置校验门 —— 写盘后、bib 构建前拦截编造的 cite key。
+
+        真相源 = self._cite_key_map（CitationInjector 用 generate_bib_key 确定性生成）。
+        合法 key 形如 'he2016'/'honauer2016'（surname+year）；LLM 编造的 key 形如
+        'urbanlf_dataset'（数据集名 snake_case），两者形态不交集，故 fuzzy 门槛从严。
+
+        策略（宁可留痕不可误修）：
+          - key 在 map 内 → 通过
+          - 不在 → 仅当与某合法 key 形态接近（同 surname + 年份差 ≤1）才修正
+          - 否则 → 替换为 \\textbf{[REF?-原key]} 留痕，计入 unknown（不再静默删）
+
+        Returns:
+            {"fixed": [(bad, good), ...], "unknown": [bad_key, ...], "changed": bool}
+        """
+        import re as _re
+        if not os.path.exists(tex_path):
+            return {"fixed": [], "unknown": [], "changed": False}
+
+        with open(tex_path, "r", encoding="utf-8") as f:
+            tex_content = f.read()
+
+        key_map = getattr(self, '_cite_key_map', {})
+        if not key_map:
+            logger.warning("[v15.5] _cite_key_map 为空，跳过 cite 前置校验")
+            return {"fixed": [], "unknown": [], "changed": False}
+
+        valid_keys = set(key_map.keys())
+        # 提取所有 \cite{...}（支持多 key 逗号分隔）
+        cite_spans = list(_re.finditer(r'\\cite\{([^}]+)\}', tex_content))
+        if not cite_spans:
+            logger.info(f"[v15.5] cite 前置校验：tex 无 \\cite{{}}，跳过 "
+                        f"(map 有 {len(valid_keys)} 个合法 key)")
+            return {"fixed": [], "unknown": [], "changed": False}
+
+        _total_keys = sum(len(m.group(1).split(",")) for m in cite_spans)
+        logger.info(f"[v15.5] cite 前置校验启动：{_total_keys} 个 cite key "
+                    f"vs map {len(valid_keys)} 个合法 key")
+
+        fixed_pairs = []   # (bad_key, good_key)
+        unknown_keys = []  # 无法修正的 bad key
+
+        for m in cite_spans:
+            inner = m.group(1)
+            parts = [p.strip() for p in inner.split(",")]
+            new_parts = []
+            for k in parts:
+                if not k or k in valid_keys:
+                    new_parts.append(k)
+                    continue
+                # 不在 map → 尝试严格 fuzzy（同 surname + 年份差 ≤1）
+                good = self._fuzzy_match_cite_key(k, valid_keys)
+                if good:
+                    fixed_pairs.append((k, good))
+                    new_parts.append(good)
+                else:
+                    # 留痕而非删除：把该 key 标记，保留可见性供人工/末轮处理
+                    unknown_keys.append(k)
+                    new_parts.append(rf"\textbf{{[REF?-{k}]}}")
+
+            # 仅当该 \cite{} 内有 key 被改/标时才重写这一处
+            new_inner = ", ".join(new_parts)
+            if new_inner != inner:
+                tex_content = (tex_content[:m.start(1)] + new_inner
+                               + tex_content[m.end(1):])
+                # 重扫以避免 offset 失效（\cite{} 不多，性能可接受）
+                cite_spans = list(_re.finditer(r'\\cite\{([^}]+)\}', tex_content))
+
+        changed = bool(fixed_pairs or unknown_keys)
+        if changed:
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(tex_content)
+            if fixed_pairs:
+                logger.info(f"[v15.5] cite 前置校验修正 {len(fixed_pairs)} 个 key: "
+                            f"{fixed_pairs}")
+            if unknown_keys:
+                logger.warning(f"[v15.5] cite 前置校验发现 {len(unknown_keys)} 个"
+                               f"无法修正的编造 key，已留痕 [REF?]: {unknown_keys}")
+        else:
+            logger.info(f"[v15.5] cite 前置校验通过：所有 cite key 均合法（无需修正）")
+        return {"fixed": fixed_pairs, "unknown": unknown_keys, "changed": changed}
+
+    @staticmethod
+    def _fuzzy_match_cite_key(bad_key: str, valid_keys: set) -> Optional[str]:
+        """
+        v15.5 A1.1: 严格 fuzzy 匹配。仅当 bad_key 与某合法 key 同 surname
+        且年份差 ≤1 时才返回该合法 key；否则返回 None（交由留痕）。
+
+        关键判据是"有无年份"——合法 key 形如 'he2016'（surname+year），
+        编造 key 形如 'urbanlf_dataset'（无年份）。surname 长度不设下限，
+        以兼容 'he'/'li'/'hu' 等中文姓短 surname。
+        """
+        import re as _re
+        bad_letter = ''.join(_re.findall(r'[a-z]', bad_key.lower()))
+        bad_digits = ''.join(_re.findall(r'\d', bad_key))
+        # 必须有年份 + surname 前缀（≥2 字符，挡住纯数字/单字母噪声）
+        if len(bad_letter) < 2 or not bad_digits:
+            return None
+
+        for vk in valid_keys:
+            vk_letter = ''.join(_re.findall(r'[a-z]', vk.lower()))
+            vk_digits = ''.join(_re.findall(r'\d', vk))
+            if len(vk_letter) < 2 or not vk_digits:
+                continue
+            # surname 必须完全相等（不取前缀，避免 'ho' 误中 'honauer'），
+            # 仅年份差 ≤1 容错（he2015 → he2016 这类笔误）。
+            if (bad_letter == vk_letter
+                    and abs(int(bad_digits) - int(vk_digits)) <= 1):
+                return vk
+        return None
+
     def _ensure_bib_has_all_cited_keys(self, tex_path: str):
         """
-        v14.0: 扫描 main.tex 中 \\cite{key}，确保 references.bib 有对应条目。
-        使用缓存的 _cite_key_map（单一真相源），不再独立生成 key。
+        v15.5 A1.2: 前置校验（_validate_cite_keys）已先拦截编造 key，
+        本方法只负责补 bib 条目（map 有但 bib 缺的 key）。
+        v14.0 的"静默删 cite"分支已删除——编造 key 现以 [REF?] 留痕。
         """
         import re as _re
         if not os.path.exists(tex_path):
@@ -1125,8 +1240,9 @@ class ResearchLoop:
         from tools.bibtex_builder import BibTeXBuilder
         builder = BibTeXBuilder(os.path.dirname(os.path.dirname(tex_path)))
         new_entries = []
-        removed_keys = []
 
+        # v15.5 A1.2: 编造 key 已被前置门 _validate_cite_keys 拦截/留痕，
+        # 这里只补"map 有但 bib 没生成"的 key。不再有静默删 cite 分支。
         for missing_key in missing:
             paper = key_map.get(missing_key)
             if paper:
@@ -1136,18 +1252,10 @@ class ResearchLoop:
                 if entry:
                     new_entries.append(entry)
             else:
-                # 未知 key（LLM 编造的）→ 移除
-                logger.warning(f"[Phase 7.8b] 未知 cite key '{missing_key}'，移除该引用")
-                tex_content = _re.sub(
-                    r'\\cite\{[^}]*' + _re.escape(missing_key) + r'[^}]*\}',
-                    '', tex_content
-                )
-                removed_keys.append(missing_key)
-
-        # 写回清理后的 tex
-        if removed_keys:
-            with open(tex_path, "w", encoding="utf-8") as f:
-                f.write(tex_content)
+                # 不应到达：前置门已把不在 map 的 key 留痕为 [REF?]，
+                # 到这里说明前置门没跑——记 warning 不再删除
+                logger.warning(f"[Phase 7.8b] key '{missing_key}' 不在 _cite_key_map"
+                               f"（前置门应已拦截），跳过补 bib")
 
         if new_entries:
             with open(bib_path, "a", encoding="utf-8") as f:
@@ -1592,15 +1700,21 @@ class ResearchLoop:
                     # 用公开 API 渲染非架构图（不伸手进私有 _single_figure）
                     remaining_figures = self._figure_manifest.to_latex_snippets(
                         exclude_types=[FigType.ARCHITECTURE])
-                    _bib = "\bibliographystyle"
                     _end_doc = "\end{document}"
-                    if remaining_figures and _bib in tex_content:
+                    # v15.6 E1: 锚点按优先级——图必须插在参考文献区 *之前*。
+                    # v15.4 #3 的盲区：只认 \bibliographystyle，但 Phase 7.3 时刻
+                    # tex 里常是 \begin{thebibliography}（要等 Phase 7.8 才转换），
+                    # 导致走 elif 把图插在 thebibliography 之后 → 图墙。
+                    _anchors = ["\\bibliographystyle", "\\begin{thebibliography}",
+                                "\\bibliography{"]
+                    _anchor = next((a for a in _anchors if a in tex_content), None)
+                    if remaining_figures and _anchor:
                         tex_content = tex_content.replace(
-                            _bib,
-                            remaining_figures + "\n\n" + _bib,
+                            _anchor,
+                            remaining_figures + "\n\n" + _anchor,
+                            1,
                         )
                     elif remaining_figures:
-                        # v15.4 #3: bibliographystyle 不在时，插在 \end{document} 前（而非追加末尾）
                         if _end_doc in tex_content:
                             tex_content = tex_content.replace(
                                 _end_doc,
@@ -1608,16 +1722,24 @@ class ResearchLoop:
                             )
                         else:
                             tex_content += "\n\n" + remaining_figures
-                    # v15.4 #3: 位置校验——确保注入的 figure 块在 \end{document} 之前
+                    # v15.6 E1: 位置校验扩展——figure 不得在 \end{document} 后，
+                    # 也不得在任何 bibliography 锚点之后（否则图墙）。
                     if remaining_figures and _end_doc in tex_content:
                         _end_idx = tex_content.rfind(_end_doc)
                         _fig_idx = tex_content.rfind("\\begin{figure")
                         if _fig_idx > _end_idx:
-                            # figure 块在 \end{document} 之后 → 移到前面（致命结构错误）
                             logger.warning("[Phase 7.3] 检测到 figure 在 \\end{document} 之后，"
                                            "重新定位到 \\end{document} 前")
                             _after_end = tex_content[_end_idx + len(_end_doc):]
                             tex_content = tex_content[:_end_idx] + _after_end + "\n" + _end_doc
+                        else:
+                            # 检查 figure 是否在 bibliography 区之后（图墙主因）
+                            for _b in _anchors:
+                                _b_idx = tex_content.rfind(_b)
+                                if _b_idx > -1 and _fig_idx > _b_idx:
+                                    logger.warning(f"[Phase 7.3] 检测到 figure 在 {_b} 之后"
+                                                   f"（图墙风险），请检查注入逻辑")
+                                    break
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
@@ -1695,6 +1817,8 @@ class ResearchLoop:
                         logger.info("[Phase 7.8] thebibliography → \\bibliography{references}")
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
+                    # v15.5 A1: 前置校验门先跑（拦截/修正/留痕编造 cite key）
+                    self._validate_cite_keys(tex_path)
                     self._ensure_bib_has_all_cited_keys(tex_path)
         except Exception as e:
             logger.warning(f"[Phase 7.8] BibTeX 生成失败: {e}")
@@ -1923,6 +2047,48 @@ class ResearchLoop:
         except (TypeError, ValueError):
             return None
 
+    def _load_or_plan_figures(self, plan_cache: str, paper_content: Dict,
+                              venue: str, planner=None) -> Dict:
+        """
+        v15.5 A2.2: figure plan 缓存——首次规划后落盘，后续读盘复用。
+        失效条件：_force_replan=True 或 ablation_results hash 变化。
+
+        提取为独立方法以便单元测试（不必 mock 整个 _generate_figures 渲染链）。
+        planner 参数默认惰性导入 plan_figures，测试可注入 mock。
+        """
+        _abl_hash = hash(json.dumps(self._ablation_results, sort_keys=True,
+                                    default=str)) if self._ablation_results else 0
+        # 1. 尝试读盘
+        if not self._force_replan and os.path.exists(plan_cache):
+            try:
+                with open(plan_cache, "r", encoding="utf-8") as f:
+                    _cached = json.load(f)
+                if (_cached.get("figures")
+                        and _cached.get("_ablation_hash") == _abl_hash):
+                    logger.info(f"[Phase 7.28] 读盘 figure_plan.json 复用 "
+                                f"(source={_cached.get('_source')}, "
+                                f"{len(_cached['figures'])} 张)")
+                    return _cached
+            except Exception as ce:
+                logger.warning(f"[Phase 7.28] 读 plan 缓存失败，重新规划: {ce}")
+        # 2. 缓存未命中 → 重新规划
+        if planner is None:
+            from tools.figure_planner import plan_figures as planner
+        plan_result = planner(
+            paper_content, venue=venue,
+            experiment_data=self._ablation_results if self._ablation_results else None,
+        )
+        plan_result["_ablation_hash"] = _abl_hash
+        try:
+            with open(plan_cache, "w", encoding="utf-8") as f:
+                json.dump(plan_result, f, ensure_ascii=False, indent=2)
+            logger.info(f"[Phase 7.28] figure_plan.json 已落盘 "
+                        f"(source={plan_result.get('_source')}, "
+                        f"{len(plan_result.get('figures', []))} 张)")
+        except Exception as we:
+            logger.warning(f"[Phase 7.28] 写 plan 缓存失败: {we}")
+        return plan_result
+
     def _generate_figures(self, results: Dict) -> str:
         """Phase 7.28: 规划并生成论文图表，返回 figure LaTeX snippets"""
         figure_latex_snippets = ""
@@ -1939,9 +2105,11 @@ class ResearchLoop:
             }
             venue_name = (getattr(self.venue_adapter, 'venue_name', 'IEEE TCSVT')
                           if self.venue_adapter else 'IEEE TCSVT')
-            plan_result = plan_figures(
-                paper_content, venue=venue_name,
-                experiment_data=self._ablation_results if self._ablation_results else None,
+            # v15.5 A2.2: plan 缓存逻辑提取到 _load_or_plan_figures（可独立测试）
+            plan_cache = os.path.join(OUTPUT_DIR, "figure_plan.json")
+            plan_result = self._load_or_plan_figures(
+                plan_cache, paper_content, venue_name,
+                planner=plan_figures,
             )
             fig_plans = plan_result.get("figures", [])
 

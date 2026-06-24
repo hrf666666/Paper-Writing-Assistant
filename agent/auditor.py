@@ -600,6 +600,11 @@ class Auditor:
         # 检查虚假数值声明（如"我们的方法达到了XX%"等过于具体的声明）
         self._check_specific_claims(report, chapter_name, content, project_data)
 
+        # v15.6 E4: 方法过度声称检查（overclaim）
+        # 正文把常规方法包装成"物理理论/数学原理"，但真实代码（loss_config/model）
+        # 里找不到对应。典型：L2损失被声称成"Maxwell波矢力学"。
+        self._check_method_overclaim(report, chapter_name, content, project_data)
+
     def _check_specific_claims(self, report: AuditReport, chapter_name: str,
                                content: str, project_data: Dict = None):
         """
@@ -666,6 +671,80 @@ class Auditor:
                             f"所有 {len(our_values)} 个数值均在 BRIEF 中找到",
                             "建议实际运行实验获取真实数据，或使用占位符"
                         )
+
+    def _check_method_overclaim(self, report: AuditReport, chapter_name: str,
+                                content: str, project_data: Dict = None):
+        """
+        v15.6 E4: 方法过度声称检查（overclaim）。
+
+        正文把常规方法包装成"物理理论/数学原理/力学"，但真实代码
+        （loss_config_content/model_content）里找不到对应实现。
+        典型：L2损失+Sigmoid 被声称成"基于 Maxwell 波矢力学"。
+
+        策略（启发式，宁少报不误报）：
+        1. 抓"基于/grounded in/informed by/founded on X 理论/原理/力学/机制"类表述
+        2. 提取声称的术语 X
+        3. 对照真实代码内容（loss_config + model_content）+ innovation_names
+        4. X 在真实代码里完全找不到 → overclaim warning
+        """
+        if not project_data:
+            return
+        # 只查 Methodology/Introduction（方法声称主要在这两章）
+        if chapter_name not in ("Methodology", "Introduction", "Abstract"):
+            return
+
+        # 构建真实实现的"术语池"——从代码内容提取
+        _code_text = " ".join(filter(None, [
+            str(project_data.get("loss_config_content", "")),
+            str(project_data.get("model_content", "")),
+        ])).lower()
+        # innovation_names 是中文创新点描述，也纳入
+        _innov_raw = project_data.get("innovation_names")
+        if not _innov_raw:
+            _innov_raw = [ip.get("name", "") if isinstance(ip, dict) else str(ip)
+                          for ip in project_data.get("innovation_points", [])]
+        _innov_text = " ".join(str(x) for x in (_innov_raw or [])).lower()
+
+        # 抓理论声称：中文"基于X理论/原理/力学/机制"+ 英文 "grounded/founded/informed by X"
+        _patterns = [
+            r'基于([^\s，。、]{2,12}(?:理论|原理|力学|机制|定律|方程|定理))',
+            r'(?:grounded\s+in|founded\s+on|informed\s+by|derived\s+from)\s+'
+            r'(?:the\s+)?([A-Za-z][A-Za-z\- ]{2,30}?)\s+'
+            r'(?:theory|principle|mechanics|law|equation|formulation)',
+        ]
+        _known_legit = {  # 常规实现词（在代码里能直接找到的），避免误报。
+            # 注意：不纳入 maxwell/物理/光学 等大词——overclaim 恰恰喜欢
+            # 用这些包装常规方法，纳入会漏检真实 overclaim。
+            "lambertian", "specular", "diffuse", "reflectance",
+            "sigmoid", "softmax", "convolution", "attention",
+            "l1", "l2", "mse", "cross.entropy",
+        }
+
+        flagged = []
+        for pat in _patterns:
+            for m in re.finditer(pat, content):
+                _claimed = m.group(1).strip().lower()
+                if not _claimed or len(_claimed) < 2:
+                    continue
+                # 已知合法词跳过
+                if any(kw in _claimed for kw in _known_legit):
+                    continue
+                # 在真实代码/创新点里找子串匹配
+                _found = (_claimed in _code_text or _claimed in _innov_text
+                          or any(w in _code_text for w in re.findall(r'[a-z]{3,}', _claimed)))
+                if not _found:
+                    flagged.append(m.group(0)[:60])
+
+        if flagged:
+            report.add_issue(
+                "warning", "factuality",
+                f"检测到 {len(flagged)} 处疑似方法过度声称（overclaim）："
+                f"正文声称的理论/原理在项目代码（loss/model）中未找到对应实现",
+                chapter_name,
+                f"疑似 overclaim 表述: {flagged[:3]}",
+                "核实这些理论表述是否真实对应代码实现；若是类比/启发式命名，"
+                "应在文中明确说明（如'inspired by'而非'based on'），避免过度声称"
+            )
 
     # ========== 内部一致性检查 ==========
 

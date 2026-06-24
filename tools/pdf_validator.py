@@ -376,22 +376,34 @@ class PDFValidator:
                 total_page_area += page_area
                 text = page.get_text()
                 text_area = len(text.strip()) * 10
-                if text_area < page_area * 0.05:
+                # v15.6 E5: 图占面积也算"内容"——有图的页不算空白。
+                # 之前只数文字，导致图墙页（有图无文字）被误判为空白。
+                # 注意：TikZ/pgfplots 渲染的是矢量图，get_images() 检不到，
+                # 必须用 get_drawings() 检测矢量绘图。任何 drawings/images
+                # 都说明该页有视觉内容（图、caption），不判空白。
+                _has_image = bool(page.get_images()) or bool(page.get_drawings())
+                if text_area < page_area * 0.05 and not _has_image:
                     blank_pages.append(page_num + 1)
                 total_text_area += text_area
 
             result["blank_pages"] = blank_pages
+            # v15.6 E5: 图墙页文字少属正常，coverage 仅作参考记录。
             result["text_coverage"] = total_text_area / total_page_area if total_page_area > 0 else 0.0
             doc.close()
 
+            # v15.6 E5: valid 判定不再用 text_coverage 否决——图密集型论文
+            # 文字覆盖率天然低（旧阈值 0.3 只适合纯文字论文）。只要无真空白页
+            # 且页数合理即结构正常。
+            _n_figures = self._count_figure_pages(pdf_path)
+            result["figure_pages"] = _n_figures
             result["valid"] = (
                 5 <= result["pages"] <= 30
                 and not blank_pages
-                and result["text_coverage"] > 0.3
             )
             logger.info(
                 f"[Phase 8.5] PDF 结构: {result['pages']} 页, "
-                f"空白页: {blank_pages}, 覆盖率: {result['text_coverage']:.2%}"
+                f"空白页: {blank_pages}, 覆盖率: {result['text_coverage']:.2%}, "
+                f"图页: {_n_figures}"
             )
         except ImportError:
             logger.warning("[Phase 8.5] PyMuPDF 未安装，使用基础检查")
@@ -401,6 +413,18 @@ class PDFValidator:
             result = self._basic_pdf_check(pdf_path)
 
         return result
+
+    def _count_figure_pages(self, pdf_path: str) -> int:
+        """v15.6 E5: 统计含图的页数（用于放宽 text_coverage 阈值）。
+        含位图（get_images）或大量矢量绘图（get_drawings，TikZ/pgfplots）。"""
+        try:
+            import fitz
+            doc = fitz.open(pdf_path)
+            n = sum(1 for p in doc if p.get_images() or len(p.get_drawings()) > 5)
+            doc.close()
+            return n
+        except Exception:
+            return 0
 
     def _basic_pdf_check(self, pdf_path: str) -> Dict:
         """基础 PDF 检查（不依赖 PyMuPDF）"""
