@@ -1147,6 +1147,55 @@ class ResearchLoop:
         self._title_to_key = _inj.title_to_key
         return result
 
+    # v15.7: LLM 常用命令 → 所需宏包映射（LLM 可能用了未 load 的命令）
+    _CMD_TO_PACKAGE = {
+        "makecell": "makecell", "multirow": "multirow",
+        "toprule": "booktabs", "midrule": "booktabs", "bottomrule": "booktabs",
+        "tabularx": "tabularx", "subfloat": "subfig",
+        "definecolor": "xcolor", "rowcolor": "colortbl",
+        "bm": "bm", "boldsymbol": "amsmath",
+        "mathbb": "amssymb", "mathcal": "amsmath",
+    }
+
+    def _ensure_packages_loaded(self, tex_path: str):
+        """v15.7: 编译前校验——LLM 可能用了未 load 宏包的命令（如 makecell），
+        导致 Undefined control sequence。扫描用到的命令，自动补缺失宏包。
+
+        这是系统性缺口的修复：系统从不校验"LLM 输出的命令是否在已 load 宏包内"。
+        历史三次运行未触发是概率问题（LLM 恰好没用复杂表格命令），非没有隐患。
+        """
+        import re as _re
+        if not os.path.exists(tex_path):
+            return
+        with open(tex_path, "r", encoding="utf-8") as f:
+            tex = f.read()
+        # 已 load 的宏包（展开 a,b 形式）
+        _loaded = set()
+        for m in _re.finditer(r'\\usepackage(?:\[[^\]]*\])?\{([^}]+)\}', tex):
+            for p in m.group(1).split(","):
+                _loaded.add(p.strip())
+        # 扫描用到的命令，找缺失宏包
+        _missing_pkgs = []
+        for cmd, pkg in self._CMD_TO_PACKAGE.items():
+            if pkg in _loaded:
+                continue
+            if _re.search(r'\\' + cmd + r'\b', tex):
+                _missing_pkgs.append(pkg)
+        if not _missing_pkgs:
+            return
+        # 在 documentclass 后插入缺失宏包
+        _unique = sorted(set(_missing_pkgs))
+        _insert = "\n".join(f"\\usepackage{{{p}}}" for p in _unique)
+        _doc_idx = tex.find("\\documentclass")
+        if _doc_idx == -1:
+            logger.warning(f"[v15.7] 无法插入宏包（无 documentclass）: {_unique}")
+            return
+        _line_end = tex.find("\n", _doc_idx)
+        tex = tex[:_line_end + 1] + _insert + "\n" + tex[_line_end + 1:]
+        with open(tex_path, "w", encoding="utf-8") as f:
+            f.write(tex)
+        logger.info(f"[v15.7] 宏包校验：自动补 {len(_unique)} 个缺失宏包: {_unique}")
+
     def _validate_cite_keys(self, tex_path: str) -> dict:
         """
         v15.5 A1.1: 引用前置校验门 —— 写盘后、bib 构建前拦截编造的 cite key。
@@ -1807,6 +1856,11 @@ class ResearchLoop:
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
+
+            # v15.7: 宏包校验——LLM 可能用了未 load 的命令（如 makecell），自动补缺
+            _tex_path = f"{OUTPUT_DIR}/latex/main.tex"
+            if os.path.exists(_tex_path):
+                self._ensure_packages_loaded(_tex_path)
 
             # 复制 figures/ 到 latex/figures/
             figures_src = os.path.join(OUTPUT_DIR, "figures")
