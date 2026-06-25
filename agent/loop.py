@@ -1891,13 +1891,14 @@ class ResearchLoop:
                     # v15.7: dangling fig ref 降级——前移规划让正文引用了图，
                     # 但图可能渲染失败(非RENDERED)导致没生成 \label → 引用悬空。
                     # 不能静默删（那是老路），降级为可见提示让读者知道图缺失。
-                    _actual_labels = set(_re.findall(r'\\label\{(fig:[^}]+)\}', tex_content))
-                    _all_refs = set(_re.findall(r'\\ref\{(fig:[^}]+)\}', tex_content))
+                    import re as _dre  # v15.8 fix: _re 作用域不跨方法，局部导入
+                    _actual_labels = set(_dre.findall(r'\\label\{(fig:[^}]+)\}', tex_content))
+                    _all_refs = set(_dre.findall(r'\\ref\{(fig:[^}]+)\}', tex_content))
                     _dangling = sorted(_all_refs - _actual_labels)
                     if _dangling:
                         for _dref in _dangling:
-                            tex_content = _re.sub(
-                                r'\\ref\{' + _re.escape(_dref) + r'\}',
+                            tex_content = _dre.sub(
+                                r'\\ref\{' + _dre.escape(_dref) + r'\}',
                                 r'\\textit{(fig. unavailable)}',
                                 tex_content)
                         with open(tex_path, "w", encoding="utf-8") as f:
