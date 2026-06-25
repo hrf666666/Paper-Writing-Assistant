@@ -156,6 +156,44 @@ class FactBase:
                 return k
         return None
 
+    def _compute_pairing_constraint(self, ours: Dict, baselines: Dict) -> str:
+        """v16 防线1: 数值配对约束——防止 LLM 张冠李戴。
+
+        将每个子集的 ours/baseline 值配对列出，明确标注每个数值属于哪个子集。
+        让 LLM 在写论文时看到"0.081 是 Urban，不是 Lambertian"。
+        """
+        # 按子集标签配对 ours 和 baseline
+        _ours_by_tag = {}
+        for k, v in ours.items():
+            tag = self._metric_tag(k)
+            if tag:
+                try:
+                    _ours_by_tag[tag] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        _baselines_by_tag = {}
+        for k, v in baselines.items():
+            tag = self._metric_tag(k)
+            if tag:
+                try:
+                    _baselines_by_tag[tag] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        all_tags = sorted(set(_ours_by_tag) | set(_baselines_by_tag))
+        if not all_tags:
+            return ""
+        lines = ["数值配对约束（正文引用数值时必须与此归属一致，禁止张冠李戴）："]
+        for tag in all_tags:
+            ov = _ours_by_tag.get(tag)
+            bv = _baselines_by_tag.get(tag)
+            parts = []
+            if ov is not None:
+                parts.append(f"ours={ov}")
+            if bv is not None:
+                parts.append(f"baseline={bv}")
+            lines.append(f"  {tag}: {', '.join(parts)}")
+        return "\n".join(lines)
+
     def get_metric(self, name: str, default: Optional[float] = None) -> Optional[float]:
         """读取权威数值。大小写不敏感，去空白。"""
         if not self.metrics:
@@ -224,6 +262,10 @@ class FactBase:
             if _comparison:
                 lines.append("⚠️ 数值对比结论（正文声称必须与此一致，禁止夸大）:")
                 lines.append(_comparison)
+            # v16 防线1: 数值配对约束——防止 LLM 张冠李戴（如 Urban 0.081 标成 Lambertian）
+            _pairing = self._compute_pairing_constraint(ours, baselines)
+            if _pairing:
+                lines.append(_pairing)
         if self.innovation_names:
             lines.append(f"innovations: {', '.join(self.innovation_names)}")
         lines.append("</fact_base>")

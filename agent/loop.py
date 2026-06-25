@@ -1208,6 +1208,103 @@ class ResearchLoop:
             f.write(tex)
         logger.info(f"[v15.7] 宏包校验：自动补 {len(_unique)} 个缺失宏包: {_unique}")
 
+    # v16: 指标名词表（封闭集合，用于数值归属校验）
+    _METRIC_WORDS = {
+        "lambertian": "Lambertian",
+        "non-lambertian": "Non-Lambertian",
+        "nonlambertian": "Non-Lambertian",
+        "urban": "Urban",
+        "overall": "Overall",
+    }
+
+    def _validate_metric_attribution(self, tex_path: str):
+        """v16 防线2: 数值归属校验——检测正文数值是否配错了子集（张冠李戴）。
+
+        类比 cite 前置校验，但只检测不自动改（自然语言归属不确定，自动改可能改错）。
+        检测到的张冠李戴记入 findings_report（v15.9 可见化通道）。
+
+        策略：
+        1. 从 FactBase 构建 值→子集 映射（如 0.081 → Urban）
+        2. 正则扫描正文每个 0.NNN 数值
+        3. 对每个数值，找前后 50 字符窗口内的指标名词
+        4. 值∈FactBase 但窗口指标名≠真实归属 → 可能张冠李戴 → warning
+        """
+        import re as _re
+        if not os.path.exists(tex_path):
+            return
+        fb = getattr(self, '_factbase', None)
+        if not fb or not fb.metrics:
+            return
+        with open(tex_path, "r", encoding="utf-8") as f:
+            tex = f.read()
+
+        # 1. 构建 值→归属 映射（只取带子集标签的核心数值）
+        _val_to_tag = {}  # {0.081: "Urban"}
+        for k, v in fb.metrics.items():
+            tag = fb._metric_tag(k)
+            if not tag:
+                continue
+            try:
+                _fv = float(v)
+            except (TypeError, ValueError):
+                continue
+            # 只保留 MAE 类指标（避免 training params 噪声）
+            if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
+                _val_to_tag[round(_fv, 4)] = tag  # tag 已是小写（_metric_tag 返回小写）
+        if not _val_to_tag:
+            return
+
+        # 2. 扫描正文数值，检测张冠李戴
+        _mismatches = []
+        _seen_spans = set()  # 去重（同一数值多次出现只报第一次）
+        for m in _re.finditer(r'(\d+\.\d{3,4})', tex):
+            try:
+                _val = round(float(m.group(1)), 4)
+            except ValueError:
+                continue
+            if _val not in _val_to_tag:
+                continue  # 不在 FactBase 的数值不管
+            _true_tag = _val_to_tag[_val]
+            # 3. 找前后窗口内的指标名词
+            _start = max(0, m.start() - 60)
+            _end = min(len(tex), m.end() + 60)
+            _window = tex[_start:_end].lower()
+            _claimed_tags = set()
+            for _word, _norm in self._METRIC_WORDS.items():
+                if _word in _window:
+                    _claimed_tags.add(_norm)
+            # 4. 真实归属不在声称集合里 → 可能张冠李戴
+            #    （但排除"同时提多个子集"的情况，如"Lambertian and Urban"）
+            #    注意：统一小写比较（_true_tag 是小写，_claimed_tags 是首字母大写）
+            if _claimed_tags and _true_tag not in {t.lower() for t in _claimed_tags}:
+                _ctx = tex[_start:_end].replace('\n', ' ').strip()[:80]
+                _key = (m.start() // 100,)  # 按段落去重
+                if _key not in _seen_spans:
+                    _seen_spans.add(_key)
+                    _mismatches.append(
+                        f"值 {_val} (归属={_true_tag}) 但上下文提 {_claimed_tags}: ...{_ctx}...")
+
+        if _mismatches:
+            logger.warning(f"[v16] 数值归属校验: {len(_mismatches)} 处疑似张冠李戴")
+            for _mm in _mismatches[:5]:
+                logger.warning(f"  {_mm}")
+            # 记入 FindingBus（经 findings 落盘可见）
+            try:
+                from agent.core.finding import (Finding, Severity, Location,
+                                                 FixAction)
+                for _mm in _mismatches[:5]:
+                    self._findings.record(Finding(
+                        source="metric_attribution",
+                        kind="number:misattribution",
+                        severity=Severity.WARNING,
+                        description=f"疑似数值张冠李戴: {_mm}",
+                        location=Location(chapter="main.tex"),
+                        fix=FixAction(op="regenerate", target="main.tex",
+                                      hint="核实该数值的子集归属是否正确"),
+                    ))
+            except Exception:
+                pass  # FindingBus 不存在时不阻塞
+
     def _validate_cite_keys(self, tex_path: str) -> dict:
         """
         v15.5 A1.1: 引用前置校验门 —— 写盘后、bib 构建前拦截编造的 cite key。
@@ -1971,6 +2068,11 @@ class ResearchLoop:
             _tex_path = f"{OUTPUT_DIR}/latex/main.tex"
             if os.path.exists(_tex_path):
                 self._ensure_packages_loaded(_tex_path)
+                # v16 防线2: 数值归属校验——检测张冠李戴（如 Urban 0.081 标成 Lambertian）
+                self._validate_metric_attribution(_tex_path)
+                # 若数值校验新增了 finding，重新落盘 findings_report
+                if any(f.source == "metric_attribution" for f in self._findings.all()):
+                    self._dump_findings_report()
 
             # 复制 figures/ 到 latex/figures/
             figures_src = os.path.join(OUTPUT_DIR, "figures")
