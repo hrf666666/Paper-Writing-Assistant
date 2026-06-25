@@ -2021,6 +2021,7 @@ class ResearchLoop:
                             tex_content = tex_content.replace(
                                 _end_doc,
                                 remaining_figures + "\n\n" + _end_doc,
+                                1,  # v16 fix: count=1 防止多个 \end{document} 被重复替换
                             )
                         else:
                             tex_content += "\n\n" + remaining_figures
@@ -2042,6 +2043,14 @@ class ResearchLoop:
                                     logger.warning(f"[Phase 7.3] 检测到 figure 在 {_b} 之后"
                                                    f"（图墙风险），请检查注入逻辑")
                                     break
+                    # v16 fix: 清除重复的 \end{document}（replace 漏 count=1 导致的残留）
+                    _end_count = tex_content.count(_end_doc)
+                    if _end_count > 1:
+                        _last_end = tex_content.rfind(_end_doc)
+                        _before_last = tex_content[:_last_end]
+                        _before_last = _before_last.replace(_end_doc, "")
+                        tex_content = _before_last + _end_doc
+                        logger.warning(f"[Phase 7.3] 清除 {_end_count - 1} 个重复 \\end{{document}}")
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
                     logger.info(f"[Phase 7.3] 图表LaTeX代码已注入main.tex ({len(remaining_figures)} chars)")
