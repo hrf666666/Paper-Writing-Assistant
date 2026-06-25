@@ -1498,6 +1498,61 @@ class ResearchLoop:
 
         return results
 
+    def _apply_auto_fixactions(self) -> int:
+        """v15.9: FixAction executor——自动执行 auto_apply 的确定性修复。
+
+        绕过 warning 死信的时序死锁：warning finding 携带 auto_apply FixAction
+        时，直接在 self._chapters 执行替换（不依赖 rerun 通道）。
+
+        当前仅处理 op=replace_number（cross_chapter 数值不一致的确定性修复）。
+        执行后把 finding severity 降为 INFO（避免下一轮 as_revision_brief 重复处理）。
+
+        Returns: 执行的替换次数。
+        """
+        from agent.core.finding import Severity
+        _applied = 0
+        for f in self._findings.all():
+            if not f.fix or not f.fix.auto_apply:
+                continue
+            if f.fix.op != "replace_number":
+                continue  # 只处理确定性数值替换
+            _old, _new = f.fix.target, f.fix.replacement
+            if not _old or _old == _new:
+                continue
+            for ch_num, content in self._chapters.items():
+                if _old in content:
+                    self._chapters[ch_num] = content.replace(_old, _new)
+                    _applied += 1
+                    logger.info(f"[v15.9] FixAction 执行: ch{ch_num} "
+                                f"'{_old}' → '{_new}'")
+            # 降级 severity 避免 as_revision_brief 重复处理
+            f.severity = Severity.INFO
+        if _applied:
+            logger.info(f"[v15.9] FixAction executor 完成: {_applied} 处替换")
+        return _applied
+
+    def _dump_findings_report(self):
+        """v15.9: 不可修 warning 可见化——落盘所有 warning+ findings。
+
+        当前 FindingBus findings 只活在内存，除了 l3_review 源的都不落盘。
+        这让 overclaim/缺消融/命名泄漏等不可修 warning 对人工/审稿人可见。
+        """
+        from agent.core.finding import Severity
+        _findings_out = []
+        for f in self._findings.all():
+            if f.severity not in (Severity.WARNING, Severity.CRITICAL):
+                continue
+            _d = f.to_dict()
+            _findings_out.append(_d)
+        try:
+            with open(os.path.join(OUTPUT_DIR, "findings_report.json"), "w",
+                      encoding="utf-8") as f:
+                json.dump(_findings_out, f, ensure_ascii=False, indent=2)
+            logger.info(f"[v15.9] findings_report.json 落盘: "
+                        f"{len(_findings_out)} 个 warning+ findings")
+        except Exception as e:
+            logger.warning(f"[v15.9] findings_report 落盘失败: {e}")
+
     def _run_pre_lock_audit(self) -> Dict:
         """Phase 5.6: 全章草稿审计 + 一致性（v15.3 L2 前移闭环）
 
@@ -1595,6 +1650,12 @@ class ResearchLoop:
                             logger.info(f"[Phase 5.6] {name} rerun 完成 (score={getattr(report, 'overall_score', 0):.1f})")
         else:
             logger.info(f"[Phase 5.6] 无 critical findings，无需 rerun")
+
+        # v15.9: FixAction executor——自动执行 auto_apply 的确定性修复（不依赖 rerun 通道）
+        results["auto_fixes_applied"] = self._apply_auto_fixactions()
+
+        # v15.9: 不可修 warning 可见化——落盘所有 warning+ findings
+        self._dump_findings_report()
 
         results["total_findings"] = audit_findings_count + cc_findings_count
         results["critical_reruns"] = len(results["reruns"])

@@ -102,7 +102,8 @@ class Finding:
         if self.fix:
             d["fix"] = {"op": self.fix.op, "target": self.fix.target,
                         "replacement": self.fix.replacement,
-                        "auto_apply": self.fix.auto_apply}
+                        "auto_apply": self.fix.auto_apply,
+                        "hint": self.fix.hint}  # v15.9: 补 hint（原 to_dict 漏了）
         if self.evidence_anchor:
             d["evidence_anchor"] = self.evidence_anchor
         if self.close_criterion:
