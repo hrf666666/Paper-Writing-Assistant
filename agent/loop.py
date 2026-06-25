@@ -1305,6 +1305,132 @@ class ResearchLoop:
             except Exception:
                 pass  # FindingBus 不存在时不阻塞
 
+    def _check_chapter_metric_attribution(self, ch_num: int, content: str) -> list:
+        """v16.1: 章节级数值归属校验——返回结构化错误供段落级重写。
+
+        与 _validate_metric_attribution（main.tex 级，只记日志）不同，
+        本方法在章节内容上跑，offset 可靠，返回结构化结果供 _revise_paragraphs 使用。
+        """
+        import re as _re
+        fb = getattr(self, '_factbase', None)
+        if not fb or not fb.metrics:
+            return []
+        # 构建 值→归属 映射
+        _val_to_tag = {}
+        for k, v in fb.metrics.items():
+            tag = fb._metric_tag(k)
+            if not tag:
+                continue
+            try:
+                _fv = float(v)
+            except (TypeError, ValueError):
+                continue
+            if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
+                _val_to_tag[round(_fv, 4)] = tag
+        if not _val_to_tag:
+            return []
+        # 构建 tag→正确值 映射（用于 truth_brief）
+        _tag_to_val = {}
+        for k, v in fb.metrics.items():
+            tag = fb._metric_tag(k)
+            if tag:
+                try:
+                    _tag_to_val.setdefault(tag, float(v))
+                except (TypeError, ValueError):
+                    pass
+        # 扫描章节内容
+        _misattributions = []
+        _seen_spans = set()
+        for m in _re.finditer(r'(\d+\.\d{3,4})', content):
+            try:
+                _val = round(float(m.group(1)), 4)
+            except ValueError:
+                continue
+            if _val not in _val_to_tag:
+                continue
+            _true_tag = _val_to_tag[_val]
+            _start = max(0, m.start() - 60)
+            _end = min(len(content), m.end() + 60)
+            _window = content[_start:_end].lower()
+            _claimed_tags = set()
+            for _word, _norm in self._METRIC_WORDS.items():
+                if _word in _window:
+                    _claimed_tags.add(_norm.lower())
+            if _claimed_tags and _true_tag not in _claimed_tags:
+                _key = (m.start() // 100,)
+                if _key not in _seen_spans:
+                    _seen_spans.add(_key)
+                    _correct_val = _tag_to_val.get(
+                        next(iter(_claimed_tags)), None)
+                    _misattributions.append({
+                        'char_span': (m.start(), m.end()),
+                        'value': _val,
+                        'true_tag': _true_tag,
+                        'claimed_tag': next(iter(_claimed_tags)),
+                        'correct_val': _correct_val,
+                    })
+        if _misattributions:
+            logger.info(f"[v16.1] ch{ch_num} 数值归属校验: "
+                        f"{len(_misattributions)} 处张冠李戴，将触发段落级重写")
+        return _misattributions
+
+    def _locate_paragraph(self, content: str, char_span: tuple) -> int:
+        """v16.1: offset→段落索引（按 \\n\\n 切分累计长度定位）。"""
+        paragraphs = content.split('\n\n')
+        cumlen = 0
+        for i, p in enumerate(paragraphs):
+            if cumlen + len(p) >= char_span[0]:
+                return i
+            cumlen += len(p) + 2  # +2 for \n\n
+        return 0
+
+    def _build_truth_brief(self, misattributions: list) -> str:
+        """v16.1: 把检测到的错误+FactBase 真相拼成 brief。"""
+        lines = ["数值归属修正依据（来自 FactBase 权威数据）："]
+        for m in misattributions:
+            _line = (f"- 数值 {m['value']} 被标为 {m['claimed_tag']}，"
+                     f"但 {m['value']} 实际属于 {m['true_tag']} 子集。")
+            if m.get('correct_val') is not None:
+                _line += f" 若此处指 {m['claimed_tag']}，正确值应为 {m['correct_val']}。"
+            lines.append(_line)
+        return '\n'.join(lines)
+
+    def _revise_paragraphs(self, ch_num: int, content: str,
+                           misattributions: list, truth_brief: str) -> str:
+        """v16.1: 对含数值错误的段落，带真相重写（第三道防线）。
+
+        与 rerun（重写整章）不同，本方法只重写出错段落，且把 FactBase 真相
+        注入 prompt，让 LLM 理解错误后修正——不是盲目重写。
+        """
+        paragraphs = content.split('\n\n')
+        _revised_count = 0
+        for m in misattributions:
+            para_idx = self._locate_paragraph(content, m['char_span'])
+            if para_idx >= len(paragraphs):
+                continue
+            orig_para = paragraphs[para_idx]
+            prompt = (
+                f"以下段落有数值归属错误，请只修正数值归属错误，保持其余内容不变：\n\n"
+                f"错误：数值 {m['value']} 被标为 {m['claimed_tag']}，"
+                f"但真相是 {m['value']} 属于 {m['true_tag']} 子集。\n"
+                f"{truth_brief}\n\n"
+                f"原段落：\n{orig_para}\n\n"
+                f"请输出修正后的单段 LaTeX（只改数值归属，不改变论述结构），"
+                f"直接输出内容无需解释："
+            )
+            try:
+                fixed_para = self.api_client.call_generation(prompt)
+                if fixed_para and fixed_para.strip():
+                    paragraphs[para_idx] = fixed_para.strip()
+                    _revised_count += 1
+                    logger.info(f"[v16.1] ch{ch_num} 段落{para_idx} 重写完成"
+                                f"（修正 {m['claimed_tag']} {m['value']} → {m['true_tag']}）")
+            except Exception as e:
+                logger.warning(f"[v16.1] ch{ch_num} 段落{para_idx} 重写失败: {e}")
+        if _revised_count:
+            logger.info(f"[v16.1] ch{ch_num} 段落级重写完成: {_revised_count} 段")
+        return '\n\n'.join(paragraphs)
+
     def _validate_cite_keys(self, tex_path: str) -> dict:
         """
         v15.5 A1.1: 引用前置校验门 —— 写盘后、bib 构建前拦截编造的 cite key。
@@ -1713,6 +1839,21 @@ class ResearchLoop:
                 logger.info(f"[Phase 5.6] cross_chapter 录入 {cc_findings_count} findings")
             except Exception as e:
                 logger.warning(f"[Phase 5.6] cross_chapter 失败: {e}")
+
+        # v16.1: 第三道防线——章节级数值归属校验 → 带真相的段落级重写
+        # 与 critical rerun（重写整章）不同，这里只重写出错段落，且注入 FactBase 真相
+        _v161_fixes = 0
+        for _ch_num, _ch_content in list(self._chapters.items()):
+            _mis = self._check_chapter_metric_attribution(_ch_num, _ch_content)
+            if _mis:
+                _brief = self._build_truth_brief(_mis)
+                _fixed = self._revise_paragraphs(_ch_num, _ch_content, _mis, _brief)
+                if _fixed != _ch_content:
+                    self._chapters[_ch_num] = _fixed
+                    _v161_fixes += len(_mis)
+        if _v161_fixes:
+            logger.info(f"[v16.1] 段落级重写完成: {_v161_fixes} 处数值张冠李戴已修正")
+            results["paragraph_rewrites"] = _v161_fixes
 
         # 3. 若有 critical findings → 触发受影响章节 rerun
         from agent.core.finding import Severity
