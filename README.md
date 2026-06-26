@@ -1,6 +1,44 @@
-# 论文范文写作助手 v15.7 (Paper Writing Assistant)
+# 论文范文写作助手 v16.2 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.3 修复评价闭环：数值 owner 真相源（baseline 不再被错标 ours）+ 评价前移（Phase 5.6 草稿态审计解 FindingBus 死信箱）+ 评价可信化（L1/L2 去重 + 阈值缩放）**。**v15.5 治愈引用漂移与 figure 非确定性：cite key 前置校验门（不再静默删引用）+ figure plan 落盘复用（不再每次 LLM 重规划导致缺图）**。**v15.6 实跑后修复 4 个深挖根因：图墙时序错位 + None 污染 + overclaim 反向校验 + validator 矢量图识别**。**v15.7 治本文图联动断裂：图规划前移到章节前，结果经 planning_block 注入章节 prompt，正文自然 \ref 图（7 张 orphan → 0）**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.5-v15.7 治愈引用漂移/figure 非确定性/文图联动断裂**。**v15.8-v16.1 建立数值可信三道防线（真相注入+写后检测+带真相段落重写）+ FixAction executor + warning 可见化**。**v16.2 架构升级：pipeline 从线性（生成→检测→报告）变成闭环（边写边改+全文检查闭环），L3 从终局评价变成闭环检测器**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v16.2 里程碑：边写边改 + 全文检查闭环（架构升级）
+
+> **v16.2 统一了 v15.5-v16.1 的碎片防线——不是加第6道防线，是把校验嵌入生成过程 + L3 接回闭环。** 所有问题的共同根：论文声称 vs 真相源不一致。v16.2 改变了 pipeline 拓扑（线性→闭环），3 个模块 + 3 个接线（~340 行）：
+> - **模块A 统一真相上下文**（`truth_context`）：合并 architecture/experiment 真相 + 自动矛盾标注（零参数+SAM 同现→标注），经 planning_block 自动注入所有章节 prompt。token 预算≤9KB。
+> - **模块B 子节即时校验**（`_verify_chapter_subsections`）：orchestrator 返回整章后按 \n\n 切分子节，逐个确定性正则校验（cite/数值/图引用），有错带真相重写。零 LLM 调用（只有检测到错才调）。
+> - **模块C L3 闭环重写**（`_run_l3_revision_loop`）：L3 major issues → evidence_anchor 定位段落 → 带真相重写 → 重新生成 main.tex。L3 从"终局评价"变成"闭环检测器"。+ 引用链验证（cite→bib title 一致性）。
+> - **为什么不蠢**：不靠正则提取语义声称（蠢）→ 靠 L3 理解语义（完备）；不在文本上机械替换（蠢）→ 带真相理解性重写；不外挂检查器（解耦）→ 校验嵌入生成+L3 接回闭环。
+> - **诚实的局限**：实验缺陷类问题（整体退步/Non-Lamb 持平）不可修——架构能让论文"忠实反映真相"，但不能"改变真相"。
+
+## v16.1 里程碑：带真相的段落级重写（第三道防线）
+
+> **v16 建了前两道防线（真相注入+写后检测），但检测到的错误修正不了。v16.1 补第三道防线。**
+> - 段落级重写（`_revise_paragraphs`）：检测到数值张冠李戴 → 定位出错段落 → 把 FactBase 真相+错误描述拼给 LLM → 只重写这段。实跑验证：ch1 修正 0.411 标 urban→non-lambertian，ch5 修正 0.081 标 urban→mixed。
+> - 三道防线完整：防线1（真相注入）→ 防线2（写后检测）→ 防线3（带真相段落重写）。
+
+## v16 里程碑：数值可信——补"可用参考稿"缺失的核心一环
+
+> **回到系统初衷：产出可信的参考稿。** cite 有两道防线（写前约束+写后校验），数值没有。v16 给数值加上同样的两道防线。
+> - **防线1**（`_compute_pairing_constraint`）：FactBase 配对约束——按子集列出 ours/baseline 值，让 LLM 看到每个数值的正确归属。张冠李戴 21→2 处。
+> - **防线2**（`_validate_metric_attribution`）：编译前扫描正文数值归属，检测张冠李戴记入 findings_report。
+> - bug 修复：重复 end{document}（replace 漏 count=1）+ 留痕切断文字（offset 替换→批量字符串替换）。
+
+## v15.9 里程碑：FixAction executor + 不可修 warning 可见化
+
+> **系统性问题诊断：warning 死信。** FindingBus 的 warning finding 从不被消费（只有 critical 触发 rerun），5+ 个检测器共享此缺陷。
+> - FixAction executor（`_apply_auto_fixactions`）：Phase 5.6 后自动执行 auto_apply 的 replace_number FixAction，降级 severity 避免重复。
+> - 不可修 warning 可见化（`_dump_findings_report`）：落盘所有 warning+ findings 到 findings_report.json。
+> - 核心设计：确定性的事让代码做（executor），语义的事让 LLM 做（hint），做不到的事让人看到（落盘）。
+
+## v15.8 里程碑：弱点一致性闭环 + 留痕 bug + overclaim 扩展 + FactBase 对比结论
+
+> **E3+L3 issue[2]/[3] 的统一诊断：叙事分裂**（abstract 声称优越但 Limitations 承认退步，两者不同步）。
+> - 留痕 bug 修复（v15.5 的 `\textbf{[REF?]}` 放 cite 内部破坏 LaTeX → 整条 cite 替换）。
+> - overclaim 扩展（新增"零参数+SAM"能力夸大检查）。
+> - FactBase 对比结论（`_compute_comparison`）：预计算 ours vs baseline 胜负，Overall 退步时警告"禁止声称整体优越"。
+> - abstract 注入 Limitations + FactBase（弱点一致性闭环）。
+> - cross_chapter 跨章节同指标一致性检查。
 
 ## v15.7 里程碑：文图联动治本（规划前移 + 通信回路）
 

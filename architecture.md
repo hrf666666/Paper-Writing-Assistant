@@ -1,10 +1,48 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v15.7 | 更新: 2026-06-24
+> 版本: v16.2 | 更新: 2026-06-26
 
 ---
 
-## 0. v15.7 文图联动治本（规划前移 + 通信回路）
+## 0. v16.2 边写边改 + 全文检查闭环（架构升级）
+
+> **v16.2 统一了 v15.5-v16.1 的碎片防线——pipeline 从线性（生成→检测→报告）变成闭环
+> （边写边改+全文检查闭环）。** 所有问题的共同根：论文声称 vs 真相源不一致。
+>
+> - **模块A 统一真相上下文**（`truth_context`）：合并 architecture/experiment 真相 +
+>   自动矛盾标注（零参数+SAM→标注），经 planning_block 注入所有章节。token≤9KB。
+> - **模块B 子节即时校验**（`_verify_chapter_subsections`）：整章按\n\n切分子节，逐个
+>   确定性正则校验（cite/数值/图），有错带真相重写。零 LLM 调用（只检测到错才调）。
+> - **模块C L3 闭环重写**（`_run_l3_revision_loop`）：L3 major→evidence_anchor 定位段落
+>   →带真相重写→重新生成 main.tex。L3 从终局评价变成闭环检测器。
+> - **核心设计**：确定性的事让代码做（正则校验），语义的事让 LLM 做（L3 理解+真相重写），
+>   不靠正则提取语义声称（不完备），不靠字符串替换（蠢）。
+
+## 1. v16.1 带真相的段落级重写（第三道防线）
+
+> **v16 建了前两道防线，但检测到的错误修正不了。v16.1 补第三道防线。**
+> - `_revise_paragraphs`：检测到数值张冠李戴→定位段落→FactBase 真相+错误拼给 LLM→重写这段。
+> - 三道防线完整：真相注入(防线1)→写后检测(防线2)→带真相段落重写(防线3)。
+
+## 2. v16 数值可信——"可用参考稿"缺失的核心一环
+
+> cite 有两道防线，数值没有。v16 给数值加同样的两道防线。
+> - 防线1（`_compute_pairing_constraint`）：FactBase 配对约束注入 prompt。
+> - 防线2（`_validate_metric_attribution`）：编译前扫描数值归属，检测张冠李戴。
+
+## 3. v15.9 FixAction executor + warning 可见化
+
+> 系统性问题：warning 死信（FindingBus 的 warning 从不被消费）。
+> - FixAction executor：Phase 5.6 后自动执行 auto_apply replace_number。
+> - findings_report.json：落盘所有 warning+ findings。
+
+## 4. v15.8 弱点一致性闭环 + FactBase 对比结论
+
+> E3+L3 统一诊断：叙事分裂（abstract 声称优越但 Limitations 承认退步）。
+> - FactBase 对比结论（`_compute_comparison`）：预计算胜负，Overall 退步时警告。
+> - abstract 注入 Limitations + FactBase。cross_chapter 跨章节一致性检查。
+
+## 5. v15.7 文图联动治本（规划前移 + 通信回路）
 
 > **v15.7 解决地基级问题——文图联动通信断裂**。v14 FigureManifest 承诺"文图联动单一真相源"，
 > 但 figure_planner 在 Phase7.28（章节后）规划，结果从未流入章节生成 → 7 张图全 orphan。
