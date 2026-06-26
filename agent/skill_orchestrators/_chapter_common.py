@@ -159,6 +159,10 @@ class ChapterContext:
                 _flines.append(f"- \\ref{{{_label}}}: {_desc}")
             _flines.append("</figure_directive>")
             blocks.append("\n".join(_flines))
+        # v16.2: 统一真相上下文（含矛盾标注）——经 planning_block 自动注入所有章节
+        _truth = self.truth_context()
+        if _truth:
+            blocks.append(_truth)
         return "\n".join(blocks) if blocks else ""
 
     # v16.2: 声称-矛盾词表（用于 architecture_truth 矛盾标注）

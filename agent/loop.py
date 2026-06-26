@@ -754,6 +754,8 @@ class ResearchLoop:
 
         content = run_fn(self._project_data, self._ref_data, **kwargs)
         content, _ = self._quality_ensure(chapter_name, content)
+        # v16.2 接线2: 子节级即时校验（边写边改）——整章按\n\n切分，逐子节确定性校验
+        content = self._verify_chapter_subsections(phase_num, content)
         self._chapters[phase_num] = content
         return content  # 审计在 Phase 6.5 统一做
 
@@ -1373,6 +1375,47 @@ class ResearchLoop:
             logger.info(f"[v16.1] ch{ch_num} 数值归属校验: "
                         f"{len(_misattributions)} 处张冠李戴，将触发段落级重写")
         return _misattributions
+
+    def _verify_chapter_subsections(self, ch_num: int, content: str) -> str:
+        """v16.2 接线2: 整章切分子节，逐个即时校验（边写边改）。
+
+        orchestrator 返回整章后，按 \\n\\n 切分子节，对每个子节跑 _verify_subsection。
+        检测到错的子节 → 带真相重写该子节（复用 _revise_paragraphs 逻辑）。
+        """
+        paragraphs = content.split('\n\n')
+        _total_issues = 0
+        _revised = 0
+        for i, para in enumerate(paragraphs):
+            if len(para.strip()) < 20:
+                continue  # 跳过空段/短段
+            _, issues = self._verify_subsection(para)
+            if issues:
+                _total_issues += len(issues)
+                # 构建真相 brief 并重写该子节
+                _brief_parts = []
+                for t, *rest in issues:
+                    if t == 'cite':
+                        _brief_parts.append(f"引用 '{rest[0]}' 不在合法 cite key 列表中")
+                    elif t == 'numeric':
+                        _brief_parts.append(f"数值 {rest[0]} 归属错误")
+                    elif t == 'figure':
+                        _brief_parts.append(f"图引用 {rest[0]} dangling")
+                _truth = "；".join(_brief_parts)
+                try:
+                    prompt = (
+                        f"以下段落有校验问题，请修正（保持其余内容不变）：\n\n"
+                        f"问题：{_truth}\n\n原段落：\n{para[:2000]}\n\n"
+                        f"请输出修正后的单段 LaTeX，直接输出：")
+                    fixed = self.api_client.call_generation(prompt)
+                    if fixed and fixed.strip():
+                        paragraphs[i] = fixed.strip()
+                        _revised += 1
+                except Exception as e:
+                    logger.warning(f"[v16.2] ch{ch_num} 子节{i} 重写失败: {e}")
+        if _total_issues:
+            logger.info(f"[v16.2] ch{ch_num} 子节即时校验: {_total_issues} 处问题, "
+                        f"{_revised} 子节已重写")
+        return '\n\n'.join(paragraphs)
 
     def _verify_subsection(self, content: str) -> str:
         """v16.2 模块B: 子节级即时校验（确定性正则，零LLM调用）。
@@ -3061,6 +3104,19 @@ class ResearchLoop:
                 results["l3_findings"] = [f.to_dict() for f in self._findings.by(source="l3_review")]
 
             logger.info(f"[Phase 9] 评价完成: Grade={grade}")
+
+            # v16.2 接线3: L3 闭环重写——L3 major issues → 段落级带真相重写
+            if eval_result and eval_result.get("L3_academic_quality", {}).get("issues"):
+                _l3_fixed = self._run_l3_revision_loop(eval_result)
+                if _l3_fixed:
+                    results["l3_revisions"] = _l3_fixed
+                    logger.info(f"[v16.2] L3闭环: {_l3_fixed} 个 major issue 段落级修正完成")
+                    # 修正后重新生成 main.tex（只重生成LaTeX，不重跑全pipeline）
+                    try:
+                        self._generate_latex_output(results)
+                        logger.info("[v16.2] L3闭环后 main.tex 已重新生成")
+                    except Exception as re:
+                        logger.warning(f"[v16.2] L3闭环后LaTeX重生成失败: {re}")
 
 
         except Exception as e:
