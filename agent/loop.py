@@ -1374,6 +1374,78 @@ class ResearchLoop:
                         f"{len(_misattributions)} 处张冠李戴，将触发段落级重写")
         return _misattributions
 
+    def _verify_subsection(self, content: str) -> str:
+        """v16.2 模块B: 子节级即时校验（确定性正则，零LLM调用）。
+
+        在每个子节 call_generation 后跑，检测结构化声称错误：
+        1. cite key 合法性（vs _cite_key_map）
+        2. 数值归属（vs FactBase _val_to_tag）
+        3. 图引用 dangling（vs figure_manifest labels）
+        检测到错 → 返回标记（由调用方决定是否重写）。
+        无错 → 原样返回。
+
+        这是"边写边改"的即时校验环节——确定性、零成本、精确。
+        """
+        import re as _re
+        issues = []
+
+        # 1. cite key 校验
+        key_map = getattr(self, '_cite_key_map', {})
+        if key_map:
+            valid_keys = set(key_map.keys())
+            for m in _re.finditer(r'\\cite\{([^}]+)\}', content):
+                for k in m.group(1).split(','):
+                    k = k.strip()
+                    if k and k not in valid_keys:
+                        issues.append(('cite', k, m.group(0)[:50]))
+
+        # 2. 数值归属校验
+        fb = getattr(self, '_factbase', None)
+        if fb and fb.metrics:
+            _val_to_tag = {}
+            for k, v in fb.metrics.items():
+                tag = fb._metric_tag(k)
+                if not tag:
+                    continue
+                try:
+                    _fv = float(v)
+                except (TypeError, ValueError):
+                    continue
+                if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
+                    _val_to_tag[round(_fv, 4)] = tag
+            if _val_to_tag:
+                for m in _re.finditer(r'(\d+\.\d{3,4})', content):
+                    try:
+                        _val = round(float(m.group(1)), 4)
+                    except ValueError:
+                        continue
+                    if _val not in _val_to_tag:
+                        continue
+                    _true_tag = _val_to_tag[_val]
+                    _window = content[max(0, m.start()-60):m.end()+60].lower()
+                    _claimed = {wn.lower() for w, wn in self._METRIC_WORDS.items() if w in _window}
+                    if _claimed and _true_tag not in _claimed:
+                        issues.append(('numeric', f"{_val}({ _true_tag})",
+                                       f"claimed {_claimed}"))
+
+        # 3. 图引用 dangling 校验
+        manifest_labels = set()
+        if hasattr(self, '_figure_manifest'):
+            for e in getattr(self._figure_manifest, '_entries', []):
+                if e.label:
+                    manifest_labels.add(e.label)
+        if manifest_labels:
+            fig_refs = set(_re.findall(r'\\ref\{(fig:[^}]+)\}', content))
+            actual_labels = set(_re.findall(r'\\label\{(fig:[^}]+)\}', content))
+            dangling = fig_refs - actual_labels - manifest_labels
+            for d in dangling:
+                issues.append(('figure', d, 'dangling'))
+
+        if issues:
+            logger.info(f"[v16.2] 子节即时校验: {len(issues)} 处问题 "
+                        f"({', '.join(t[0] for t in issues[:3])})")
+        return content, issues
+
     def _locate_paragraph(self, content: str, char_span: tuple) -> int:
         """v16.1: offset→段落索引（按 \\n\\n 切分累计长度定位）。"""
         paragraphs = content.split('\n\n')
@@ -1430,6 +1502,138 @@ class ResearchLoop:
         if _revised_count:
             logger.info(f"[v16.1] ch{ch_num} 段落级重写完成: {_revised_count} 段")
         return '\n\n'.join(paragraphs)
+
+    def _locate_by_evidence(self, evidence_anchor: str) -> tuple:
+        """v16.2 模块C: 用 L3 的 evidence_anchor（精确原文引用）定位章节+段落。
+
+        evidence_anchor 是 L3 审稿 prompt 约束的"EXACT verbatim quote"，
+        天然适合 str.find 做字符串定位锚。
+
+        Returns: (ch_key, para_idx) 或 (None, None)
+        """
+        if not evidence_anchor or len(evidence_anchor) < 10:
+            return None, None
+        # 截取 evidence_anchor 的核心片段（取前60字符避免引用太长匹配不到）
+        _anchor = evidence_anchor.strip()[:80]
+        for ch_key, content in self._chapters.items():
+            idx = content.find(_anchor)
+            if idx == -1:
+                # 降级：取前30字符
+                _short = evidence_anchor.strip()[:30]
+                idx = content.find(_short)
+            if idx != -1:
+                para_idx = self._locate_paragraph(content, (idx, idx + len(_anchor)))
+                return ch_key, para_idx
+        return None, None
+
+    def _build_l3_truth_brief(self, issue: dict) -> str:
+        """v16.2 模块C: 从 L3 issue 构建真相 brief。"""
+        lines = ["L3 审稿发现的问题（请根据以下信息修正该段落）："]
+        summary = issue.get("summary", issue.get("description", ""))
+        close = issue.get("close_criterion", "")
+        if summary:
+            lines.append(f"问题: {summary[:200]}")
+        if close:
+            lines.append(f"修正标准: {close[:200]}")
+        # 补充 FactBase 真相
+        fb = getattr(self, '_factbase', None)
+        if fb and not fb.is_empty():
+            sheet = fb.as_fact_sheet()
+            if sheet:
+                lines.append(f"权威数据:\n{sheet[:800]}")
+        return "\n".join(lines)
+
+    def _revise_paragraph_by_index(self, ch_key, para_idx, issue, truth_brief) -> str:
+        """v16.2 模块C: 按段落索引重写单个段落（L3 issue 驱动）。"""
+        content = self._chapters[ch_key]
+        paragraphs = content.split('\n\n')
+        if para_idx >= len(paragraphs):
+            return content
+        orig_para = paragraphs[para_idx]
+        summary = issue.get("summary", "")
+        prompt = (
+            f"以下段落被审稿人指出存在问题，请根据审稿意见修正：\n\n"
+            f"{truth_brief}\n\n"
+            f"原段落：\n{orig_para[:2000]}\n\n"
+            f"请输出修正后的单段 LaTeX（只改有问题的部分，保持论述结构），直接输出："
+        )
+        try:
+            fixed = self.api_client.call_generation(prompt)
+            if fixed and fixed.strip():
+                paragraphs[para_idx] = fixed.strip()
+                logger.info(f"[v16.2] L3闭环: ch{ch_key} 段落{para_idx} 重写完成")
+        except Exception as e:
+            logger.warning(f"[v16.2] L3闭环重写失败: {e}")
+        return '\n\n'.join(paragraphs)
+
+    def _run_l3_revision_loop(self, eval_result: dict):
+        """v16.2 模块C: L3 闭环重写——L3 major issues → 段落级带真相重写。
+
+        L3 从'终局评价'变成'闭环检测器'：发现问题→定位段落→带真相重写。
+        最多处理5个major issue，每轮最多1次闭环。
+        """
+        l3 = eval_result.get("L3_academic_quality", {})
+        issues = l3.get("issues", [])
+        major_issues = [i for i in issues if i.get("significance") == "major"]
+        if not major_issues:
+            return 0
+
+        _fixed_count = 0
+        for issue in major_issues[:5]:
+            evidence = issue.get("evidence_anchor", "")
+            ch_key, para_idx = self._locate_by_evidence(evidence)
+            if ch_key is None:
+                logger.info(f"[v16.2] L3 issue 无法定位(evidence不匹配): "
+                            f"{evidence[:40]}...")
+                continue
+            truth = self._build_l3_truth_brief(issue)
+            new_content = self._revise_paragraph_by_index(
+                ch_key, para_idx, issue, truth)
+            if new_content != self._chapters[ch_key]:
+                self._chapters[ch_key] = new_content
+                _fixed_count += 1
+
+        if _fixed_count:
+            logger.info(f"[v16.2] L3闭环重写: {_fixed_count}/{len(major_issues)} "
+                        f"个 major issue 已段落级修正")
+        return _fixed_count
+
+    def _verify_citation_chain(self) -> list:
+        """v16.2 模块C: 完整引用链验证 cite→bib→pool。
+
+        当前只有 cite∈bib 检查，本方法补 bib 条目内容 vs key_map 元数据一致性。
+        """
+        import re as _re
+        issues = []
+        key_map = getattr(self, '_cite_key_map', {})
+        if not key_map:
+            return issues
+        bib_path = os.path.join(OUTPUT_DIR, "latex", "references.bib")
+        if not os.path.exists(bib_path):
+            return issues
+        with open(bib_path, "r", encoding="utf-8") as f:
+            bib_content = f.read()
+        # 对每个 key_map 里的 key，检查 bib 条目是否含正确的 title
+        for key, paper in key_map.items():
+            # 查 bib 里有没有这个 key
+            entry_match = _re.search(
+                r'@\w+\{' + _re.escape(key) + r',\s*(.*?)(?=@\w+\{|\Z)',
+                bib_content, _re.DOTALL)
+            if not entry_match:
+                continue  # bib 没这个 key（_ensure_bib 会补）
+            entry_text = entry_match.group(1)[:500]
+            # 检查 title 一致性
+            expected_title = str(paper.get("title", ""))[:30].lower()
+            if expected_title and expected_title not in entry_text.lower():
+                issues.append({
+                    'key': key,
+                    'expected_title': paper.get("title", ""),
+                    'type': 'bib_title_mismatch',
+                })
+        if issues:
+            logger.warning(f"[v16.2] 引用链验证: {len(issues)} 个 bib 条目 "
+                           f"title 与 key_map 不一致")
+        return issues
 
     def _validate_cite_keys(self, tex_path: str) -> dict:
         """

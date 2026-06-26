@@ -161,6 +161,81 @@ class ChapterContext:
             blocks.append("\n".join(_flines))
         return "\n".join(blocks) if blocks else ""
 
+    # v16.2: 声称-矛盾词表（用于 architecture_truth 矛盾标注）
+    _CLAIM_WORDS = {"零参数": "zero-parameter", "无参数": "parameter-free",
+                    "轻量": "lightweight", "端到端": "end-to-end", "无监督": "unsupervised"}
+    _CONTRADICTION_WORDS = {"sam": "SAM", "segment anything": "SAM",
+                            "pretrained": "pretrained model", "pre-trained": "pretrained model",
+                            "backbone": "backbone network", "手工": "manual post-processing"}
+
+    def truth_context(self) -> str:
+        """v16.2: 统一真相上下文——合并 architecture/experiment 真相 + 矛盾标注。
+
+        numeric_truth（FactBase 配对约束）已在 citation_context 里打包注入，
+        本方法补充 architecture/experiment 真相 + 自动矛盾标注（零参数+SAM 等）。
+        token 预算：≤9KB（architecture≤6KB + experiment≤3KB）。
+        """
+        blocks = []
+        # 结构真相 + 矛盾标注
+        arch = self._summarize_architecture_with_warnings()
+        if arch:
+            blocks.append(f"<architecture_truth>\n{arch}\n</architecture_truth>")
+        # 实验真相
+        exp = self._summarize_experiment_results()
+        if exp:
+            blocks.append(f"<experiment_truth>\n{exp}\n</experiment_truth>")
+        return "\n".join(blocks) if blocks else ""
+
+    def _summarize_architecture_with_warnings(self) -> str:
+        """提取模块信息 + 自动标注'声称词+矛盾词'的 overclaim。"""
+        if not self.model_architecture:
+            return ""
+        lines = []
+        modules = self.model_architecture.get("模块详情", [])
+        for m in modules[:8]:  # 最多8个模块
+            name = m.get("模块名", "")
+            ops = str(m.get("核心操作", ""))
+            # 矛盾检测：同一模块描述里同时出现声称词+矛盾词
+            ops_lower = ops.lower()
+            _claims_found = [cn for cw, cn in self._CLAIM_WORDS.items() if cw in ops]
+            _contras_found = [cw for cw in self._CONTRADICTION_WORDS if cw in ops_lower]
+            if _claims_found and _contras_found:
+                contra_str = "/".join(self._CONTRADICTION_WORDS[c] for c in _contras_found)
+                claim_str = "/".join(_claims_found)
+                lines.append(f"  {name}: {ops[:120]}")
+                lines.append(f"    ⚠️ 声称'{claim_str}'但依赖{contra_str}——"
+                             f"正文必须注明依赖，不可单独声称'{claim_str}'")
+            else:
+                lines.append(f"  {name}: {ops[:120]}")
+        result = "\n".join(lines)
+        return result[:6000]  # token 预算
+
+    def _summarize_experiment_results(self) -> str:
+        """提取实验关键结果（不含 FactBase——那个在 citation_context 里）。"""
+        if not self.experiment_design:
+            return ""
+        lines = []
+        # 关键结果
+        results = self.experiment_design.get("关键结果", {})
+        if isinstance(results, dict):
+            for k, v in list(results.items())[:6]:
+                lines.append(f"  {k}: {str(v)[:100]}")
+        elif isinstance(results, list):
+            for r in results[:6]:
+                lines.append(f"  {str(r)[:100]}")
+        # 评估指标
+        metrics = self.experiment_design.get("评估指标", [])
+        if metrics:
+            if isinstance(metrics, dict):
+                metric_str = ", ".join(f"{k}={v}" for k, v in list(metrics.items())[:8])
+            elif isinstance(metrics, list):
+                metric_str = ", ".join(str(m) for m in metrics[:8])
+            else:
+                metric_str = str(metrics)[:200]
+            lines.append(f"  评估指标: {metric_str}")
+        result = "\n".join(lines)
+        return result[:3000]  # token 预算
+
     def _chapter_num(self) -> int:
         m = {"Introduction": 1, "Related Work": 2, "Methodology": 3,
              "Experiments": 4, "Conclusion": 5}
