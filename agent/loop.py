@@ -3265,12 +3265,32 @@ class ResearchLoop:
                                      "ablation": FigType.ABLATION, "comparison": FigType.COMPARISON,
                                      "qualitative": FigType.QUALITATIVE}
                         _existing = self._figure_manifest.get(_fig_id)
+                        # v17: 画后视觉自检（融合 figure-skill 自检闭环思想 + zai_vision MCP）
+                        # 达标(≥7)升 VALIDATED + 写 quality_score；不达标保持 RENDERED（不写低分避免被排除）
+                        _final_status = FigStatus.RENDERED
+                        _quality_score = 0.0
+                        _png_for_review = fig_result.get("png_path", "")
+                        try:
+                            from tools.figure_review import review_figure
+                            _rv = review_figure(_png_for_review, fp)
+                            if _rv["available"]:
+                                _quality_score = float(_rv["score"])
+                                if _rv["passed"]:
+                                    _final_status = FigStatus.VALIDATED
+                                    logger.info(f"[Phase 7.28] {_fig_id} 视觉自检通过 "
+                                                f"({_quality_score}/10) → VALIDATED")
+                                else:
+                                    logger.info(f"[Phase 7.28] {_fig_id} 视觉评分 "
+                                                f"{_quality_score}/10 < 7，保持 RENDERED")
+                        except Exception as _re:
+                            logger.debug(f"[Phase 7.28] {_fig_id} 视觉自检跳过: {_re}")
                         if _existing:
-                            # phase0_99 已 add(PLANNED) → update 为 RENDERED + 填 source_pdf/caption
+                            # phase0_99 已 add(PLANNED) → update + 填 source_pdf/caption/质量分
                             self._figure_manifest.update(
-                                _fig_id, status=FigStatus.RENDERED,
+                                _fig_id, status=_final_status,
                                 source_pdf=_fig_tex_path, caption=_caption,
                                 size_type=_size_type,
+                                quality_score=_quality_score,
                                 supports_claim=fp.get("key_message", _caption[:40]),
                             )
                         else:
@@ -3281,7 +3301,8 @@ class ResearchLoop:
                                 source_pdf=_fig_tex_path,
                                 caption=_caption,
                                 supports_claim=fp.get("key_message", _caption[:40]),
-                                status=FigStatus.RENDERED,
+                                status=_final_status,
+                                quality_score=_quality_score,
                                 size_type=_size_type,
                             ))
                 except Exception as fe:

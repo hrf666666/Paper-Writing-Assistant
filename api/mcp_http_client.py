@@ -52,6 +52,10 @@ class MCPHttpClient:
         self._api_key = api_key
         self._session = requests.Session()
         self._session_ids: Dict[str, str] = {}  # server_name -> session_id
+        # v17: stdio MCP 会话（zai_vision 等 stdio 服务）
+        self._stdio_sessions: Dict[str, dict] = {}  # server_name -> {proc, next_id, lock}
+        import threading
+        self._stdio_lock = threading.Lock()
 
     @property
     def api_key(self) -> str:
@@ -271,9 +275,175 @@ class MCPHttpClient:
         return None
 
     def close(self):
-        """关闭 HTTP 会话"""
+        """关闭 HTTP 会话 + stdio 子进程"""
         self._session.close()
         self._session_ids.clear()
+        self._shutdown_stdio()
+    # ═══════════════════════════════════════════════════════════
+    # stdio MCP transport（v17 移植自 auto_research_agent）
+    # 支持 @z_ai/mcp-server（zai_vision 视觉理解等）
+    # ═══════════════════════════════════════════════════════════
+
+    def _stdio_initialize(self, service_name: str) -> Optional[dict]:
+        """启动 stdio MCP 子进程并握手（initialize + notifications/initialized）。
+
+        复用：同一 service 只 spawn 一次，会话缓存在 self._stdio_sessions。
+        返回 {proc, next_id, lock} 或 None（失败）。
+        """
+        import subprocess, threading
+        glm_key = self.api_key
+        if not glm_key:
+            logger.debug("stdio MCP: 无 API key，跳过")
+            return None
+        try:
+            proc = subprocess.Popen(
+                ["npx", "-y", "@z_ai/mcp-server"],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={**os.environ, "Z_AI_API_KEY": glm_key, "Z_AI_MODE": "ZHIPU"},
+            )
+        except FileNotFoundError:
+            logger.debug("stdio MCP: npx 未找到")
+            return None
+        except Exception as e:
+            logger.debug(f"stdio MCP: 启动失败: {e}")
+            return None
+        init_msg = json.dumps({
+            "jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05", "capabilities": {},
+                "clientInfo": {"name": "Paper-Writing-Assistant", "version": "17.0"},
+            },
+        }) + "\n"
+        try:
+            proc.stdin.write(init_msg.encode())
+            proc.stdin.flush()
+            resp_line = proc.stdout.readline()
+            if not resp_line:
+                proc.kill()
+                return None
+            resp = json.loads(resp_line.decode())
+            if "error" in resp:
+                logger.debug(f"stdio MCP: initialize error: {resp['error']}")
+                proc.kill()
+                return None
+        except Exception as e:
+            logger.debug(f"stdio MCP: initialize 失败: {e}")
+            proc.kill()
+            return None
+        # notifications/initialized
+        notif = json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}}) + "\n"
+        try:
+            proc.stdin.write(notif.encode())
+            proc.stdin.flush()
+        except Exception:
+            pass
+        logger.info(f"stdio MCP {service_name}: 握手成功")
+        return {"proc": proc, "next_id": 2, "lock": threading.RLock()}
+
+    def _stdio_call_tool(self, service_name: str, tool_name: str,
+                        arguments: dict, timeout: int = 60) -> Optional[str]:
+        """通过 stdio 子进程调用 MCP 工具。返回文本内容或 None。"""
+        import time
+        session = self._stdio_sessions.get(service_name)
+        if not session:
+            session = self._stdio_initialize(service_name)
+            if not session:
+                return None
+            self._stdio_sessions[service_name] = session
+        proc = session["proc"]
+        lock = session["lock"]
+        with lock:
+            session["next_id"] += 1
+            rpc_id = session["next_id"]
+            payload = json.dumps({
+                "jsonrpc": "2.0", "id": rpc_id, "method": "tools/call",
+                "params": {"name": tool_name, "arguments": arguments},
+            }) + "\n"
+            try:
+                proc.stdin.write(payload.encode())
+                proc.stdin.flush()
+            except BrokenPipeError:
+                logger.warning(f"stdio MCP {service_name}: 子进程已死，清理")
+                self._stdio_sessions.pop(service_name, None)
+                try: proc.kill()
+                except Exception: pass
+                return None
+        if proc.poll() is not None:
+            logger.warning(f"stdio MCP {service_name}: 子进程退出 code={proc.returncode}")
+            self._stdio_sessions.pop(service_name, None)
+            return None
+        try:
+            buf = b""
+            deadline = time.time() + timeout
+            data = None
+            while time.time() < deadline:
+                line = proc.stdout.readline()
+                if not line:
+                    break
+                buf += line
+                try:
+                    data = json.loads(buf.decode())
+                    if data.get("id") == rpc_id:
+                        break
+                    buf = b""
+                    data = None
+                    continue
+                except json.JSONDecodeError:
+                    continue
+            else:
+                logger.warning(f"stdio MCP {service_name}: 读取超时")
+                return None
+            if data is None:
+                return None
+        except Exception as e:
+            logger.warning(f"stdio MCP {service_name}: 读取失败: {e}")
+            return None
+        if "error" in data:
+            err = data["error"]
+            logger.warning(f"stdio MCP {service_name}: error {err.get('code')}: {err.get('message')}")
+            return None
+        result = data.get("result", {})
+        if result.get("isError"):
+            err_text = " ".join(b.get("text", "") for b in result.get("content", []) if isinstance(b, dict))
+            logger.warning(f"stdio MCP {service_name} tool error: {err_text[:200]}")
+            return None
+        text_parts = []
+        for block in result.get("content", []):
+            if isinstance(block, dict) and block.get("type") == "text":
+                text_parts.append(block.get("text", ""))
+            elif isinstance(block, str):
+                text_parts.append(block)
+        raw = "\n".join(text_parts)
+        return raw if raw.strip() else None
+
+    def _shutdown_stdio(self):
+        """关闭所有 stdio 子进程。"""
+        for name, session in list(self._stdio_sessions.items()):
+            try:
+                proc = session.get("proc")
+                if proc and proc.poll() is None:
+                    proc.kill()
+                    proc.wait(timeout=5)
+            except Exception:
+                pass
+        self._stdio_sessions.clear()
+
+    # ── 通用 MCP 工具调用（自动路由 HTTP/stdio）──
+
+    def call_stdio_or_http(self, server_name: str, tool_name: str,
+                           arguments: dict, timeout: int = 60,
+                           transport: str = "auto") -> Optional[str]:
+        """通用 MCP 工具调用，按 transport 或服务名自动路由 HTTP/stdio。
+
+        transport: "auto"（按服务名判断）/ "http" / "stdio"
+        """
+        stdio_services = {"zai_vision"}
+        use_stdio = (transport == "stdio" or
+                     (transport == "auto" and server_name in stdio_services))
+        if use_stdio:
+            return self._stdio_call_tool(server_name, tool_name, arguments, timeout)
+        return self.call_tool(server_name, tool_name, arguments, timeout)
+
 
 
 # ========== 全局单例（延迟初始化） ==========
@@ -351,4 +521,95 @@ def mcp_web_reader(url: str,
         timeout=timeout_seconds + 10,
     )
 
+# ═══════════════════════════════════════════════════════════════
+# zai_vision 视觉理解便捷封装（v17 移植自 auto_research_agent）
+# 通过 stdio @z_ai/mcp-server 调用，提供 5 个视觉专项工具。
+# 传图方式：本地绝对路径（stdio server 直接读本地文件，不用 data URL）。
+# ═══════════════════════════════════════════════════════════════
 
+def mcp_understand_diagram(image_path: str, prompt: str = "",
+                           timeout: int = 90) -> Optional[str]:
+    """调用 understand_technical_diagram —— 针对架构图/流程图/UML 的结构化解读。
+
+    适用：论文的 architecture/teaser/module_detail 图（TikZ 生成的架构图）。
+    """
+    args = {"image_source": str(os.path.abspath(image_path))}
+    if prompt:
+        args["prompt"] = prompt
+    return get_mcp_client()._stdio_call_tool(
+        "zai_vision", "understand_technical_diagram", args, timeout=timeout
+    )
+
+
+def mcp_analyze_data_viz(image_path: str, prompt: str = "",
+                         timeout: int = 90) -> Optional[str]:
+    """调用 analyze_data_visualization —— 阅读统计图表，提炼趋势/异常。
+
+    适用：论文的 ablation/comparison 数据图（柱状图/折线/热力图）。
+    """
+    args = {"image_source": str(os.path.abspath(image_path))}
+    if prompt:
+        args["prompt"] = prompt
+    return get_mcp_client()._stdio_call_tool(
+        "zai_vision", "analyze_data_visualization", args, timeout=timeout
+    )
+
+
+def mcp_analyze_image(image_path: str, prompt: str = "",
+                      timeout: int = 90) -> Optional[str]:
+    """调用 analyze_image —— 通用图像理解（未被专项工具覆盖的视觉内容）。
+
+    适用：qualitative 图、结果展示图等通用场景。
+    """
+    args = {"image_source": str(os.path.abspath(image_path))}
+    if prompt:
+        args["prompt"] = prompt
+    return get_mcp_client()._stdio_call_tool(
+        "zai_vision", "analyze_image", args, timeout=timeout
+    )
+
+
+def mcp_extract_text(image_path: str, language_hint: str = "",
+                     timeout: int = 60) -> Optional[str]:
+    """调用 extract_text_from_screenshot —— OCR 提取图中文字。
+
+    适用：检查图中文字是否可读、是否有乱码。
+    """
+    args = {"image_source": str(os.path.abspath(image_path))}
+    if language_hint:
+        args["language_hint"] = language_hint
+    return get_mcp_client()._stdio_call_tool(
+        "zai_vision", "extract_text_from_screenshot", args, timeout=timeout
+    )
+
+
+def mcp_vision_available() -> bool:
+    """检测 zai_vision（stdio MCP）是否可用（握手能成功）。"""
+    try:
+        client = get_mcp_client()
+        if not client.api_key:
+            return False
+        session = client._stdio_sessions.get("zai_vision")
+        if session and session.get("proc") and session["proc"].poll() is None:
+            return True
+        session = client._stdio_initialize("zai_vision")
+        if session:
+            client._stdio_sessions["zai_vision"] = session
+            return True
+        return False
+    except Exception:
+        return False
+
+
+def shutdown_mcp_vision():
+    """关闭 zai_vision stdio 子进程（pipeline 结束时调用）。"""
+    try:
+        client = get_mcp_client()
+        session = client._stdio_sessions.pop("zai_vision", None)
+        if session and session.get("proc"):
+            proc = session["proc"]
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait(timeout=5)
+    except Exception:
+        pass

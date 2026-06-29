@@ -176,6 +176,8 @@ def _build_generation_prompt(fig_plan, venue, guide, examples):
     width_hint = "16cm (double-column figure*)" if size_type in ("double", "teaser") else "8cm (single-column figure)"
     height_hint = "4-6cm" if size_type in ("double", "teaser") else "6-8cm"
 
+    key_message = fig_plan.get("key_message", "")
+
     prompt = f"""## Task
 Generate a complete, compilable LaTeX+TikZ document for the following academic paper figure.
 
@@ -184,6 +186,11 @@ Generate a complete, compilable LaTeX+TikZ document for the following academic p
 
 ## Style Examples (follow these patterns)
 {examples}
+
+## Key Message（核心论证目标 — 本图必须让读者看懂这个论点）
+{key_message if key_message else "(未指定，按 title/caption 自行组织视觉重点)"}
+
+设计思考：模块布局、视觉层次、箭头方向要如何组织，才能最清晰地传达上述论证目标？
 
 ## Figure Specification
 - **Figure ID**: {fig_id}

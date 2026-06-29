@@ -66,6 +66,16 @@ _PLAN_USER_PROMPT = """Analyze the following paper content and plan the figures.
 ## Available Experiment Data
 {experiment_data}
 
+## Chart Selection Principles (v17 融合自 scipilot-figure-skill)
+When planning data figures (ablation/comparison), follow these evidence-driven rules:
+- 1 categorical + 1 continuous, n<10/group → stripplot/dot plot (NEVER mean bars — hides distribution)
+- 1 categorical + 1 continuous, n>=10/group → box/violin + stripplot overlay
+- 2 continuous, see relationship → scatter + regression + r value
+- time/dose vs continuous → line + error band (NEVER bars)
+- multi-variable correlation → correlation heatmap / pairplot
+- Avoid: pie charts, dual Y-axis, 3D bars, rainbow/jet colormap, mean bars for small n
+- Color: use colorblind-safe palette (Okabe-Ito), add redundant encoding (linestyle/marker)
+
 ## Output Format (JSON)
 Return a JSON object with this exact structure:
 {{
@@ -464,8 +474,69 @@ def _validate_plan(plan: Dict, venue: str,
             logger.warning(f"[FigurePlanner] {fig['fig_id']} 模块过多({len(fig['modules'])})，截断为10")
             fig["modules"] = fig["modules"][:10]
 
+    # v17 精神B: 主动拦截科研画图禁忌（viz_pitfalls）
+    # figure-skill 精神：生成后检查是否触发经典错误，触发就标记+给替代方案
+    for fig in figures:
+        _pitfall_warnings = _check_viz_pitfalls(fig)
+        if _pitfall_warnings:
+            fig["pitfall_warnings"] = _pitfall_warnings
+            for w in _pitfall_warnings:
+                logger.warning(f"[FigurePlanner] {fig['fig_id']} 触发禁忌: {w['pitfall']} — {w['advice']}")
+
     plan["figures"] = figures
     return plan
+
+
+def _check_viz_pitfalls(fig: Dict) -> list:
+    """检查 figure plan 是否触发科研画图经典错误（viz_pitfalls）。
+
+    figure-skill 精神：主动拦截，不是顺从。触发就给替代方案。
+    当前 agent 主要画架构图，故只检查适用项；数据图禁忌（均值柱/双Y轴等）
+    为未来数据图路径预留。
+    """
+    warnings = []
+    fig_type = fig.get("fig_type", "")
+    design = fig.get("design_constraints", {})
+    annotations = fig.get("annotations", [])
+
+    # P7 过度使用颜色（检查模块/标注是否颜色过多）
+    modules = fig.get("modules", [])
+    colors_used = set()
+    for m in modules:
+        c = m.get("color", "") or m.get("fill", "")
+        if c:
+            colors_used.add(c.lower())
+    if len(colors_used) > 7:
+        warnings.append({
+            "pitfall": "P7 过度使用颜色",
+            "advice": "类别>7 时颜色难区分，建议分组+形状冗余编码",
+        })
+
+    # P13 红绿对比（检查 design_constraints 或 annotations 是否指定红绿）
+    all_text = json.dumps(fig, ensure_ascii=False).lower()
+    if ("red" in all_text and "green" in all_text) or "red green" in all_text:
+        warnings.append({
+            "pitfall": "P13 红绿对比不色盲友好",
+            "advice": "改用蓝橙/Okabe-Ito 色盲安全配色",
+        })
+
+    # P14 rainbow/jet 色图（数据图）
+    if fig_type in ("ablation", "comparison") and any(c in all_text for c in ("rainbow", "jet", "hsv")):
+        warnings.append({
+            "pitfall": "P14 rainbow/jet 色图感知不均匀",
+            "advice": "改用 viridis/magma/RdBu_r",
+        })
+
+    # P1 均值柱掩盖分布（数据图，小样本）—— 当前 agent 无真实数据图，预留
+    # P12 一图多论点
+    key_msg = fig.get("key_message", "")
+    if fig_type == "architecture" and len(modules) > 8:
+        warnings.append({
+            "pitfall": "P12 信息过载（模块过多）",
+            "advice": f"模块数 {len(modules)}>8，考虑拆分为两张图或分组展示",
+        })
+
+    return warnings
 
 
 def _infer_layout_template(fig: Dict) -> str:
