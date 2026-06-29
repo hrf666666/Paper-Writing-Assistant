@@ -179,10 +179,11 @@ class ContentVerifier:
         注：\\cite{key} 是否在 references.bib 可解析由 Phase 7.8 保证。
         bibliography 参数保留兼容但 v14 不再使用。
         """
-        # 统计 \cite{} 引用
-        cite_matches = re.findall(r'\\cite\{([^}]*)\}', full_text)
-        total_cites = len(cite_matches)
-        empty_cites = sum(1 for c in cite_matches if not c.strip())
+        # 统计 \cite{} 引用（v17: 统一走 CitationBase，消除正则副本）
+        from agent.core.citation_base import CitationBase
+        nonempty_cites = CitationBase.extract_cites(full_text)
+        empty_cites = len(CitationBase.extract_empty_cites(full_text))
+        total_cites = len(nonempty_cites) + empty_cites
 
         # 检测残留标记
         unresolved = full_text.count("[?]")

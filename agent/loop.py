@@ -312,24 +312,34 @@ class ResearchLoop:
         logger.info(f"  额外章节: {self.venue_adapter.get_extra_sections() or '无'}")
 
     def _setup_output_dir(self):
-        """设置输出目录"""
+        """设置输出目录
+
+        v17 修复：resume 模式下若 output/ 已有可用检查点（index.json），跳过归档，
+        直接复用——否则归档会把 .checkpoints/ 一起移走，_try_resume 拿到的就是
+        空目录，被迫从头跑（与 resume=True 的意图相反）。
+        仅当 output/ 无检查点（首次跑 / 旧残留）时才归档旧目录。
+        """
         from datetime import datetime
         import shutil
 
         output_dir = OUTPUT_DIR
+        cp_index = os.path.join(output_dir, ".checkpoints", "index.json")
         if os.path.exists(output_dir):
-            try:
-                cases_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cases")
-                os.makedirs(cases_dir, exist_ok=True)
-                current_time = datetime.now().strftime("%m%d_%H%M")
-                new_dir_name = f"output_{current_time}"
-                new_dir_path = os.path.join(cases_dir, new_dir_name)
-                shutil.move(output_dir, new_dir_path)
-                logger.info(f"[pipeline] 已将旧输出归档到 {new_dir_path}")
-            except Exception as e:
-                logger.warning(f"归档旧输出目录失败: {e}")
-
-        os.makedirs(output_dir, exist_ok=True)
+            if os.path.exists(cp_index):
+                # 已有检查点 → resume 复用，绝不归档（否则破坏恢复）
+                logger.info(f"[pipeline] 检测到检查点 {cp_index}，跳过归档，resume 复用 output/")
+            else:
+                try:
+                    cases_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cases")
+                    os.makedirs(cases_dir, exist_ok=True)
+                    current_time = datetime.now().strftime("%m%d_%H%M")
+                    new_dir_name = f"output_{current_time}"
+                    new_dir_path = os.path.join(cases_dir, new_dir_name)
+                    shutil.move(output_dir, new_dir_path)
+                    logger.info(f"[pipeline] 已将旧输出归档到 {new_dir_path}")
+                except Exception as e:
+                    logger.warning(f"归档旧输出目录失败: {e}")
+                    os.makedirs(output_dir, exist_ok=True)
         for i in range(1, 6):
             os.makedirs(f"{output_dir}/chapter{i}", exist_ok=True)
         os.makedirs(f"{output_dir}/abstract", exist_ok=True)
@@ -625,7 +635,7 @@ class ResearchLoop:
                         "previous_content": previous_summary,
                         "style_guide": self._ref_data.get("style_guide", {}),
                         "experiments_summary": experiments_summary,
-                        "citation_context": self._build_citation_context(),
+                        "citation_context": self._build_citation_context(None),
                         # v15.8: 弱点一致性——abstract 生成时已知 Limitations 承认的弱点
                         "limitations_summary": limitations_summary,
                         "fact_sheet": fact_sheet,
@@ -745,7 +755,7 @@ class ResearchLoop:
             self._project_data['outline'] = _ol
         # v14: rationale_matrix/exemplar_learner 已删（0消费空转）
 
-        kwargs = {"citation_context": self._build_citation_context(),
+        kwargs = {"citation_context": self._build_citation_context(f"ch{phase_num}"),
                   "venue_adapter": self.venue_adapter}
         if phase_num > 1:
             kwargs["previous_chapters"] = previous_chapters
@@ -757,6 +767,19 @@ class ResearchLoop:
         # v16.2 接线2: 子节级即时校验（边写边改）——整章按\n\n切分，逐子节确定性校验
         content = self._verify_chapter_subsections(phase_num, content)
         self._chapters[phase_num] = content
+
+        # v17: ch2 裂缝修复——收编 ch2 在线搜到的论文进 CitationBase
+        # （之前搜到但不进 cite_key_map，LLM 引用它们被判编造）
+        if phase_num == 2:
+            _online = self._ref_data.pop("_ch2_online_papers", None)
+            _cb = getattr(self, '_citation_base', None)
+            if _online and _cb:
+                _added = _cb.add_papers(_online)
+                if _added:
+                    # 同步兼容属性（下游 bib 生成读 _cite_key_map）
+                    self._cite_key_map = _cb.cite_key_map
+                    self._title_to_key = _cb.title_to_key
+                    logger.info(f"[ch2] 收编 {_added} 篇在线论文进 CitationBase")
         return content  # 审计在 Phase 6.5 统一做
 
     def _has_extra_discussion(self) -> bool:
@@ -1144,22 +1167,30 @@ class ResearchLoop:
                     f"manifest 填 PLANNED, 章节指令: "
                     f"{ {k: len(v) for k, v in directives.items()} }")
 
-    def _build_citation_context(self) -> str:
-        """v14: 委托给 CitationInjector。注：每次新建实例（citation_bank 会变），
-        内联缓存可能不命中但不影响正确性。"""
-        from agent.citation_injector import CitationInjector
-        _inj = CitationInjector(
-            reference_pool=self._reference_pool,
-            citation_bank=self._citation_bank,
-            factbase=getattr(self, '_factbase', None),
-            paper_context=getattr(self, '_paper_context', None),
+    def _build_citation_context(self, chapter: str = None) -> str:
+        """构建引用上下文（喂 LLM）+ 构建唯一真相源 CitationBase。
 
-        )
-        result = _inj.build()
-        # 回写 cite_key_map / title_to_key（BibTeX 阶段依赖）
-        self._cite_key_map = _inj.cite_key_map
-        self._title_to_key = _inj.title_to_key
-        return result
+        v17: 引用系统收敛进 CitationBase（agent/core/citation_base.py），
+        取代散落的 CitationInjector。本方法一次性构建 CitationBase 存为实例属性，
+        后续 inject/audit/bib 全部从同一个 CitationBase 读——真相源真正统一。
+        citation_context 字符串改用 CitationBase.citation_block()：清单不给 key，
+        LLM 只能用 <cite title=.. author=../> 占位符指认。
+        """
+        from agent.core.citation_base import CitationBase
+        # 首次构建（reference_pool + citation_bank 在 phase0_5/0_8 已就绪）。
+        # 复用：若已构建且论文数未变，直接用现成的（避免每章重建）。
+        _cb = getattr(self, '_citation_base', None)
+        _need_rebuild = (_cb is None) or (_cb.is_empty() and self._reference_pool)
+        if _need_rebuild:
+            _cb = CitationBase.build(
+                reference_pool=self._reference_pool,
+                citation_bank=self._citation_bank,
+            )
+            self._citation_base = _cb
+            # 兼容回写旧属性（bibtex_builder 等下游在退役前仍读它们）
+            self._cite_key_map = _cb.cite_key_map
+            self._title_to_key = _cb.title_to_key
+        return _cb.citation_block(chapter)
 
     # v15.7: LLM 常用命令 → 所需宏包映射（LLM 可能用了未 load 的命令）
     _CMD_TO_PACKAGE = {
@@ -1376,45 +1407,219 @@ class ResearchLoop:
                         f"{len(_misattributions)} 处张冠李戴，将触发段落级重写")
         return _misattributions
 
-    def _verify_chapter_subsections(self, ch_num: int, content: str) -> str:
-        """v16.2 接线2: 整章切分子节，逐个即时校验（边写边改）。
+    # v17 数值归属闭环上限（替代旧的无限盲改——旧逻辑曾对 ch1 段落13 盲改30次）
+    MAX_NUMERIC_FIX_ROUNDS = 3
 
-        orchestrator 返回整章后，按 \\n\\n 切分子节，对每个子节跑 _verify_subsection。
-        检测到错的子节 → 带真相重写该子节（复用 _revise_paragraphs 逻辑）。
+    def _judge_metric_attribution(self, content: str) -> dict:
+        """v17 治本：LLM + FactBase 真相 判断数值归属是否正确。
+
+        旧 _check_chapter_metric_attribution 用正则 + 字符窗口判"张冠李戴"，
+        在原理上做不对（对比句式必然误判），曾把正确陈述判错、盲改30次→段落变乱码。
+        治本：正则只定位含 FactBase 数值的段落（找数字，可靠），把（段落+真相）
+        喂给 LLM 做语义判断——这是已实测可靠的方法（正例判correct/反例抓misattributed）。
+
+        Returns:
+            {overall: "all_correct"|"has_errors",
+             misattributions: [{value, claimed_subset, true_subset, evidence, verdict}]}
+            无 FactBase 或无数值时返回 {overall: "all_correct", misattributions: []}。
         """
+        fb = getattr(self, '_factbase', None)
+        if not fb or not fb.metrics:
+            return {"overall": "all_correct", "misattributions": []}
+
+        # 1. 正则定位含 FactBase 数值的段落（只找数字，正则可靠）
+        import re as _re
+        _val_set = {}
+        for k, v in fb.metrics.items():
+            tag = fb._metric_tag(k)
+            if not tag:
+                continue
+            try:
+                _fv = round(float(v), 4)
+            except (TypeError, ValueError):
+                continue
+            if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
+                _val_set[_fv] = (tag, k)
+        if not _val_set:
+            return {"overall": "all_correct", "misattributions": []}
+
+        paragraphs = content.split('\n\n')
+        _to_judge = []  # [(para_idx, para_text)]
+        for i, para in enumerate(paragraphs):
+            nums_here = set()
+            for m in _re.finditer(r'(\d+\.\d{3,4})', para):
+                try:
+                    _v = round(float(m.group(1)), 4)
+                except ValueError:
+                    continue
+                if _v in _val_set:
+                    nums_here.add(_v)
+            if nums_here:
+                _to_judge.append((i, para))
+
+        if not _to_judge:
+            return {"overall": "all_correct", "misattributions": []}
+
+        # 2. 构建 FactBase 真相简报
+        truth_lines = []
+        for _val, (tag, key) in sorted(_val_set.items()):
+            truth_lines.append(f"  - {key} = {_val} (subset: {tag})")
+        truth = '\n'.join(truth_lines)
+
+        # 3. 把（含数值段落 + 真相）喂给 LLM 判断（已实测可靠）
+        sections_text = '\n\n'.join(
+            f"[Paragraph {i}]\n{p[:2000]}" for i, p in _to_judge
+        )
+        prompt = (
+            "You are reviewing whether metric numbers in an academic paper are "
+            "CORRECTLY ATTRIBUTED to their metric subsets.\n\n"
+            "**Authoritative ground truth (from experiments, do not question):**\n"
+            f"{truth}\n\n"
+            f"**Paragraphs under review:**\n{sections_text}\n\n"
+            "For EACH numeric value (like 0.119) that appears: judge whether the "
+            "surrounding sentence claims the RIGHT subset for that value. A value "
+            "appearing in its correct subset context is CORRECT — do NOT flag it. "
+            "Only flag genuine misattributions (number right but wrong subset claimed).\n\n"
+            "Also flag if a paragraph is corrupted/garbled (e.g. debug artifacts, "
+            "meta-commentary, punctuation noise) — verdict 'corrupted'.\n\n"
+            "Output JSON ONLY:\n"
+            "```json\n"
+            "{\n"
+            '  "overall": "all_correct" | "has_errors",\n'
+            '  "misattributions": [\n'
+            "    {\n"
+            '      "paragraph": <int>,\n'
+            '      "value": <number or null>,\n'
+            '      "claimed_subset": "<what the text says>",\n'
+            '      "true_subset": "<what ground truth says>",\n'
+            '      "evidence": "<exact quote>",\n'
+            '      "verdict": "correct" | "misattributed" | "corrupted"\n'
+            "    }\n"
+            "  ]\n"
+            "}```"
+        )
+
+        try:
+            resp = self.api_client.call_evaluation(prompt)
+            result = self.api_client.parse_json_response(resp, default={})
+            if isinstance(result, dict) and "overall" in result:
+                mis = result.get("misattributions", [])
+                # 只保留非 correct 的（correct 的是 LLM 列举确认，无需处理）
+                real_errors = [m for m in mis if m.get("verdict") != "correct"]
+                result["misattributions"] = real_errors
+                return result
+        except Exception as e:
+            logger.warning(f"[v17] _judge_metric_attribution LLM 判断失败: {e}")
+
+        # 兜底：LLM 失败时不误改（宁可不改也不盲改）
+        return {"overall": "all_correct", "misattributions": []}
+
+    def _revise_with_evidence(self, content: str, misattributions: list) -> str:
+        """v17：带 LLM evidence 的精确段落修订（替代旧的 _revise_paragraphs 盲改）。
+
+        与 _revise_paragraphs 的关键区别：
+        1. 修订指令来自 LLM 判断的 evidence（精确引用），不是正则误判
+        2. 修订后由调用方重评（闭环），不是盲改直落盘
+        """
+        if not misattributions:
+            return content
+        paragraphs = content.split('\n\n')
+        brief_lines = []
+        para_indices = set()
+        for m in misattributions:
+            pidx = m.get("paragraph")
+            if isinstance(pidx, int) and 0 <= pidx < len(paragraphs):
+                para_indices.add(pidx)
+            ev = m.get("evidence", "")
+            claimed = m.get("claimed_subset", "")
+            true_sub = m.get("true_subset", "")
+            verdict = m.get("verdict", "misattributed")
+            if verdict == "corrupted":
+                brief_lines.append(f"- 段落内容损坏（含调试碎片/乱码），需重写为连贯学术段落")
+            else:
+                _ev = ev[:60] if ev else ""
+                brief_lines.append(
+                    f"- 数值归属错误：声称 {claimed}，但真相是 {true_sub}（证据: {_ev!r}）"
+                )
+        if not para_indices:
+            return content
+        truth_brief = '\n'.join(brief_lines)
+        # 把需要修的段落原文 + evidence 指令 一起给 LLM
+        paras_text = '\n\n'.join(
+            f"[Paragraph {i}]\n{paragraphs[i][:2000]}" for i in sorted(para_indices)
+        )
+        prompt = (
+            "以下论文段落有数值归属错误（或内容损坏），请精确修正。\n\n"
+            f"**问题清单**:\n{truth_brief}\n\n"
+            f"**待修正段落**:\n{paras_text}\n\n"
+            "**要求**:\n"
+            "1. 只修正指出的问题，保持其余内容和论述结构不变\n"
+            "2. 修正数值归属：让数值出现在正确的子集上下文中\n"
+            "3. 若段落损坏，重写为连贯的学术英语段落\n"
+            "4. 直接输出修正后的段落（每个段落前加 [Paragraph N] 标记），无需解释\n"
+        )
+        try:
+            revised = self.api_client.call_generation(prompt)
+            if not revised or not revised.strip():
+                return content
+            # 解析 LLM 返回的 [Paragraph N] 标记段落，替换原文
+            import re as _re
+            for m in _re.finditer(r'\[Paragraph (\d+)\]\n(.+?)(?=\n\[Paragraph \d+\]|$)',
+                                  revised, flags=_re.DOTALL):
+                pidx = int(m.group(1))
+                new_text = m.group(2).strip()
+                if 0 <= pidx < len(paragraphs) and new_text:
+                    paragraphs[pidx] = new_text
+            return '\n\n'.join(paragraphs)
+        except Exception as e:
+            logger.warning(f"[v17] _revise_with_evidence 修订失败: {e}")
+            return content
+
+    def _verify_chapter_subsections(self, ch_num: int, content: str) -> str:
+        """v17: 整章切分子节即时校验（边写边改）。
+
+        - cite/figure: 走 _verify_subsection 确定性检测（可靠）
+        - numeric 归属: v17 改用 _judge_metric_attribution（LLM+真相），不再正则盲改。
+        """
+        _numeric_judge = self._judge_metric_attribution(content)
+        _numeric_mis = _numeric_judge.get("misattributions", []) if _numeric_judge.get("overall") == "has_errors" else []
+
         paragraphs = content.split('\n\n')
         _total_issues = 0
         _revised = 0
         for i, para in enumerate(paragraphs):
             if len(para.strip()) < 20:
-                continue  # 跳过空段/短段
+                continue
             _, issues = self._verify_subsection(para)
-            if issues:
-                _total_issues += len(issues)
-                # 构建真相 brief 并重写该子节
-                _brief_parts = []
-                for t, *rest in issues:
-                    if t == 'cite':
-                        _brief_parts.append(f"引用 '{rest[0]}' 不在合法 cite key 列表中")
-                    elif t == 'numeric':
-                        _brief_parts.append(f"数值 {rest[0]} 归属错误")
-                    elif t == 'figure':
-                        _brief_parts.append(f"图引用 {rest[0]} dangling")
-                _truth = "；".join(_brief_parts)
-                try:
-                    prompt = (
-                        f"以下段落有校验问题，请修正（保持其余内容不变）：\n\n"
-                        f"问题：{_truth}\n\n原段落：\n{para[:2000]}\n\n"
-                        f"请输出修正后的单段 LaTeX，直接输出：")
-                    fixed = self.api_client.call_generation(prompt)
-                    if fixed and fixed.strip():
-                        paragraphs[i] = fixed.strip()
-                        _revised += 1
-                except Exception as e:
-                    logger.warning(f"[v16.2] ch{ch_num} 子节{i} 重写失败: {e}")
-        if _total_issues:
-            logger.info(f"[v16.2] ch{ch_num} 子节即时校验: {_total_issues} 处问题, "
-                        f"{_revised} 子节已重写")
+            issues = [x for x in issues if x[0] not in ('numeric', 'numeric_locate')]
+            if not issues and not any(m.get("paragraph") == i for m in _numeric_mis):
+                continue
+            _total_issues += len(issues) + sum(1 for m in _numeric_mis if m.get("paragraph") == i)
+            _brief_parts = []
+            for t, *rest in issues:
+                if t == 'cite':
+                    _brief_parts.append(f"引用 '{rest[0]}' 不在合法 cite key 列表中")
+                elif t == 'figure':
+                    _brief_parts.append(f"图引用 {rest[0]} dangling")
+            for m in _numeric_mis:
+                if m.get("paragraph") == i:
+                    _brief_parts.append(f"数值归属：声称{m.get('claimed_subset','')}，真相{m.get('true_subset','')}")
+            _truth = "；".join(_brief_parts) if _brief_parts else "内容损坏需重写"
+            try:
+                prompt = (
+                    f"以下段落有校验问题，请精确修正（保持其余内容不变）：\n\n"
+                    f"问题：{_truth}\n\n原段落：\n{para[:2000]}\n\n"
+                    f"请输出修正后的单段 LaTeX，直接输出：")
+                fixed = self.api_client.call_generation(prompt)
+                if fixed and fixed.strip() and len(fixed.strip()) > 30:
+                    paragraphs[i] = fixed.strip()
+                    _revised += 1
+                else:
+                    logger.warning(f"[v17] ch{ch_num} 段{i} 修订为空或过短，保留原文")
+            except Exception as e:
+                logger.warning(f"[v17] ch{ch_num} 段{i} 修订失败: {e}")
+        if _revised:
+            logger.info(f"[v17] ch{ch_num} 边写边改: {_revised} 段已修（cite/figure/numeric）")
         return '\n\n'.join(paragraphs)
 
     def _verify_subsection(self, content: str) -> str:
@@ -1432,44 +1637,27 @@ class ResearchLoop:
         import re as _re
         issues = []
 
-        # 1. cite key 校验
+        # 1. cite 校验（v17: 统一走 CitationBase，同时认占位符与 \cite{} 形态）
         key_map = getattr(self, '_cite_key_map', {})
-        if key_map:
+        _cb = getattr(self, '_citation_base', None)
+        if key_map or _cb:
+            from agent.core.citation_base import CitationBase as _CB
             valid_keys = set(key_map.keys())
-            for m in _re.finditer(r'\\cite\{([^}]+)\}', content):
-                for k in m.group(1).split(','):
-                    k = k.strip()
-                    if k and k not in valid_keys:
-                        issues.append(('cite', k, m.group(0)[:50]))
+            # \cite{} 形态：池外 key（占位符阶段提取不到，phase7 后才有）
+            for k in _CB.extract_cites(content):
+                if k not in valid_keys:
+                    issues.append(('cite', k, f"\\cite{{{k}}}"))
+            # 占位符形态：池外指认（章节生成时即时检测，与 audit 同源）
+            if _cb:
+                import re as _re2
+                for m in _re2.finditer(r'<cite\s+title="([^"]*)"(?:\s+author="([^"]*)")?\s*/>', content):
+                    _t, _a = m.group(1), (m.group(2) or "")
+                    if _t and not _cb._resolve_placeholder(_t, _a):
+                        issues.append(('cite', _t[:40], f"占位符指认清单外论文"))
 
-        # 2. 数值归属校验
-        fb = getattr(self, '_factbase', None)
-        if fb and fb.metrics:
-            _val_to_tag = {}
-            for k, v in fb.metrics.items():
-                tag = fb._metric_tag(k)
-                if not tag:
-                    continue
-                try:
-                    _fv = float(v)
-                except (TypeError, ValueError):
-                    continue
-                if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
-                    _val_to_tag[round(_fv, 4)] = tag
-            if _val_to_tag:
-                for m in _re.finditer(r'(\d+\.\d{3,4})', content):
-                    try:
-                        _val = round(float(m.group(1)), 4)
-                    except ValueError:
-                        continue
-                    if _val not in _val_to_tag:
-                        continue
-                    _true_tag = _val_to_tag[_val]
-                    _window = content[max(0, m.start()-60):m.end()+60].lower()
-                    _claimed = {wn.lower() for w, wn in self._METRIC_WORDS.items() if w in _window}
-                    if _claimed and _true_tag not in _claimed:
-                        issues.append(('numeric', f"{_val}({ _true_tag})",
-                                       f"claimed {_claimed}"))
+        # v17 降级: 数值归属不再由正则判定（判不对，交 _judge_metric_attribution）。
+        # numeric 判定统一走 _verify_chapter_subsections 的 LLM+真相判断，
+        # 此处不产生 numeric issues（避免重复+误判）。
 
         # 3. 图引用 dangling 校验
         manifest_labels = set()
@@ -1680,20 +1868,15 @@ class ResearchLoop:
 
     def _validate_cite_keys(self, tex_path: str) -> dict:
         """
-        v15.5 A1.1: 引用前置校验门 —— 写盘后、bib 构建前拦截编造的 cite key。
+        引用前置校验门（v17 降级为 CitationBase 注入后的兜底断言）。
 
-        真相源 = self._cite_key_map（CitationInjector 用 generate_bib_key 确定性生成）。
-        合法 key 形如 'he2016'/'honauer2016'（surname+year）；LLM 编造的 key 形如
-        'urbanlf_dataset'（数据集名 snake_case），两者形态不交集，故 fuzzy 门槛从严。
-
-        策略（宁可留痕不可误修）：
-          - key 在 map 内 → 通过
-          - 不在 → 仅当与某合法 key 形态接近（同 surname + 年份差 ≤1）才修正
-          - 否则 → 替换为 \\textbf{[REF?-原key]} 留痕，计入 unknown（不再静默删）
-
-        Returns:
-            {"fixed": [(bad, good), ...], "unknown": [bad_key, ...], "changed": bool}
+        v17 起，引用 key 由 CitationBase.inject() 确定性注入，保证 key∈map。
+        本方法在 CitationBase 存在时短路（零工作）；仅当 CitationBase 缺失
+        （旧路径/降级）时才走旧的 fuzzy+留痕 逻辑。逐步退役中。
         """
+        # v17: CitationBase 已注入 → 短路，无需校验
+        if getattr(self, '_citation_base', None) and not self._citation_base.is_empty():
+            return {"fixed": [], "unknown": [], "changed": False}
         import re as _re
         if not os.path.exists(tex_path):
             return {"fixed": [], "unknown": [], "changed": False}
@@ -1810,8 +1993,11 @@ class ResearchLoop:
         """
         v15.5 A1.2: 前置校验（_validate_cite_keys）已先拦截编造 key，
         本方法只负责补 bib 条目（map 有但 bib 缺的 key）。
-        v14.0 的"静默删 cite"分支已删除——编造 key 现以 [REF?] 留痕。
+        v17 降级：CitationBase 注入保证 key∈map 且 bib 由 map 生成，本方法短路。
+        仅 CitationBase 缺失时走旧补漏逻辑。
         """
+        if getattr(self, '_citation_base', None) and not self._citation_base.is_empty():
+            return
         import re as _re
         if not os.path.exists(tex_path):
             return
@@ -2069,6 +2255,23 @@ class ResearchLoop:
                         logger.warning(f"[Phase 5.6] auditor {name} 失败: {e}")
         logger.info(f"[Phase 5.6] auditor 录入 {audit_findings_count} findings")
 
+        # v17: CitationBase 引用审计 → FindingBus（少引/池外指认 → critical rerun）
+        # 在占位符阶段审计最直接：数 <cite .../> 个数 vs min_cites，检测清单外 title
+        _cb = getattr(self, '_citation_base', None)
+        _cite_findings = 0
+        if _cb and not _cb.is_empty():
+            for num in chapter_names:
+                if num in self._chapters:
+                    try:
+                        cfs = _cb.audit_to_findings(f"ch{num}", self._chapters[num])
+                        recorded = self._findings.record_many(cfs)
+                        _cite_findings += len(recorded)
+                    except Exception as e:
+                        logger.warning(f"[Phase 5.6] CitationBase audit ch{num} 失败: {e}")
+            if _cite_findings:
+                logger.info(f"[Phase 5.6] CitationBase 录入 {_cite_findings} 个引用 findings"
+                            f"（少引/池外将触发 rerun）")
+
         # 2. cross_chapter 一致性 → FindingBus
         cc_findings_count = 0
         if hasattr(self, 'cross_chapter_checker') and self.cross_chapter_checker is not None:
@@ -2221,6 +2424,104 @@ class ResearchLoop:
 
         return results
 
+    def _ensure_resume_state(self):
+        """v17 修复：确保 resume 后 phase7 所需的关键状态已就位。
+
+        病根：self._reference_pool / _citation_bank / _factbase 都是 phase0_5/0_8/5.x
+        实跑时挂上 self 的实例属性，但 CheckpointManager 只把它们存进 PipelineContext
+        （ctx.xxx），_try_resume 走 ctx.load_from_checkpoint 恢复到 ctx，**从不回填
+        self._xxx**。结果 resume 单跑 phase7 时这些属性全是 None/空：
+        - CitationBase.build() 拿到空 reference_pool → _cite_key_map 空 → inject 短路、
+          bib 为空、占位符无法展开成 \\cite{key}。
+        - _factbase 缺失 → 图表生成报 'ResearchLoop' object has no attribute '_factbase'。
+
+        修法：phase7 开头若发现这些属性为空，从 ctx（已由检查点恢复）回填，
+        并从落盘的 factbase.json 重建 FactBase。全量跑时这些已就位，守卫零工作。
+        """
+        # 1) reference_pool / citation_bank / chapters：ctx → self 回填
+        if not getattr(self, '_reference_pool', None) and getattr(self.ctx, 'reference_pool', None):
+            self._reference_pool = self.ctx.reference_pool
+            logger.info(f"[resume] 回填 _reference_pool: {len(self._reference_pool)} 篇")
+        if not getattr(self, '_citation_bank', None) and getattr(self.ctx, 'citation_bank', None):
+            self._citation_bank = self.ctx.citation_bank
+            logger.info(f"[resume] 回填 _citation_bank: {len(self._citation_bank)} keys")
+        if not getattr(self, '_chapters', None) and getattr(self.ctx, 'chapters', None):
+            self._chapters = self.ctx.chapters
+        # chapters 容错：ctx 里可能是 list（旧检查点），统一成 {1..5: str}
+        if isinstance(self._chapters, list):
+            self._chapters = {i + 1: c for i, c in enumerate(self._chapters) if c}
+
+        # v17 路径A：resume 章节新旧格式校验——磁盘优先，旧检查点裸 cite 兜底
+        # 病根：旧检查点 chapters.json 是占位符契约引入前的产物，章节里直接是
+        #   \cite{ng2005light} 这种裸 cite（map 外 key）。resume 跳过 phase5，
+        #   self._chapters 用旧检查点 → 裸 cite 进 main.tex → inject 不碰裸 cite
+        #   → bib 缺失。而磁盘 chapter{N}/chapter{N}_*.md 是 phase5 用占位符契约
+        #   生成的新版本（<cite .../>），才是 inject 能处理的正确源。
+        # 修法：对 1-5 章，若磁盘有 .md 且内容含占位符（新契约），优先用磁盘版本
+        #   覆盖检查点；检查点只补磁盘没有的章（如 5_1/5_2 子章节）。纯全量跑时
+        #   self._chapters 已是内存最新版，本块零工作。
+        import glob as _glob
+        _reloaded = []
+        for _ci in range(1, 6):
+            _disk_files = sorted(_glob.glob(f"{OUTPUT_DIR}/chapter{_ci}/chapter{_ci}_*.md"))
+            # 排除 review 后缀等中间产物，取主章节文件
+            _main = [f for f in _disk_files
+                     if not f.endswith("_reviewed.md") and "review" not in f]
+            if not _main:
+                continue
+            try:
+                with open(_main[0], "r", encoding="utf-8") as _f:
+                    _disk_content = _f.read()
+            except Exception:
+                continue
+            # 仅当磁盘版本含占位符（新契约）时才覆盖——避免用残缺/旧磁盘文件误覆盖
+            import re as _re_mod
+            _has_placeholder = bool(_re_mod.search(r'<cite\s+title="', _disk_content))
+            if not _has_placeholder:
+                continue
+            _ckpt_content = self._chapters.get(_ci, "")
+            _ckpt_ph = len(_re_mod.findall(r'<cite\s+title="', _ckpt_content or ""))
+            # 磁盘有占位符且（检查点无占位符 或 检查点含裸 cite）→ 用磁盘覆盖
+            _ckpt_bare = len(_re_mod.findall(r'\\cite\{[^}]+\}', _ckpt_content or ""))
+            if _ckpt_ph == 0 or (_ckpt_bare > 0 and _ckpt_ph < 3):
+                if _disk_content.strip() and _disk_content != _ckpt_content:
+                    _disk_ph = len(_re_mod.findall(r'<cite\s+title="', _disk_content))
+                    self._chapters[_ci] = _disk_content
+                    _reloaded.append(f"ch{_ci}(占位符{_disk_ph},覆盖前裸cite{_ckpt_bare})")
+        if _reloaded:
+            logger.info("[resume] 章节从磁盘重载（新契约覆盖旧检查点裸 cite）: "
+                        f"{_reloaded}")
+
+        # 2) FactBase：从落盘 factbase.json 重建（检查点不存它，但落盘文件在）
+        if not getattr(self, '_factbase', None) or getattr(self, '_factbase', None) and self._factbase.is_empty():
+            try:
+                from agent.core.factbase import load as _fb_load
+                _fb = _fb_load(OUTPUT_DIR)
+                if _fb and not _fb.is_empty():
+                    self._factbase = _fb
+                    # 同步注入下游（与 line 1086-1091 全量跑一致）
+                    if hasattr(self, 'auditor') and self.auditor is not None:
+                        self.auditor.set_factbase(_fb)
+                    if hasattr(self, 'verifier') and self.verifier is not None:
+                        self.verifier.set_factbase(_fb)
+                    if hasattr(self, 'cross_chapter_checker') and self.cross_chapter_checker is not None:
+                        self.cross_chapter_checker.set_factbase(_fb)
+                    logger.info("[resume] 从 factbase.json 重建 FactBase")
+            except Exception as _e:
+                logger.debug(f"[resume] FactBase 重建失败（不阻塞图表）: {_e}")
+
+        # 3) 触发 CitationBase 构建（惰性，从已回填的 reference_pool/citation_bank）
+        #    这让后续 inject/bib/coverage 全部读到非空 _citation_base。
+        try:
+            self._build_citation_context(None)
+            _cb = getattr(self, '_citation_base', None)
+            if _cb and not _cb.is_empty():
+                logger.info(f"[resume] CitationBase 已就绪: {len(_cb.cite_key_map)} 篇可引")
+            else:
+                logger.warning("[resume] CitationBase 构建后仍为空（reference_pool 可能缺）")
+        except Exception as _e:
+            logger.warning(f"[resume] CitationBase 构建失败: {_e}")
+
     def _run_output_phase(self) -> Dict:
         """Phase 7: 输出（含全局打磨、引用解析和跨章节一致性检查）"""
         logger.info("\n" + "=" * 60)
@@ -2228,6 +2529,10 @@ class ResearchLoop:
         logger.info("=" * 60)
 
         results = {}
+
+        # v17: resume 状态守卫——确保 phase7 依赖的实例属性（_reference_pool /
+        # _citation_bank / _factbase / _citation_base）已就位。全量跑零工作。
+        self._ensure_resume_state()
 
         # Phase 7.0–7.26: 全局打磨 + 门控 + 一致性 + 公式 + 去重
         self._postprocess_content()
@@ -2503,30 +2808,21 @@ class ResearchLoop:
         results["markdown"] = f"{OUTPUT_DIR}/full_paper.md"
 
         # ── Phase 7.8: BibTeX 引用生成 ──
+        # v17 时序修复：必须 inject 先于 bib。
+        # 旧顺序（bib 先 inject 后）的病根：bib 构建读空 _cite_key_map（inject 还没跑），
+        #   生成的 references.bib 只有 1 字节；coverage 也读到的是占位符状态而非 \cite{key}。
+        # 正确顺序：① thebibliography 替换 ② inject（占位符→\cite{key}）③ bib 基于
+        #   inject 后的 tex 实际 key 构建 ④ coverage ⑤ 校验门兜底。
         try:
             logger.info("[Phase 7.8] 生成 BibTeX 引用...")
             from tools.bibtex_builder import BibTeXBuilder
             builder = BibTeXBuilder(OUTPUT_DIR)
-            cite_key_map = getattr(self, '_cite_key_map', {})
-            citation_map = {}  # v13: 预初始化，防止 build 抛异常时 UnboundLocalError
-            if cite_key_map:
-                try:
-                    _, citation_map = builder.build_from_cite_key_map(cite_key_map)
-                    logger.info(f"[Phase 7.8] 使用 _cite_key_map 构建: {len(citation_map)} 条引用")
-                except Exception as be:
-                    from agent.core.errors import classify as _cls_bib
-                    _lvl, _, _ = _cls_bib(be)
-                    logger.error(f"[Phase 7.8] BibTeX 构建失败 [{_lvl}]: {be}")
-                    results["bibtex_failed"] = True
-            else:
-                logger.warning("[Phase 7.8] _cite_key_map 为空，跳过 BibTeX 生成")
-                results["bibtex_failed"] = True
-            results["bibtex"] = f"{OUTPUT_DIR}/latex/references.bib"
-            results["citation_map"] = len(citation_map) if citation_map else 0
+            citation_map = {}  # 预初始化，防止 build 抛异常时 UnboundLocalError
 
             if OUTPUT_LATEX:
                 tex_path = f"{OUTPUT_DIR}/latex/main.tex"
                 if os.path.exists(tex_path):
+                    # ── ① thebibliography → \bibliography{references} ──
                     with open(tex_path, "r", encoding="utf-8") as f:
                         tex_content = f.read()
                     bib_pattern = re.compile(
@@ -2541,7 +2837,103 @@ class ResearchLoop:
                         logger.info("[Phase 7.8] thebibliography → \\bibliography{references}")
                     with open(tex_path, "w", encoding="utf-8") as f:
                         f.write(tex_content)
-                    # v15.5 A1: 前置校验门先跑（拦截/修正/留痕编造 cite key）
+
+                    # ── ② CitationBase 正向注入——占位符 <cite .../> → \cite{key} ──
+                    # 在 bib 构建前跑：bib 才能基于 inject 后的实际 cite key 生成条目。
+                    _cb = getattr(self, '_citation_base', None)
+                    if _cb and not _cb.is_empty():
+                        with open(tex_path, "r", encoding="utf-8") as f:
+                            _tex = f.read()
+                        _tex, _unresolved = _cb.inject(_tex)
+                        # v17: 池外回填——未解析占位符先查 Semantic Scholar，
+                        # 命中则登记进 map 并重新注入（消除留痕）；查无才留痕交 rerun
+                        if _unresolved:
+                            try:
+                                _still = _cb.resolve_offline(_unresolved, self.api_client)
+                                if len(_still) < len(_unresolved):
+                                    _resolved_n = len(_unresolved) - len(_still)
+                                    logger.info(f"[Phase 7.8] 池外回填成功 {_resolved_n} 篇"
+                                                f"，重新注入")
+                                    _tex, _unresolved = _cb.inject(_tex)
+                            except Exception as _oe:
+                                logger.debug(f"池外回填失败（不阻塞）: {_oe}")
+                        with open(tex_path, "w", encoding="utf-8") as f:
+                            f.write(_tex)
+                        results["cite_unresolved"] = len(_unresolved)
+                        # 落盘 CitationBase（真相源可追溯）
+                        try:
+                            from agent.core.citation_base import save as _cb_save
+                            _cb_save(_cb, OUTPUT_DIR)
+                        except Exception as _e:
+                            logger.debug(f"CitationBase 落盘失败: {_e}")
+                        if _unresolved:
+                            logger.warning(f"[Phase 7.8] {len(_unresolved)} 个占位符未解析"
+                                           f"（留痕 [REF?-]，audit/rerun 接管）")
+
+                    # ── ③ bib 构建：基于 inject 后的 tex 实际 cite key ──
+                    # v17 治本：用 CitationBase.build_bib(tex) 替代旧的
+                    # BibTeXBuilder.build_from_cite_key_map(空 map)。前者只为 tex 实际
+                    # cite 的 key 生成条目，是与 inject 后状态一致的唯一 bib 来源。
+                    try:
+                        with open(tex_path, "r", encoding="utf-8") as f:
+                            _tex_post_inject = f.read()
+                        if _cb and not _cb.is_empty():
+                            bib_content, citation_map = _cb.build_bib(_tex_post_inject)
+                            _bib_path = f"{OUTPUT_DIR}/latex/references.bib"
+                            with open(_bib_path, "w", encoding="utf-8") as f:
+                                f.write(bib_content if bib_content else "\n")
+                            logger.info(f"[Phase 7.8] build_bib 基于 inject 后 tex "
+                                        f"构建: {len(citation_map)} 条引用")
+                        else:
+                            # 退化路径：CitationBase 缺失时用旧 builder 兜底
+                            cite_key_map = getattr(self, '_cite_key_map', {})
+                            if cite_key_map:
+                                _, citation_map = builder.build_from_cite_key_map(cite_key_map)
+                                logger.info(f"[Phase 7.8] 退化: _cite_key_map 构建 "
+                                            f"{len(citation_map)} 条")
+                            else:
+                                logger.warning("[Phase 7.8] CitationBase 与 _cite_key_map 均空，"
+                                               f"bib 未生成")
+                                results["bibtex_failed"] = True
+                    except Exception as be:
+                        from agent.core.errors import classify as _cls_bib
+                        _lvl, _, _ = _cls_bib(be)
+                        logger.error(f"[Phase 7.8] BibTeX 构建失败 [{_lvl}]: {be}")
+                        results["bibtex_failed"] = True
+            else:
+                # 非 LATEX 输出：用旧 builder 兜底（无 inject 概念）
+                cite_key_map = getattr(self, '_cite_key_map', {})
+                if cite_key_map:
+                    try:
+                        _, citation_map = builder.build_from_cite_key_map(cite_key_map)
+                    except Exception as be:
+                        logger.error(f"[Phase 7.8] BibTeX 构建失败: {be}")
+                        results["bibtex_failed"] = True
+
+            results["bibtex"] = f"{OUTPUT_DIR}/latex/references.bib"
+            results["citation_map"] = len(citation_map) if citation_map else 0
+
+            # ── ④ 池子采用率（全文，基于 inject 后状态）──
+            _cb = getattr(self, '_citation_base', None)
+            if _cb and not _cb.is_empty():
+                _tex_for_cov = ""
+                _cov_path = f"{OUTPUT_DIR}/latex/main.tex"
+                if os.path.exists(_cov_path):
+                    with open(_cov_path, "r", encoding="utf-8") as f:
+                        _tex_for_cov = f.read()
+                try:
+                    _cov = _cb.coverage_report(_tex_for_cov)
+                    results["citation_coverage"] = _cov
+                    if _cov.get("wasted_high"):
+                        logger.warning(f"[Phase 7.8] 池子采用率过低: "
+                                       f"{_cov['coverage_rate']}（浪费 {_cov['wasted_count']} 篇）")
+                except Exception as _e:
+                    logger.debug(f"coverage_report 失败: {_e}")
+
+            # ── ⑤ 校验门兜底（拦截/修正/留痕编造 cite key）──
+            if OUTPUT_LATEX:
+                tex_path = f"{OUTPUT_DIR}/latex/main.tex"
+                if os.path.exists(tex_path):
                     self._validate_cite_keys(tex_path)
                     self._ensure_bib_has_all_cited_keys(tex_path)
         except Exception as e:
@@ -2933,7 +3325,8 @@ class ResearchLoop:
             innovations = self._project_data.get("innovation_points", [])
             inn_names = [ip.get("创新点名称", f"Component {i+1}")
                          for i, ip in enumerate(innovations[:4])]
-            cite_keys = re.findall(r'\\cite\{([^}]+)\}', tex)
+            from agent.core.citation_base import CitationBase as _CB
+            cite_keys = _CB.extract_cites(tex)
 
             table_types = ["experimental settings and dataset details",
                            "ablation study on key components",
@@ -3488,7 +3881,14 @@ class ResearchLoop:
         budget = self.venue_adapter.get_section_word_budget(chapter_name)
         previous_summary = self._build_previous_summary()
         motivation = getattr(self, '_motivation_thread', '')
-        citation_context = self._build_citation_context()
+        # 推断 citation 契约 chapter key：Discussion/Limitations 按 ch5 量级
+        _cb_key = "ch5"
+        _cn_low = (chapter_name or "").lower()
+        for _k in ("ch1", "ch2", "ch3", "ch4", "ch5"):
+            if _k in _cn_low or _cn_low in _k:
+                _cb_key = _k
+                break
+        citation_context = self._build_citation_context(_cb_key)
 
         # 传入 Conclusion 摘要，避免重复内容
         conclusion_summary = ""

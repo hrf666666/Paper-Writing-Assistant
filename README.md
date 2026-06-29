@@ -1,6 +1,36 @@
-# 论文范文写作助手 v16.2 (Paper Writing Assistant)
+# 论文范文写作助手 v16.3 (Paper Writing Assistant)
 
-一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.5-v15.7 治愈引用漂移/figure 非确定性/文图联动断裂**。**v15.8-v16.1 建立数值可信三道防线（真相注入+写后检测+带真相段落重写）+ FixAction executor + warning 可见化**。**v16.2 架构升级：pipeline 从线性（生成→检测→报告）变成闭环（边写边改+全文检查闭环），L3 从终局评价变成闭环检测器**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+一个基于多个大语言模型的智能顶刊论文范文写作系统，采用 **THINK → EXECUTE → VERIFY → REFLECT** 自主循环架构。**v14.0 引入内核契约层 + paperjury 对抗式审稿范式**（错误分级 / FactBase 单一事实源 / 分层记忆 / Finding 统一问题总线 / QualityLoop 真闭环 / FigureManifest 文图联动），让 audit/constraint/guidance/eval/iteration/memory 通过少数契约协作，而非各自为政的松散机制。**v15.5-v15.7 治愈引用漂移/figure 非确定性/文图联动断裂**。**v15.8-v16.1 建立数值可信三道防线（真相注入+写后检测+带真相段落重写）+ FixAction executor + warning 可见化**。**v16.2 架构升级：pipeline 从线性（生成→检测→报告）变成闭环（边写边改+全文检查闭环）**。**v16.3 引用子系统治本（cite 守恒守卫 + 单一真相源 inject）+ 数值校验正则降级（LLM+FactBase 真相判断 + 改完重评闭环）+ resume 状态同步修复**。系统能够根据**文章类型 + 论文标题 + 项目实验工程代码**，自动生成完整的5章+摘要学术论文（LaTeX 或 Word），作为写作参考或起点。
+
+## v16.3 里程碑：引用子系统治本 + 数值校验正则降级 + resume 状态同步
+
+> **v16.3 不是加新防线，是修掉既有防线的"假通过"——全量 pipeline 暴露的 3 类真实矛盾，逐个治本。**
+> **教训**：resume 单跑 phase7 能拿"100% 验收 + 引用闭环全通"，但它绕过了会加工正文的 phase5_6，掩盖了真实矛盾。只有全量跑（phase0→9）才暴露 Contributions 段落被毁成乱码。所以 v16.3 的验证标准是全量 pipeline，不是单阶段 resume。
+
+> **3 个治本修复（每个都有全量实跑实证）：**
+
+> **1. 引用子系统治本——cite 守恒守卫 + 单一真相源 inject**
+> - **根因**：LLM 编译修复（3 条路径：逐章 dry-compile / 整篇编译兜底 / 验证器 LLM 修复）会把占位符 `<cite/>` 改写成裸 `\cite{author}`（7+ 个裸名 key），旧 cite 守卫只数数量、正则还匹配不到真实占位符，形同虚设。
+> - **治本**：新增 `_cite_keys_conserved`（复用 CitationBase 唯一提取器，判 key 集合守恒——允许新增、禁止删减/改写），覆盖 3 处守卫（`_safe_llm_replace` / `_fix_chapter_latex` / `pdf_validator._is_valid_latex_response`）。inject 成为唯一 key 解析点，CitationBase 成为唯一真相源。裸名 key 7+ → 0。
+> - **bib 时序修复**：phase7.8 inject 前移到 bib 构建之前，bib 改用 `CitationBase.build_bib(tex)` 基于 inject 后实际 cite key 构建（旧逻辑读空 map → bib 1字节）。bib 0 条 → 25 条，cite/bib 完全匹配。
+> - **LLM 脏输出代码块清理**：`_lint_latex` 清理 ```代码块——含裸 cite 的整块删（map 外脏内容），干净内容（如 Abstract）剥标记保留。消除 LLM"复述"旧版章节（带裸 cite）绕过 inject 的污染路径。
+
+> **2. 数值校验正则降级——LLM+FactBase 真相判断 + 改完重评闭环**
+> - **根因**：phase5_6 的 `_check_chapter_metric_attribution` 用「正则扫数值 + ±60字符窗口 + metric 词表」判断"数值归属对错"，这是语义任务，正则在原理上做不对——对比句式（"urban 0.119 ... Non-Lambertian 0.295"）必然误判。它把**正确的**"mixed urban scenes (MAE 0.119)"判成张冠李戴 → `_revise_paragraphs` 盲改直落盘（旁路 quality_gate 闭环）→ 30 次震荡 → ch1 Contributions 段落变乱码。而验收"100% 通过"没发现（验收只查结构，不查内容）。
+> - **深层矛盾**：系统里能做语义判断的（LLM）和数值真相（FactBase）被割裂——quality_gate 懂语义但看不到真相，正则检测器有真相但不懂语义。两个各只有一半能力，正则这一半反而抢了话语权（能直接改写、旁路闭环）。
+> - **治本**（拼合被割裂的能力）：正则**只干定位**（找 FactBase 数值 + 截取上下文段落，正则可靠），**删掉判归属**（做不对的）。新增 `_judge_metric_attribution`：把（含数值段落 + FactBase 真相）喂给 LLM 做语义判断，返回 `all_correct`/`has_errors` + evidence。新增 `_revise_with_evidence`：带 evidence 的精确修订。phase5_6 改为**改完重评闭环**——all_correct 就停（正确内容不动，震荡从根消除），has_errors 才修订，修订后重评，受 `MAX_NUMERIC_FIX_ROUNDS=3` 上限保护。
+> - **实证**（真实 API + 真实 FactBase 端到端）：GOOD 段落（0.119 正确）→ all_correct（不误改，旧正则误判导致30次震荡的就是它）；BAD 段落（0.2953 张冠李戴）→ has_errors 精准抓出两处；GARBAGE（乱码）→ has_errors 识别损坏。9 单测 + 53 回归全过。
+
+> **3. resume 状态同步修复**
+> - **根因**：`_ensure_resume_state` 之前没补——`self._reference_pool`/`_citation_bank`/`_factbase` 都是实例属性，检查点只存进 PipelineContext（ctx.xxx），`_try_resume` 恢复到 ctx 但从不回填 self._xxx。resume 单跑 phase7 时这些属性全是 None → CitationBase 构建为空 → inject 短路、bib 空、图表全失败。
+> - **治本**：`_ensure_resume_state` 从 ctx 回填实例属性 + 从磁盘 factbase.json 重建 FactBase + 触发 CitationBase 构建。+ **路径A 章节磁盘优先重载**：检测到旧检查点章节含裸 cite 时，从磁盘 chapter*.md（占位符契约版本）覆盖，避免 resume 用旧格式章节。
+> - **resume 归档 bug 修复**：`_setup_output_dir` 原本无条件归档 output/（连带 .checkpoints），破坏 resume。改为：检测到检查点时跳过归档（resume 复用），仅首次跑归档。
+> - **G3/G4 验收修复**：`figure_plan_exists` metric 未注册（验收器漏注册→G3 永远 None）；`_read_chapter_words` 用 `len(split())` 把 LaTeX 命令当词（不准）→ 改为剔除 LaTeX 标记后数正文 + Conclusion 阈值 500→350（收束章天然短于正文）。
+
+> **为什么这次不蠢（自我修正记录）**：
+> - 最初给的 4 个修复方向（重写加守卫 / 震荡终止 / 章节白名单 / 验收加可读性门）全是下游堵漏，没碰"系统为什么自相矛盾"。经全量实跑暴露真因后，改为拼合已有能力（正则定位 + LLM+真相判断），不造新启发式。
+> - 中途"并入 quality_gate 闭环"的判断也是错的——实验证明 quality_gate 的整章 LLM 评估不适合做数值事实检查。最终让数值校验用自己的 LLM+真相判断器，借鉴闭环结构但不复用整章评估。
+> - 教训：动手前必须实证（读原文/复现/看时间线），不能用推理代替验证——这和"用正则判语义归属"是同一种错误。
 
 ## v16.2 里程碑：边写边改 + 全文检查闭环（架构升级）
 

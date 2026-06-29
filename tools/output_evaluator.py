@@ -242,10 +242,8 @@ class OutputEvaluator:
         # v15.3 L3-1: 引用真实性（cite key 全在 bib 存在）
         if checks.get("tex_exists") and checks.get("bib_exists"):
             try:
-                cite_keys = set()
-                for m in re.finditer(r'\\cite\{([^}]+)\}', tex_content):
-                    for k in m.group(1).split(','):
-                        cite_keys.add(k.strip())
+                from agent.core.citation_base import CitationBase
+                cite_keys = set(CitationBase.extract_cites(tex_content))
                 bib_keys = set(re.findall(r'@\w+\{([^,]+),', bib_content))
                 missing = cite_keys - bib_keys
                 checks["undefined_cite_keys"] = len(missing)

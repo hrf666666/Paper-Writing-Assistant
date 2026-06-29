@@ -410,7 +410,9 @@ class CrossChapterChecker:
         full_text = "\n".join(valid_chapters.values())
 
         # 1. 检测空 key \cite{} （LLM 输出缺陷）
-        empty_cites = len(re.findall(r'\\cite\{\s*\}', full_text))
+        # v17: 统一走 CitationBase.extract_empty_cites（消除正则副本）
+        from agent.core.citation_base import CitationBase
+        empty_cites = len(CitationBase.extract_empty_cites(full_text))
         if empty_cites > 0:
             self.issues.append({
                 "severity": "critical",

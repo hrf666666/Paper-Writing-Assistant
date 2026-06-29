@@ -923,6 +923,7 @@ class PDFValidator:
         1. 必须包含 \begin{document} 和 \end{document}
         2. 长度不应小于原文的 30%（防止返回空壳）
         3. 不应包含 LLM 自言自语（如 "Here is the fixed..."）
+        4. v17 治本: cite key 守恒——LLM 整篇重写时不得删减/改写已有引用
         """
         if not response:
             return False
@@ -947,6 +948,21 @@ class PDFValidator:
         for pattern in chat_patterns:
             if re.match(pattern, first_line, re.IGNORECASE):
                 return False
+
+        # 规则 4: cite 守恒守卫（v17 治本）
+        # LLM 整篇重写 main.tex 时，可能丢 cite（尤其 prompt 截断时尾部必丢）。
+        # 守恒判定复用 latex_converter._cite_keys_conserved，不引入第二套提取逻辑。
+        try:
+            from tools.latex_converter import _cite_keys_conserved
+            conserved, lost = _cite_keys_conserved(original, response)
+            if not conserved:
+                logger.warning(
+                    f"[pdf_validator] [cite守恒] LLM 修复删改了引用，判定无效 — "
+                    f"丢失: {lost[:10]}"
+                )
+                return False
+        except Exception as _e:
+            logger.debug(f"[pdf_validator] cite 守恒守卫不可用（跳过）: {_e}")
 
         return True
 

@@ -137,7 +137,7 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
         scope = subsec.get("scope", "")
         key_aspects = subsec.get("key_aspects", [])
         target_shortcomings = subsec.get("target_shortcomings", [])
-        
+
         # 搜索相关论文
         logger.info(f"[chapter2] 搜索 '{title}' 相关论文...")
         try:
@@ -146,7 +146,20 @@ def generate_related_work(project_data, ref_data, previous_chapters=None, citati
         except Exception as e:
             logger.warning(f"[chapter2] 论文搜索失败 '{title}': {e}")
             related_papers = []
-        
+
+        # v17: 搜到的论文登记为合法可引目标（堵裂缝：之前搜到但不进 cite_key_map，
+        # 导致 LLM 引用它们被判编造）。通过 ref_data 回传，loop 用 CitationBase.add_papers 收编。
+        if related_papers:
+            _collected = ref_data.setdefault("_ch2_online_papers", [])
+            for _p in related_papers:
+                # 标准化为 CitationBase 可消费的 paper dict（authors 升级为 [{name:...}]）
+                _norm = dict(_p)
+                if isinstance(_norm.get("authors"), list) and _norm["authors"] and isinstance(_norm["authors"][0], str):
+                    _norm["authors"] = [{"name": a} for a in _norm["authors"]]
+                _collected.append(_norm)
+            # 论文清单也并入 citation_context 指令（让 LLM 知道这些可引）——
+            # 由 loop 重建 CitationBase 后自然包含，此处只回传数据。
+
         # 构建论文摘要
         papers_summary = ""
         for p in related_papers:

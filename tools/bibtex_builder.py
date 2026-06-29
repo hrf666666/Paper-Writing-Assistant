@@ -77,20 +77,21 @@ class BibTeXBuilder:
 
 
     def _extract_cited_keys(self) -> set:
-        """从 tex 文件中提取所有 \\cite{key} 引用的 key 集合"""
-        cited = set()
+        """从 tex 文件中提取所有 \\cite{key} 引用的 key 集合。
+
+        v17: 统一走 CitationBase.extract_cites（消除正则副本，与全文口径一致）。
+        """
+        from agent.core.citation_base import CitationBase
         tex_path = os.path.join(self.latex_dir, "main.tex")
         if not os.path.exists(tex_path):
-            return cited
+            return set()
         try:
             with open(tex_path, "r", encoding="utf-8") as f:
                 tex = f.read()
-            for m in re.finditer(r'\\cite\{([^}]+)\}', tex):
-                for key in m.group(1).split(','):
-                    cited.add(key.strip())
+            return set(CitationBase.extract_cites(tex))
         except Exception as e:
             logger.debug(f"[BibTeXBuilder] 读取 tex 失败: {e}")
-        return cited
+            return set()
 
 
     def _create_bib_entry(self, cite_info: Dict, key: str) -> Optional[str]:

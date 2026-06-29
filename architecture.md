@@ -1,10 +1,66 @@
 # Paper Writing Assistant — 架构设计文档
 
-> 版本: v16.2 | 更新: 2026-06-26
+> 版本: v16.3 | 更新: 2026-06-29
 
 ---
 
-## 0. v16.2 边写边改 + 全文检查闭环（架构升级）
+## 0. v16.3 引用子系统治本 + 数值校验正则降级 + resume 状态同步
+
+> **v16.3 修掉既有防线的"假通过"——全量 pipeline 暴露的 3 类真实矛盾，逐个治本。
+> 验证标准是全量 pipeline（phase0→9），不是单阶段 resume（后者会掩盖矛盾）。**
+
+### 0.1 引用子系统治本——cite 守恒守卫 + 单一真相源 inject
+
+> **根因**：LLM 编译修复（3 条路径）会把占位符 `<cite/>` 改写成裸 `\cite{author}`，
+> 旧 cite 守卫只数数量、正则匹配不到真实占位符，形同虚设。
+
+> - **cite 守恒守卫**（`_cite_keys_conserved`，tools/latex_converter.py）：
+>   复用 CitationBase 唯一提取器，判 key 集合守恒（允许新增、禁止删减/改写）。
+>   覆盖 3 处守卫：`_safe_llm_replace`（phase7/8 编译修复）、`_fix_chapter_latex`
+>   （逐章 dry-compile）、`pdf_validator._is_valid_latex_response`（phase8.5）。
+>   占位符集合必须相等 + cite key 集合 candidate⊇original。
+> - **inject 单一真相源**：phase7.8 inject 是唯一 key 解析点，CitationBase 是唯一真相源。
+>   裸名 key 7+ → 0。
+> - **bib 时序修复**：inject 前移到 bib 构建之前，bib 用 `CitationBase.build_bib(tex)`
+>   基于 inject 后实际 cite key 构建（旧逻辑读空 map → bib 1字节）。bib 0→25 条，完全匹配。
+> - **代码块清理**（`_lint_latex`）：LLM 脏输出 ```代码块——含裸 cite 整块删，干净内容剥标记保留。
+
+### 0.2 数值校验正则降级——LLM+FactBase 真相判断 + 改完重评闭环
+
+> **根因**：phase5_6 用「正则扫数值 + ±60字符窗口 + metric 词表」判断数值归属——这是
+> 语义任务，正则原理上做不对。把正确的"mixed urban scenes (MAE 0.119)"判成张冠李戴
+> → `_revise_paragraphs` 盲改直落盘（旁路 quality_gate 闭环）→ 30次震荡 → 段落变乱码。
+> 而验收"100%通过"没发现（只查结构不查内容）。**
+
+> **深层矛盾**：能做语义判断的（LLM）和数值真相（FactBase）被割裂——
+> quality_gate 懂语义但看不到真相，正则检测器有真相但不懂语义。
+> 两个各只有一半能力，正则这一半反而抢了话语权（能直接改写、旁路闭环）。
+
+> **治本（拼合被割裂的能力）**：
+> - 正则**只干定位**（找 FactBase 数值 + 截取上下文段落，可靠），**删掉判归属**。
+> - 新增 `_judge_metric_attribution`（agent/loop.py）：把（含数值段落 + FactBase 真相）
+>   喂给 LLM 做语义判断，返回 all_correct/has_errors + evidence。
+> - 新增 `_revise_with_evidence`：带 evidence 的精确修订（替代盲改）。
+> - phase5_6 改为**改完重评闭环**：all_correct 就停（正确内容不动，震荡消除），
+>   has_errors 才修订，修订后重评，受 `MAX_NUMERIC_FIX_ROUNDS=3` 上限保护。
+> - `_verify_subsection` numeric 降级为定位标记；cite/figure 部分（用 CitationBase/manifest）不动。
+
+> **实证**（真实 API + 真实 FactBase）：GOOD(0.119正确)→all_correct不误改；
+> BAD(0.2953张冠李戴)→has_errors精准抓出；GARBAGE(乱码)→has_errors识别损坏。
+> 9单测+53回归全过。
+
+### 0.3 resume 状态同步修复
+
+> - `_ensure_resume_state`：从 ctx 回填 self._reference_pool/_citation_bank/_factbase
+>   + 从磁盘 factbase.json 重建 FactBase + 触发 CitationBase 构建（旧逻辑全 None→inject短路）。
+> - **路径A 章节磁盘优先重载**：旧检查点章节含裸 cite 时，从磁盘 chapter*.md（占位符契约）覆盖。
+> - **归档 bug 修复**：`_setup_output_dir` 检测到检查点时跳过归档（resume 复用），仅首次跑归档。
+> - **G3/G4 验收修复**：`figure_plan_exists` metric 注册 + `_read_chapter_words` 剔除 LaTeX 标记
+>   + Conclusion 阈值 500→350。
+
+---
+
+## 1. v16.2 边写边改 + 全文检查闭环（架构升级）
 
 > **v16.2 统一了 v15.5-v16.1 的碎片防线——pipeline 从线性（生成→检测→报告）变成闭环
 > （边写边改+全文检查闭环）。** 所有问题的共同根：论文声称 vs 真相源不一致。

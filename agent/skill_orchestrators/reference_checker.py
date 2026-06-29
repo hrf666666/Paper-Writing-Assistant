@@ -35,14 +35,11 @@ def extract_all_references(full_paper_content):
     1. \\cite{key} 或 \\cite{key1,key2} (新格式，主要)
     2. [N] 数字引用 (旧格式，兼容)
     3. <citation>...</citation> (已弃用，兼容)
+
+    v17: \\cite{} 提取统一走 CitationBase.extract_cites（消除正则副本）。
     """
-    # 提取 \cite{key} 引用
-    cite_pattern = r'\\cite\{([^}]+)\}'
-    cite_matches = re.findall(cite_pattern, full_paper_content)
-    cite_keys = set()
-    for match in cite_matches:
-        for key in match.split(','):
-            cite_keys.add(key.strip())
+    from agent.core.citation_base import CitationBase
+    cite_keys = set(CitationBase.extract_cites(full_paper_content))
 
     # 兼容：提取 [N] 数字引用
     numeric_pattern = r'\[(\d+)\]'

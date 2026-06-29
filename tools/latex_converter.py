@@ -25,6 +25,35 @@ from config.project_config import (
 logger = logging.getLogger(__name__)
 
 
+def _cite_keys_conserved(original: str, candidate: str) -> Tuple[bool, List[str]]:
+    """v17 治本：判定 LLM 修复是否守恒了引用集合（允许新增，禁止删减/改写）。
+
+    旧 cite 守卫只数数量、正则还匹配不到真实占位符（<citation vs <cite），
+    LLM 把占位符改成 \\cite{tao} 时反而放行——裸名 key 污染的放大器。
+    治本：判集合守恒，复用 CitationBase 唯一提取器，不引入新正则/新映射。
+      - 占位符 title 集合必须相等
+      - cite key 集合 candidate ⊇ original
+
+    Returns: (是否守恒, 丢失的 key/title 列表)
+    """
+    if not candidate:
+        return True, []
+    try:
+        from agent.core.citation_base import CitationBase, _PLACEHOLDER_RE
+    except Exception:
+        return True, []
+    orig_ph = {m.group(1) for m in _PLACEHOLDER_RE.finditer(original or "")}
+    cand_ph = {m.group(1) for m in _PLACEHOLDER_RE.finditer(candidate or "")}
+    if orig_ph != cand_ph:
+        lost = list(orig_ph - cand_ph) + [f"+新增:{t}" for t in list(cand_ph - orig_ph)[:3]]
+        return False, lost
+    orig_keys = set(CitationBase.extract_cites(original or ""))
+    cand_keys = set(CitationBase.extract_cites(candidate or ""))
+    if not orig_keys.issubset(cand_keys):
+        return False, sorted(orig_keys - cand_keys)
+    return True, []
+
+
 # ═══════════════════════════════════════════════════════════════
 # IEEE 期刊模板（对标 bare_jrnl_new_sample4.tex）
 # ═══════════════════════════════════════════════════════════════
@@ -172,13 +201,14 @@ def _safe_llm_replace(original: str, candidate: str, label: str,
         )
         return original
 
-    # v15.2: cite 守卫 — 引用数量不应大幅减少
-    orig_cites = len(re.findall(r'\\cite\{|<citation', original))
-    cand_cites = len(re.findall(r'\\cite\{|<citation', candidate))
-    if orig_cites >= 3 and cand_cites < orig_cites * 0.5:
+    # v17 治本: cite 守恒守卫 — 替代旧"数量减半"判定
+    # 旧正则匹配不到真实占位符 <cite（无 citation 子串），只数数量不数集合，
+    # LLM 把占位符改成 \cite{tao} 时 candidate 的 cite 反而变多，守卫放行。
+    conserved, lost = _cite_keys_conserved(original, candidate)
+    if not conserved:
         logger.warning(
-            f"[latex_converter] {label}: 引用守卫触发 — "
-            f"cite 从 {orig_cites} 减少到 {cand_cites}，保留原文"
+            f"[latex_converter] {label}: [cite守恒] 引用集合被改写，保留原文 — "
+            f"丢失/异常: {lost[:10]}"
         )
         return original
 
@@ -190,6 +220,20 @@ def _lint_latex(latex: str) -> str:
     v15.2: 纯正则清理 — 只删除明确不该存在的东西，不做任何风格转换。
     替代 _review_latex 的格式修复职责，零 LLM 调用，零幻觉风险。
     """
+    # v17: LLM 脏输出代码块清理
+    # 病根：补表格/Abstract 等环节的 LLM 把响应用代码块(fence)包裹，常复述旧版
+    #   章节（带 map 外裸 cite 或更老的 <citation> 标记），原样进 main.tex 绕过 inject。
+    # 策略：含裸 cite(\cite{)或占位符(<cite title)的代码块整块删（map外脏内容）；
+    #   含 <citation> 数字格式的保留（旧式但内容有效，如 Abstract）。
+    def _strip_codeblock(m):
+        body = m.group(1)
+        if re.search(r'\\cite\{|<cite\s+title=', body):
+            return ''
+        return body
+    latex = re.sub(r'```[a-zA-Z]*\n(.*?)```', _strip_codeblock, latex, flags=re.DOTALL)
+    _ORPHAN_FENCE = re.compile("^[`]{3}[a-zA-Z]*\\s*$")
+    latex = _ORPHAN_FENCE.sub('', latex)
+
     # Markdown 残留 (LLM 偶尔泄漏)
     latex = re.sub(r'^#{1,6}\s+', '', latex, flags=re.MULTILINE)
     latex = re.sub(r'\*\*(.+?)\*\*', r'\1', latex)
@@ -319,12 +363,14 @@ Output ONLY the corrected LaTeX (no markdown fences, no explanations):"""
             )
             return chapter_latex
 
-        # cite 守卫
-        orig_cites = len(re.findall(r'\\cite\{', chapter_latex))
-        fixed_cites = len(re.findall(r'\\cite\{', result))
-        if orig_cites >= 3 and fixed_cites < orig_cites * 0.5:
+        # v17 治本: cite 守恒守卫（替代旧数量减半判定）
+        # 裸名 key 污染的核心拦截点——LLM 把 <cite author="tao"/> 改写成
+        # \cite{tao} 会在此被拒、回退原文占位符（交 phase7.8 inject 处理）。
+        conserved, lost = _cite_keys_conserved(chapter_latex, result)
+        if not conserved:
             logger.warning(
-                f"[Chapter {chapter_num}] cite 数 {orig_cites}→{fixed_cites}, 拒绝替换"
+                f"[Chapter {chapter_num}] [cite守恒] 引用集合被改写，拒绝替换 — "
+                f"丢失/异常: {lost[:10]}"
             )
             return chapter_latex
 
