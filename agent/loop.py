@@ -3414,6 +3414,31 @@ class ResearchLoop:
 
     def _compile_and_validate(self, results: Dict):
         """Phase 8–9: PDF 编译 + 验证 + 分层验收 + 输出评价"""
+        # v16.3: 编译前跑纵向专项 Checker → FixExecutor（分层治理架构第2+4层）
+        # 4 个 Checker 审图/公式/表格/bib → Finding → FixExecutor 修 → 再编译
+        try:
+            from tools.vertical_checkers import run_all_vertical_checks
+            from agent.fix_executor import execute_fixes
+            logger.info("[Phase 8] 纵向专项审查（Figure/Formula/Table/Bib Checker）...")
+            _v_findings = run_all_vertical_checks(OUTPUT_DIR)
+            if _v_findings:
+                # 入 FindingBus 分配 id
+                self._findings.record_many(_v_findings)
+                _fixable = [f for f in _v_findings if f.severity.value in ("warning", "critical")]
+                logger.info(f"[Phase 8] 纵向审查发现 {len(_v_findings)} 条，"
+                            f"尝试修复 {len(_fixable)} 条")
+                _fix_results = execute_fixes(_fixable, OUTPUT_DIR)
+                _fixed_n = sum(1 for r in _fix_results if r["fixed"])
+                if _fixed_n:
+                    logger.info(f"[Phase 8] FixExecutor 修复 {_fixed_n} 条，重新编译")
+                    results["vertical_fixes"] = _fixed_n
+                    # 消解已修复的 Finding
+                    for r in _fix_results:
+                        if r["fixed"]:
+                            self._findings.resolve(r["finding_id"])
+        except Exception as _ve:
+            logger.debug(f"[Phase 8] 纵向审查跳过: {_ve}")
+
         # ── Phase 8: PDF 编译 ──
         try:
             logger.info("[Phase 8] 编译 PDF...")

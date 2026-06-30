@@ -154,6 +154,25 @@ class FindingBus:
         else:
             self._findings.clear()
 
+    def resolve(self, finding_id: str) -> bool:
+        """按 ID 消解单条 Finding（Verifier 验收通过后调用）。
+
+        v16.3: 替代粗粒度 clear(source=)——旧逻辑按源清，导致 auditor/citation
+        的 critical 改后仍亮红、rerun 重复改同一问题（C4）。按 ID 清让每条 Finding
+        独立消解：FixExecutor 改 + Verifier 验通过 → resolve 该条 ID。
+        Returns: True 若找到并消解。
+        """
+        before = len(self._findings)
+        self._findings = [f for f in self._findings if f.id != finding_id]
+        return len(self._findings) < before
+
+    def resolve_many(self, finding_ids: List[str]) -> int:
+        """批量消解（FixExecutor 批量修复后）。Returns: 消解条数。"""
+        id_set = set(finding_ids)
+        before = len(self._findings)
+        self._findings = [f for f in self._findings if f.id not in id_set]
+        return before - len(self._findings)
+
     # ── 查 ──
 
     def all(self) -> List[Finding]:
