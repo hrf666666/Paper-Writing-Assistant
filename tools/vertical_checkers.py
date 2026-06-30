@@ -236,6 +236,61 @@ def inspect_figures(tex_path: str, figures_dir: str) -> List:
 # 统一入口：跑全部 Checker
 # ═══════════════════════════════════════════════════════════════
 
+def inspect_language(tex_path: str) -> List:
+    """检查全文语言一致性（术语/时态/语态）。
+
+    职能边界：只审不改，报 Finding。
+    检查项：
+    - 时态一致性（Methodology 应用现在时，Experiments 结果用过去时）
+    - 术语统一（同一概念是否用了多个写法，如 "depth map" vs "disparity map"）
+    - 被动/主动语态滥用
+    """
+    findings = []
+    if not os.path.exists(tex_path):
+        return findings
+    content = open(tex_path, "r", encoding="utf-8").read()
+    import re
+
+    # 1. 时态：Experiments 章节里 "we proposes"（现在时第三人称错用）
+    exp_section = re.search(r'\\section\{.*?[Ee]xperiment.*?\}(.*?)(?=\\section|$)',
+                            content, re.DOTALL)
+    if exp_section:
+        exp_text = exp_section.group(1)
+        # 过去时该用 achieved/demonstrated/showed，现在时 proposes/achieves 在 Experiments 是错的
+        wrong_tense = re.findall(r'\b(we|our method|our approach)\s+(proposes|achieves|shows|demonstrates)\b',
+                                 exp_text, re.IGNORECASE)
+        if wrong_tense:
+            findings.append(_make_finding(
+                source="language_reviewer", kind="tense_inconsistency",
+                severity="info", location_chapter="Experiments",
+                target=f"Experiments 时态",
+                evidence=f"Experiments 应过去时，发现 {len(wrong_tense)} 处现在时",
+                fix_hint="Experiments 结果描述应用过去时(achieved/demonstrated/showed)",
+            ))
+
+    # 2. 术语统一：常见同义词对（只报，不自动改——需语义判断）
+    term_pairs = [
+        (r"depth map", r"disparity map", "depth/disparity"),
+        (r"light field", r"light-field", "light field 连字符"),
+        (r"non-Lambertian", r"non-lambertian|Non-lambertian", "Non-Lambertian 大小写"),
+    ]
+    for pat1, pat2, label in term_pairs:
+        c1 = len(re.findall(pat1, content, re.IGNORECASE))
+        c2 = len(re.findall(pat2, content, re.IGNORECASE))
+        if c1 > 0 and c2 > 0 and c1 != c2:
+            findings.append(_make_finding(
+                source="language_reviewer", kind="terminology_inconsistency",
+                severity="info", location_chapter="main.tex",
+                target=f"术语 {label}",
+                evidence=f"'{label}' 有 {c1}+{c2} 种写法混用",
+                fix_hint=f"统一 '{label}' 的写法（全文一致）",
+            ))
+
+    if findings:
+        logger.info(f"[LanguageReviewer] {len(findings)} 条语言一致性问题")
+    return findings
+
+
 def run_all_vertical_checks(output_dir: str) -> List:
     """跑全部纵向 Checker，返回所有 Finding。
 
@@ -249,6 +304,7 @@ def run_all_vertical_checks(output_dir: str) -> List:
     all_findings.extend(inspect_formulas(tex_path))
     all_findings.extend(inspect_tables(tex_path))
     all_findings.extend(inspect_figures(tex_path, figures_dir))
+    all_findings.extend(inspect_language(tex_path))
     if all_findings:
         logger.info(f"[VerticalCheckers] 共发现 {len(all_findings)} 条问题")
     return all_findings

@@ -2382,82 +2382,6 @@ class ResearchLoop:
             logger.warning(f"[Phase 6.5] cross_chapter 检查失败: {e}")
         return results
 
-    def _run_audit_phase(self) -> Dict:
-        """Phase 6.5: 反幻觉审计（v5.0 新增）"""
-        logger.info("\n" + "=" * 60)
-        logger.info("  Phase 6.5: 反幻觉审计")
-        logger.info("=" * 60)
-
-        if not ENABLE_AUDIT:
-            logger.info("[audit] 审计功能未启用（ENABLE_AUDIT=False）")
-            return {"skipped": True}
-
-        results = {}
-
-        # 1. 审计各章节
-        chapter_names = {
-            1: "Introduction", 2: "Related Work",
-            3: "Methodology", 4: "Experiments", 5: "Conclusion"
-        }
-        # v14 兜底: 确保 auditor/verifier/cross_chapter 都注入 FactBase
-        _fb = getattr(self, '_factbase', None)
-        if _fb and not _fb.is_empty():  # v14: 空 FactBase 不注入（会让数值检查静默跳过）
-            if hasattr(self, 'auditor') and not getattr(self.auditor, '_factbase', None):
-                self.auditor.set_factbase(_fb)
-            if hasattr(self, 'verifier') and not getattr(self.verifier, '_factbase', None):
-                self.verifier.set_factbase(_fb)
-            if hasattr(self, 'cross_chapter_checker') and not getattr(self.cross_chapter_checker, '_factbase', None):
-                self.cross_chapter_checker.set_factbase(_fb)
-
-        for num, name in chapter_names.items():
-            if num in self._chapters:
-                logger.info(f"[audit] 审计 {name}...")
-                report = self.auditor.audit_chapter(
-                    f"phase{num}", name,
-                    self._chapters[num],
-                    self._project_data, self._ref_data
-                )
-                results[f"chapter{num}_audit"] = report.to_dict()
-                # v13 接线: auditor 审计结果录入 FindingBus（供 QualityLoop 修订回流）
-                from agent.core.finding import audit_report_to_findings as _a2f
-                _ch_loc = f"ch{num}"
-                _recorded = self._findings.record_many(_a2f(report, chapter_hint=_ch_loc))
-                logger.info(f"[Phase6.5] {name}: 录入 {len(_recorded)} auditor findings, "
-                            f"bus 总计 {len(self._findings.all())}")
-
-                # 打印审计摘要
-                critical = sum(1 for i in report.issues if i.severity == "critical")
-                warnings = sum(1 for i in report.issues if i.severity == "warning")
-                if critical > 0:
-                    logger.warning(f"  [!] {critical} 个严重问题，{warnings} 个警告")
-                    for issue in report.issues:
-                        if issue.severity == "critical":
-                            logger.error(f"    - CRITICAL: {issue.description[:100]}")
-                else:
-                    logger.info(f"  通过 ({warnings} 个警告)")
-
-        # 2. 审计摘要
-        if self._abstract:
-            logger.info(f"[audit] 审计 Abstract...")
-            report = self.auditor.audit_abstract(
-                self._abstract, self._chapters, self._project_data
-            )
-            results["abstract_audit"] = report.to_dict()
-
-        # 3. 保存审计报告
-        self.auditor.save_reports(OUTPUT_DIR)
-
-        # 4. 打印审计汇总
-        summary = self.auditor.get_summary_report()
-        logger.info("\n" + "-" * 40)
-        logger.info(f"  审计汇总: {summary['total_phases_audited']} 个阶段")
-        logger.info(f"  严重问题: {summary['critical_issues']}")
-        logger.info(f"  警告: {summary['warning_issues']}")
-        logger.info(f"  整体通过: {'是' if summary['overall_passed'] else '否'}")
-        logger.info("-" * 40)
-
-        return results
-
     def _ensure_resume_state(self):
         """v17 修复：确保 resume 后 phase7 所需的关键状态已就位。
 
@@ -3017,13 +2941,18 @@ class ResearchLoop:
             logger.warning(f"[Phase 7.9] 约束预检失败（不阻塞）: {e}")
 
     def _postprocess_content(self):
-        """Phase 7.15–7.26: 有序门控 + 跨章节一致性 + 公式处理 + 去重"""
-        # ── Phase 7.15: 有序门控流水线 ──
+        """Phase 7.15–7.26 编排（v16.3 第四批拆分：4职责各独立方法）。"""
+        self._run_gate_pipeline()      # 7.15 门控
+        self._run_cross_chapter_check() # 7.2 跨章一致性
+        self._process_formulas()        # 7.25 公式
+        self._run_dedup()               # 7.26 去重
+
+    def _run_gate_pipeline(self):
+        """Phase 7.15: 有序门控流水线。职能边界：只验门控，不改内容。"""
         logger.info("[Phase 7.15] 有序门控流水线（VERIFY + 质量综合评估）...")
         try:
             pipeline_result = self.gate_pipeline.run(
-                self._chapters, self._abstract, "",
-                skip_llm_gate=True,
+                self._chapters, self._abstract, "", skip_llm_gate=True,
             )
             logger.info(f"[Phase 7.15] 门控结果:\n{pipeline_result.summary()}")
             if not pipeline_result.passed:
@@ -3045,16 +2974,15 @@ class ResearchLoop:
         except Exception as e:
             logger.warning(f"有序门控流水线失败（不影响输出）: {e}")
 
-        # ── Phase 7.2: 跨章节一致性检查 ──
+    def _run_cross_chapter_check(self):
+        """Phase 7.2: 跨章一致性。职能边界：只报告不改正文，录入 FindingBus。"""
         logger.info("[Phase 7.2] 跨章节一致性检查...")
         try:
             pc = getattr(self, '_paper_context', None)
             if pc:
                 self.cross_chapter_checker.set_paper_context(pc)
-            # v14: cross_chapter 只报告不一致，不自动改正文（避免数值交叉污染）
-            # 数值修正由 QualityLoop 修订层判断（它能看上下文）
             issues, _, _ = self.cross_chapter_checker.check_all(
-                self._chapters, self._abstract, auto_fix=False  # v14: 只报告不改正文
+                self._chapters, self._abstract, auto_fix=False
             )
             fix_count = len(self.cross_chapter_checker._fixes_applied)
             if fix_count:
@@ -3066,7 +2994,6 @@ class ResearchLoop:
                     logger.warning(f"  - {issue.get('description', '')[:100]}")
             else:
                 logger.info(f"[Phase 7.2] 一致性检查通过 ({len(issues)} 个警告)")
-            # v13 PR4: 统一录入 FindingBus（供 QualityLoop 修订回流）
             from agent.core.finding import cross_chapter_issues_to_findings
             self._findings.clear(source="cross_chapter")
             self._findings.record_many(cross_chapter_issues_to_findings(issues))
@@ -3076,7 +3003,8 @@ class ResearchLoop:
         except Exception as e:
             logger.warning(f"跨章节检查失败（不影响输出）: {e}")
 
-        # ── Phase 7.25: 公式处理 ──
+    def _process_formulas(self):
+        """Phase 7.25: 公式标记处理。职能边界：只转 <formula>→LaTeX，不判数学正确性。"""
         logger.info("[Phase 7.25] 处理 <formula> 标记...")
         try:
             from tools.formula_processor import (
@@ -3100,7 +3028,8 @@ class ResearchLoop:
         except Exception as e:
             logger.warning(f"公式处理失败（不影响输出）: {e}")
 
-        # ── Phase 7.26: 去重检查 ──
+    def _run_dedup(self):
+        """Phase 7.26: 去重检查。职能边界：只去重复段落，不改语义。"""
         logger.info("[Phase 7.26] 内容去重检查...")
         try:
             self._deduplicate_content()
@@ -3456,12 +3385,28 @@ class ResearchLoop:
                 _fix_results = execute_fixes(_fixable, OUTPUT_DIR, self.api_client)
                 _fixed_n = sum(1 for r in _fix_results if r["fixed"])
                 if _fixed_n:
-                    logger.info(f"[Phase 8] FixExecutor 修复 {_fixed_n} 条，重新编译")
+                    logger.info(f"[Phase 8] FixExecutor 修复 {_fixed_n} 条")
                     results["vertical_fixes"] = _fixed_n
-                    # 消解已修复的 Finding
+                    # v16.3 第四批: Verifier 独立验收——FixExecutor改完→Checker复查→通过才resolve
+                    # 不再"改了就resolve"（可能改错），而是用 Checker 复验确认问题真消失了
+                    _recheck = run_all_vertical_checks(OUTPUT_DIR)
+                    _recheck_keys = set()
+                    for f in _recheck:
+                        _recheck_keys.add((f.source, f.kind))
+                    _verified = 0
                     for r in _fix_results:
-                        if r["fixed"]:
+                        if not r["fixed"]:
+                            continue
+                        # 找原始 finding 的 source/kind
+                        _orig = next((f for f in _fixable if f.id == r["finding_id"]), None)
+                        if _orig and (_orig.source, _orig.kind) not in _recheck_keys:
+                            # 问题已消失（复查没再发现）→ 验收通过 → resolve
                             self._findings.resolve(r["finding_id"])
+                            _verified += 1
+                        else:
+                            logger.warning(f"[Phase 8] Verifier: {r['finding_id']} "
+                                          f"修复后复查仍发现问题，不消解")
+                    logger.info(f"[Phase 8] Verifier 验收: {_verified}/{_fixed_n} 条确认修复")
         except Exception as _ve:
             logger.debug(f"[Phase 8] 纵向审查跳过: {_ve}")
 

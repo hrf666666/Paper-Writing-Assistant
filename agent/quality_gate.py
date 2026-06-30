@@ -441,10 +441,47 @@ If no real issues, return empty issues list.
             if round_num < max_rounds:
                 # 执行修改
                 logger.info(f"[质量门控] '{chapter_name}' 根据评估结果修改内容...")
+                _before_revise = current_content
                 current_content = self.revise(chapter_name, current_content, report,
                                               extra_findings_brief)
+                # v16.3 第五批 B3修复: revise 后回归守卫——独立于 evaluate 的确定性检查
+                # 防止 revise 引入回归（cite 丢失/段落大幅缩短/内容损坏）
+                _regression = self._check_revise_regression(chapter_name, _before_revise, current_content)
+                if _regression:
+                    logger.warning(f"[质量门控] '{chapter_name}' revise 引入回归: {_regression}，回退")
+                    current_content = _before_revise  # 回退到改前
+                    report.should_retry = False  # 不再重试（避免反复改坏）
 
         return current_content, report
+
+    def _check_revise_regression(self, chapter_name: str,
+                                before: str, after: str) -> str:
+        """v16.3 B3修复: revise 后独立回归守卫（确定性，不依赖 evaluate）。
+
+        职能边界：只检查 revise 是否引入确定性回归，不评写作质量。
+        检查项：
+        1. cite 丢失（改前有 cite，改后没了）
+        2. 内容大幅缩短（改后 < 改前 50%，可能丢失段落）
+        3. 内容损坏（LLM 思考碎片/乱码注入）
+        Returns: 回归描述（""=无回归）
+        """
+        import re
+        if not after or len(after.strip()) < 50:
+            return "改后内容为空或过短"
+        # 1. cite 丢失
+        _before_cites = set(re.findall(r'\\cite\{[^}]+\}', before))
+        _after_cites = set(re.findall(r'\\cite\{[^}]+\}', after))
+        _lost = _before_cites - _after_cites
+        if _lost and len(_lost) >= 2:
+            return f"丢失 {len(_lost)} 个 cite"
+        # 2. 大幅缩短
+        if len(before) > 500 and len(after) < len(before) * 0.5:
+            return f"内容缩短 {len(before)}→{len(after)}（>50%）"
+        # 3. 内容损坏（LLM 思考碎片）
+        _garbage_signals = ["But they said", "Alternative:", "bad.", ",,,"]
+        if any(s in after and s not in before for s in _garbage_signals):
+            return "注入 LLM 思考碎片/乱码"
+        return ""
 
     def get_history(self) -> List[Dict]:
         """获取评估历史"""
