@@ -356,6 +356,24 @@ class ValidationEngine:
                 logger.debug(f"[ValidationEngine] 读取 metric '{metric}' 失败: {e}")
                 return None
 
+        # v16.3: quality_score_N 模式（G4 采信 quality_gate 语义判断，替代硬编码字数）
+        if metric.startswith("quality_score_"):
+            ch_num = metric.rsplit("_", 1)[-1]
+            chapter_names = {"1": "Introduction", "2": "Related Work",
+                             "3": "Methodology", "4": "Experiments", "5": "Conclusion"}
+            cname = chapter_names.get(ch_num)
+            if not cname:
+                return None
+            qs_path = os.path.join(self.output_dir, "quality_scores.json")
+            if not os.path.exists(qs_path):
+                return None
+            try:
+                with open(qs_path, "r", encoding="utf-8") as f:
+                    qs = json.load(f)
+                return float(qs.get(cname, {}).get("score", 0))
+            except (json.JSONDecodeError, IOError, ValueError):
+                return None
+
         # chapter_words_{N} 模式
         if metric.startswith("chapter_words_"):
             ch_num = metric.replace("chapter_words_", "")
@@ -670,22 +688,22 @@ def build_default_plan(venue_adapter=None) -> HierarchicalPlan:
         AtomicStep(
             step_id="G4-S1", description="Ch1 Introduction",
             phase_name="phase1", task_id="generate_chapter1",
-            acceptance_criteria={"metric": "chapter_words_1", "op": ">=", "value": 500},
+            acceptance_criteria={"metric": "quality_score_1", "op": ">=", "value": 70.0},
         ),
         AtomicStep(
             step_id="G4-S2", description="Ch2 Related Work",
             phase_name="phase2", task_id="generate_chapter2",
-            acceptance_criteria={"metric": "chapter_words_2", "op": ">=", "value": 500},
+            acceptance_criteria={"metric": "quality_score_2", "op": ">=", "value": 70.0},
         ),
         AtomicStep(
             step_id="G4-S3", description="Ch3 Methodology",
             phase_name="phase3", task_id="generate_chapter3",
-            acceptance_criteria={"metric": "chapter_words_3", "op": ">=", "value": 500},
+            acceptance_criteria={"metric": "quality_score_3", "op": ">=", "value": 70.0},
         ),
         AtomicStep(
             step_id="G4-S4", description="Ch4 Experiments",
             phase_name="phase4", task_id="generate_chapter4",
-            acceptance_criteria={"metric": "chapter_words_4", "op": ">=", "value": 500},
+            acceptance_criteria={"metric": "quality_score_4", "op": ">=", "value": 70.0},
         ),
         AtomicStep(
             step_id="G4-S5", description="Ch5 Conclusion",
@@ -693,7 +711,7 @@ def build_default_plan(venue_adapter=None) -> HierarchicalPlan:
             # v17: Conclusion 是收束章，天然短于正文（300-600 词属合理范围）。
             # 正文章阈值 500，Conclusion 下调到 350——378 字的 Conclusion 含
             # 背景+3贡献+展望，结构完整，不应因字数判定失败。
-            acceptance_criteria={"metric": "chapter_words_5", "op": ">=", "value": 350},
+            acceptance_criteria={"metric": "quality_score_5", "op": ">=", "value": 70.0},
         ),
     ]
 

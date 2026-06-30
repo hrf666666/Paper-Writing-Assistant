@@ -682,6 +682,14 @@ class ResearchLoop:
             Tuple[str, QualityReport]: (最终内容, 质量报告)
         """
         style_guide = self._ref_data.get("style_guide", {})
+        # v16.3: 补 venue 规格（content_pattern + word budget）传入 quality_gate
+        # 对照实验证明：quality_gate 拿到 venue 规格后判得准（完整→过/凑数→判差）
+        if self.venue_adapter:
+            _vh = self.venue_adapter.get_section_prompt_hint(chapter_name)
+            _vb = self.venue_adapter.get_section_word_budget(chapter_name)
+            if _vh or _vb:
+                style_guide = dict(style_guide) if style_guide else {}
+                style_guide["venue_spec"] = f"{_vh} budget:{_vb}"
         chapter_org = self._ref_data.get("chapter_organizations", {}).get(chapter_name, {})
         previous_content = "\n".join(
             self._chapters.get(i, "")[:500] for i in sorted(self._chapters, key=str)

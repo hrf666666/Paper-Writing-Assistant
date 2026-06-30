@@ -272,7 +272,37 @@ If no real issues, return empty issues list.
             **report.to_dict()
         })
 
+        # v16.3: 落盘章节质量分（供 G4 验收器读取——验收器纯文件读取架构）
+        self._persist_score(chapter_name, report)
+
         return report
+
+    def _persist_score(self, chapter_name: str, report) -> None:
+        """把章节质量分落盘到 output/quality_scores.json。
+
+        验收器（ValidationEngine）纯从 output_dir 读文件，读不到内存 _history。
+        落盘后 G4 能用 quality_score_N metric 读到分数，采信语义判断替代硬编码字数。
+        """
+        import os
+        path = os.path.join(OUTPUT_DIR, "quality_scores.json")
+        data = {}
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                pass
+        data[chapter_name] = {
+            "score": round(report.overall_score, 1),
+            "passed": report.passed,
+            "issues_count": len(report.issues),
+            "timestamp": time.time(),
+        }
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except IOError:
+            pass
 
     def should_retry(self, report: QualityReport, current_round: int) -> bool:
         """
