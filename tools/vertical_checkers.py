@@ -277,7 +277,7 @@ def inspect_language(tex_path: str) -> List:
     for pat1, pat2, label in term_pairs:
         c1 = len(re.findall(pat1, content, re.IGNORECASE))
         c2 = len(re.findall(pat2, content, re.IGNORECASE))
-        if c1 > 0 and c2 > 0 and c1 != c2:
+        if c1 > 0 and c2 > 0:  # 混用就报（不要求数量不等）
             findings.append(_make_finding(
                 source="language_reviewer", kind="terminology_inconsistency",
                 severity="info", location_chapter="main.tex",
