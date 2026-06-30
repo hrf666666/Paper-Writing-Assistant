@@ -739,61 +739,6 @@ class ResearchLoop:
         5: ("ch5_conclusion", "Conclusion"),
     }
 
-    def _run_chapter_phase(self, phase_num: int) -> str:
-        """
-        统一处理章节生成（phase1–phase5）。
-
-        流程：构建前序摘要 → 调用 orchestrator → 质量保证 → 存储 → 即时审计
-        """
-        import importlib
-        module_name, chapter_name = self._CHAPTER_CONFIGS[phase_num]
-        mod = importlib.import_module(f"agent.skill_orchestrators.{module_name}")
-        run_fn = getattr(mod, f"run_chapter{phase_num}")
-
-        # 构建前序章节摘要（chapter 1 无前序章节）
-        previous_chapters = {}
-        for ch_num in range(1, phase_num):
-            if ch_num in self._chapters:
-                previous_chapters[ch_num] = self._chapters[ch_num][:2000]
-
-        # v12.2: 注入 Phase 0.65 分析结果到 project_data（消除 16 次 LLM 调用浪费）
-        if hasattr(self, '_content_strategy') and self._content_strategy:
-            self._project_data['content_strategy'] = self._content_strategy
-        if hasattr(self, '_motivation_thread') and self._motivation_thread:
-            self._project_data['motivation_thread'] = self._motivation_thread
-        # v14 龙骨: outline 注入 project_data（剥包装层，planning_block 读章节契约）
-        if hasattr(self, '_outline') and self._outline:
-            _ol = self._outline.get("outline", self._outline) if isinstance(self._outline, dict) else {}
-            self._project_data['outline'] = _ol
-        # v14: rationale_matrix/exemplar_learner 已删（0消费空转）
-
-        kwargs = {"citation_context": self._build_citation_context(f"ch{phase_num}"),
-                  "venue_adapter": self.venue_adapter}
-        if phase_num > 1:
-            kwargs["previous_chapters"] = previous_chapters
-        if phase_num == 5:
-            kwargs["skip_limitations"] = self._has_extra_discussion()
-
-        content = run_fn(self._project_data, self._ref_data, **kwargs)
-        content, _ = self._quality_ensure(chapter_name, content)
-        # v16.2 接线2: 子节级即时校验（边写边改）——整章按\n\n切分，逐子节确定性校验
-        content = self._verify_chapter_subsections(phase_num, content)
-        self._chapters[phase_num] = content
-
-        # v17: ch2 裂缝修复——收编 ch2 在线搜到的论文进 CitationBase
-        # （之前搜到但不进 cite_key_map，LLM 引用它们被判编造）
-        if phase_num == 2:
-            _online = self._ref_data.pop("_ch2_online_papers", None)
-            _cb = getattr(self, '_citation_base', None)
-            if _online and _cb:
-                _added = _cb.add_papers(_online)
-                if _added:
-                    # 同步兼容属性（下游 bib 生成读 _cite_key_map）
-                    self._cite_key_map = _cb.cite_key_map
-                    self._title_to_key = _cb.title_to_key
-                    logger.info(f"[ch2] 收编 {_added} 篇在线论文进 CitationBase")
-        return content  # 审计在 Phase 6.5 统一做
-
     def _has_extra_discussion(self) -> bool:
         """检查 venue_adapter 是否配置了独立的 Discussion/Limitations 章节"""
         try:
@@ -1350,76 +1295,7 @@ class ResearchLoop:
             except Exception:
                 pass  # FindingBus 不存在时不阻塞
 
-    def _check_chapter_metric_attribution(self, ch_num: int, content: str) -> list:
-        """v16.1: 章节级数值归属校验——返回结构化错误供段落级重写。
-
-        与 _validate_metric_attribution（main.tex 级，只记日志）不同，
-        本方法在章节内容上跑，offset 可靠，返回结构化结果供 _revise_paragraphs 使用。
-        """
-        import re as _re
-        fb = getattr(self, '_factbase', None)
-        if not fb or not fb.metrics:
-            return []
-        # 构建 值→归属 映射
-        _val_to_tag = {}
-        for k, v in fb.metrics.items():
-            tag = fb._metric_tag(k)
-            if not tag:
-                continue
-            try:
-                _fv = float(v)
-            except (TypeError, ValueError):
-                continue
-            if any(x in k.lower() for x in ("mae", "rmse", "mse", "psnr", "ssim")):
-                _val_to_tag[round(_fv, 4)] = tag
-        if not _val_to_tag:
-            return []
-        # 构建 tag→正确值 映射（用于 truth_brief）
-        _tag_to_val = {}
-        for k, v in fb.metrics.items():
-            tag = fb._metric_tag(k)
-            if tag:
-                try:
-                    _tag_to_val.setdefault(tag, float(v))
-                except (TypeError, ValueError):
-                    pass
-        # 扫描章节内容
-        _misattributions = []
-        _seen_spans = set()
-        for m in _re.finditer(r'(\d+\.\d{3,4})', content):
-            try:
-                _val = round(float(m.group(1)), 4)
-            except ValueError:
-                continue
-            if _val not in _val_to_tag:
-                continue
-            _true_tag = _val_to_tag[_val]
-            _start = max(0, m.start() - 60)
-            _end = min(len(content), m.end() + 60)
-            _window = content[_start:_end].lower()
-            _claimed_tags = set()
-            for _word, _norm in self._METRIC_WORDS.items():
-                if _word in _window:
-                    _claimed_tags.add(_norm.lower())
-            if _claimed_tags and _true_tag not in _claimed_tags:
-                _key = (m.start() // 100,)
-                if _key not in _seen_spans:
-                    _seen_spans.add(_key)
-                    _correct_val = _tag_to_val.get(
-                        next(iter(_claimed_tags)), None)
-                    _misattributions.append({
-                        'char_span': (m.start(), m.end()),
-                        'value': _val,
-                        'true_tag': _true_tag,
-                        'claimed_tag': next(iter(_claimed_tags)),
-                        'correct_val': _correct_val,
-                    })
-        if _misattributions:
-            logger.info(f"[v16.1] ch{ch_num} 数值归属校验: "
-                        f"{len(_misattributions)} 处张冠李戴，将触发段落级重写")
-        return _misattributions
-
-    # v17 数值归属闭环上限（替代旧的无限盲改——旧逻辑曾对 ch1 段落13 盲改30次）
+    # v16.3 数值归属闭环上限（替代旧的无限盲改——旧逻辑曾对 ch1 段落13 盲改30次）
     MAX_NUMERIC_FIX_ROUNDS = 3
 
     def _judge_metric_attribution(self, content: str) -> dict:
@@ -1698,53 +1574,6 @@ class ResearchLoop:
                 return i
             cumlen += len(p) + 2  # +2 for \n\n
         return 0
-
-    def _build_truth_brief(self, misattributions: list) -> str:
-        """v16.1: 把检测到的错误+FactBase 真相拼成 brief。"""
-        lines = ["数值归属修正依据（来自 FactBase 权威数据）："]
-        for m in misattributions:
-            _line = (f"- 数值 {m['value']} 被标为 {m['claimed_tag']}，"
-                     f"但 {m['value']} 实际属于 {m['true_tag']} 子集。")
-            if m.get('correct_val') is not None:
-                _line += f" 若此处指 {m['claimed_tag']}，正确值应为 {m['correct_val']}。"
-            lines.append(_line)
-        return '\n'.join(lines)
-
-    def _revise_paragraphs(self, ch_num: int, content: str,
-                           misattributions: list, truth_brief: str) -> str:
-        """v16.1: 对含数值错误的段落，带真相重写（第三道防线）。
-
-        与 rerun（重写整章）不同，本方法只重写出错段落，且把 FactBase 真相
-        注入 prompt，让 LLM 理解错误后修正——不是盲目重写。
-        """
-        paragraphs = content.split('\n\n')
-        _revised_count = 0
-        for m in misattributions:
-            para_idx = self._locate_paragraph(content, m['char_span'])
-            if para_idx >= len(paragraphs):
-                continue
-            orig_para = paragraphs[para_idx]
-            prompt = (
-                f"以下段落有数值归属错误，请只修正数值归属错误，保持其余内容不变：\n\n"
-                f"错误：数值 {m['value']} 被标为 {m['claimed_tag']}，"
-                f"但真相是 {m['value']} 属于 {m['true_tag']} 子集。\n"
-                f"{truth_brief}\n\n"
-                f"原段落：\n{orig_para}\n\n"
-                f"请输出修正后的单段 LaTeX（只改数值归属，不改变论述结构），"
-                f"直接输出内容无需解释："
-            )
-            try:
-                fixed_para = self.api_client.call_generation(prompt)
-                if fixed_para and fixed_para.strip():
-                    paragraphs[para_idx] = fixed_para.strip()
-                    _revised_count += 1
-                    logger.info(f"[v16.1] ch{ch_num} 段落{para_idx} 重写完成"
-                                f"（修正 {m['claimed_tag']} {m['value']} → {m['true_tag']}）")
-            except Exception as e:
-                logger.warning(f"[v16.1] ch{ch_num} 段落{para_idx} 重写失败: {e}")
-        if _revised_count:
-            logger.info(f"[v16.1] ch{ch_num} 段落级重写完成: {_revised_count} 段")
-        return '\n\n'.join(paragraphs)
 
     def _locate_by_evidence(self, evidence_anchor: str) -> tuple:
         """v16.2 模块C: 用 L3 的 evidence_anchor（精确原文引用）定位章节+段落。
@@ -2302,20 +2131,9 @@ class ResearchLoop:
             except Exception as e:
                 logger.warning(f"[Phase 5.6] cross_chapter 失败: {e}")
 
-        # v16.1: 第三道防线——章节级数值归属校验 → 带真相的段落级重写
-        # 与 critical rerun（重写整章）不同，这里只重写出错段落，且注入 FactBase 真相
-        _v161_fixes = 0
-        for _ch_num, _ch_content in list(self._chapters.items()):
-            _mis = self._check_chapter_metric_attribution(_ch_num, _ch_content)
-            if _mis:
-                _brief = self._build_truth_brief(_mis)
-                _fixed = self._revise_paragraphs(_ch_num, _ch_content, _mis, _brief)
-                if _fixed != _ch_content:
-                    self._chapters[_ch_num] = _fixed
-                    _v161_fixes += len(_mis)
-        if _v161_fixes:
-            logger.info(f"[v16.1] 段落级重写完成: {_v161_fixes} 处数值张冠李戴已修正")
-            results["paragraph_rewrites"] = _v161_fixes
+        # v16.3: 旧的 v16.1 数值重写块已删除（被 _judge_metric_attribution +
+        # _revise_with_evidence 替代，走 ChapterAgent 的 _verify_chapter_subsections）。
+        # 数值归属校验现在是 LLM+真相判断 + 改完重评闭环，不再正则盲改。
 
         # 3. 若有 critical findings → 触发受影响章节 rerun
         from agent.core.finding import Severity
