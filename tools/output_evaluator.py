@@ -96,6 +96,23 @@ class OutputEvaluator:
             l3_score = max(0, l3_score - penalty)
             logger.warning(f"[OutputEval] L1 关键失败 {l1_critical_fails}，L3 扣 {penalty} 分")
 
+        # v16.3 第三批: GlobalReviewer 仲裁——章节级 quality_gate vs 全文级 L3 矛盾时裁决
+        # 如果章节 quality 分高（≥80）但 L3 全文审发现问题（<70），以 L3 为准（全文视野更广）
+        import os as _os3
+        _qs_path = _os3.join(self.output_dir, "quality_scores.json")
+        if _os3.exists(_qs_path) and l3_score < 70:
+            try:
+                import json as _json3
+                _qs = _json3.load(open(_qs_path, encoding="utf-8"))
+                _high_q = [k for k, v in _qs.items() if isinstance(v, dict) and v.get("score", 0) >= 80]
+                if _high_q and l3_score < 60:
+                    # 章节级判通过但全文级判差 → 仲裁：全文级有最终决策权（GlobalReviewer 裁决）
+                    logger.warning(f"[GlobalReviewer 仲裁] 章节级 quality≥80 ({_high_q}) "
+                                   f"但全文 L3={l3_score} → 以全文级为准")
+                    # 全文级的问题已体现在 l3_score（扣分已在惩罚机制里）
+            except Exception:
+                pass
+
         report["overall"] = {
             "L1_score": l1_score,
             "L2_score": l2_score,

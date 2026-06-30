@@ -139,6 +139,9 @@ class ResearchLoop:
         )
 
         # v12.0: 分层验收引擎
+        # v16.3 第二批: ChapterAgent（章节级 agent，管一章生成+审+改+审计）
+        from agent.chapter_agent import ChapterAgent
+        self.chapter_agent = ChapterAgent(self)
         self.validation_engine = ValidationEngine(output_dir=OUTPUT_DIR)
 
         # 运行时控制（非持久化状态）
@@ -585,7 +588,7 @@ class ResearchLoop:
 
             elif phase in ("phase1", "phase2", "phase3", "phase4", "phase5"):
                 ch_num = int(phase.replace("phase", ""))
-                result = self._run_chapter_phase(ch_num)
+                result = self.chapter_agent.run(ch_num)  # v16.3: ChapterAgent 接管
 
             elif phase == "phase5_1":
                 # v7.0: Discussion（期刊扩展章节）
@@ -655,8 +658,9 @@ class ResearchLoop:
                 result = self._run_review_phase()
 
             elif phase == "phase6_5":
-                # v5.0: 反幻觉审计
-                result = self._run_audit_phase()
+                # v16.3 第二批: 审计已内聚到 ChapterAgent（每章生成后立即审）。
+                # phase6_5 批量重复审计废弃（C2 重复审 + B1 断链）。改为轻量 cross_chapter 协调。
+                result = self._run_cross_chapter_only()
 
             elif phase == "phase7":
                 result = self._run_output_phase()
@@ -2356,6 +2360,28 @@ class ResearchLoop:
                      f"{results['critical_reruns']} reruns")
         return results
 
+    def _run_cross_chapter_only(self) -> Dict:
+        """v16.3: phase6_5 轻量版——只做 cross_chapter 跨章一致性检查。
+
+        章节级审计已内聚到 ChapterAgent（每章生成后立即审）。
+        这里只保留 cross_chapter（它需要看所有章节，不能在单章 agent 里做）。
+        """
+        results = {}
+        try:
+            _fb = getattr(self, '_factbase', None)
+            if _fb and not _fb.is_empty() and hasattr(self, 'cross_chapter_checker'):
+                if not getattr(self.cross_chapter_checker, '_factbase', None):
+                    self.cross_chapter_checker.set_factbase(_fb)
+                _cc_report = self.cross_chapter_checker.check_all(self._chapters)
+                if _cc_report and _cc_report.get("findings"):
+                    from agent.core.finding import cross_report_to_findings as _c2f
+                    _recorded = self._findings.record_many(_c2f(_cc_report))
+                    logger.info(f"[Phase 6.5] cross_chapter 检查: {len(_recorded)} 条 finding")
+                results["cross_chapter"] = _cc_report
+        except Exception as e:
+            logger.warning(f"[Phase 6.5] cross_chapter 检查失败: {e}")
+        return results
+
     def _run_audit_phase(self) -> Dict:
         """Phase 6.5: 反幻觉审计（v5.0 新增）"""
         logger.info("\n" + "=" * 60)
@@ -3427,7 +3453,7 @@ class ResearchLoop:
                 _fixable = [f for f in _v_findings if f.severity.value in ("warning", "critical")]
                 logger.info(f"[Phase 8] 纵向审查发现 {len(_v_findings)} 条，"
                             f"尝试修复 {len(_fixable)} 条")
-                _fix_results = execute_fixes(_fixable, OUTPUT_DIR)
+                _fix_results = execute_fixes(_fixable, OUTPUT_DIR, self.api_client)
                 _fixed_n = sum(1 for r in _fix_results if r["fixed"])
                 if _fixed_n:
                     logger.info(f"[Phase 8] FixExecutor 修复 {_fixed_n} 条，重新编译")
@@ -3558,12 +3584,26 @@ class ResearchLoop:
                 if _l3_fixed:
                     results["l3_revisions"] = _l3_fixed
                     logger.info(f"[v16.2] L3闭环: {_l3_fixed} 个 major issue 段落级修正完成")
-                    # 修正后重新生成 main.tex（只重生成LaTeX，不重跑全pipeline）
+                    # v16.3 修复B2: L3修订幽灵——重生成main.tex后必须重编译PDF
+                    # 旧版只重生成tex不重编译，导致L3修订不进PDF（幽灵修订）
                     try:
                         self._generate_latex_output(results)
-                        logger.info("[v16.2] L3闭环后 main.tex 已重新生成")
+                        logger.info("[v16.3] L3闭环后 main.tex 已重新生成")
+                        # 重编译 PDF（让 L3 修订真正进成品）
+                        from tools.pdf_compiler import run_pdf_compiler
+                        _recompile = run_pdf_compiler(OUTPUT_DIR)
+                        if _recompile.get("success"):
+                            results["pdf"] = _recompile["pdf_path"]
+                            logger.info("[v16.3] L3闭环后 PDF 已重编译（幽灵修复）")
+                        # 重跑纵向 Checker（L3 改了内容，图/公式/表格可能变化）
+                        from tools.vertical_checkers import run_all_vertical_checks
+                        from agent.fix_executor import execute_fixes
+                        _v2 = run_all_vertical_checks(OUTPUT_DIR)
+                        if _v2:
+                            execute_fixes([f for f in _v2 if f.severity.value in ("warning","critical")],
+                                          OUTPUT_DIR, self.api_client)
                     except Exception as re:
-                        logger.warning(f"[v16.2] L3闭环后LaTeX重生成失败: {re}")
+                        logger.warning(f"[v16.3] L3闭环后重生成/重编译失败: {re}")
 
 
         except Exception as e:

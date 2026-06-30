@@ -230,7 +230,11 @@ class CrossChapterChecker:
         for _name, ch_vals in metric_by_chapter.items():
             if len(ch_vals) < 2:
                 continue
-            vals = list(ch_vals.values())
+            vals = [float(v) for v in ch_vals.values() if isinstance(v, (int, float, str))]
+            vals = [v for v in vals if not isinstance(v, str) or v.replace('.', '').replace('-', '').isdigit()]
+            vals = [float(v) for v in vals]
+            if len(vals) < 2:
+                continue
             _min, _max = min(vals), max(vals)
             if _min == 0:
                 continue
