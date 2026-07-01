@@ -48,20 +48,35 @@ class FactBase:
 
     # ── 查询 API ──
 
-    # v15.3 L1: owner 分类（metrics key 前缀含 owner 信息）
-    # baseline 信号：key 含这些词 → baseline；否则 → ours
-    _BASELINE_SIGNALS = ("基线", "baseline", "Baseline", "CostVolume",
-                         "EPINet", "Pilot", "对比", "compare")
+    # v15.3 L1 + G4-a: owner 三分类（metrics key 前缀含 owner 信息）
+    # 优先级：baseline > auxiliary > ours（默认 ours）
+    # 真实 factbase.json 的 key 分组名见 output_6_23_full_run/factbase.json
+    _BASELINE_SIGNALS = ("基线", "baseline", "costvolume", "epinet",
+                         "pilot", "预实验", "对比方法", "previous", "conventional")
+    # G4-a 新增 auxiliary：既非 ours 深度结果也非 baseline 的中间产物
+    # （交叉验证/物理特征比/Phase1诊断分类/训练历史等），不再塌缩进 ours 污染配对
+    _AUXILIARY_SIGNALS = ("交叉验证", "kfold", "物理特征", "ratio突破",
+                          "诊断", "phase 1", "phase1", "分类实验",
+                          "能量图", "训练历史", "初步训练")
 
     @classmethod
     def _classify_owner(cls, metric_key: str) -> str:
-        """判断一个 metric key 的 owner：'ours' 或 'baseline'。
+        """判断一个 metric key 的 owner：'baseline' / 'auxiliary' / 'ours'。
 
-        metrics key 前缀自带 owner 信息（"结构化核心指标" = ours，
-        "基线模型表现 (EPINet)" / "CostVolumeDepthNet Pilot" = baseline）。
+        metrics key 前缀自带 owner 信息（来自 experiment_design.json 的分组名）：
+        - baseline: "基线表现 (EPINet)" / "CostVolumeDepthNet 预实验" / "对比方法"
+        - auxiliary: "交叉验证与其他结构化实验数值" / "物理特征Ratio突破" /
+                     "显式分类实验结果 (Phase 1 Diagnostic)"
+        - ours: "结构化核心指标" 或裸指标名（默认）
+
+        G4-a 修复：旧二分类把 auxiliary 全塌缩进 ours，污染 _compute_comparison
+        配对（如 kfold.mean_mae 被当 ours 与真 ours 配 overall tag 算胜负）。
         """
-        if any(sig in metric_key for sig in cls._BASELINE_SIGNALS):
+        kl = metric_key.lower()
+        if any(sig in metric_key or sig.lower() in kl for sig in cls._BASELINE_SIGNALS):
             return "baseline"
+        if any(sig in metric_key or sig.lower() in kl for sig in cls._AUXILIARY_SIGNALS):
+            return "auxiliary"
         return "ours"
 
     # v15.8: 指标名语义标签（用于 ours vs baseline 配对）
@@ -245,17 +260,24 @@ class FactBase:
         if self.loss_terms:
             lines.append(f"loss_terms: {', '.join(self.loss_terms)}")
         if self.metrics:
-            # v15.3 L1-1: 按 owner 分组渲染（修 baseline 被错标 "Ours" 的病灶）
+            # v15.3 L1-1 + G4-a: 按 owner 三分类分组渲染（修 baseline 被错标 + auxiliary 塌缩进 ours）
             ours = {k: v for k, v in self.metrics.items()
                     if self._classify_owner(k) == "ours"}
             baselines = {k: v for k, v in self.metrics.items()
                          if self._classify_owner(k) == "baseline"}
+            auxiliary = {k: v for k, v in self.metrics.items()
+                         if self._classify_owner(k) == "auxiliary"}
             if ours:
                 ms = ", ".join(f"{k}={v}" for k, v in ours.items())
                 lines.append('metrics (Ours 权威值，正文声称我们的必须匹配): ' + ms)
             if baselines:
                 bs = ", ".join(f"{k}={v}" for k, v in baselines.items())
                 lines.append('baselines (对比用，非我们的结果，正文必须标注是 baseline): ' + bs)
+            if auxiliary:
+                # G4-a: auxiliary 既非 ours 也非 baseline（交叉验证/物理特征/诊断分类等）
+                # 明确标注，防止 LLM 误当作 ours 权威值或 baseline 对比值
+                aus = ", ".join(f"{k}={v}" for k, v in auxiliary.items())
+                lines.append('auxiliary (辅助/中间产物，非最终结果，仅供查值不进对比): ' + aus)
             # v15.8 修复3: 预计算 ours vs baseline 对比结论
             # 防止 LLM 看到子集改进就声称"整体优越"但 Overall 实际退步
             _comparison = self._compute_comparison(ours, baselines)

@@ -99,8 +99,8 @@ class OutputEvaluator:
         # v16.3 第三批: GlobalReviewer 仲裁——章节级 quality_gate vs 全文级 L3 矛盾时裁决
         # 如果章节 quality 分高（≥80）但 L3 全文审发现问题（<70），以 L3 为准（全文视野更广）
         import os as _os3
-        _qs_path = _os3.join(self.output_dir, "quality_scores.json")
-        if _os3.exists(_qs_path) and l3_score < 70:
+        _qs_path = _os3.path.join(self.output_dir, "quality_scores.json")
+        if _os3.path.exists(_qs_path) and l3_score < 70:
             try:
                 import json as _json3
                 _qs = _json3.load(open(_qs_path, encoding="utf-8"))

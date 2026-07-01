@@ -844,6 +844,10 @@ class ResearchLoop:
                 exp_design = pd
 
         # ── 提取硬件配置 ──
+        # G4-b: strategy 提前取（真实数据把硬件放在 训练策略.硬件限制/硬件约束）
+        strategy = exp_design.get("训练策略", {})
+        if not isinstance(strategy, dict):
+            strategy = {}
         hardware = ""
         for key in ["硬件配置", "hardware"]:
             val = exp_design.get(key, "")
@@ -861,21 +865,29 @@ class ResearchLoop:
                 if val:
                     hardware = str(val)
                     break
+        # G4-b: 真实数据把硬件放在 训练策略.硬件限制 / 硬件约束（见 output_6_23 experiment_design）
+        if not hardware:
+            for key in ["硬件限制", "硬件约束", "硬件", "训练硬件"]:
+                val = strategy.get(key, "")
+                if val:
+                    hardware = str(val)
+                    break
 
         # ── 提取训练参数 ──
         training_params = {}
-        # 先从 训练策略 子字典提取
-        strategy = exp_design.get("训练策略", {})
+        # 先从 训练策略 子字典提取（strategy 已在上方提取）
         if isinstance(strategy, dict):
-            # v15.3 L1-2: 扩展 key_map 覆盖实际数据格式 + patch_size（L3 issue #3 根因）
+            # v15.3 L1-2 + G4-b: 扩展 key_map 覆盖实际数据格式 + patch_size（L3 issue #3 根因）
+            # G4-b 补：真实 experiment_design 用 "Epoch"(单数)/"Batch size"(带空格)/"训练轮次"
             key_map = {
                 "优化器": "optimizer", "学习率": "learning_rate",
                 "优化器与学习率": "optimizer_lr",
                 "权重衰减": "weight_decay", "batch_size": "batch_size",
-                "Batch Size": "batch_size",
+                "Batch Size": "batch_size", "Batch size": "batch_size",
                 "损失函数": "loss_function", "采样与数据策略": "sampling_strategy",
+                "采样与Batch策略": "sampling_strategy",
                 "epoch": "epochs", "训练轮数": "epochs",
-                "Epochs": "epochs",
+                "Epochs": "epochs", "Epoch": "epochs", "训练轮次": "epochs",
                 "patch_size": "patch_size", "Patch Size": "patch_size",
                 "训练尺寸": "patch_size", "patch": "patch_size",
                 "其他策略": "other_strategy",
@@ -908,6 +920,13 @@ class ResearchLoop:
         loss_info = ""
         if isinstance(strategy, dict):
             loss_info = strategy.get("损失函数", "")
+        # G4-b: 真实数据用 "优化目标"/"优化器与学习率" 而非 "损失函数"（见 output experiment_design）
+        if not loss_info and isinstance(strategy, dict):
+            for key in ["优化目标", "优化器与学习率"]:
+                val = strategy.get(key, "")
+                if val:
+                    loss_info = val
+                    break
         if not loss_info:
             loss_info = exp_design.get("loss_function", "") or exp_design.get("损失函数", "")
         if loss_info:
@@ -924,12 +943,19 @@ class ResearchLoop:
         elif isinstance(datasets, dict):
             # dict 格式：提取 名称 字段（可能是 list 或 str）
             names = datasets.get("名称", datasets.get("name", []))
-            if isinstance(names, (list, tuple, set)):
+            if isinstance(names, (list, tuple, set)) and names:
                 datasets = [str(n) for n in names]
-            elif isinstance(names, str):
+            elif isinstance(names, str) and names:
                 datasets = [names]
             else:
-                datasets = []
+                # G4-b: 兜底从"组成与类型"/"组成"提取（见 output experiment_design，
+                # 数据集列表嵌在"组成与类型"这个 list of dict 里，每项有"名称"）
+                _comp = datasets.get("组成与类型", datasets.get("组成", []))
+                if isinstance(_comp, list):
+                    datasets = [str(c.get("名称", c.get("name", "")))
+                                for c in _comp if isinstance(c, dict) and c.get("名称", c.get("name"))]
+                else:
+                    datasets = []
         # 处理 list of dict 格式：提取名称
         if isinstance(datasets, list):
             dataset_names = []
@@ -1463,14 +1489,22 @@ class ResearchLoop:
             logger.warning(f"[v17] _revise_with_evidence 修订失败: {e}")
             return content
 
-    def _verify_chapter_subsections(self, ch_num: int, content: str) -> str:
+    def _verify_chapter_subsections(self, ch_num: int, content: str,
+                                    elements: dict = None) -> str:
         """v17: 整章切分子节即时校验（边写边改）。
 
         - cite/figure: 走 _verify_subsection 确定性检测（可靠）
         - numeric 归属: v17 改用 _judge_metric_attribution（LLM+真相），不再正则盲改。
+        - G1: elements 驱动的 numeric 前置短路——无数值章（has_formula=False 且非 Experiments）
+          跳过 _judge_metric_attribution 的 LLM 调用，节省成本 + 避免误判。
         """
-        _numeric_judge = self._judge_metric_attribution(content)
-        _numeric_mis = _numeric_judge.get("misattributions", []) if _numeric_judge.get("overall") == "has_errors" else []
+        # G1: numeric 前置短路——只有含数值的章（有公式或有表格=Experiments）才调 LLM 数值判断
+        _has_numeric = (ch_num == 4) or (elements and elements.get("has_formula"))
+        if _has_numeric:
+            _numeric_judge = self._judge_metric_attribution(content)
+            _numeric_mis = _numeric_judge.get("misattributions", []) if _numeric_judge.get("overall") == "has_errors" else []
+        else:
+            _numeric_mis = []   # 无数值章短路，不调 LLM
 
         paragraphs = content.split('\n\n')
         _total_issues = 0

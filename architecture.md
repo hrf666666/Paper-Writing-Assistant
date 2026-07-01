@@ -60,6 +60,76 @@
 
 ---
 
+## 0.5 分层治理架构（v16.3 治理五批 + G1/G4 补齐）
+
+> **本节固化六层治理架构 + 12 断点 + 审改验分离原则。
+> 这些定义原本只在治理五批 commit message + 历史对话里，现固化为权威文档。**
+
+### 0.5.1 六层架构（政府治理比喻）
+
+针对 PDF 实跑暴露的"审了不改、改了不验、改了不重审、重复审无仲裁"问题，建立六层治理架构。
+**改革的对象不是新增功能，是修复"审改验"流程的 12 个断点。**
+
+| 层 | 角色（比喻） | 模块 | 职责边界（纵向） | 横向边界 |
+|----|------------|------|----------------|---------|
+| **L1** | 省级政府 | `chapter_agent.py` ChapterAgent | 只管一章：生成→审→改→审计内聚；不碰别章 | 章=省，省间不串扰 |
+| **L2** | 中央部委（纵向专项） | `vertical_checkers.py` 5个Checker | 只审不改：产 Finding 入 FindingBus | 每 Checker 一专项（bib/formula/table/figure/language） |
+| **L3** | 中央政府（全文协调） | `output_evaluator.py` GlobalReviewer | 全文视野仲裁：章节 quality≥80 但全文 L3<70 时，全文说了算 | 全文 vs 章节，矛盾时全文决策 |
+| **L4a** | 执行机构 | `fix_executor.py` FixExecutor | 只改不判：按 Finding 路由修复，确定性优先 | 改完交回，不评估对错 |
+| **L4b** | 纪检 | `verifier.py` ContentVerifier | 只验不改：改完→复查→通过才 resolve | 独立于改方，防自评自验 |
+| **L5** | 中央决策中枢 | `loop.py` + `quality_gate.py` 回归守卫 | 调度+最终把关：revise 后跑独立回归守卫 | 决策权最高，但不亲自审/改/验 |
+
+**核心原则**（贯穿六层）：
+1. **审改验分离**：审（L1/L2）→ 改（L4a）→ 验（L4b）→ 消解（FindingBus.resolve），三权不集中同一函数
+2. **Finding 是唯一问题载体**：所有层通过 FindingBus 通信
+3. **决策链单向清晰**：审→FindingBus→FixExecutor→Verifier复查→resolve
+4. **省级自治 + 中央仲裁**：省级处理章内事务，矛盾上交中央
+
+### 0.5.2 12 断点（已全部修复，代码逐行核验）
+
+| 断点 | 定义 | 修复层 | 状态 |
+|------|------|--------|------|
+| B1 断链 | phase6_5 findings 录入后无消费 | L1 ChapterAgent 录入 FindingBus | ✅ |
+| B2 幽灵修复 | L3 修订只重生成 tex 不重编译 PDF | L5 loop.py 重编译+重跑 Checker | ✅ |
+| B3 自评自验 | quality_gate 审与验同一函数 | L5 回归守卫独立检查 | ✅ |
+| B4 改完不重审 | 改完直接覆盖无复查 | L4a resolve + L4b Verifier 复查 | ✅ |
+| B5 图无回路 | figure_review 只报不触发重画 | L2 FigureInspector + L4a 图缩节点 | ✅ |
+| B6 公式空白 | 公式 0 审查 0 修改 0 验收 | L2 FormulaChecker + L4a 公式换行 | ✅ |
+| B7 表内容无验 | 表格只验结构不验内容 | L2 TableChecker | ✅ |
+| B8 无章节agent | 5 章走同一无差别流程 | L1 ChapterAgent 按章区分 | ✅ |
+| C1 重复审查 | auditor 与 quality_gate 都审引用 | L1 ChapterAgent 内聚审计 | ✅ |
+| C2 重复审查 | auditor 在 5.6/6.5 跑两遍 | L1 审计内聚 + phase6_5 轻量化 | ✅ |
+| C3 无仲裁 | G4 结构分 vs L3 语义分矛盾无决断 | L3 GlobalReviewer 仲裁 | ✅ |
+| C4 Finding不消解 | clear 按源清，critical 改后不降级 | FindingBus.resolve(finding_id) 按 ID | ✅ |
+
+### 0.5.3 G4 补齐：FactBase owner 三分类 + 字段抽取
+
+> **修复治理架构地基的真 bug：数值防线建立在错误的 owner 分类上。**
+
+**G4-a owner 三分类**（`factbase._classify_owner`）：
+- 旧二分类（非 baseline 即 ours）把"既非 ours 也非 baseline"的第三类数值（交叉验证/物理特征比/Phase1 诊断分类）全塌缩进 ours，污染 `_compute_comparison` 配对。
+- 改三分类：baseline / **auxiliary**（新增）/ ours。auxiliary 不进 ours vs baseline 配对，但仍存 metrics 供查值。
+- `as_fact_sheet` 渲染三栏：ours 权威值 / baselines 对比值 / auxiliary 辅助值。
+- 真实数据验证（output_6_23 factbase）：8 baseline + 6 auxiliary（旧代码这 6 条全误判 ours）。
+
+**G4-b 字段抽取 key 补全**（`loop._build_paper_context`）：
+- 真实 experiment_design.json 的 key 与抽取逻辑系统性不匹配（hardware 在`训练策略.硬件限制`、datasets 在`组成与类型`、loss 叫`优化目标`、Epoch 单数 / Batch size 带空格）。
+- 补全 key 别名 + 嵌套层兜底 + 空 list 误判修复。真实数据验证：hardware/datasets/loss 在 2/3 个真实样本能抽到值。
+
+### 0.5.4 G1 补齐：venue_profile 驱动按章区分 + 校验/审计短路
+
+> **接通 ChapterAgent 按章 awareness，做"无内容章的前置短路"。**
+
+**venue 驱动**（复用 `content_patterns` dict，零新增 profile 字段）：
+- chapter_elements 配置从 `_CHAPTER_ELEMENTS` 硬编码改为 `venue_profile.content_patterns[章节名].chapter_elements` 驱动。
+- ChapterAgent `_get_elements` 优先读 venue，未配则 fallback `_CHAPTER_ELEMENTS`。
+
+**接通短路**：
+- 校验层：无数值章（`has_formula=False` 且非 Experiments）跳过 `_judge_metric_attribution` 的 LLM 调用，节省 ch1/ch2/ch5 成本。
+- 审计层：`_check_method_overclaim` 守卫从 Methodology/Introduction/Abstract 收窄为 Methodology/Abstract（ch1 Introduction 无方法正文，跳过）。
+
+---
+
 ## 1. v16.2 边写边改 + 全文检查闭环（架构升级）
 
 > **v16.2 统一了 v15.5-v16.1 的碎片防线——pipeline 从线性（生成→检测→报告）变成闭环

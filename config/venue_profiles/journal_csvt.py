@@ -88,22 +88,30 @@ class IEEE_TCSVT_Profile(VenueProfile):
             "opening": "problem_motivation",
             "contributions": "bulleted_3items",
             "has_paper_structure": True,
+            # G1: venue 驱动的按章元素配置（替代 ChapterAgent 硬编码）
+            "chapter_elements": {"has_figure": False, "has_formula": False, "has_table": False},
         },
         "Related Work": {
             "organization": "by_approach",
             "critique_style": "end_of_group",
             "comparison_depth": "moderate",
+            "chapter_elements": {"has_figure": False, "has_formula": False, "has_table": False},
         },
         "Methodology": {
             "starts_with": "overview",
             "derivation_style": "full",
             "has_algorithm_box": False,
+            "chapter_elements": {"has_figure": True, "has_formula": True, "has_table": False},
         },
         "Experiments": {
             "dataset_description": "brief_text",
             "ablation_style": "table",
             "comparison_style": "table",
             "has_failure_analysis": True,
+            "chapter_elements": {"has_figure": True, "has_formula": False, "has_table": True},
+        },
+        "Conclusion": {
+            "chapter_elements": {"has_figure": False, "has_formula": False, "has_table": False},
         },
     }
 

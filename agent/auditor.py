@@ -689,8 +689,9 @@ class Auditor:
         """
         if not project_data:
             return
-        # 只查 Methodology/Introduction（方法声称主要在这两章）
-        if chapter_name not in ("Methodology", "Introduction", "Abstract"):
+        # 只查 Methodology/Abstract（方法声称主要在 Methodology；Abstract 可能 overclaim）
+        # G1: Introduction（ch1）无数值无方法正文，跳过 overclaim 扫描（避免无意义工作量）
+        if chapter_name not in ("Methodology", "Abstract"):
             return
 
         # 构建真实实现的"术语池"——从代码内容提取

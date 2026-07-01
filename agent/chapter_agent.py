@@ -34,6 +34,24 @@ class ChapterAgent:
         5: {"has_figure": False, "has_formula": False, "has_table": False},   # Conclusion
     }
 
+    def _get_elements(self, ch_num: int) -> dict:
+        """G1: 获取本章元素配置——venue_profile 驱动，fallback 用 _CHAPTER_ELEMENTS。
+
+        优先读 venue_adapter.profile.content_patterns[章节名].chapter_elements
+        （让不同期刊/会议的章节元素差异由 profile 决定，而非硬编码）。
+        venue 未配 chapter_elements 时，fallback 到 _CHAPTER_ELEMENTS（保证总有值）。
+        """
+        loop = self.loop
+        ch_name = loop._CHAPTER_CONFIGS.get(ch_num, ("", ""))[1]
+        _va = getattr(loop, "venue_adapter", None)
+        if _va and getattr(_va, "profile", None):
+            cp = _va.profile.content_patterns.get(ch_name, {})
+            ce = cp.get("chapter_elements", {})
+            if ce:   # venue 配了就用 venue 的
+                return ce
+        # fallback：venue 未配 chapter_elements
+        return self._CHAPTER_ELEMENTS.get(ch_num, {})
+
     def __init__(self, loop):
         """持有 loop 引用，复用其现有方法和状态。
 
@@ -49,11 +67,11 @@ class ChapterAgent:
         流程：构建kwargs → orchestrator生成 → 内容质量闭环 → 子节校验
               → 审计内聚（替代phase6_5）→ 存储 → 返回
 
-        按章区分审查：根据 _CHAPTER_ELEMENTS 跳过本章没有的元素审查。
+        按章区分审查：根据 _get_elements（venue 驱动）跳过本章没有的元素审查。
         """
         loop = self.loop
         module_name, chapter_name = loop._CHAPTER_CONFIGS[ch_num]
-        elements = self._CHAPTER_ELEMENTS.get(ch_num, {})
+        elements = self._get_elements(ch_num)   # G1: venue 驱动，fallback _CHAPTER_ELEMENTS
 
         logger.info(f"[ChapterAgent] ch{ch_num} ({chapter_name}) 开始 — "
                     f"元素: {elements}")
@@ -64,8 +82,8 @@ class ChapterAgent:
         # ── 2. 内容质量闭环（复用 _quality_ensure，带 venue 规格）──
         content, _ = loop._quality_ensure(chapter_name, content)
 
-        # ── 3. 子节校验（复用 _verify_chapter_subsections，按章区分）──
-        content = self._verify_with_awareness(ch_num, content)
+        # ── 3. 子节校验（复用 _verify_chapter_subsections，按章区分 + numeric 短路）──
+        content = self._verify_with_awareness(ch_num, content, elements)
 
         # ── 4. 审计内聚（本章生成后立即审，替代 phase6_5 批量重复审）──
         self._audit_chapter(ch_num, chapter_name, content)
@@ -111,15 +129,15 @@ class ChapterAgent:
 
         return run_fn(loop._project_data, loop._ref_data, **kwargs)
 
-    def _verify_with_awareness(self, ch_num: int, content: str) -> str:
+    def _verify_with_awareness(self, ch_num: int, content: str, elements: dict = None) -> str:
         """子节校验（按章区分审查）。
 
-        复用 _verify_chapter_subsections，但记录本章元素 awareness。
-        当前 _verify_chapter_subsections 内部已按 fig_type 区分（v17），
-        ChapterAgent 在此层提供 awareness 上下文（供后续扩展按章定制）。
+        G1 接通：把 elements 透传给 _verify_chapter_subsections，
+        无数值章（has_formula=False 且非 Experiments）跳过 _judge_metric_attribution 的 LLM 调用，
+        节省 ch1/ch2/ch5 的 LLM 成本 + 避免误判。
         """
         loop = self.loop
-        return loop._verify_chapter_subsections(ch_num, content)
+        return loop._verify_chapter_subsections(ch_num, content, elements=elements)
 
     def _audit_chapter(self, ch_num: int, chapter_name: str, content: str):
         """审计内聚——本章生成后立即审（替代 phase6_5 批量重复审）。
