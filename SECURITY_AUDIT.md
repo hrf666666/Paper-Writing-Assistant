@@ -1,5 +1,16 @@
 # 安全审计报告
 
+> **⚠️ 过时声明**：本报告基于 **v6.0（2026年4月）**，项目现已是 **v16.3**。
+> 报告内引用的文件路径（`api/claude_37.py`、`tools/make_bibliography.py`、
+> `utils/chapter2_utils.py`、`tools/tikz_generator.py` 等）大多已删除或重构：
+> - API 客户端 → 统一到 `api/openai_compatible.py` + `mcp_http_client.py`
+> - BibTeX → `tools/bibtex_builder.py` + `agent/core/citation_base.py`
+> - 图表 → `tools/figure_generator.py` + `tools/arch_diagram_renderer.py`
+> - 引用检查 → `agent/skill_orchestrators/reference_checker.py`
+>
+> 当前架构与模块清单以 `architecture.md`（§0.5 分层治理架构 + §12 目录结构）
+> 和 `README.md` 为准。本报告保留作历史记录，**不再反映当前代码状态**。
+
 ## v6.0 安全改进（2026年4月）
 
 ### ✅ 代码注入漏洞修复

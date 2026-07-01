@@ -13,7 +13,6 @@
 接入点：_execute line 588 `self._run_chapter_phase(ch_num)` → `self.chapter_agent.run(ch_num)`
 """
 import logging
-from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 

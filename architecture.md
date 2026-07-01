@@ -144,31 +144,31 @@
 > - **核心设计**：确定性的事让代码做（正则校验），语义的事让 LLM 做（L3 理解+真相重写），
 >   不靠正则提取语义声称（不完备），不靠字符串替换（蠢）。
 
-## 1. v16.1 带真相的段落级重写（第三道防线）
+## 2. v16.1 带真相的段落级重写（第三道防线）
 
 > **v16 建了前两道防线，但检测到的错误修正不了。v16.1 补第三道防线。**
 > - `_revise_paragraphs`：检测到数值张冠李戴→定位段落→FactBase 真相+错误拼给 LLM→重写这段。
 > - 三道防线完整：真相注入(防线1)→写后检测(防线2)→带真相段落重写(防线3)。
 
-## 2. v16 数值可信——"可用参考稿"缺失的核心一环
+## 3. v16 数值可信——"可用参考稿"缺失的核心一环
 
 > cite 有两道防线，数值没有。v16 给数值加同样的两道防线。
 > - 防线1（`_compute_pairing_constraint`）：FactBase 配对约束注入 prompt。
 > - 防线2（`_validate_metric_attribution`）：编译前扫描数值归属，检测张冠李戴。
 
-## 3. v15.9 FixAction executor + warning 可见化
+## 4. v15.9 FixAction executor + warning 可见化
 
 > 系统性问题：warning 死信（FindingBus 的 warning 从不被消费）。
 > - FixAction executor：Phase 5.6 后自动执行 auto_apply replace_number。
 > - findings_report.json：落盘所有 warning+ findings。
 
-## 4. v15.8 弱点一致性闭环 + FactBase 对比结论
+## 5. v15.8 弱点一致性闭环 + FactBase 对比结论
 
 > E3+L3 统一诊断：叙事分裂（abstract 声称优越但 Limitations 承认退步）。
 > - FactBase 对比结论（`_compute_comparison`）：预计算胜负，Overall 退步时警告。
 > - abstract 注入 Limitations + FactBase。cross_chapter 跨章节一致性检查。
 
-## 5. v15.7 文图联动治本（规划前移 + 通信回路）
+## 6. v15.7 文图联动治本（规划前移 + 通信回路）
 
 > **v15.7 解决地基级问题——文图联动通信断裂**。v14 FigureManifest 承诺"文图联动单一真相源"，
 > 但 figure_planner 在 Phase7.28（章节后）规划，结果从未流入章节生成 → 7 张图全 orphan。
@@ -190,7 +190,7 @@
 > **数据流**：phase0_99 规划→manifest(PLANNED)+directives → phase1-5 planning_block 注入
 > → 正文 \ref{fig:xxx} → phase7.28 渲染+update(RENDERED) → phase7.3 注入 LaTeX
 
-## 1. v15.6 实跑后深挖根因修复（4 个 bugfix）
+## 7. v15.6 实跑后深挖根因修复（4 个 bugfix）
 
 > **v15.6 来自 v15.5 实跑的综合分析 + 根因深挖**。逐个错误挖到代码行级，并反思
 > "为何历史 review 漏检"。4 项修复（~80 行），无架构改动。
@@ -229,7 +229,7 @@
 > - **推迟 v15.7**：E3 数值矛盾（Lambertian MAE Intro 0.411 vs Conclusion 0.081）
 >   需 FactBase 加实验条件溯源字段，属架构改动，不混进 bugfix 小版本。
 
-## 1. v15.5 引用前置校验门 + figure plan 固化
+## 8. v15.5 引用前置校验门 + figure plan 固化
 
 > **v15.5 治愈两个系统性问题**（基于 6/22 vs 6/23 对照实测）。根因：cite key 仅靠
 > prompt 祈使句约束 + Phase 7.8b 事后静默删（损伤正文）；figure plan 每次 LLM 现规划
@@ -247,7 +247,7 @@
 >   - `_default_plan` 3→4 张（+module_detail 方法图）；plan 来源（llm/fallback/default_4）可观测。
 > - **推迟 v15.6**：L3 离散计数稳定性 + G4 Conclusion 字数闭环（需动评价范式）。
 
-## 1. v15.3 评价可信化 + 数值 owner 真相源 + 前移闭环
+## 9. v15.3 评价可信化 + 数值 owner 真相源 + 前移闭环
 
 > **v15.3 治愈 v14 评价模块的诊断→改进断裂。** 根因：`as_fact_sheet` 一行代码把
 > baseline 数值标成 "Ours 权威值"（3 环节连环放大），导致 LLM 误用 baseline 值 +
@@ -267,7 +267,7 @@
 
 ---
 
-## 1. v13.0 内核契约层
+## 10. v13.0 内核契约层
 
 v13.0 在 `agent/core/` 新增**契约层**，是 audit/constraint/guidance/eval/iteration/memory
 协作的共同语言。旧模块通过适配器接入，不改内部逻辑。本层自身不依赖 agent 其他模块（零循环依赖）。
@@ -275,20 +275,19 @@ v13.0 在 `agent/core/` 新增**契约层**，是 audit/constraint/guidance/eval
 ```
 agent/core/
 ├── errors.py            # 错误分级 (Transient/Permanent/DegradedResult) + classify() 闸口
-├── factbase.py          # FactBase 单一事实源（替代 PaperContext 写读分裂）
-├── memory.py            # LayeredMemory 三层记忆 + get_or_compute() 缓存 + assemble(intent)
+├── factbase.py          # FactBase 单一事实源（替代 PaperContext 写读分裂；G4 owner 三分类）
 ├── finding.py           # Finding 统一问题 + FindingBus 收集/查询/回流 + 4 适配器
-└── figure_manifest.py   # FigureManifest 图清单（文图联动单一真相源）
+├── figure_manifest.py   # FigureManifest 图清单（文图联动单一真相源）
+└── citation_base.py     # CitationBase 引用契约（build_bib 单一 BibTeX 生成入口）
 ```
 
 | 契约 | 解决的旧病 | 接入点 |
 |------|-----------|--------|
 | errors | 42 处 except 静默降级 → 429 吞为 0图/0引用 | api_client._call_with_fallback + loop 8 处 |
 | FactBase | auditor/verifier 各自从 project_data 重推导 → 数值分歧 | loop._build_paper_context + hierarchical_planner |
-| LayeredMemory | citation_context 每章重注 7 次（10-30KB×7） | loop._build_citation_context 缓存包装 |
 | Finding | 7 套不兼容 issue 结构（category/name/dimension/type/rule） | loop Phase 7.2 + quality_gate 修订链 |
-| QualityLoop | QualityGate 内循环自封闭、不消费其他子系统 | loop._quality_ensure 注入 FindingBus 简报 |
 | FigureManifest | 裸字符串拼接 + 无文图对账 + 占位图进正文 | （PR6 基础，注入迁移待 PR7） |
+| CitationBase | 多处重复 build_bib → 引用不一致 | citation_injector + bibtex_builder |
 
 **设计原则**：收敛到少数契约，而非新增更多模块。7 套 issue → 1 套 Finding；
 3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
@@ -308,12 +307,10 @@ agent/core/
 > - **#2 figure_planner 多图 fallback**：_default_plan 扩为 4 张骨架（teaser+module_detail+ablation+comparison），让 fallback 也达 TCSVT 主流配置 min_figures=4。**v15.5: plan 结果落盘 figure_plan.json 复用，且带 _source 标记（llm/fallback_model/default_4）让回落可观测。**
 > - **#3 motivation 注入 ch1**：motivation_thread（已生成却从未进 prompt）注入 ch1 1.1 节。rationale/exemplar 暂不注入（ch1-5 无消费者=死代码）。
 > - **#4 FindingBus 诊断埋点**：record_many 后加计数日志，待下次实跑据日志定位"0 条"根因（半完成，诚实标注）。
-> audit_with_autofix 复活。7 套 issue → 1 套 Finding；
-3 条渲染路径 → 1 条；42 处降级 → 分级。是在做减法和收敛。
 
 ---
 
-## 1. 系统总览
+## 11. 系统总览
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -339,7 +336,7 @@ agent/core/
 
 ---
 
-## 2. 目录结构
+## 12. 目录结构
 
 ```
 paper-writing-assistant/
@@ -357,12 +354,12 @@ paper-writing-assistant/
 │   └── paper_search.py          # 论文检索（S2 语义搜索）
 │
 ├── agent/                       # Agent 核心层
-│   ├── core/                    # 🆕 v14 内核契约层（6 块契约，零循环依赖）
+│   ├── core/                    # 🆕 v14 内核契约层（5 块契约，零循环依赖）
 │   │   ├── errors.py            #   错误分级 (Transient/Permanent/DegradedResult) + classify()
-│   │   ├── factbase.py          #   FactBase 单一事实源（替代 PaperContext 写读分裂）
-│   │   ├── memory.py            #   LayeredMemory 三层记忆 + citation_context 缓存
+│   │   ├── factbase.py          #   FactBase 单一事实源（G4 owner 三分类）
 │   │   ├── finding.py           #   Finding 统一问题 + FindingBus + 4 适配器
-│   │   └── figure_manifest.py   #   FigureManifest 文图联动单一真相源
+│   │   ├── figure_manifest.py   #   FigureManifest 文图联动单一真相源
+│   │   └── citation_base.py     #   CitationBase 引用契约（build_bib 单一入口）
 │   ├── loop.py                  # 自主循环引擎（系统心脏, v13: classify 闸口 + 8 处致命 except 分级）
 │   ├── api_client.py            # 统一 API 客户端 (v13: classify 错误分级 + prompt 计数)
 │   ├── dispatcher.py            # Leader-Worker 分层调度
@@ -372,10 +369,12 @@ paper-writing-assistant/
 │   ├── style_manager.py         # 统一风格管理 (P0 通用写作纪律层)
 │   ├── quality_gate.py          # 质量门控 (v13: QualityLoop 接 FindingBus 简报)
 │   ├── auditor.py               # 反幻觉审计引擎
+│   ├── chapter_agent.py         # 🆕 省级章节 agent（G1 venue 驱动按章区分）
 │   ├── citation_manager.py      # 引用去重、编号
 │   ├── cross_chapter_checker.py # 跨章节一致性检查 (读 FactBase 权威数值)
 │   ├── hierarchical_planner.py  # 分层任务规划 (v13: 优先读 factbase.json)
-│   ├── memory.py                # 双层记忆系统（旧，仅 THINK；生成走 core/memory.py）
+│   ├── verifier.py              # 🆕 纪检验收（L4b 改完复查才 resolve）
+│   ├── fix_executor.py          # 🆕 执行机构（L4a 按 Finding 路由修复）
 │   ├── checkpoint.py            # 断点恢复
 │   └── ...                      # 辅助模块
 │
@@ -398,25 +397,23 @@ paper-writing-assistant/
 │   └── ...
 │
 ├── figure/                      # 图表模板（v13 清理后仅保留活依赖）
-│   ├── style_templates.py       #   期刊风格模板（data_visualizer 3 处 import）
-│   ├── layout_engine.py         #   TikZ 布局引擎（测试引用）
-│   └── layout_templates.py      #   管道/分支模板（测试引用）
+│   └── style_templates.py       #   期刊风格模板（data_visualizer import）
 │
-├── test/                        # pytest 测试（v13 清理后 7 个有效模块，263 测试 0 error）
+├── test/                        # pytest 测试（92 测试；test_unit/ 另 449 治理测试，均 gitignore）
 │   ├── conftest.py              #   pytest 配置
-│   ├── test_systemic_upgrade.py #   (39) / test_v10_1_smoke.py (26)
-│   ├── test_citation_multisource.py  # (24) / test_v9_2_figure_system.py (6)
-│   ├── stage_targeted_test.py   #   (4) / test_pdf_validator.py (4) / test_phase85_quick.py (1)
+│   ├── test_systemic_upgrade.py #   (39) / test_v10_1_smoke.py (15)
+│   ├── test_citation_multisource.py  # (24) / test_v9_2_figure_system.py (5)
+│   └── stage_targeted_test.py   #   (4) / test_pdf_validator.py (4) / test_phase85_quick.py (1)
 │
 └── data/                        # 离线数据
     └── reference_packs/         # 离线论文
 ```
 
-> **v13.0 清理记录**：两轮保守删除共 15 个死代码/废弃测试（每点 grep 验证 0 引用）。删 4 个废弃 figure 渲染器（architecture_renderer/ablation_plotter/comparison_plotter/teaser_designer）、3 个根级废弃脚本（test_batch1/test_v9_2/test_v9_3）、8 个废弃测试（2 坏 + 6 一次性 `__main__` 脚本）。活依赖（style_templates/layout_engine/layout_templates/run_with_log）保留。
+> **v13.0 清理记录**：两轮保守删除共 15 个死代码/废弃测试（每点 grep 验证 0 引用）。删 4 个废弃 figure 渲染器（architecture_renderer/ablation_plotter/comparison_plotter/teaser_designer）、3 个根级废弃脚本、8 个废弃测试。layout_engine/layout_templates 已随 v14 渲染器重构删除，现 figure/ 仅 style_templates.py。
 
 ---
 
-## 3. 核心循环：THINK → EXECUTE → VERIFY → REFLECT
+## 13. 核心循环：THINK → EXECUTE → VERIFY → REFLECT
 
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
@@ -436,7 +433,7 @@ paper-writing-assistant/
 
 ---
 
-## 4. Phase 流水线
+## 14. Phase 流水线
 
 ### 4.1 Phase 0 — 分析阶段
 
@@ -477,7 +474,7 @@ paper-writing-assistant/
 | 7.0 | 全局打磨 | `loop.py` | 修正常见表述问题 |
 | 7.1 | 引用解析 | `citation_manager.py` | 🆕 按 chapters dict 独立处理 `<citation>` → `[N]`（无 join-then-split） |
 | 7.15 | 有序门控 | `ordered_gate.py` | P0 格式 → P1 一致性 → P2 写作质量 (v12.2: verify_all 只调用一次) |
-| 7.2 | 跨章节检查 | `cross_chapter_checker.py` | 🆕 基于 PaperContext 数值矛盾自动修复，返回 (issues, fixed_chapters) |
+| 7.2 | 跨章节检查 | `cross_chapter_checker.py` | 🆕 基于 FactBase 数值矛盾自动修复，返回 (issues, fixed_chapters) |
 | 7.3 | LaTeX 组装 | `latex_converter.py` | 章节合并 → LLM 审查 → 模板填充 → 中文字符过滤 |
 | 7.35 | citation 清理 | `loop.py` | 🆕 tex 后 `<citation>` 残留正则清理（Phase 7.3 LLM review 兜底） |
 | 7.8 | BibTeX 生成 | `bibtex_builder.py` | `[N]` → `\cite{key}` 替换 + BibTeX 条目生成 |
@@ -488,7 +485,7 @@ paper-writing-assistant/
 
 ---
 
-## 5. 核心模块设计
+## 15. 核心模块设计
 
 ### 5.1 API 客户端（降级链）
 
@@ -584,7 +581,7 @@ citation_manager.py: run_citation_manager_for_chapters()
   ├─ 汇总统一 verify + dedup（全局唯一连续编号）
   └─ 按 chapter key 独立 resolve → 更新 chapters dict
        │
-       ↓ Phase 7.2 (v12.0: PaperContext 自动修复)
+       ↓ Phase 7.2 (v13: FactBase 自动修复)
 cross_chapter_checker.py: check_all() → (issues, fixed_chapters)
        │
        ↓ Phase 7.3
@@ -597,33 +594,29 @@ loop.py: <citation> 残留正则清理
 bibtex_builder.py: [N] → \cite{ref_N} 替换 + 生成 references.bib
 ```
 
-### 5.5 PaperContext 共享事实源 (v12.2: 磁盘持久化 + 双路修复)
+### 5.5 FactBase 单一事实源（替代 PaperContext 写读分裂）
+
+FactBase 是数值/事实的**单一真相源**（agent/core/factbase.py）。旧版 PaperContext 存在 auditor/verifier 各自从 project_data 重推导导致数值分歧的问题，v13 起统一收敛到 FactBase。
 
 ```
-Phase 0.98: _build_paper_context()
+Phase 0.98: loop._build_paper_context()
        │
-       ↓ 从 project_data + experiment_design 提取
-paper_context = {
-    "hardware": "1x RTX 3090",
-    "training_params": {"epochs": 100, "batch_size": 8},
-    "loss_terms": ["L_photo", "L_smooth", "L_depth"],
-    "datasets": ["HCI 4D", "Stanford Lytro"],
-    "metrics": {"MAE": 0.133, "MSE": 0.081},
-    "model_name": "GeoDualMask-Net",
-    "innovation_names": ["Dual-Branch", "Geometry-Aware Attention"],
+       ↓ 从 project_data + experiment_design 提取，G4-b 补全真实 key 别名
+FactBase = {
+    hardware, training_params, loss_terms, datasets, metrics, model_name
 }
        │
-       ├─→ 注入 self._project_data["paper_context"]
-       │     └→ 各 chapter generator 通过 citation_context 自动获得
+       ├─→ 持久化 output/factbase.json（v13: 单一真相源）
+       │     └→ 同时写兼容 paper_context.json（旧路径，过渡期保留）
        │
-       ├─→ v12.2: 持久化到 output/paper_context.json
-       │     └→ ValidationEngine._read_paper_context_exists 验收通过
+       ├─→ G4-a: metrics 按 owner 三分类（ours / baseline / auxiliary）
+       │     └→ as_fact_sheet 渲染三栏，auxiliary 不进 _compute_comparison 配对
        │
-       └─→ 注入 CrossChapterChecker
-             └→ v12.2: 双路数值修复
-                 ├─ PaperContext metrics（权威源）
-                 └─ Experiments "Ours" 行提取值（兜底）
+       └─→ 注入 cross_chapter_checker / citation_injector / auditor
+             └→ owner 对账：find_metric_by_owner(num, owner)
 ```
+
+**G4 修复**：旧 `_classify_owner` 二分类把交叉验证/物理特征比/诊断分类等中间产物全塌缩进 ours，污染 `_compute_comparison` 配对。改三分类后 auxiliary 不进 ours vs baseline 配对（详见 §0.5.3）。
 
 ### 5.6 风格系统层级 (v12.0)
 
@@ -645,7 +638,7 @@ StyleManager._get_academic_rules(chapter):
   └─ IEEE Trans 规则 (从 venue_profile)
 ```
 
-### 5.5 评价体系（L1/L2/L3）
+### 5.6 评价体系（L1/L2/L3）
 
 | 层级 | 名称 | 分数权重 | 检查方式 | 通过标准 |
 |------|------|---------|---------|---------|
@@ -658,7 +651,7 @@ StyleManager._get_academic_rules(chapter):
 
 ---
 
-## 6. 降级链设计
+## 16. 降级链设计
 
 ### 6.1 API 降级
 
@@ -737,7 +730,7 @@ L3 评价请求 → call_evaluation() (跨 Provider 评价模型)
 
 ---
 
-## 7. 关键设计决策
+## 17. 关键设计决策
 
 ### 7.1 v12.0 架构变更：LLM 直出 LaTeX
 
@@ -771,12 +764,12 @@ outline ──→ draft ──→ review ──→ revision ──→ final
                                            质量达标 ✓
 ```
 
-### 7.4 恒定大小上下文
+### 7.4 上下文管理
 
-`bounded_context.py` 管理 3 层记忆，总预算 5000 字符：
-- **工作记忆**：当前正在处理的信息
-- **短期记忆**：最近 N 个 Phase 的摘要
-- **长期记忆**：持久化的关键结论（磁盘存储）
+无独立 bounded_context 模块。上下文预算由各子系统自管：
+- **citation_context**：citation_injector 内联指纹缓存（按章生成，去重）
+- **FactBase**：单一事实源，跨 Phase 复用（factbase.json 持久化）
+- **previous_summary**：前序章节摘要，每章生成时拼接（loop._build_previous_summary）
 
 ### 7.5 v12.2 章节生成统一分发 (Wave 6 重构)
 
@@ -804,9 +797,9 @@ Wave 6 同时将 `_run_output_phase`（664 行）拆分为 5 个子方法：
 | 问题 | 根因 | 修复 |
 |------|------|------|
 | ch5 Conclusion 仅输出 2 词 | f-string 中 `\begin{X}` 的 `{X}` 被解释为替换字段 → NameError → 异常被 try/except 静默捕获 → 返回 2 词降级字符串 | `\\begin{{X}}` 转义（与 ch1-ch4 对齐） |
-| PaperContext 验收失败 (G3-S6) | `_build_paper_context` 只更新内存，不写磁盘 → `_read_paper_context_exists` 读磁盘文件返回 0 | 构建后 `json.dump` 到 `paper_context.json` |
+| FactBase 构建 (G3-S6) | `_build_paper_context` 只更新内存，不写磁盘 → `_read_paper_context_exists` 读磁盘文件返回 0 | 构建后 `json.dump` 到 `paper_context.json` |
 | 禁用术语永不修复 | `should_retry` 被分数判断覆盖（line 244 覆盖 line 230） | 改为 `score_based_retry OR issue_based_retry` |
-| 数值矛盾修复静默失效 | `_find_canonical_value` 只查 PaperContext，`ours_values` 参数是死代码 | 双路查找：PaperContext metrics → Experiments ours_values 兜底 |
+| 数值矛盾修复静默失效 | `_find_canonical_value` 只查 FactBase，`ours_values` 参数是死代码 | 双路查找：FactBase metrics → Experiments ours_values 兜底 |
 | VenueAdapter 风格丢失 | 章节生成器各自 `VenueAdapter()` 新建实例 → `_journal_style` 丢失 | v12.3: 依赖注入参数链（替代 v12.2 的类级属性方案） |
 | ordered_gate verify_all 重复调用 | Gate 0 和 Gate 1 各自调用 `verify_all()` | `run()` 中调用一次，传入两个 Gate |
 | content_strategy/motivation_thread 未消费 | `_run_chapter_phase` 不注入这些 Phase 0.65 的分析结果 | 注入 `self._project_data` 供章节生成器读取 |
@@ -863,7 +856,7 @@ build_style_instruction(..., venue_adapter=...)   # 不再 VenueAdapter() 新建
 
 ---
 
-## 8. 配置体系
+## 18. 配置体系
 
 ### 8.1 期刊 Profile 系统
 
@@ -906,7 +899,7 @@ config/venue_profiles/
 
 ---
 
-## 9. 数据流图
+## 19. 数据流图
 
 ```
 PROJECT_CODE_PATH/          ref_md/ + ref_pdf/
@@ -955,7 +948,7 @@ PROJECT_CODE_PATH/          ref_md/ + ref_pdf/
 
 ---
 
-## 10. 运维
+## 20. 运维
 
 ### 启动
 
@@ -988,7 +981,7 @@ output/
 ```
 
 
-## 八、PaperJury 统一评价范式（v14 最终）
+## 21. PaperJury 统一评价范式（v14 最终）
 一个评价范式（paperjury），两个时机（生成时+终局），一个修订闭环（QualityGate）。
 生成阶段 QualityGate evaluate 用 paperjury 两轮审稿（issues + evidence_anchor + close_criterion）。
 终局 L3 同范式确认，close_criterion 写报告。删了 _l3_revise_loop（架构不合理的第二套修订）。
