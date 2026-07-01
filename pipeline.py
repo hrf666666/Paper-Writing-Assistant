@@ -42,7 +42,7 @@ def main():
     import os
     os.environ.setdefault("SKIP_ONLINE_VERIFICATION", "1")
 
-    parser = argparse.ArgumentParser(description="论文范文写作助手 v11.6")
+    parser = argparse.ArgumentParser(description="论文范文写作助手 v17.0")
     parser.add_argument("--no-resume", action="store_true",
                        help="不从检查点恢复，从头开始")
     parser.add_argument("--debug", action="store_true",

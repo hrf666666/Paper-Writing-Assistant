@@ -1,4 +1,4 @@
-# Paper Writing Assistant v6.0 - 依赖清单
+# Paper Writing Assistant v17.0 - 依赖清单
 # 安装: pip install -r requirements.txt
 
 # ========== 核心 API ==========

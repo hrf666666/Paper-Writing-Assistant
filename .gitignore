@@ -58,7 +58,9 @@ generated-images/
 # 历史报告/计划文档，本地保留但不入库
 *.md
 !README.md
+!README.en.md
 !architecture.md
+!architecture.en.md
 !SECURITY_AUDIT.md
 idea_report.pdf
 *.pdf
